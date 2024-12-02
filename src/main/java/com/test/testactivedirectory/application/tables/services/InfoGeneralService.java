@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.test.testactivedirectory.infrastructure.persistence.entity.Tables.DatosDept;
-import com.test.testactivedirectory.infrastructure.persistence.entity.Tables.infGeneral;
+import com.test.testactivedirectory.infrastructure.persistence.entity.Tables.InfGeneral;
 import com.test.testactivedirectory.infrastructure.persistence.repository.tables.InfoGeneralRepository;
 import com.test.testactivedirectory.infrastructure.persistence.repository.tables.MiEntidadRepository;
 
@@ -30,7 +30,7 @@ public class InfoGeneralService {
                         .withSkipHeaderRecord())) {
 
             for (CSVRecord record : parser) {
-                infGeneral entidad = new infGeneral();
+                InfGeneral entidad = new InfGeneral();
                 entidad.setCodigo(record.get("CODIGO"));
                 if (entidad.getCodigo().isEmpty()){
                     entidad.setCodigo(null); // Esto se insertará como NULL en la base de datos

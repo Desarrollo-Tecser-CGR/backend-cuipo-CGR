@@ -13,23 +13,22 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Entity
 @Data
 @Table(name = "infGeneral")
 @NoArgsConstructor
-public class infGeneral {
+public class InfGeneral {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idCodigo;
-    
+
     @Column(nullable = true)
     private String codigo;
 
     @Column(nullable = true)
     private String nombre;
-    
+
     @Column(nullable = true)
     private String CPC;
 
@@ -66,9 +65,21 @@ public class infGeneral {
     @Column(nullable = true)
     private String totalRecaudo;
 
+    @Column(nullable = true)
+    private String regla1;
+
+    @Column(nullable = true)
+    private String regla2;
+
+    @Column(nullable = true)
+    private String regla4;
+
+    @Column(nullable = true)
+    private String regla5;
+
     // @ManyToOne
     // @JoinColumn(name = "menu_id", nullable = true)
     // @JsonBackReference
-   // private infGeneral infGeneral;
+    // private infGeneral infGeneral;
 
 }
