@@ -31,8 +31,14 @@ public class CargaCsvService {
             for (CSVRecord record : parser) {
                 DatosDept entidad = new DatosDept();
                 entidad.setCodigoString(record.get("CODIGO"));
+                if (entidad.getCodigoString().isEmpty()){
+                    entidad.setCodigoString(null); // Esto se insertará como NULL en la base de datos
+                }
                 // entidad.setCodigoString(record.get("CODIGO"));
                 entidad.setDepartamentos(record.get("DEPARTAMENTO"));
+                if (entidad.getDepartamentos().isEmpty()){
+                    entidad.setDepartamentos(null); // Esto se insertará como NULL en la base de datos
+                }
 
                 
                 System.out.println(entidad);

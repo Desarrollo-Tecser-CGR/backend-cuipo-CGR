@@ -24,50 +24,50 @@ public class infGeneral {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idCodigo;
     
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String codigo;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String nombre;
     
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String CPC;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String detalleSectorial;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String fuentesFinanciacion;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String terceros;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String politicaPublica;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String numFechNorma;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String tipoNorma;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String Reacau1;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String Reacau2;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String Reacau3;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String Reacau4;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String totalRecaudo;
 
     // @ManyToOne
-    // @JoinColumn(name = "menu_id", nullable = false)
+    // @JoinColumn(name = "menu_id", nullable = true)
     // @JsonBackReference
    // private infGeneral infGeneral;
 
