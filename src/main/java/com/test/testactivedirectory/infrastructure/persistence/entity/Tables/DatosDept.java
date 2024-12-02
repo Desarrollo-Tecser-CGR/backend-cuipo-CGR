@@ -23,10 +23,11 @@ public class DatosDept {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer  codigo;
-
+    
+    @Column(nullable = true)
     private String codigoString;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String departamentos;
     // @ManyToOne
     // @JoinColumn(name = "menu_id", nullable = false)

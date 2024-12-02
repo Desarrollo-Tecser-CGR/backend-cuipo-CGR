@@ -15,6 +15,7 @@ import com.test.testactivedirectory.infrastructure.persistence.entity.Tables.Dat
 import com.test.testactivedirectory.infrastructure.persistence.entity.Tables.infGeneral;
 import com.test.testactivedirectory.infrastructure.persistence.repository.tables.InfoGeneralRepository;
 import com.test.testactivedirectory.infrastructure.persistence.repository.tables.MiEntidadRepository;
+
 @Service
 public class InfoGeneralService {
     @Autowired
@@ -31,24 +32,66 @@ public class InfoGeneralService {
             for (CSVRecord record : parser) {
                 infGeneral entidad = new infGeneral();
                 entidad.setCodigo(record.get("CODIGO"));
+                if (entidad.getCodigo().isEmpty()){
+                    entidad.setCodigo(null); // Esto se insertará como NULL en la base de datos
+                }
+                    
                 entidad.setNombre(record.get("NOMBRE"));
+                if (entidad.getNombre().isEmpty()){
+                    entidad.setNombre(null); // Esto se insertará como NULL en la base de datos
+                }
+                 
                 entidad.setCPC(record.get("CPC"));
+                if (entidad.getCPC().isEmpty()){
+                    entidad.setCPC(null); // Esto se insertará como NULL en la base de datos
+                }
                 entidad.setDetalleSectorial(record.get("DETALLE_SECTORIAL"));
+                if (entidad.getDetalleSectorial().isEmpty()){
+                    entidad.setDetalleSectorial(null); // Esto se insertará como NULL en la base de datos
+                }
                 entidad.setFuentesFinanciacion(record.get("FUENTES_DE_FINANCIACION"));
+                if (entidad.getFuentesFinanciacion().isEmpty()){
+                    entidad.setFuentesFinanciacion(null); // Esto se insertará como NULL en la base de datos
+                }
                 entidad.setTerceros(record.get("TERCEROS"));
+                if (entidad.getTerceros().isEmpty()){
+                    entidad.setTerceros(null); // Esto se insertará como NULL en la base de datos
+                }
                 entidad.setPoliticaPublica(record.get("POLITICA_PUBLICA"));
+                if (entidad.getPoliticaPublica().isEmpty()){
+                    entidad.setPoliticaPublica(null); // Esto se insertará como NULL en la base de datos
+                }
                 entidad.setNumFechNorma(record.get("NUMERO_Y_FECHA_DE_LA_NORMA"));
+                if (entidad.getNumFechNorma().isEmpty()){
+                    entidad.setNumFechNorma(null); // Esto se insertará como NULL en la base de datos
+                }
                 entidad.setTipoNorma(record.get("TIPO_DE_NORMA"));
+                if (entidad.getTipoNorma().isEmpty()){
+                    entidad.setTipoNorma(null); // Esto se insertará como NULL en la base de datos
+                }
                 entidad.setReacau1(record.get("RECAUDO_VIGEN_ACTUAL_SIN_FONDOS"));
+                if (entidad.getReacau1().isEmpty()){
+                    entidad.setReacau1(null); // Esto se insertará como NULL en la base de datos
+                }
                 entidad.setReacau2(record.get("RECAUDO_VIGEN_ACTUAL_CON_FONDOS"));
+                if (entidad.getReacau2().isEmpty()){
+                    entidad.setReacau2(null); // Esto se insertará como NULL en la base de datos
+                }
                 entidad.setReacau3(record.get("RECAUDO_VIGEN_ANTERIOR_SIN_FONDO"));
+                if (entidad.getReacau3().isEmpty()){
+                    entidad.setReacau3(null); // Esto se insertará como NULL en la base de datos
+                }
                 entidad.setReacau4(record.get("RECAUDO_VIGEN_ANTERIOR_CON_FONDO"));
+                if (entidad.getReacau4().isEmpty()){
+                    entidad.setReacau4(null); // Esto se insertará como NULL en la base de datos
+                }
                 entidad.setTotalRecaudo(record.get("TOTAL_RECAUDO"));
-               
+                if (entidad.getTotalRecaudo() .isEmpty()){
+                    entidad.setTotalRecaudo(null); // Esto se insertará como NULL en la base de datos
+                }
 
-                
                 System.out.println(entidad);
-          
+
                 infoGeneralRepository.save(entidad);
             }
 
@@ -56,5 +99,5 @@ public class InfoGeneralService {
             throw new RuntimeException("Error al procesar el archivo CSV: " + e.getMessage());
         }
     }
-    
+
 }
