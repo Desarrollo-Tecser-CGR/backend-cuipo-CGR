@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.test.testactivedirectory.application.Rules.Regla1Services;
+import com.test.testactivedirectory.application.Rules.RuleEngine;
 import com.test.testactivedirectory.infrastructure.persistence.repository.tables.InfoGeneralRepository;
 
 @RestController
@@ -16,13 +16,11 @@ import com.test.testactivedirectory.infrastructure.persistence.repository.tables
 public class RulesController {
 
     @Autowired
-    private Regla1Services rule1Service;
+    private RuleEngine ruleEngine;
 
-    @GetMapping("/ruleOne")
+    @GetMapping()
     public Map<String, Object> getAll() {
-        Map<String, Object> json = new HashMap<>();
-        json = this.rule1Service.rulesOne();
-        return json;
+        return this.ruleEngine.implementRules();
     }
 
 }
