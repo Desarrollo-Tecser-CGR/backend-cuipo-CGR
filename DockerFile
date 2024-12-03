@@ -7,7 +7,7 @@ WORKDIR /app
 # Copiar el archivo .jar generado al contenedor
 COPY target/*.jar app.jar
 
-# Exponer el puerto 8000 (puerto de tu aplicación)
+# Exponer el puerto 8001 (puerto de tu aplicación)
 EXPOSE 8001
 
 # Comando para ejecutar la aplicación
