@@ -14,6 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
@@ -35,7 +36,7 @@ public class LogEntity {
     @Column(name = "email", nullable = false, length = 100)
     private String correo;
 
-    @NotBlank
+    @NotNull
     @Column(name = "date_session_start", updatable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "America/Bogota")
     private Date data_session_start;
