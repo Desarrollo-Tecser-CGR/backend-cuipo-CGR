@@ -1,6 +1,7 @@
 package com.test.testactivedirectory.application.Rules;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,20 +26,31 @@ public class RuleEngine {
 
     private int successfulRules1 = 0;
     private int successfulRules2 = 0;
+    private int successfulRules4 = 0;
+    private int successfulRules5 = 0;
 
     @Transactional
     public Map<String, Object> implementRules() {
-        Map<String, Object> resultRules = new HashMap<>();
+        Map<String, Object> resultRules = new LinkedHashMap<>();
+
+        successfulRules1 = 0;
+        successfulRules2 = 0;
+        successfulRules4 = 0;
+        successfulRules5 = 0;
 
         List<InfGeneral> territorialEntities = this.generalRepository.findAll();
         List<DatosDept> departamentosType = this.departamentosRepository.findAll();
 
         this.validateRuleOne(territorialEntities);
         this.validateTwo(territorialEntities, departamentosType);
+        this.validateRuleFour(territorialEntities);
+        this.validateRuleFive(territorialEntities);
 
         resultRules.put("Total", territorialEntities.size());
-        resultRules.put("Validación código cuenta:", this.successfulRules1);
-        resultRules.put("Validación código cuenta por ámbito:", this.successfulRules2);
+        resultRules.put("Regla 1: Validación código cuenta:", this.successfulRules1);
+        resultRules.put("Regla 2: Validación código cuenta por ámbito:", this.successfulRules2);
+        resultRules.put("Regla 4: Validación fuente de financiación:", this.successfulRules4);
+        resultRules.put("Regla 5: Validación fuente de financiación SGP:", this.successfulRules5);
 
         return resultRules;
     }
@@ -53,7 +65,6 @@ public class RuleEngine {
                 entity.setRegla1("NO CUMPLE");
             }
         });
-
     }
 
     @Transactional
@@ -68,6 +79,33 @@ public class RuleEngine {
                 this.successfulRules2++;
             } else {
                 entidad.setRegla2("NO CUMPLE");
+            }
+        });
+    }
+
+    @Transactional
+    private void validateRuleFour(List<InfGeneral> entidades) {
+        entidades.forEach(entity -> {
+            if (entity.getFuentesFinanciacion() != null
+                    && entity.getFuentesFinanciacion().equals("INGRESOS CORRIENTES DE LIBRE DESTINACION")) {
+                entity.setRegla4("INCLUIR");
+                this.successfulRules4++;
+            } else {
+                entity.setRegla4("NO INCLUIR");
+            }
+        });
+    }
+
+    @Transactional
+    private void validateRuleFive(List<InfGeneral> entidades) {
+        entidades.forEach(entity -> {
+            if (entity.getFuentesFinanciacion() != null
+                    && entity.getFuentesFinanciacion()
+                            .equals("SGP-PROPOSITO GENERAL-LIBRE DESTINACION MUNICIPIOS CATEGORIAS 4, 5 Y 6")) {
+                entity.setRegla5("INCLUIR");
+                this.successfulRules5++;
+            } else {
+                entity.setRegla5("NO INCLUIR");
             }
         });
     }
