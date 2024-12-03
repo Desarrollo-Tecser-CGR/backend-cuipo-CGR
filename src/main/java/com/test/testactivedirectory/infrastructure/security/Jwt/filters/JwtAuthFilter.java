@@ -56,7 +56,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/api/csv/cargar",
             "/api/csv/carGen",
             "test/**",
-            "/api/rules/ruleOne");
+            "/api/rules");
 
     /**
      * Verifica si a la URI no se le debe aplicar el filtro
@@ -85,8 +85,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
      * @throws ServletException
      * @throws IOException
      * @throws UnauthorizedException - Si no tiene la cabezera
-     * HttpHeaders.AUTHORIZATION - Si tiene más de dos elementos en al cabezera
-     * o no tiene 'Bearer' - Si el token no es valido
+     *                               HttpHeaders.AUTHORIZATION - Si tiene más de dos
+     *                               elementos en al cabezera
+     *                               o no tiene 'Bearer' - Si el token no es valido
      */
     @SuppressWarnings("null")
     @Override
@@ -178,7 +179,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
      * @throws IOException
      * @throws JsonProcessingException
      * @apiNote Metodo encargado de enviar la respuesta al cliente cuando
-     * exixste una exception o validacion de token
+     *          exixste una exception o validacion de token
      */
     private void responseHandler(HttpServletResponse response, String ExceptionHandler, int status) throws IOException {
 
