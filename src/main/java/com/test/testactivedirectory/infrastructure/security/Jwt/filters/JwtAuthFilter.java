@@ -56,7 +56,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/api/csv/cargar",
             "/api/csv/carGen",
             "test/**",
-            "/api/rules");
+            "/api/rules",
+            "/api/excel");
 
     /**
      * Verifica si a la URI no se le debe aplicar el filtro
