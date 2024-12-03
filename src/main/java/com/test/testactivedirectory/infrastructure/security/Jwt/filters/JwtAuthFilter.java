@@ -1,10 +1,13 @@
 package com.test.testactivedirectory.infrastructure.security.Jwt.filters;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
@@ -49,6 +52,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/auth/",
             "/swagger-ui.html",
             "/swagger-ui",
+            "/swagger-ui/index.html",
             "/api-docs",
             "/user/",
             "/role/**",
@@ -66,13 +70,43 @@ public class JwtAuthFilter extends OncePerRequestFilter {
      */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        System.out.println("llegué aqui shouldNotFilter");
-        System.out.println("Esto se ronpe en :===" + request.getRequestURI());
-        System.out.println("headers:" + request);
-        System.out.println("headers:" + request.getHeaders(HttpHeaders.AUTHORIZATION).toString());
-        String requestUri = request.getRequestURI();
-        return urlsToSkip.stream().anyMatch(uri -> requestUri.startsWith(uri));
+
+        Logger logger = LoggerFactory.getLogger(getClass());
+
+        try {
+
+            logger.debug("Entrando a SwaggerUI");
+            logger.debug("Request URI: {}", request.getRequestURI());
+
+            Enumeration<String> headers = request.getHeaders(HttpHeaders.AUTHORIZATION);
+            if (headers != null && headers.hasMoreElements()) {
+                logger.debug("Autorización Header: {}", headers.nextElement());
+            } else {
+                logger.debug("Autorizacion Header no presente");
+            }
+
+            if (urlsToSkip == null || urlsToSkip.isEmpty()) {
+                logger.warn("La lista urlsToSkip esta vacia o no inicializada");
+                return false;
+            } 
+
+            String requestUri = request.getRequestURI();
+            boolean isMatch = urlsToSkip.stream().anyMatch(uri -> requestUri.startsWith(uri));
+            return isMatch;
+            
+        } catch (Exception e) {
+            logger.error("Error en shouldNotFilter", e);
+            throw new ServletException("Error al evaluar shouldNotFilter");
+        }
     }
+
+        // System.out.println("llegué aqui shouldNotFilter");
+        // System.out.println("Esto se ronpe en :===" + request.getRequestURI());
+        // System.out.println("headers:" + request);
+        // System.out.println("headers:" + request.getHeaders(HttpHeaders.AUTHORIZATION).toString());
+        // String requestUri = request.getRequestURI();
+        // Boolean isOK = (Boolean) urlsToSkip.stream().anyMatch(uri -> requestUri.startsWith(uri));
+        // return urlsToSkip.stream().anyMatch(uri -> requestUri.startsWith(uri));
 
     /**
      * Valida si la petición contiene la cabezera de authorization con el bearer
