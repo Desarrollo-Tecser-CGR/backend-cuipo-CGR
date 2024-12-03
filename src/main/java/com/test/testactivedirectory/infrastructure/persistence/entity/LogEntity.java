@@ -51,12 +51,11 @@ public class LogEntity {
     public LogEntity() {
     }
 
-    public LogEntity(String correo, Date data_session_start, boolean enable, String name_user, UserEntity user) {
+    public LogEntity(String correo, Date data_session_start, boolean enable, String name_user) {
         this.correo = correo;
         this.data_session_start = data_session_start;
         this.enable = enable;
         this.name_user = name_user;
-        this.user = user;
     }
 
 }
