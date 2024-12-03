@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.test.testactivedirectory.application.logs.usecase.LogUseCase;
 import com.test.testactivedirectory.domain.repository.ILogRepository;
 import com.test.testactivedirectory.infrastructure.exception.customException.ResourceNotFoundException;
 import com.test.testactivedirectory.infrastructure.persistence.entity.LogEntity;
@@ -25,25 +26,21 @@ public class LogRepositoryAdapterImpl implements ILogRepository {
         this.userRepositoryJpa = userRepositoryJpa;
     }
 
-
     @Transactional(readOnly = true)
     @Override
     public List<LogEntity> logFindAll() {
         return this.logRepositoryJpa.findAll();
     }
 
-    @Transactional
     @Override
-    public LogEntity createLog(LogEntity logEntity, Long idUser) {
-        Optional<UserEntity> userEntityOptional = this.userRepositoryJpa.findById(idUser);
-        if (userEntityOptional != null) {
+    public LogEntity createLog(LogEntity logEntity, String userName) {
+        Optional<UserEntity> userEntityOptional = this.userRepositoryJpa.findBySAMAccountName(userName);
+        if (userEntityOptional.isPresent()) {
             logEntity.setUser(userEntityOptional.get());
+            LogEntity log = this.logRepositoryJpa.save(logEntity);
+            return log;
         } else {
-            throw new ResourceNotFoundException("el usuario con id=" + logEntity + " no existe");
+            throw new ResourceNotFoundException("el usuario con nombre=" + userName + " no existe");
         }
-        
-        LogEntity log = this.logRepositoryJpa.save(logEntity);
-        return log;
     }
-
 }
