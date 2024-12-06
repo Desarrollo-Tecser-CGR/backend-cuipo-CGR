@@ -1,9 +1,12 @@
 package com.test.testactivedirectory.application.Rules;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,9 @@ public class RuleEngine {
     private int successfulRules2 = 0;
     private int successfulRules4 = 0;
     private int successfulRules5 = 0;
+    private int successfulRules7 = 0;
+    private int successfulRules8 = 0;
+    private int successfulRules9 = 0;
 
     @Transactional
     public Map<String, Object> implementRules() {
@@ -37,6 +43,9 @@ public class RuleEngine {
         successfulRules2 = 0;
         successfulRules4 = 0;
         successfulRules5 = 0;
+        successfulRules7 = 0;
+        successfulRules8 = 0;
+        successfulRules9 = 0;
 
         List<InfGeneral> territorialEntities = this.generalRepository.findAll();
         List<DatosDept> departamentosType = this.departamentosRepository.findAll();
@@ -45,12 +54,16 @@ public class RuleEngine {
         this.validateTwo(territorialEntities, departamentosType);
         this.validateRuleFour(territorialEntities);
         this.validateRuleFive(territorialEntities);
+        this.validateRuleSeven(territorialEntities);
 
         resultRules.put("Total", territorialEntities.size());
         resultRules.put("Regla 1: Validación código cuenta:", this.successfulRules1);
         resultRules.put("Regla 2: Validación código cuenta por ámbito:", this.successfulRules2);
         resultRules.put("Regla 4: Validación fuente de financiación:", this.successfulRules4);
         resultRules.put("Regla 5: Validación fuente de financiación SGP:", this.successfulRules5);
+        resultRules.put("Regla 7: :Suma total del recaudo", this.successfulRules7);
+        resultRules.put("Regla 8: :Suma total del recaudo", this.successfulRules8);
+        resultRules.put("Regla 9: :Suma total del recaudo", this.successfulRules9);
 
         return resultRules;
     }
@@ -106,6 +119,76 @@ public class RuleEngine {
                 this.successfulRules5++;
             } else {
                 entity.setRegla5("NO INCLUIR");
+            }
+        });
+    }
+
+    // private void validateRuleSeven(List<InfGeneral> entidades) {
+    // // Paso 1: Crear un mapa para contar la frecuencia de cada código
+    // List<InfGeneral> entidadesFiltradas = entidades.stream()
+    // .filter(entity -> entity.getCodigo() != null)
+    // .filter(entity -> entity.getCodigo() == "INGRESOS CORRIENTES DE LIBRE
+    // DESTINACION")
+    // .toList();
+
+    // }
+
+    @Transactional
+    private void validateRuleSeven(List<InfGeneral> entidades) {
+        // Paso 1: Crear un mapa para contar la frecuencia de cada código
+        Map<String, Long> codigoCounts = entidades.stream()
+                .filter(entity -> entity.getCodigo() != null) // Asegurarse de que 'codigo' no sea nulo
+                .filter(entity -> entity.getFuentesFinanciacion() == "INGRESOS CORRIENTES DE LIBRE DESTINACION")
+                .collect(Collectors.groupingBy(InfGeneral::getCodigo,
+                        Collectors.counting()));
+
+        // Paso 2: Identificar los códigos que se repiten
+        Set<String> codigosRepetidos = codigoCounts.entrySet().stream()
+                .filter(entry -> entry.getValue() > 1) // Filtrar los códigos que se repiten
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+        System.out.println(codigosRepetidos);
+
+        // Paso 3: Procesar los registros con códigos repetidos
+        entidades.forEach(entity -> {
+            if (codigosRepetidos.contains(entity.getCodigo())) {
+                // Aquí puedes procesar los registros repetidos como desees
+                // System.out.println("Registro con código repetido: " + entity);
+                // entity.setRegla7("Registro repetido");
+
+            } else {
+                entity.setRegla7(entity.getTotalRecaudo());
+
+            }
+        });
+    }
+
+    @Transactional
+    private void validateRuleEight(List<InfGeneral>entidades){
+
+        entidades.forEach(entity -> {
+            if (entity.getFuentesFinanciacion() != null
+                    && entity.getFuentesFinanciacion()
+                            .equals("INGRESOS CORRIENTES DE LIBRE DESTINACION ")) {
+                entity.setRegla8("INCLUIR");
+                this.successfulRules8++;
+            } else {
+                entity.setRegla8("NO INCLUIR");
+            }
+        });
+    }
+
+    @Transactional
+    private void validateRulenigth(List<InfGeneral>entidades){
+
+        entidades.forEach(entity -> {
+            if (entity.getFuentesFinanciacion() != null
+                    && entity.getFuentesFinanciacion()
+                            .equals("ICLD – Ley 99 – Destino Ambiental")) {
+                entity.setRegla8("INCLUIR");
+                this.successfulRules8++;
+            } else {
+                entity.setRegla8("NO INCLUIR");
             }
         });
     }
