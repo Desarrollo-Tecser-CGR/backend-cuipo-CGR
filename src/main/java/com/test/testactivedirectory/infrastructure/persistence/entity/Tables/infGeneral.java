@@ -77,6 +77,21 @@ public class InfGeneral {
     @Column(nullable = true)
     private String regla5;
 
+    @Column(nullable = true)
+    private String regla6;
+
+    @Column(nullable = true)
+    private String regla7;
+
+    @Column(nullable = true)
+    private String regla8;
+
+    @Column(nullable = true)
+    private String regla9;
+
+    @Column(nullable = true)
+    private String regla10;
+
     // @ManyToOne
     // @JoinColumn(name = "menu_id", nullable = true)
     // @JsonBackReference
