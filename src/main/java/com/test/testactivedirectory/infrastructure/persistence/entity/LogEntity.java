@@ -42,7 +42,7 @@ public class LogEntity {
     private Date data_session_start;
 
     @Column(name = "enable", nullable = false)
-    private boolean enable;
+    private Boolean enable;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -51,7 +51,7 @@ public class LogEntity {
     public LogEntity() {
     }
 
-    public LogEntity(String correo, Date data_session_start, boolean enable, String name_user) {
+    public LogEntity(String correo, Date data_session_start, Boolean enable, String name_user) {
         this.correo = correo;
         this.data_session_start = data_session_start;
         this.enable = enable;
