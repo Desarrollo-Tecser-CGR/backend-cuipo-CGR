@@ -11,3 +11,4 @@ public interface ILogRepository {
     public abstract LogEntity createLog(LogEntity logEntity, String userName);
 
 }
+

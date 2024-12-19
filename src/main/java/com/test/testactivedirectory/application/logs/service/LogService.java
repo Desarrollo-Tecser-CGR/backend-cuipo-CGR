@@ -33,3 +33,4 @@ public class LogService implements LogUseCase {
     }
 
 }
+
