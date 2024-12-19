@@ -10,3 +10,4 @@ public interface LogUseCase {
 
     public abstract LogEntity createLog(String userName);
 }
+

@@ -44,3 +44,4 @@ public class LogRepositoryAdapterImpl implements ILogRepository {
         }
     }
 }
+

@@ -11,10 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.test.testactivedirectory.infrastructure.persistence.entity.Tables.DatosDept;
 import com.test.testactivedirectory.infrastructure.persistence.entity.Tables.InfGeneral;
 import com.test.testactivedirectory.infrastructure.persistence.repository.tables.InfoGeneralRepository;
-import com.test.testactivedirectory.infrastructure.persistence.repository.tables.MiEntidadRepository;
 
 @Service
 public class InfoGeneralService {
