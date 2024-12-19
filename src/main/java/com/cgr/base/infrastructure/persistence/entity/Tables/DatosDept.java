@@ -1,4 +1,4 @@
-package com.test.testactivedirectory.infrastructure.persistence.entity.Tables;
+package com.cgr.base.infrastructure.persistence.entity.Tables;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

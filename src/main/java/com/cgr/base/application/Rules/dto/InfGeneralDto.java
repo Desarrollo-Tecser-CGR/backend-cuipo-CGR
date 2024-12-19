@@ -1,4 +1,4 @@
-package com.test.testactivedirectory.application.Rules.dto;
+package com.cgr.base.application.Rules.dto;
 
 import lombok.Data;
 

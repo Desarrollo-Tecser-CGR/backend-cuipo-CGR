@@ -1,7 +1,5 @@
-package com.test.testactivedirectory.application.Rules;
+package com.cgr.base.application.Rules;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,11 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.test.testactivedirectory.application.Rules.dto.InfGeneralDto;
-import com.test.testactivedirectory.infrastructure.persistence.entity.Tables.DatosDept;
-import com.test.testactivedirectory.infrastructure.persistence.entity.Tables.InfGeneral;
-import com.test.testactivedirectory.infrastructure.persistence.repository.tables.InfoGeneralRepository;
-import com.test.testactivedirectory.infrastructure.persistence.repository.tables.MiEntidadRepository;
+import com.cgr.base.infrastructure.persistence.entity.Tables.DatosDept;
+import com.cgr.base.infrastructure.persistence.entity.Tables.InfGeneral;
+import com.cgr.base.infrastructure.persistence.repository.tables.InfoGeneralRepository;
+import com.cgr.base.infrastructure.persistence.repository.tables.MiEntidadRepository;
 
 @Service
 public class RuleEngine {

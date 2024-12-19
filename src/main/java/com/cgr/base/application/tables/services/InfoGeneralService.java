@@ -1,4 +1,4 @@
-package com.test.testactivedirectory.application.tables.services;
+package com.cgr.base.application.tables.services;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.test.testactivedirectory.infrastructure.persistence.entity.Tables.InfGeneral;
-import com.test.testactivedirectory.infrastructure.persistence.repository.tables.InfoGeneralRepository;
+import com.cgr.base.infrastructure.persistence.entity.Tables.InfGeneral;
+import com.cgr.base.infrastructure.persistence.repository.tables.InfoGeneralRepository;
 
 @Service
 public class InfoGeneralService {
