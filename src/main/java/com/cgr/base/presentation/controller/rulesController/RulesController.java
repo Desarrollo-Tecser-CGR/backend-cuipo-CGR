@@ -1,6 +1,5 @@
-package com.test.testactivedirectory.presentation.controller.rulesController;
+package com.cgr.base.presentation.controller.rulesController;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.test.testactivedirectory.application.Rules.RuleEngine;
-import com.test.testactivedirectory.infrastructure.persistence.repository.tables.InfoGeneralRepository;
+import com.cgr.base.application.Rules.RuleEngine;
 
 @RestController
 @RequestMapping("/api/rules")
