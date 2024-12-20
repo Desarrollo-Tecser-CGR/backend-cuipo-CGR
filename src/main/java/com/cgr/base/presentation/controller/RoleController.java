@@ -39,12 +39,12 @@ public class RoleController extends AbstractController {
 
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody RoleEntity role, BindingResult result) {
-        return requestResponse(this.roleService.create(role), "rol creado");
+        return processRequest(result, () -> this.roleService.create(role), "rol creado");
     }
 
     @PutMapping
     public ResponseEntity<?> update(@Valid @RequestBody RoleEntity role, BindingResult result) {
-        return requestResponse(this.roleService.update(role), "rol actualizado");
+        return processRequest(result, () -> this.roleService.update(role), "rol actualizado");
     }
 
     @DeleteMapping("/{id}")

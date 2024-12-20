@@ -10,11 +10,12 @@ import org.springframework.validation.BindingResult;
 
 public abstract class AbstractController {
 
-    protected ResponseEntity<?> processRequest(BindingResult result, Supplier<ResponseEntity<?>> action) {
+    protected ResponseEntity<?> processRequest(BindingResult result, Supplier<?> action,
+            String message) {
         if (result.hasFieldErrors()) {
             return this.validate(result);
         }
-        return action.get();
+        return requestResponse(action.get(), message);
     }
 
     private ResponseEntity<?> validate(BindingResult result) {
