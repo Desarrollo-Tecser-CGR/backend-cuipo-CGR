@@ -61,6 +61,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/api/csv/carGen",
             "test/**",
             "/api/rules",
+            "/EmailEnviar",
+            "/tokenEmail",
             "/api/excel");
 
     /**
