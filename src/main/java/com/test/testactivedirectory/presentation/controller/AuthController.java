@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.test.testactivedirectory.application.auth.dto.AuthRequestDto;
+import com.test.testactivedirectory.application.auth.dto.UserDto;
 import com.test.testactivedirectory.application.auth.usecase.IAuthUseCase;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,5 +47,13 @@ public class AuthController {
         return ResponseEntity.ok(authUseCase.authWithLDAPActiveDirectory(request, servletRequest));
 
     }
+
+    @PostMapping("/tokenEmail")
+    public ResponseEntity<?> tokenEmail(@RequestBody UserDto request, final HttpServletRequest servletRequest) throws JsonProcessingException {
+
+        return ResponseEntity.ok(authUseCase.emailLogin(request));
+
+    }
+
 
 }
