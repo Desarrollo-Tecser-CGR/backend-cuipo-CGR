@@ -115,43 +115,6 @@ public class AuthService implements IAuthUseCase {
         return response;
     }
 
-    // @Override
-    // public Map<String, Object> emailLogin(EmailDto emailDto,
-    // HttpServletRequest servletRequest)
-    // throws JsonProcessingException {
-
-    // Map<String, Object> response = new HashMap<>();
-
-    // try {
-
-    // Boolean verifactionEmail = emailRepository.findByEmailNative(
-    // emailDto.getCorreo());
-
-    // if (verifactionEmail) {
-
-    // this.logService.createLog(emailDto.getCorreo());
-    // EmailDto aEmailDto = AuthMapper.INSTANCE.toEma();
-
-    // String token = jwtAuthenticationProvider.createToken(userRequestDto);
-
-    // userRequestDto.setToken(token);
-    // userRequestDto.setIsEnable(true);
-
-    // response.put("user", userRequestDto);
-    // response.put("message", "User authenticated successfully");
-    // response.put("statusCode", 200);
-    // response.put("status", "success");
-    // return response;
-    // }
-
-    // } catch (Exception e) {
-    // // TODO: handle exception
-    // System.err.println("Error en la capa de aplicaciontion en service: " +
-    // e.getMessage());
-    // }
-    // response.put("message", "User not authenticated");
-    // return response;
-    // }
 
     @Transactional
     @Override
@@ -171,7 +134,7 @@ public class AuthService implements IAuthUseCase {
             userToken.setSAMAccountName(userRequest.getUser());
             String emailToken = jwtAuthenticationProvider.createToken(userToken);
 
-            this.emailService.sendSimpleEmail(userLogin.getEmail(), "Asunto predeterminado", EmailUtility.getHtmlContent(emailToken));
+            this.emailService.sendSimpleEmail(userLogin.getEmail(), "Verificacion de Usuario", EmailUtility.getHtmlContent(emailToken));
 
 
         } catch (Exception e) {
