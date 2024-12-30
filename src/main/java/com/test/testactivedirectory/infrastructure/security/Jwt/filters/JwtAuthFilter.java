@@ -64,7 +64,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/EmailEnviar",
             "/tokenEmail",
             "/api/excel",
-            "/ventas/productos/listar"
+            "/ventas/productos/listar",
+            "/verificarToken/email/verify"
             );
 
     /**
