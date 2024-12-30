@@ -55,6 +55,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/excel").permitAll();
                     auth.requestMatchers("/ventas/productos/listar").permitAll();
                     auth.requestMatchers("/EmailEnviar").permitAll();
+                    auth.requestMatchers("/verificarToken/email/**").permitAll();
                     auth.requestMatchers("/admin/**").hasAnyRole(RoleUtil.ADMIN, RoleUtil.FUNCIONARIO,
                             RoleUtil.Usuario);
                     auth.requestMatchers("/user/**").hasAnyRole(RoleUtil.FUNCIONARIO,
