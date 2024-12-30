@@ -27,4 +27,6 @@ public class LogController extends AbstractController {
         return json;
     }
 
+    
+
 }
