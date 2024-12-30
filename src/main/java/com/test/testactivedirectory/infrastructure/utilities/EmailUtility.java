@@ -75,7 +75,7 @@ public class EmailUtility {
                     <p>Estimado/a,</p>
                     <p>Gracias por registrarte con nosotros. Por favor, confirma tu dirección de correo electrónico haciendo clic en el botón de abajo.</p>
                     <div class="button-container">
-                        <a href="http://localhost:4200/verificar?token=%s" class="button">Ingrese Aqui</a>
+                        <a href="http://localhost:4200/verify?token=%s" class="button">Ingrese Aqui</a>
                     </div>
                     <p>Si no solicitaste esta verificación, puedes ignorar este mensaje.</p>
                     <p>Atentamente,<br>El equipo de [Tu Empresa]</p>

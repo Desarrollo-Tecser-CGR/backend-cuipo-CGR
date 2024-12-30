@@ -1,15 +1,21 @@
 package com.test.testactivedirectory.presentation.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.test.testactivedirectory.application.Email.EmailService;
 
+
 @RestController
 public class EmailController {
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    @Qualifier("excel")
+
 
     @GetMapping("/EmailEnviar")
     public String sendEmail() {
@@ -101,6 +107,8 @@ public class EmailController {
 </body>
             """;
         try {
+          
+
             emailService.sendSimpleEmail(to, subject,htmlContent);
             return "Correo enviado con éxito a " + to;
         } catch (Exception e) {
