@@ -1,5 +1,6 @@
 package com.cgr.base.presentation.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,28 +30,28 @@ public class RoleController extends AbstractController {
 
     @GetMapping
     public ResponseEntity<?> getAll() {
-        return requestResponse(this.roleService.findAll(), "roles del sistema");
+        return requestResponse(this.roleService.findAll(), "roles del sistema", HttpStatus.OK, true);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
-        return requestResponse(this.roleService.findById(id), "rol encontrado");
+        return requestResponse(this.roleService.findById(id), "rol encontrado", HttpStatus.OK, true);
     }
 
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody RoleEntity role, BindingResult result) {
-        return requestResponse(this.roleService.create(role), "rol creado");
+        return requestResponse(result, () -> this.roleService.create(role), "rol creado", HttpStatus.CREATED, true);
     }
 
     @PutMapping
     public ResponseEntity<?> update(@Valid @RequestBody RoleEntity role, BindingResult result) {
-        return requestResponse(this.roleService.update(role), "rol actualizado");
+        return requestResponse(result, () -> this.roleService.update(role), "rol actualizado", HttpStatus.OK, true);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         RoleRequestDto role = this.roleService.activateOrDeactivate(id);
-        return requestResponse(role, role.isEnable() ? "rol activado" : "rol desactivado");
+        return requestResponse(role, role.isEnable() ? "rol activado" : "rol desactivado", HttpStatus.OK, true);
     }
 
 }
