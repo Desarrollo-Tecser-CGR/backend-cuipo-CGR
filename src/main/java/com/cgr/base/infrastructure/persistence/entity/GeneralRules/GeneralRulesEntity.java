@@ -19,6 +19,9 @@ public class GeneralRulesEntity {
     private Integer id;
 
     @Column(nullable = true)
+    private String entityName;
+
+    @Column(nullable = true)
     private String accountName;
 
     @Column(nullable = true)
@@ -26,4 +29,7 @@ public class GeneralRulesEntity {
 
     @Column(nullable = true)
     private String generalRule2;
+
+    @Column(nullable = true)
+    private String generalRule4;
 }

@@ -13,10 +13,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OpenDataProgIng {
 
+   @Column(name = "NOMBRE_ENTIDAD")
+   private String nombreEntidad;
+
    @Id
    @Column(name = "NOMBRE_CUENTA")
    private String nombreCuenta;
    
    @Column(name = "PRESUPUESTO_DEFINITIVO")
    private Double presupuestoDefinitivo;
+
+   @Column(name = "PRESUPUESTO_INICIAL")
+   private Double presupuestoInicial;
 }
