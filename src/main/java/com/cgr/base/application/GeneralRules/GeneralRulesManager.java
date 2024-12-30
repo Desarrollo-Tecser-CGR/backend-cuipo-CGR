@@ -20,112 +20,77 @@ public class GeneralRulesManager {
     @Autowired
     private GeneralRulesRepository generalRulesRepository;
 
-    // Transferencia del Nombre de Cuenta
     @Transactional
-    public void transferAccountNameToGeneralRules() {
-        
+    public void applyGeneralRules() {
+
         List<OpenDataProgIng> openDataList = openDataProgIngRepository.findAll();
 
         openDataList.forEach(openData -> {
+
+            // Transferencia Información Cuenta
             GeneralRulesEntity generalRulesEntity = new GeneralRulesEntity();
+            generalRulesEntity.setEntityName(openData.getNombreEntidad());
             generalRulesEntity.setAccountName(openData.getNombreCuenta());
+            Double presupuestoDefinitivoValue = openData.getPresupuestoDefinitivo();
+            Double presupuestoInicialValue = openData.getPresupuestoInicial();
+
+            // Regla1: Validacion presupuesto definitivo. 
+            String resultGeneralRule1 = evaluateGeneralRule1(presupuestoDefinitivoValue);
+            generalRulesEntity.setGeneralRule1(resultGeneralRule1);
+
+            // Regla2: Entidad en Liquidacion.
+            String accountNameValue = openData.getNombreCuenta();
+            String resultGeneralRule2 = evaluateGeneralRule2(accountNameValue);
+            generalRulesEntity.setGeneralRule2(resultGeneralRule2);
+
+            // Regla3: Alerta Regla1 y Regla2.
+
+            // Regla4: Comparativo de Campos.
+            String resultGeneralRule4 = evaluateGeneralRule4(presupuestoDefinitivoValue, presupuestoInicialValue);
+            generalRulesEntity.setGeneralRule4(resultGeneralRule4);
+            
+            //Regla4.1: Alerta Regla4.
+
+            // Regla5: Validacion presupuesto inicial por Periodos.
+
+            // Guarda Tabla GeneralRules
             generalRulesRepository.save(generalRulesEntity);
         });
     }
 
-    // Regla1: Validacion presupuesto definitivo.
-    /*
-     Transactional
-    public void applyGeneralRule1() {
-        
-        List<OpenDataProgIng> openDataList = openDataProgIngRepository.findAll();
-        openDataList.forEach(openData -> {
-            String AccountName = openData.getNombreCuenta();
-            
-            String generalRule2Value = AccountName != null && AccountName.toLowerCase().contains("liquidacion") 
-                                    ? "NO CUMPLE" : "CUMPLE";
-
-            GeneralRulesEntity generalRulesEntity = generalRulesRepository
-            .findByAccountName(AccountName)
-            .orElse(new GeneralRulesEntity());
-            
-            generalRulesEntity.setGeneralRule2(generalRule2Value);
-            generalRulesRepository.save(generalRulesEntity);
-
-        });
-    }
-     */
-    @Transactional
-    public void applyGeneralRule1() {
-        // Obtener todos los datos
-        List<OpenDataProgIng> openDataList = openDataProgIngRepository.findAll();
-        
-        // Solo procesar los primeros 3 elementos
-        List<OpenDataProgIng> firstThreeOpenDataList = openDataList.size() > 3 ? openDataList.subList(0, 3) : openDataList;
-    
-        firstThreeOpenDataList.forEach(openData -> {
-            // Obtener el nombre de la cuenta
-            String AccountName = openData.getNombreCuenta();
-            
-            // Imprimir por consola el nombre de la cuenta procesada
-            System.out.println("Procesando cuenta: " + AccountName);
-    
-            // Determinar el valor de la regla general 2
-            String generalRule2Value = AccountName != null && AccountName.toLowerCase().contains("liquidacion") 
-                                        ? "NO CUMPLE" : "CUMPLE";
-            
-            // Imprimir el valor de la regla
-            System.out.println("Valor de la regla general 2: " + generalRule2Value);
-    
-            // Buscar o crear una entidad para la cuenta
-            GeneralRulesEntity generalRulesEntity = generalRulesRepository
-                .findByAccountName(AccountName)
-                .orElse(new GeneralRulesEntity());
-    
-            // Asignar el valor a la regla general 2
-            generalRulesEntity.setGeneralRule2(generalRule2Value);
-    
-            // Imprimir por consola antes de guardar
-            System.out.println("Guardando regla general para cuenta: " + AccountName);
-    
-            // Guardar la entidad
-            generalRulesRepository.save(generalRulesEntity);
-    
-            // Imprimir confirmación de guardado
-            System.out.println("Regla general guardada para cuenta: " + AccountName);
-        });
-    }
-    
-    
-    @Transactional
-    public void applyGeneralRule2() {
-        
-        List<OpenDataProgIng> openDataList = openDataProgIngRepository.findAll();
-        openDataList.forEach(openData -> {
-            Double value = openData.getPresupuestoDefinitivo();
-            
-            if (value == null || value.isNaN()) {
-                value = 0.0;
-            }
-
-            String generalRule1Value = value > 100000000 ? "CUMPLE" : "NO CUMPLE";
-            
-            GeneralRulesEntity generalRulesEntity = generalRulesRepository
-                .findByAccountName(openData.getNombreCuenta())
-                .orElse(new GeneralRulesEntity());
-            
-            generalRulesEntity.setGeneralRule1(generalRule1Value);
-            generalRulesRepository.save(generalRulesEntity);
-
-        });
+    // Regla1: Validacion presupuesto definitivo. 
+    public String evaluateGeneralRule1(Double value) {
+        if (value == null || value.isNaN()) {
+            value = 0.0;
+        }
+        return value > 100000000 ? "CUMPLE" : "NO CUMPLE";
     }
 
-    // Data GeneralRules por AccountName
+    // Regla2: Entidad en Liquidacion.
+    public String evaluateGeneralRule2(String value) {
+        return value != null && value.toLowerCase().contains("liquidacion") ? "NO CUMPLE" : "CUMPLE";
+    }
+
+    // Regla3: Alerta Regla1 y Regla2.
+
+    // Regla4: Comparativo de Campos.
+    public String evaluateGeneralRule4(Double value1, Double value2) {
+        if (value1 == null || value1.isNaN()) {
+            value1 = 0.0;
+        }
+        if (value2 == null || value2.isNaN()) {
+            value2 = 0.0;
+        }
+        return (value1 == 0.0 && value2 == 0.0) ? "NO CUMPLE" : "CUMPLE";
+    }
+
+    //Regla4.1: Alerta Regla4.
+    
+    // Tabla General Rules
     @Transactional
     public List<GeneralRulesEntity> getGeneralRulesData() {
-        transferAccountNameToGeneralRules();
+        applyGeneralRules();
         return generalRulesRepository.findAll();
     }
 
 }
-
