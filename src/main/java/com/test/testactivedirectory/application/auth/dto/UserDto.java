@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
     @NotEmpty
-    @JsonProperty("userName")
+    @JsonProperty("sAMAccountName")
     private String user;
 }
 
