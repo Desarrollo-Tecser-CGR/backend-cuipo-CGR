@@ -19,6 +19,12 @@ public class GeneralRulesEntity {
     private Integer id;
 
     @Column(nullable = true)
+    private String period;
+
+    @Column(nullable = true)
+    private String entityAmbit;
+
+    @Column(nullable = true)
     private String entityName;
 
     @Column(nullable = true)
