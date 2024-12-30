@@ -29,6 +29,8 @@ public class GeneralRulesManager {
 
             // Transferencia Información Cuenta
             GeneralRulesEntity generalRulesEntity = new GeneralRulesEntity();
+            generalRulesEntity.setPeriod(openData.getPeriodo());
+            generalRulesEntity.setEntityAmbit(openData.getNombreAmbito());
             generalRulesEntity.setEntityName(openData.getNombreEntidad());
             generalRulesEntity.setAccountName(openData.getNombreCuenta());
             Double presupuestoDefinitivoValue = openData.getPresupuestoDefinitivo();

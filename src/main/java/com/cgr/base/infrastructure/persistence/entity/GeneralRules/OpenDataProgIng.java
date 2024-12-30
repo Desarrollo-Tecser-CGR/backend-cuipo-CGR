@@ -13,6 +13,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OpenDataProgIng {
 
+   @Column(name = "PERIODO")
+   private String periodo;
+
+   @Column(name = "AMBITO_NOMBRE")
+   private String nombreAmbito;
+
    @Column(name = "NOMBRE_ENTIDAD")
    private String nombreEntidad;
 
