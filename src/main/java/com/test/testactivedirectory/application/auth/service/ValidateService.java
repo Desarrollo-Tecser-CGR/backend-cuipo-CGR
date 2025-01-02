@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.test.testactivedirectory.application.auth.dto.TokenDto;
+import com.test.testactivedirectory.application.auth.dto.UserDto;
 import com.test.testactivedirectory.infrastructure.security.Jwt.services.JwtService;
 
 import lombok.AllArgsConstructor;
@@ -17,15 +18,18 @@ public class ValidateService {
 
     private final JwtService jwtService;
 
-    public TokenDto validationToken(String token) {
+    public UserDto validationToken(String token) {
+         UserDto userDto = new UserDto();
         try {
 
             if (jwtService.validateFirma(token) != null)
-                return new TokenDto("");
+                return userDto;
             if (jwtService.validateToken(token))
-                return new TokenDto("");
+                return userDto;
+                
+            userDto.setUser(jwtService.getClaimUserName(token));
 
-            return new TokenDto(token);
+            return  userDto;
 
         } catch (Exception e) {
             log.info("error provider Jwt " + e.getMessage());
