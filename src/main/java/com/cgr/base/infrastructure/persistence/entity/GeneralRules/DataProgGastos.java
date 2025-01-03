@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@Table(name = "TMP_VW_OPENDATA_A_PROGRAMACION_INGRESOS", schema = "CUIPO")
+@Table(name = "TMP_VW_OPENDATA_C_PROGRAMACION_GASTOS", schema = "CUIPO")
 @NoArgsConstructor
-public class OpenDataProgIng {
+public class DataProgGastos {
 
-   @Column(name = "PERIODO")
+    @Column(name = "PERIODO")
    private String periodo;
 
    @Column(name = "AMBITO_NOMBRE")
@@ -25,10 +25,5 @@ public class OpenDataProgIng {
    @Id
    @Column(name = "NOMBRE_CUENTA")
    private String nombreCuenta;
-   
-   @Column(name = "PRESUPUESTO_DEFINITIVO")
-   private Double presupuestoDefinitivo;
-
-   @Column(name = "PRESUPUESTO_INICIAL")
-   private Double presupuestoInicial;
+    
 }

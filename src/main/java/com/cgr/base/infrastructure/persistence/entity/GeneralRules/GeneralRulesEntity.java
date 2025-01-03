@@ -22,7 +22,7 @@ public class GeneralRulesEntity {
     private String period;
 
     @Column(nullable = true)
-    private String entityAmbit;
+    private String nameAmbit;
 
     @Column(nullable = true)
     private String entityName;
