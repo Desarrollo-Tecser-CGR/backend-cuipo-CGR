@@ -10,7 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "general_rules_test")
+@Table(name = "general_rules_data")
 @Data
 @NoArgsConstructor
 public class GeneralRulesEntity {
