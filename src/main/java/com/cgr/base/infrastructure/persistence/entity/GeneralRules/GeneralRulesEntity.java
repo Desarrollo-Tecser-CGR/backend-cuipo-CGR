@@ -10,13 +10,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "general_rules_add")
+@Table(name = "general_rules_data")
 @Data
 @NoArgsConstructor
 public class GeneralRulesEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(nullable = true)
+    private String period;
+
+    @Column(nullable = true)
+    private String nameAmbit;
 
     @Column(nullable = true)
     private String entityName;
