@@ -1,65 +1,163 @@
 package com.cgr.base.application.GeneralRules;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cgr.base.infrastructure.persistence.entity.GeneralRules.DataProgGastos;
+import com.cgr.base.infrastructure.persistence.entity.GeneralRules.DataProgIngresos;
 import com.cgr.base.infrastructure.persistence.entity.GeneralRules.GeneralRulesEntity;
-import com.cgr.base.infrastructure.persistence.entity.GeneralRules.OpenDataProgIng;
 import com.cgr.base.infrastructure.persistence.repository.GeneralRules.GeneralRulesRepository;
-import com.cgr.base.infrastructure.persistence.repository.GeneralRules.OpenDataProgIngRepository;
+import com.cgr.base.infrastructure.persistence.repository.GeneralRules.ProgGastosRepo;
+import com.cgr.base.infrastructure.persistence.repository.GeneralRules.ProgIngresosRepo;
+
 
 @Service
 public class GeneralRulesManager {
 
     @Autowired
-    private OpenDataProgIngRepository openDataProgIngRepository;
+    private GeneralRulesRepository generalRulesRepository;
 
     @Autowired
-    private GeneralRulesRepository generalRulesRepository;
+    private ProgIngresosRepo openDataProgIngRepository;
+
+    @Autowired
+    private ProgGastosRepo openDataProgGastRepository;
+
+    
+    // Transferencia de Datos
+    @Transactional
+    public void transferDataGeneralRules() {
+
+        List<GeneralRulesEntity> existingEntries = generalRulesRepository.findAll();
+        List<GeneralRulesEntity> newEntities = new ArrayList<>();
+
+        List<DataProgIngresos> progIngList = openDataProgIngRepository.findAll();
+        for (DataProgIngresos openData : progIngList) {
+            GeneralRulesEntity newEntity = new GeneralRulesEntity();
+            
+            newEntity.setPeriod(extractYearPeriod(openData.getPeriodo()));
+            newEntity.setNameAmbit(openData.getNombreAmbito());
+            newEntity.setEntityName(openData.getNombreEntidad());
+            newEntity.setAccountName(openData.getNombreCuenta());
+            
+            boolean isDuplicate = false;
+            
+            for (GeneralRulesEntity existing : existingEntries) {
+                if (areFieldsEqual(existing.getAccountName(), newEntity.getAccountName()) &&
+                    areFieldsEqual(existing.getNameAmbit(), newEntity.getNameAmbit()) &&
+                    areFieldsEqual(existing.getEntityName(), newEntity.getEntityName()) &&
+                    areFieldsEqual(existing.getPeriod(), newEntity.getPeriod())) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+            
+            if (!isDuplicate) {
+                newEntities.add(newEntity);
+                existingEntries.add(newEntity);
+            }
+        }
+
+        List<DataProgGastos> progGastList = openDataProgGastRepository.findAll();
+        for (DataProgGastos openData : progGastList) {
+            GeneralRulesEntity newEntity = new GeneralRulesEntity();
+            
+            newEntity.setPeriod(extractYearPeriod(openData.getPeriodo()));
+            newEntity.setNameAmbit(openData.getNombreAmbito());
+            newEntity.setEntityName(openData.getNombreEntidad());
+            newEntity.setAccountName(openData.getNombreCuenta());
+            
+            boolean isDuplicate = false;
+            
+            for (GeneralRulesEntity existing : existingEntries) {
+                if (areFieldsEqual(existing.getAccountName(), newEntity.getAccountName()) &&
+                    areFieldsEqual(existing.getNameAmbit(), newEntity.getNameAmbit()) &&
+                    areFieldsEqual(existing.getEntityName(), newEntity.getEntityName()) &&
+                    areFieldsEqual(existing.getPeriod(), newEntity.getPeriod())) {
+                    isDuplicate = true;
+                    break;
+                }
+            }
+            
+            if (!isDuplicate) {
+                newEntities.add(newEntity);
+                existingEntries.add(newEntity);
+            }
+        }
+
+        if (!newEntities.isEmpty()) {
+            generalRulesRepository.saveAll(newEntities);
+        }
+
+    }
+
+    private boolean areFieldsEqual(String field1, String field2) {
+        if (field1 == null && field2 == null) {
+            return true;
+        }
+        if (field1 == null || field2 == null) {
+            return false;
+        }
+        return (field1).equals(field2);
+    }
+
+    private String extractYearPeriod(String period) {
+        return period.length() >= 4 ? period.substring(0, 4) : period;
+    }
 
     @Transactional
     public void applyGeneralRules() {
+        List<GeneralRulesEntity> generalRulesData = generalRulesRepository.findAll();
+        List<DataProgIngresos> progIngresosList = openDataProgIngRepository.findAll();
 
-        List<OpenDataProgIng> openDataList = openDataProgIngRepository.findAll();
+        generalRulesData.forEach(generalRule -> {
+            Optional<DataProgIngresos> matchingEntry = progIngresosList.stream().filter(
+                openData -> {
+                    return (
+                        extractYearPeriod(openData.getPeriodo()).equals(generalRule.getPeriod()) &&
+                        openData.getNombreAmbito().equals(generalRule.getNameAmbit()) &&
+                        openData.getNombreEntidad().equals(generalRule.getEntityName()) &&
+                        openData.getNombreCuenta().equals(generalRule.getAccountName())
+                    );
+                }
+            ).findFirst();
+    
+            if (matchingEntry.isPresent()) {
 
-        openDataList.forEach(openData -> {
+                DataProgIngresos matchedData = matchingEntry.get();
 
-            // Transferencia Información Cuenta
-            GeneralRulesEntity generalRulesEntity = new GeneralRulesEntity();
-            generalRulesEntity.setEntityName(openData.getNombreEntidad());
-            generalRulesEntity.setAccountName(openData.getNombreCuenta());
-            Double presupuestoDefinitivoValue = openData.getPresupuestoDefinitivo();
-            Double presupuestoInicialValue = openData.getPresupuestoInicial();
+                // Regla 1: Presupuesto Definitivo
+                Double presupuestoDefinitivoValue = matchedData.getPresupuestoDefinitivo();
+                String resultGeneralRule1 = evaluateGeneralRule1(presupuestoDefinitivoValue);
+                generalRule.setGeneralRule1(resultGeneralRule1);
 
-            // Regla1: Validacion presupuesto definitivo. 
-            String resultGeneralRule1 = evaluateGeneralRule1(presupuestoDefinitivoValue);
-            generalRulesEntity.setGeneralRule1(resultGeneralRule1);
+                // Regla 4: Comparativo de Campos
+                Double presupuestoInicialValue = matchedData.getPresupuestoInicial();
+                String resultGeneralRule4 = evaluateGeneralRule4(presupuestoDefinitivoValue, presupuestoInicialValue);
+                generalRule.setGeneralRule4(resultGeneralRule4);
+
+            } else {
+                generalRule.setGeneralRule1("NO DATA");
+                generalRule.setGeneralRule4("NO DATA");
+            }
 
             // Regla2: Entidad en Liquidacion.
-            String accountNameValue = openData.getNombreCuenta();
+            String accountNameValue = generalRule.getAccountName();
             String resultGeneralRule2 = evaluateGeneralRule2(accountNameValue);
-            generalRulesEntity.setGeneralRule2(resultGeneralRule2);
+            generalRule.setGeneralRule2(resultGeneralRule2);
 
-            // Regla3: Alerta Regla1 y Regla2.
-
-            // Regla4: Comparativo de Campos.
-            String resultGeneralRule4 = evaluateGeneralRule4(presupuestoDefinitivoValue, presupuestoInicialValue);
-            generalRulesEntity.setGeneralRule4(resultGeneralRule4);
-            
-            //Regla4.1: Alerta Regla4.
-
-            // Regla5: Validacion presupuesto inicial por Periodos.
-
-            // Guarda Tabla GeneralRules
-            generalRulesRepository.save(generalRulesEntity);
+            // Guardar Cambios
+            generalRulesRepository.save(generalRule);
         });
     }
 
-    // Regla1: Validacion presupuesto definitivo. 
-    public String evaluateGeneralRule1(Double value) {
+    // Regla1: Validacion presupuesto definitivo.
+    private String evaluateGeneralRule1(Double value) {
         if (value == null || value.isNaN()) {
             value = 0.0;
         }
@@ -70,8 +168,6 @@ public class GeneralRulesManager {
     public String evaluateGeneralRule2(String value) {
         return value != null && value.toLowerCase().contains("liquidacion") ? "NO CUMPLE" : "CUMPLE";
     }
-
-    // Regla3: Alerta Regla1 y Regla2.
 
     // Regla4: Comparativo de Campos.
     public String evaluateGeneralRule4(Double value1, Double value2) {
@@ -84,11 +180,9 @@ public class GeneralRulesManager {
         return (value1 == 0.0 && value2 == 0.0) ? "NO CUMPLE" : "CUMPLE";
     }
 
-    //Regla4.1: Alerta Regla4.
-    
-    // Tabla General Rules
     @Transactional
     public List<GeneralRulesEntity> getGeneralRulesData() {
+        transferDataGeneralRules();
         applyGeneralRules();
         return generalRulesRepository.findAll();
     }
