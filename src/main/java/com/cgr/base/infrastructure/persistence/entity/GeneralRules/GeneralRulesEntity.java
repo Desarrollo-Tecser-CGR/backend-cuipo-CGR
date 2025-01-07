@@ -37,5 +37,6 @@ public class GeneralRulesEntity {
     private String generalRule2;
 
     @Column(nullable = true)
-    private String generalRule4;
+    private String generalRule3;
+
 }
