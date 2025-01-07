@@ -23,7 +23,7 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
 
     @Override
     public Boolean checkAccount(String samAccountName, String password) {
-        String ldapHost = "192.168.2.42";
+        String ldapHost = "192.168.2.46";
         int ldapPort = 389;
         String baseDN = "OU=Tecser,OU=Usuarios,DC=tecser,DC=local";
         String domain = "tecser.local";

@@ -48,12 +48,12 @@ public class GeneralRulesManager {
             boolean isDuplicate = false;
             
             for (GeneralRulesEntity existing : existingEntries) {
-                if (areFieldsEqual(existing.getAccountName(), newEntity.getAccountName()) &&
-                    areFieldsEqual(existing.getNameAmbit(), newEntity.getNameAmbit()) &&
-                    areFieldsEqual(existing.getEntityName(), newEntity.getEntityName()) &&
-                    areFieldsEqual(existing.getPeriod(), newEntity.getPeriod())) {
-                    isDuplicate = true;
-                    break;
+                if (areFieldsEqual(existing.getEntityName(), newEntity.getEntityName())) {
+                    if(areFieldsEqual(existing.getAccountName(), newEntity.getAccountName())){
+                        if (areFieldsEqual(existing.getPeriod(), newEntity.getPeriod())) {
+                            isDuplicate = true;
+                        }
+                    }
                 }
             }
             
@@ -75,12 +75,12 @@ public class GeneralRulesManager {
             boolean isDuplicate = false;
             
             for (GeneralRulesEntity existing : existingEntries) {
-                if (areFieldsEqual(existing.getAccountName(), newEntity.getAccountName()) &&
-                    areFieldsEqual(existing.getNameAmbit(), newEntity.getNameAmbit()) &&
-                    areFieldsEqual(existing.getEntityName(), newEntity.getEntityName()) &&
-                    areFieldsEqual(existing.getPeriod(), newEntity.getPeriod())) {
-                    isDuplicate = true;
-                    break;
+                if (areFieldsEqual(existing.getEntityName(), newEntity.getEntityName())) {
+                    if(areFieldsEqual(existing.getAccountName(), newEntity.getAccountName())){
+                        if (areFieldsEqual(existing.getPeriod(), newEntity.getPeriod())) {
+                            isDuplicate = true;
+                        }
+                    }
                 }
             }
             
@@ -103,8 +103,15 @@ public class GeneralRulesManager {
         if (field1 == null || field2 == null) {
             return false;
         }
-        return (field1).equals(field2);
+        if (field1.trim().equals(field2.trim())) {
+            return true;
+        }
+    
+        return false;
+        
+        
     }
+    
 
     private String extractYearPeriod(String period) {
         return period.length() >= 4 ? period.substring(0, 4) : period;
@@ -118,12 +125,16 @@ public class GeneralRulesManager {
         generalRulesData.forEach(generalRule -> {
             Optional<DataProgIngresos> matchingEntry = progIngresosList.stream().filter(
                 openData -> {
-                    return (
-                        extractYearPeriod(openData.getPeriodo()).equals(generalRule.getPeriod()) &&
-                        openData.getNombreAmbito().equals(generalRule.getNameAmbit()) &&
-                        openData.getNombreEntidad().equals(generalRule.getEntityName()) &&
-                        openData.getNombreCuenta().equals(generalRule.getAccountName())
-                    );
+                    if (extractYearPeriod(openData.getPeriodo()).equals(generalRule.getPeriod())) {
+                        if (openData.getNombreAmbito().equals(generalRule.getNameAmbit())) {
+                            if (openData.getNombreEntidad().equals(generalRule.getEntityName())) {
+                                if (openData.getNombreCuenta().equals(generalRule.getAccountName())) {
+                                    return true; // Todos los campos coinciden
+                                }
+                            }
+                        }
+                    }
+                    return false;
                 }
             ).findFirst();
     
