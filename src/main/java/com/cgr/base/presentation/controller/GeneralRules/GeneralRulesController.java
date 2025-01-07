@@ -20,7 +20,7 @@ public class GeneralRulesController {
     @Autowired
     private GeneralRulesManager generalRulesManager;
 
-    @GetMapping("/api/v1/auth/general-rules")
+    @GetMapping("/api/v1/auth/general-rules/data")
     public List<GeneralRulesEntity> getGeneralRules() {
         return generalRulesManager.getGeneralRulesData();
     }
