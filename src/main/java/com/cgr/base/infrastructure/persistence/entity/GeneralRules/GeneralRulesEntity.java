@@ -37,5 +37,27 @@ public class GeneralRulesEntity {
     private String generalRule2;
 
     @Column(nullable = true)
-    private String generalRule4;
+    private String generalRule3;
+
+    @Column(nullable = true)
+    private String InitialBudget_Period3;
+
+    @Column(nullable = true)
+    private String InitialBudget_Period6;
+
+    @Column(nullable = true)
+    private String generalRule4__Period6;
+
+    @Column(nullable = true)
+    private String InitialBudget_Period9;
+
+    @Column(nullable = true)
+    private String generalRule4__Period9;
+
+    @Column(nullable = true)
+    private String InitialBudget_Period12;
+
+    @Column(nullable = true)
+    private String generalRule4__Period12;
+
 }
