@@ -8,13 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cgr.base.infrastructure.persistence.entity.GeneralRules.DataProgGastos;
 import com.cgr.base.infrastructure.persistence.entity.GeneralRules.DataProgIngresos;
 import com.cgr.base.infrastructure.persistence.entity.GeneralRules.GeneralRulesEntity;
 import com.cgr.base.infrastructure.persistence.repository.GeneralRules.GeneralRulesRepository;
 import com.cgr.base.infrastructure.persistence.repository.GeneralRules.ProgGastosRepo;
 import com.cgr.base.infrastructure.persistence.repository.GeneralRules.ProgIngresosRepo;
-
 
 @Service
 public class GeneralRulesManager {
@@ -38,30 +36,32 @@ public class GeneralRulesManager {
         List<DataProgIngresos> progIngList = openDataProgIngRepository.findAll();
         for (DataProgIngresos openData : progIngList) {
             GeneralRulesEntity newEntity = new GeneralRulesEntity();
-            
+
             newEntity.setPeriod(extractYearPeriod(openData.getPeriodo()));
             newEntity.setNameAmbit(openData.getNombreAmbito());
             newEntity.setEntityName(openData.getNombreEntidad());
             newEntity.setAccountName(openData.getNombreCuenta());
-            
+
             boolean isDuplicate = false;
-            
+
             for (GeneralRulesEntity existing : existingEntries) {
                 if (areFieldsEqual(existing.getEntityName(), newEntity.getEntityName())) {
-                    if(areFieldsEqual(existing.getAccountName(), newEntity.getAccountName())){
+                    if (areFieldsEqual(existing.getAccountName(), newEntity.getAccountName())) {
                         if (areFieldsEqual(existing.getPeriod(), newEntity.getPeriod())) {
                             isDuplicate = true;
                         }
                     }
                 }
             }
-            
+
             if (!isDuplicate) {
                 newEntities.add(newEntity);
                 existingEntries.add(newEntity);
             }
         }
 
+        /*
+        
         List<DataProgGastos> progGastList = openDataProgGastRepository.findAll();
         for (DataProgGastos openData : progGastList) {
             GeneralRulesEntity newEntity = new GeneralRulesEntity();
@@ -89,6 +89,7 @@ public class GeneralRulesManager {
             }
         }
 
+         */
         if (!newEntities.isEmpty()) {
             generalRulesRepository.saveAll(newEntities);
         }
@@ -105,15 +106,45 @@ public class GeneralRulesManager {
         if (field1.trim().equals(field2.trim())) {
             return true;
         }
-    
+
         return false;
-        
-        
+
     }
-    
 
     private String extractYearPeriod(String period) {
         return period.length() >= 4 ? period.substring(0, 4) : period;
+    }
+
+    private String extractPeriodByMonth(String dateString) {
+        // Verificar que la fecha tenga el formato correcto (8 dígitos)
+        if (dateString == null || dateString.length() != 8) {
+            return dateString;
+        }
+
+        // Extraer el mes (posiciones 4 y 5 del string)
+        String month = dateString.substring(4, 6);
+
+        // Convertir a número para facilitar la comparación
+        int monthNum;
+        try {
+            monthNum = Integer.parseInt(month);
+        } catch (NumberFormatException e) {
+            return dateString;
+        }
+
+        // Determinar el período según el mes
+        if (monthNum >= 1 && monthNum <= 3) {
+            return "3";
+        } else if (monthNum >= 4 && monthNum <= 6) {
+            return "6";
+        } else if (monthNum >= 7 && monthNum <= 9) {
+            return "9";
+        } else if (monthNum >= 10 && monthNum <= 12) {
+            return "12";
+        }
+
+        // Si el mes no es válido (1-12), retornar la fecha original
+        return dateString;
     }
 
     @Transactional
@@ -123,12 +154,14 @@ public class GeneralRulesManager {
 
         generalRulesData.forEach(generalRule -> {
             Optional<DataProgIngresos> matchingEntry = progIngresosList.stream().filter(
-                openData -> {
-                    if (extractYearPeriod(openData.getPeriodo()).equals(generalRule.getPeriod())) {
-                        if (openData.getNombreAmbito().equals(generalRule.getNameAmbit())) {
-                            if (openData.getNombreEntidad().equals(generalRule.getEntityName())) {
-                                if (openData.getNombreCuenta().equals(generalRule.getAccountName())) {
-                                    return true;
+                    openData -> {
+                        if (extractYearPeriod(openData.getPeriodo()).equals(generalRule.getPeriod())) {
+                            if (openData.getNombreAmbito().equals(generalRule.getNameAmbit())) {
+                                if (openData.getNombreEntidad().equals(generalRule.getEntityName())) {
+                                    if (openData.getNombreCuenta().equals(generalRule.getAccountName())) {
+                                        return true;
+                                    }
+                                    return false;
                                 }
                                 return false;
                             }
@@ -136,10 +169,8 @@ public class GeneralRulesManager {
                         }
                         return false;
                     }
-                    return false;
-                }
             ).findFirst();
-    
+
             if (matchingEntry.isPresent()) {
 
                 DataProgIngresos matchedData = matchingEntry.get();
@@ -154,6 +185,19 @@ public class GeneralRulesManager {
                 String resultGeneralRule3 = evaluateGeneralRule3(presupuestoDefinitivoValue, presupuestoInicialValue);
                 generalRule.setGeneralRule3(resultGeneralRule3);
 
+                // Clasificación Presupuesto Inicial por Periodos
+                String period = extractPeriodByMonth(matchedData.getPeriodo());
+                switch (period) {
+                    case "3" ->
+                        generalRule.setInitialBudget_Period3(presupuestoInicialValue.toString());
+                    case "6" ->
+                        generalRule.setInitialBudget_Period6(presupuestoInicialValue.toString());
+                    case "9" ->
+                        generalRule.setInitialBudget_Period9(presupuestoInicialValue.toString());
+                    case "12" ->
+                        generalRule.setInitialBudget_Period12(presupuestoInicialValue.toString());
+                }
+
             } else {
                 generalRule.setGeneralRule1("NO DATA");
                 generalRule.setGeneralRule3("NO DATA");
@@ -163,6 +207,23 @@ public class GeneralRulesManager {
             String accountNameValue = generalRule.getAccountName();
             String resultGeneralRule2 = evaluateGeneralRule2(accountNameValue);
             generalRule.setGeneralRule2(resultGeneralRule2);
+
+            //Regla 4: Validación Presupuesto Inicial por Periodos
+            String resultRule4Period6 = evaluateGeneralRule4(
+                    generalRule.getInitialBudget_Period3(),
+                    generalRule.getInitialBudget_Period6()
+            );
+            generalRule.setGeneralRule4__Period6(resultRule4Period6);
+            String resultRule4Period9 = evaluateGeneralRule4(
+                    generalRule.getInitialBudget_Period3(),
+                    generalRule.getInitialBudget_Period9()
+            );
+            generalRule.setGeneralRule4__Period9(resultRule4Period9);
+            String resultRule4Period12 = evaluateGeneralRule4(
+                    generalRule.getInitialBudget_Period3(),
+                    generalRule.getInitialBudget_Period12()
+            );
+            generalRule.setGeneralRule4__Period12(resultRule4Period12);
 
             // Guardar Cambios
             generalRulesRepository.save(generalRule);
@@ -183,14 +244,28 @@ public class GeneralRulesManager {
     }
 
     // Regla3: Comparativo de Campos.
-    public String evaluateGeneralRule3(Double value1, Double value2) {
-        if (value1 == null || value1.isNaN()) {
-            value1 = 0.0;
+    public String evaluateGeneralRule3(Double presupuestoDefinitivo, Double presupuestoInicial) {
+        if (presupuestoDefinitivo == null || presupuestoDefinitivo.isNaN()) {
+            presupuestoDefinitivo = 0.0;
         }
-        if (value2 == null || value2.isNaN()) {
-            value2 = 0.0;
+        if (presupuestoInicial == null || presupuestoInicial.isNaN()) {
+            presupuestoInicial = 0.0;
         }
-        return (value1 == 0.0 && value2 == 0.0) ? "NO CUMPLE" : "CUMPLE";
+        return (presupuestoDefinitivo == 0.0 && presupuestoInicial == 0.0) ? "NO CUMPLE" : "CUMPLE";
+    }
+
+    public String evaluateGeneralRule4(String period3Value, String periodToCompare) {
+        if (period3Value == null || periodToCompare == null) {
+            return "NO DATA";
+        }
+
+        try {
+            return Double.parseDouble(periodToCompare) >= Double.parseDouble(period3Value)
+                    ? "CUMPLE"
+                    : "NO CUMPLE";
+        } catch (NumberFormatException e) {
+            return "NO DATA";
+        }
     }
 
     @Transactional
