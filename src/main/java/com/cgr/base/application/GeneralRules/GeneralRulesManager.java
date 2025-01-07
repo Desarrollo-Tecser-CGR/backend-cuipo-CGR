@@ -28,7 +28,6 @@ public class GeneralRulesManager {
     @Autowired
     private ProgGastosRepo openDataProgGastRepository;
 
-    
     // Transferencia de Datos
     @Transactional
     public void transferDataGeneralRules() {
@@ -129,10 +128,13 @@ public class GeneralRulesManager {
                         if (openData.getNombreAmbito().equals(generalRule.getNameAmbit())) {
                             if (openData.getNombreEntidad().equals(generalRule.getEntityName())) {
                                 if (openData.getNombreCuenta().equals(generalRule.getAccountName())) {
-                                    return true; // Todos los campos coinciden
+                                    return true;
                                 }
+                                return false;
                             }
+                            return false;
                         }
+                        return false;
                     }
                     return false;
                 }
@@ -147,14 +149,14 @@ public class GeneralRulesManager {
                 String resultGeneralRule1 = evaluateGeneralRule1(presupuestoDefinitivoValue);
                 generalRule.setGeneralRule1(resultGeneralRule1);
 
-                // Regla 4: Comparativo de Campos
+                // Regla 3: Comparativo de Campos
                 Double presupuestoInicialValue = matchedData.getPresupuestoInicial();
-                String resultGeneralRule4 = evaluateGeneralRule4(presupuestoDefinitivoValue, presupuestoInicialValue);
-                generalRule.setGeneralRule4(resultGeneralRule4);
+                String resultGeneralRule3 = evaluateGeneralRule3(presupuestoDefinitivoValue, presupuestoInicialValue);
+                generalRule.setGeneralRule3(resultGeneralRule3);
 
             } else {
                 generalRule.setGeneralRule1("NO DATA");
-                generalRule.setGeneralRule4("NO DATA");
+                generalRule.setGeneralRule3("NO DATA");
             }
 
             // Regla2: Entidad en Liquidacion.
@@ -180,8 +182,8 @@ public class GeneralRulesManager {
         return value != null && value.toLowerCase().contains("liquidacion") ? "NO CUMPLE" : "CUMPLE";
     }
 
-    // Regla4: Comparativo de Campos.
-    public String evaluateGeneralRule4(Double value1, Double value2) {
+    // Regla3: Comparativo de Campos.
+    public String evaluateGeneralRule3(Double value1, Double value2) {
         if (value1 == null || value1.isNaN()) {
             value1 = 0.0;
         }
