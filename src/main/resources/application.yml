@@ -20,8 +20,7 @@ spring:
             enable: true
 
   application:
-    name: testactivedirectory    
-
+    name: baseapp
   profiles:
     active: dev  # Cambia esto según el entorno: dev, qa, prod
 
@@ -35,8 +34,7 @@ spring:
     hibernate:
       ddl-auto: update
     database-platform: org.hibernate.dialect.SQLServer2012Dialect
-
-
+    show-sql: false
   output:
     ansi:
       enabled: always
