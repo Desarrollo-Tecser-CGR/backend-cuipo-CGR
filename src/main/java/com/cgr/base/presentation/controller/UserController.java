@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cgr.base.application.user.dto.UserDto;
 import com.cgr.base.application.user.dto.UserWithRolesRequestDto;
 import com.cgr.base.application.user.usecase.IUserSynchronizerUseCase;
 import com.cgr.base.application.user.usecase.IUserUseCase;
@@ -42,7 +43,16 @@ public class UserController extends AbstractController {
     @GetMapping("/synchronize")
     public ResponseEntity<?> synchronizeAD() {
         return requestResponse(this.synchronizerUsers.synchronizeUsers(),
-                "sistema sincronizado exitosamente con el Directorio Activo", HttpStatus.OK, true);
+                "sistema sincronizado exitosamente con el Directorio Activo", HttpStatus.OK, true);         
+    }
+
+    @PostMapping ("/create")
+    public ResponseEntity<?> createUser(@Valid @RequestBody UserDto userRequestDto, 
+            BindingResult result) {
+                if (result.hasErrors()) {
+        return requestResponse(result, "Error de validación en los datos proporcionados", HttpStatus.BAD_REQUEST, false);
+            }
+        return requestResponse(result,() -> this.userService.createUser(userRequestDto), "Usuario creado exitosamente", HttpStatus.CREATED, true);
     }
 
 }
