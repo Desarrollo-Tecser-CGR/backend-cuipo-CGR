@@ -6,11 +6,13 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cgr.base.application.user.dto.UserDto;
 import com.cgr.base.application.user.dto.UserWithRolesRequestDto;
 import com.cgr.base.application.user.dto.UserWithRolesResponseDto;
 import com.cgr.base.application.user.usecase.IUserUseCase;
 import com.cgr.base.domain.repository.IUserRoleRepository;
 import com.cgr.base.infrastructure.persistence.entity.UserEntity;
+import com.cgr.base.infrastructure.utilities.DtoMapper;
 
 import lombok.AllArgsConstructor;
 
@@ -19,6 +21,8 @@ import lombok.AllArgsConstructor;
 public class UserServiceImpl implements IUserUseCase {
 
     private final IUserRoleRepository userRoleRepository;
+
+    private final DtoMapper dtoMapper;
 
     @Transactional(readOnly = true)
     @Override
@@ -57,6 +61,20 @@ public class UserServiceImpl implements IUserUseCase {
         userResponsive.setCargo(userEntity.getCargo());
         userResponsive.addRole(userEntity.getRoles());
         return userResponsive;
+    }
+
+    @Transactional
+    @Override
+    public UserDto createUser(UserDto userRequestDto){
+                
+        UserDto user = this.userRoleRepository.createUser(userRequestDto);
+
+        if(user!=null) {
+            return user;
+        }
+        return null; 
+            
+        
     }
 
 }
