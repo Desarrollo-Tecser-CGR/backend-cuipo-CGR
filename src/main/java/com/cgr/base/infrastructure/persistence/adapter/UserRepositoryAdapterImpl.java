@@ -58,6 +58,8 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
             Optional<UserEntity> user = this.userRepositoryJpa.findBySAMAccountName(userRequestDto.getSAMAccountName());
             if (!user.isPresent()) {
                 UserEntity saveUser = this.dtoMapper.convertToDto(userRequestDto, UserEntity.class);
+                List<RoleEntity> roles = this.roleRepositoryJpa.findByIdIn(userRequestDto.getRoleIds());
+                saveUser.setRoles(roles);
                 UserEntity userSave = this.userRepositoryJpa.save(saveUser);
                 return this.dtoMapper.convertToDto(userSave, UserDto.class);
             }
@@ -68,5 +70,19 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
         return null;
 
     }
+
+    @Transactional
+    @Override
+    public UserDto updateUser(Long id, UserDto userDto) {
+        UserEntity userEntity = this.userRepositoryJpa.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("El usuario con id=" + id + " no existe"));
+            userEntity.setFullName(userDto.getFirstName() + "" + userDto.getLastName());
+            userEntity.setEmail(userDto.getEmail());
+            userEntity.setSAMAccountName(userDto.getSAMAccountName());
+        UserEntity updatedUser = this.userRepositoryJpa.save(userEntity);
+
+        return this.dtoMapper.convertToDto(updatedUser, UserDto.class);
+    }
+
 
 }
