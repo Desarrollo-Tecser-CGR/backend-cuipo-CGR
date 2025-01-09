@@ -47,7 +47,6 @@ public class AuthController {
 
     @PostMapping("/tokenEmail")
     public ResponseEntity<?> tokenEmail(@RequestBody UserDto request, final HttpServletRequest servletRequest) throws JsonProcessingException {
-
         return ResponseEntity.ok(authUseCase.emailLogin(request));
 
     }

@@ -143,7 +143,7 @@ public class AuthService implements IAuthUseCase {
         UserEntity userLogin = this.userRepositoryFull.findBySAMAccountNameWithRoles(userRequest.getUser())
                 .orElseThrow(() -> new ResourceNotFoundException("El usuario " + userRequest.getUser() + " no existe"));
 
-
+        
         try {
             
             AuthResponseDto userToken = new AuthResponseDto ();
