@@ -2,10 +2,8 @@ package com.cgr.base.infrastructure.persistence.adapter;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.cgr.base.application.user.dto.UserDto;
 import com.cgr.base.application.user.dto.UserWithRolesRequestDto;
 import com.cgr.base.domain.repository.IUserRoleRepository;
@@ -15,6 +13,7 @@ import com.cgr.base.infrastructure.persistence.entity.UserEntity;
 import com.cgr.base.infrastructure.persistence.repository.role.IRoleRepositoryJpa;
 import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.utilities.DtoMapper;
+
 
 @Component
 public class UserRepositoryAdapterImpl implements IUserRoleRepository {
@@ -30,6 +29,11 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
         this.userRepositoryJpa = userRepositoryJpa;
         this.roleRepositoryJpa = roleRepositoryJpa;
         this.dtoMapper = dtoMapper;
+
+    public UserRepositoryAdapterImpl(IUserRepositoryJpa userRepositoryJpa, IRoleRepositoryJpa roleRepositoryJpa) {
+        this.userRepositoryJpa = userRepositoryJpa;
+        this.roleRepositoryJpa = roleRepositoryJpa;
+
     }
 
     @Transactional(readOnly = true)
@@ -83,6 +87,5 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
 
         return this.dtoMapper.convertToDto(updatedUser, UserDto.class);
     }
-
 
 }

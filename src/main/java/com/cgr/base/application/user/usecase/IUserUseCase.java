@@ -16,4 +16,5 @@ public interface IUserUseCase {
 
     public abstract UserDto updateUser(Long id, UserDto userDto);
 
+
 }
