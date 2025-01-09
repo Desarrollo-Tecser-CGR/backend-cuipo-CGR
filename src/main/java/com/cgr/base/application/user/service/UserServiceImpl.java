@@ -77,4 +77,10 @@ public class UserServiceImpl implements IUserUseCase {
         
     }
 
+    @Override
+    public UserDto updateUser(Long id, UserDto userDto) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updateUser'");
+    }
+
 }

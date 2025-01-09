@@ -17,6 +17,10 @@ import lombok.NoArgsConstructor;
 public class UserDto {
     @JsonProperty("sAMAccountName")
     private String sAMAccountName;
+
+    private String  FirstName;
+    private String  LastName;
+
     @JsonIgnore
     private String password;
     private String fullName;
