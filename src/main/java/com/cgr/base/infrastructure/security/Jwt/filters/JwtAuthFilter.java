@@ -63,6 +63,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         System.out.println("llegué aqui shouldNotFilter");
         System.out.println("Esto se rompe en :===" + request.getRequestURI());
+        System.out.println("Esto se ronpe en :===" + request.getRequestURI());
         System.out.println("headers:" + request);
         System.out.println("headers:" + request.getHeaders(HttpHeaders.AUTHORIZATION).toString());
         String requestUri = request.getRequestURI();
