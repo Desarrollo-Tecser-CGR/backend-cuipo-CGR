@@ -1,4 +1,4 @@
-package com.cgr.base.infrastructure.persistence.entity;
+package com.cgr.base.infrastructure.persistence.entity.contracts;
 
 import java.util.Date;
 import java.util.List;
