@@ -16,7 +16,6 @@ import com.cgr.base.infrastructure.persistence.repository.role.IRoleRepositoryJp
 import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.utilities.DtoMapper;
 
-
 @Component
 public class UserRepositoryAdapterImpl implements IUserRoleRepository {
 
@@ -30,7 +29,8 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
             DtoMapper dtoMapper) {
         this.userRepositoryJpa = userRepositoryJpa;
         this.roleRepositoryJpa = roleRepositoryJpa;
-        this.dtoMapper = dtoMapper;}
+        this.dtoMapper = dtoMapper;
+    }
 
     @Transactional(readOnly = true)
     @Override
@@ -56,6 +56,7 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
     public UserDto createUser(UserDto userRequestDto) {
         try {
             Optional<UserEntity> user = this.userRepositoryJpa.findBySAMAccountName(userRequestDto.getSAMAccountName());
+            System.out.print(userRequestDto);
             if (!user.isPresent()) {
                 UserEntity saveUser = this.dtoMapper.convertToDto(userRequestDto, UserEntity.class);
                 List<RoleEntity> roles = this.roleRepositoryJpa.findByIdIn(userRequestDto.getRoleIds());
@@ -76,12 +77,17 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
     public UserDto updateUser(Long id, UserDto userDto) {
         UserEntity userEntity = this.userRepositoryJpa.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("El usuario con id=" + id + " no existe"));
-            userEntity.setFullName(userDto.getFirstName() + "" + userDto.getLastName());
-            userEntity.setEmail(userDto.getEmail());
-            userEntity.setSAMAccountName(userDto.getSAMAccountName());
-        UserEntity updatedUser = this.userRepositoryJpa.save(userEntity);
+            if (userEntity != null ){
+                userEntity = this.dtoMapper.convertToDto(userDto, UserEntity.class);
+                
+                List<RoleEntity> roles = this.roleRepositoryJpa.findByIdIn(userDto.getRoleIds());
+                userEntity.setRoles(roles);
+                
+                UserEntity updatedUser = this.userRepositoryJpa.save(userEntity);
 
-        return this.dtoMapper.convertToDto(updatedUser, UserDto.class);
+                return this.dtoMapper.convertToDto(updatedUser, UserDto.class);
+            }
+       return null;
+        
     }
-
 }

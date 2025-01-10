@@ -12,8 +12,6 @@ import com.cgr.base.application.user.dto.UserWithRolesResponseDto;
 import com.cgr.base.application.user.usecase.IUserUseCase;
 import com.cgr.base.domain.repository.IUserRoleRepository;
 import com.cgr.base.infrastructure.persistence.entity.UserEntity;
-import com.cgr.base.infrastructure.utilities.DtoMapper;
-
 
 import lombok.AllArgsConstructor;
 
@@ -22,8 +20,6 @@ import lombok.AllArgsConstructor;
 public class UserServiceImpl implements IUserUseCase {
 
     private final IUserRoleRepository userRoleRepository;
-
-    private final DtoMapper dtoMapper;
 
     @Transactional(readOnly = true)
     @Override
@@ -39,6 +35,8 @@ public class UserServiceImpl implements IUserUseCase {
             userResponsive.setEnabled(user.getEnabled());
             userResponsive.setDateModify(user.getDateModify());
             userResponsive.setCargo(user.getCargo());
+            userResponsive.setUserType(user.getUserType());
+
 
             userResponsive.addRole(user.getRoles());
 
@@ -80,7 +78,11 @@ public class UserServiceImpl implements IUserUseCase {
 
     @Override
     public UserDto updateUser(Long id, UserDto userDto) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateUser'");
+        UserDto user = this.userRoleRepository.updateUser(id, userDto);
+
+        if(user!=null) {
+            return user;
+        }
+        return null; 
     }
 }
