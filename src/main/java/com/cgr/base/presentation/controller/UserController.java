@@ -64,6 +64,7 @@ public class UserController extends AbstractController {
         return requestResponse(result, "Error de validación en los datos proporcionados", HttpStatus.BAD_REQUEST, false);
             }
         return requestResponse(result,() -> this.userService.updateUser(id, userDto), "Usuario actualizado exitosamente", HttpStatus.OK, true);
+                
     }
 
 }

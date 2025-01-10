@@ -16,6 +16,7 @@ import com.cgr.base.infrastructure.persistence.repository.role.IRoleRepositoryJp
 import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.utilities.DtoMapper;
 
+
 @Component
 public class UserRepositoryAdapterImpl implements IUserRoleRepository {
 
@@ -29,8 +30,7 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
             DtoMapper dtoMapper) {
         this.userRepositoryJpa = userRepositoryJpa;
         this.roleRepositoryJpa = roleRepositoryJpa;
-        this.dtoMapper = dtoMapper;
-    }
+        this.dtoMapper = dtoMapper;}
 
     @Transactional(readOnly = true)
     @Override
@@ -83,6 +83,5 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
 
         return this.dtoMapper.convertToDto(updatedUser, UserDto.class);
     }
-
 
 }

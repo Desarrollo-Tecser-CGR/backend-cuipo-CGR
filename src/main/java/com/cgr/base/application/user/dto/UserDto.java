@@ -33,4 +33,5 @@ public class UserDto {
     private String cargo;
     private List<Long> roleIds;
 
+
 }
