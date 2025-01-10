@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.cgr.base.application.auth.dto.AuthRequestDto;
 import com.cgr.base.application.auth.dto.UserDto;
 import com.cgr.base.application.auth.usecase.IAuthUseCase;
@@ -50,6 +49,5 @@ public class AuthController {
         return ResponseEntity.ok(authUseCase.emailLogin(request));
 
     }
-
 
 }
