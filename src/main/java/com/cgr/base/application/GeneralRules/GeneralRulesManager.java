@@ -188,6 +188,7 @@ public class GeneralRulesManager {
 
                 // Clasificación Presupuesto Inicial por Periodos
                 String period = extractPeriodByMonth(matchedData.getPeriodo());
+                BigDecimal formattedValue = new BigDecimal(presupuestoInicialValue.toString());
                 switch (period) {
                     case "3" ->
                         generalRule.setInitialBudget_Period3(new BigDecimal(presupuestoInicialValue).toPlainString());
