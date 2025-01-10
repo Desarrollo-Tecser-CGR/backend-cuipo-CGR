@@ -39,6 +39,6 @@ public class UserWithRolesResponseDto {
             role2.setEnable(role.isEnable());
             roles.add(role2);
         });
-
     }
+    private String userType;
 }
