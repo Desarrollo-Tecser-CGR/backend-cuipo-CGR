@@ -16,6 +16,7 @@ import com.cgr.base.infrastructure.persistence.repository.role.IRoleRepositoryJp
 import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.utilities.DtoMapper;
 
+
 @Component
 public class UserRepositoryAdapterImpl implements IUserRoleRepository {
 
@@ -29,8 +30,7 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
             DtoMapper dtoMapper) {
         this.userRepositoryJpa = userRepositoryJpa;
         this.roleRepositoryJpa = roleRepositoryJpa;
-        this.dtoMapper = dtoMapper;
-    }
+        this.dtoMapper = dtoMapper;}
 
     @Transactional(readOnly = true)
     @Override
@@ -69,6 +69,19 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
 
         return null;
 
+    }
+
+    @Transactional
+    @Override
+    public UserDto updateUser(Long id, UserDto userDto) {
+        UserEntity userEntity = this.userRepositoryJpa.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("El usuario con id=" + id + " no existe"));
+            userEntity.setFullName(userDto.getFirstName() + "" + userDto.getLastName());
+            userEntity.setEmail(userDto.getEmail());
+            userEntity.setSAMAccountName(userDto.getSAMAccountName());
+        UserEntity updatedUser = this.userRepositoryJpa.save(userEntity);
+
+        return this.dtoMapper.convertToDto(updatedUser, UserDto.class);
     }
 
 }

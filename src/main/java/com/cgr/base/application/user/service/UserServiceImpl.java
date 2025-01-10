@@ -14,6 +14,7 @@ import com.cgr.base.domain.repository.IUserRoleRepository;
 import com.cgr.base.infrastructure.persistence.entity.UserEntity;
 import com.cgr.base.infrastructure.utilities.DtoMapper;
 
+
 import lombok.AllArgsConstructor;
 
 @Service
@@ -77,4 +78,9 @@ public class UserServiceImpl implements IUserUseCase {
         
     }
 
+    @Override
+    public UserDto updateUser(Long id, UserDto userDto) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updateUser'");
+    }
 }
