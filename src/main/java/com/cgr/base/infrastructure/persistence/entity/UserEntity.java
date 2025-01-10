@@ -48,6 +48,7 @@ public class UserEntity {
 
     private String cargo;
 
+    @Column(name = "user_type")
     private String userType;
 
     @ManyToMany

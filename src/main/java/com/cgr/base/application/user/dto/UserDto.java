@@ -18,20 +18,17 @@ public class UserDto {
     @JsonProperty("sAMAccountName")
     private String sAMAccountName;
 
-    private String  FirstName;
-    private String  LastName;
-
     @JsonIgnore
     private String password;
     private String fullName;
     private String email;
     private String phone;
-
     private Boolean enabled;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "America/Bogota")
     private Date dateModify;
     private String cargo;
     private List<Long> roleIds;
+    private String userType;
 
 
 }
