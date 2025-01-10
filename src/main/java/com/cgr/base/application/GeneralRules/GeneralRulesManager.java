@@ -190,14 +190,14 @@ public class GeneralRulesManager {
                 String period = extractPeriodByMonth(matchedData.getPeriodo());
                 BigDecimal formattedValue = new BigDecimal(presupuestoInicialValue.toString());
                 switch (period) {
-                    case "3" -> 
-                        generalRule.setInitialBudget_Period3(formattedValue.toPlainString());
-                    case "6" -> 
-                        generalRule.setInitialBudget_Period6(formattedValue.toPlainString());
-                    case "9" -> 
-                        generalRule.setInitialBudget_Period9(formattedValue.toPlainString());
-                    case "12" -> 
-                        generalRule.setInitialBudget_Period12(formattedValue.toPlainString());
+                    case "3" ->
+                        generalRule.setInitialBudget_Period3(new BigDecimal(presupuestoInicialValue).toPlainString());
+                    case "6" ->
+                        generalRule.setInitialBudget_Period6(new BigDecimal(presupuestoInicialValue).toPlainString());
+                    case "9" ->
+                        generalRule.setInitialBudget_Period9(new BigDecimal(presupuestoInicialValue).toPlainString());
+                    case "12" ->
+                        generalRule.setInitialBudget_Period12(new BigDecimal(presupuestoInicialValue).toPlainString());
                 }
 
             } else {
