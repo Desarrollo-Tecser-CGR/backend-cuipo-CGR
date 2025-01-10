@@ -14,7 +14,6 @@ import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.application.auth.dto.UserDto;
 import com.cgr.base.application.auth.mapper.AuthMapper;
 import com.cgr.base.application.auth.usecase.IAuthUseCase;
-import com.cgr.base.application.logs.usecase.ILogUseCase;
 import com.cgr.base.domain.models.UserModel;
 import com.cgr.base.domain.repository.IActiveDirectoryUserRepository;
 import com.cgr.base.domain.repository.IUserRepository;
@@ -41,8 +40,6 @@ public class AuthService implements IAuthUseCase {
     private final IActiveDirectoryUserRepository activeDirectoryUserRepository;
 
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
-
-    private final ILogUseCase logService;
 
     private final EmailService emailService;
 
@@ -117,7 +114,6 @@ public class AuthService implements IAuthUseCase {
                 userRequestDto.setIsEnable(true);
 
                 userRequest.setEmail(user.getEmail());
-                this.logService.createLog(userRequest);
 
                 response.put("user", userRequestDto);
                 response.put("message", "User authenticated successfully");
@@ -143,7 +139,7 @@ public class AuthService implements IAuthUseCase {
         UserEntity userLogin = this.userRepositoryFull.findBySAMAccountNameWithRoles(userRequest.getUser())
                 .orElseThrow(() -> new ResourceNotFoundException("El usuario " + userRequest.getUser() + " no existe"));
 
-
+        
         try {
             
             AuthResponseDto userToken = new AuthResponseDto ();
