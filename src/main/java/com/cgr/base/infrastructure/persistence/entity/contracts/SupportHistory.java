@@ -1,4 +1,4 @@
-package com.cgr.base.infrastructure.persistence.entity;
+package com.cgr.base.infrastructure.persistence.entity.contracts;
 
 import java.util.Date;
 
@@ -16,31 +16,28 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "ContractIndicators")
-public class ContractIndicator {
+@Table(name = "SupportHistory")
+public class SupportHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int indicatorId;
+    private int historyId;
 
     @ManyToOne
-    @JoinColumn(name = "contractId")
-    private Contract contract;
+    @JoinColumn(name = "supportId")
+    private Support support;
 
     @Column(nullable = false, length = 65533)
-    private String indicatorDescription;
-
-    @Column(nullable = false)
-    private double definedGoal;
-
-    @Column(nullable = false)
-    private double currentValue;
+    private String performedAction;
 
     @Temporal(TemporalType.DATE)
-    private Date evaluationDate;
+    private Date actionDate;
 
-    @Column(nullable = false, length = 30)
-    private String indicatorStatus;
+    @Column(nullable = false, length = 250)
+    private String responsibleUser;
+
+    @Column(nullable = false, length = 65533)
+    private String comments;
 
     // Getters and Setters
 }
