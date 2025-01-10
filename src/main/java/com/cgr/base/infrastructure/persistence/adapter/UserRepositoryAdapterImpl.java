@@ -58,6 +58,8 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
             Optional<UserEntity> user = this.userRepositoryJpa.findBySAMAccountName(userRequestDto.getSAMAccountName());
             if (!user.isPresent()) {
                 UserEntity saveUser = this.dtoMapper.convertToDto(userRequestDto, UserEntity.class);
+                List<RoleEntity> roles = this.roleRepositoryJpa.findByIdIn(userRequestDto.getRoleIds());
+                saveUser.setRoles(roles);
                 UserEntity userSave = this.userRepositoryJpa.save(saveUser);
                 return this.dtoMapper.convertToDto(userSave, UserDto.class);
             }
