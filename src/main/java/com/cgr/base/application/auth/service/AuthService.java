@@ -12,6 +12,8 @@ import com.cgr.base.application.Email.EmailService;
 import com.cgr.base.application.auth.dto.AuthRequestDto;
 import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.application.auth.dto.UserDto;
+import com.cgr.base.application.auth.dto.AuthRequestDto;
+import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.application.auth.mapper.AuthMapper;
 import com.cgr.base.application.auth.usecase.IAuthUseCase;
 import com.cgr.base.domain.models.UserModel;
@@ -24,6 +26,11 @@ import com.cgr.base.infrastructure.persistence.entity.UserEntity;
 import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
 import com.cgr.base.infrastructure.utilities.EmailUtility;
+import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
+import com.cgr.base.infrastructure.persistence.entity.UserEntity;
+import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
+import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
+import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -159,6 +166,5 @@ public class AuthService implements IAuthUseCase {
         response.put("message", "User not authenticated");
         return response;
     }
-
 
 }

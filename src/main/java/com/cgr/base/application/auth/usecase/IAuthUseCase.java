@@ -16,6 +16,7 @@ public interface IAuthUseCase {
     // String signOut(String jwt);
     Map<String, Object> emailLogin (UserDto userRequest) throws JsonProcessingException;
 
+
     // Map<String, Object> checkStatusUser(String jwt) throws JsonProcessingException ;
     
 }
