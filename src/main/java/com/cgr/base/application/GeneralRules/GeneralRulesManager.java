@@ -1,5 +1,6 @@
 package com.cgr.base.application.GeneralRules;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -189,13 +190,13 @@ public class GeneralRulesManager {
                 String period = extractPeriodByMonth(matchedData.getPeriodo());
                 switch (period) {
                     case "3" ->
-                        generalRule.setInitialBudget_Period3(presupuestoInicialValue.toString());
+                        generalRule.setInitialBudget_Period3(new BigDecimal(presupuestoInicialValue).toPlainString());
                     case "6" ->
-                        generalRule.setInitialBudget_Period6(presupuestoInicialValue.toString());
+                        generalRule.setInitialBudget_Period6(new BigDecimal(presupuestoInicialValue).toPlainString());
                     case "9" ->
-                        generalRule.setInitialBudget_Period9(presupuestoInicialValue.toString());
+                        generalRule.setInitialBudget_Period9(new BigDecimal(presupuestoInicialValue).toPlainString());
                     case "12" ->
-                        generalRule.setInitialBudget_Period12(presupuestoInicialValue.toString());
+                        generalRule.setInitialBudget_Period12(new BigDecimal(presupuestoInicialValue).toPlainString());
                 }
 
             } else {
