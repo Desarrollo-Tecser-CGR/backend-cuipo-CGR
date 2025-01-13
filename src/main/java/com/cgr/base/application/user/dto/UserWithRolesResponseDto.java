@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.cgr.base.application.role.dto.RoleRequestDto;
 import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
 
@@ -24,6 +25,7 @@ public class UserWithRolesResponseDto {
 
     private boolean enabled;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "America/Bogota")
     private Date dateModify;
 
     private String cargo;

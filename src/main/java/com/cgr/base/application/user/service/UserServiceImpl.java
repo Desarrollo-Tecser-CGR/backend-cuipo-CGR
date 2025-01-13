@@ -3,14 +3,21 @@ package com.cgr.base.application.user.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
 
+import com.cgr.base.application.user.dto.UserFilterRequestDto;
 import com.cgr.base.application.user.dto.UserWithRolesRequestDto;
 import com.cgr.base.application.user.dto.UserWithRolesResponseDto;
+import com.cgr.base.application.user.mapper.UserMapper;
 import com.cgr.base.application.user.usecase.IUserUseCase;
 import com.cgr.base.domain.repository.IUserRoleRepository;
 import com.cgr.base.infrastructure.persistence.entity.UserEntity;
+import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
+import com.cgr.base.infrastructure.persistence.specification.filter.UserSpecification;
+import com.cgr.base.infrastructure.utilities.dto.PaginationResponse;
 
 import lombok.AllArgsConstructor;
 
@@ -20,24 +27,14 @@ public class UserServiceImpl implements IUserUseCase {
 
     private final IUserRoleRepository userRoleRepository;
 
+    private final IUserRepositoryJpa userRepository;
+
     @Transactional(readOnly = true)
     @Override
     public List<UserWithRolesResponseDto> findAll() {
         List<UserWithRolesResponseDto> users = new ArrayList<>();
         this.userRoleRepository.findAll().forEach(user -> {
-            var userResponsive = new UserWithRolesResponseDto();
-            userResponsive.setIdUser(user.getId());
-            userResponsive.setUserName(user.getSAMAccountName());
-            userResponsive.setFullName(user.getFullName());
-            userResponsive.setEmail(user.getEmail());
-            userResponsive.setPhone(user.getPhone());
-            userResponsive.setEnabled(user.getEnabled());
-            userResponsive.setDateModify(user.getDateModify());
-            userResponsive.setCargo(user.getCargo());
-
-            userResponsive.addRole(user.getRoles());
-
-            users.add(userResponsive);
+            users.add(UserMapper.INSTANCE.toUserWithRolesResponseDto(user));
         });
         return users;
     }
@@ -57,6 +54,25 @@ public class UserServiceImpl implements IUserUseCase {
         userResponsive.setCargo(userEntity.getCargo());
         userResponsive.addRole(userEntity.getRoles());
         return userResponsive;
+    }
+
+    @Override
+    public PaginationResponse<UserWithRolesResponseDto> findWithFilters(UserFilterRequestDto filtro,
+            Pageable pageable) {
+        Page<UserEntity> paginaUsuarios = userRepository.findAll(UserSpecification.conFiltros(filtro), pageable);
+        List<UserWithRolesResponseDto> usersResponseDto = new ArrayList<>();
+
+        paginaUsuarios.getContent().forEach(user -> {
+            usersResponseDto.add(UserMapper.INSTANCE.toUserWithRolesResponseDto(user));
+        });
+
+        return new PaginationResponse<>(
+                usersResponseDto,
+                paginaUsuarios.getNumber(),
+                paginaUsuarios.getTotalPages(),
+                paginaUsuarios.getTotalElements(),
+                paginaUsuarios.getSize(),
+                paginaUsuarios.isLast());
     }
 
 }
