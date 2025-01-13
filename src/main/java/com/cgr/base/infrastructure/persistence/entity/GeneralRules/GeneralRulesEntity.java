@@ -66,4 +66,7 @@ public class GeneralRulesEntity {
     @Column(nullable = true)
     private String incomeDifference;
 
+    @Column(nullable = true)
+    private String generalRule8;
+
 }

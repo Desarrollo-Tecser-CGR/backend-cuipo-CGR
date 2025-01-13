@@ -63,22 +63,20 @@ public class GeneralRulesManager {
             }
         }
 
-        
-        
         List<DataProgGastos> progGastList = openDataProgGastRepository.findAll();
         for (DataProgGastos openData : progGastList) {
             GeneralRulesEntity newEntity = new GeneralRulesEntity();
-            
+
             newEntity.setPeriod(extractYearPeriod(openData.getPeriodo()));
             newEntity.setNameAmbit(openData.getNombreAmbito());
             newEntity.setEntityName(openData.getNombreEntidad());
             newEntity.setAccountName(openData.getNombreCuenta());
-            
+
             boolean isDuplicate = false;
-            
+
             for (GeneralRulesEntity existing : existingEntries) {
                 if (areFieldsEqual(existing.getEntityName(), newEntity.getEntityName())) {
-                    if(areFieldsEqual(existing.getAccountName(), newEntity.getAccountName())){
+                    if (areFieldsEqual(existing.getAccountName(), newEntity.getAccountName())) {
                         if (areFieldsEqual(existing.getPeriod(), newEntity.getPeriod())) {
                             isDuplicate = true;
                             break;
@@ -86,16 +84,13 @@ public class GeneralRulesManager {
                     }
                 }
             }
-            
+
             if (!isDuplicate) {
-                if ("2".equals(openData.getCuenta())) {
-                    newEntities.add(newEntity);
-                    existingEntries.add(newEntity);
-                }
+                newEntities.add(newEntity);
+                existingEntries.add(newEntity);
             }
         }
 
-         
         if (!newEntities.isEmpty()) {
             generalRulesRepository.saveAll(newEntities);
         }
@@ -160,20 +155,20 @@ public class GeneralRulesManager {
         List<DataProgGastos> progGastList = openDataProgGastRepository.findAll();
 
         generalRulesData.forEach(generalRule -> {
+
             Optional<DataProgIngresos> matchingEntry = progIngresosList.stream().filter(
-                openData -> {
-                    if (extractYearPeriod(openData.getPeriodo()).equals(generalRule.getPeriod())) {
-                        if (openData.getNombreAmbito().equals(generalRule.getNameAmbit())) {
-                            if (openData.getNombreEntidad().equals(generalRule.getEntityName())) {
-                                if (openData.getNombreCuenta().equals(generalRule.getAccountName())) {
-                                    return true;
+                    openData -> {
+                        if (extractYearPeriod(openData.getPeriodo()).equals(generalRule.getPeriod())) {
+                            if (openData.getNombreAmbito().equals(generalRule.getNameAmbit())) {
+                                if (openData.getNombreEntidad().equals(generalRule.getEntityName())) {
+                                    if (openData.getNombreCuenta().equals(generalRule.getAccountName())) {
+                                        return true;
+                                    }
                                 }
                             }
                         }
+                        return false;
                     }
-                    return false;
-                }
-                
             ).findFirst();
 
             if (matchingEntry.isPresent()) {
@@ -202,9 +197,8 @@ public class GeneralRulesManager {
                     case "12" ->
                         generalRule.setInitialBudget_Period12(new BigDecimal(presupuestoInicialValue).toPlainString());
                 }
-
                 //Regla 5: Comparativo Ingresos.
-                if ("1".equals(matchedData.getCuenta())) {
+                if (("1".equals(matchedData.getCuenta())) && ("2".equals(matchedData.getCuenta()))) {
                     Optional<DataProgGastos> matchingGastEntry = progGastList.stream().filter(
                             openGast -> {
                                 if (extractYearPeriod(openGast.getPeriodo()).equals(generalRule.getPeriod())) {
@@ -220,18 +214,18 @@ public class GeneralRulesManager {
                                 return false;
                             }
                     ).findFirst();
-    
+
                     if (matchingGastEntry.isPresent()) {
                         DataProgGastos matchedGastData = matchingGastEntry.get();
                         BigDecimal difference = calculateDifference(presupuestoInicialValue, matchedGastData.getApropiacionInicial());
-                        String resultGeneralRule5 = evaluateRule5(presupuestoInicialValue, matchedGastData.getApropiacionInicial());
+                        String resultGeneralRule5 = evaluateGeneralRule5(presupuestoInicialValue, matchedGastData.getApropiacionInicial());
                         generalRule.setGeneralRule5(resultGeneralRule5);
                         generalRule.setIncomeDifference(difference.toPlainString());
                     } else {
                         generalRule.setGeneralRule5("NO DATA");
                         generalRule.setIncomeDifference(null);
                     }
-                } else{
+                } else {
                     generalRule.setGeneralRule5("NO DATA");
                     generalRule.setIncomeDifference(null);
                 }
@@ -265,9 +259,37 @@ public class GeneralRulesManager {
             );
             generalRule.setGeneralRule4__Period12(resultRule4Period12);
 
+            Optional<DataProgGastos> matchingGastEntry = progGastList.stream().filter(
+                    openGast -> {
+                        if (extractYearPeriod(openGast.getPeriodo()).equals(generalRule.getPeriod())) {
+                            if (openGast.getNombreAmbito().equals(generalRule.getNameAmbit())) {
+                                if (openGast.getNombreEntidad().equals(generalRule.getEntityName())) {
+                                    if (openGast.getNombreCuenta().equals(generalRule.getAccountName())) {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                        return false;
+                    }
+            ).findFirst();
+            if (matchingGastEntry.isPresent()) {
+
+                DataProgGastos matchedData = matchingGastEntry.get();
+                String codigoAmbito = matchedData.getCodigoAmbito();
+                String codigoSeccionPresupuestal = matchedData.getCodigoSeccionPresupuestal();
+                String resultGeneralRule8 = evaluateGeneralRule8(codigoAmbito, codigoSeccionPresupuestal);
+                
+                generalRule.setGeneralRule8(resultGeneralRule8);
+            } else {
+                generalRule.setGeneralRule8("NO DATA");
+
+            }
+
             // Guardar Cambios
             generalRulesRepository.save(generalRule);
         });
+
     }
 
     // Regla1: Validacion presupuesto definitivo.
@@ -293,7 +315,7 @@ public class GeneralRulesManager {
         }
         return (presupuestoDefinitivo == 0.0 && presupuestoInicial == 0.0) ? "NO CUMPLE" : "CUMPLE";
     }
-    
+
     //Regla 4: Validación Presupuesto Inicial por Periodos
     public String evaluateGeneralRule4(String period3Value, String periodToCompare) {
         if (period3Value == null || periodToCompare == null) {
@@ -310,18 +332,48 @@ public class GeneralRulesManager {
     }
 
     //Regla 5: Comparativo Ingresos.
-    public String evaluateRule5(Double presupuestoInicialValue, String apropiacionInicial) {
+    public String evaluateGeneralRule5(Double presupuestoInicialValue, String apropiacionInicial) {
         String presupuestoInicialStr = new BigDecimal(presupuestoInicialValue).toPlainString();
         return presupuestoInicialStr.equals(apropiacionInicial) ? "CUMPLE" : "NO CUMPLE";
     }
 
+    //Regla 5: Diferencia.
     public BigDecimal calculateDifference(Double initialBudgetValue, String initialAllocation) {
         BigDecimal initialBudgetBigDecimal = new BigDecimal(initialBudgetValue);
         BigDecimal initialAllocationBigDecimal = new BigDecimal(initialAllocation);
         return initialBudgetBigDecimal.subtract(initialAllocationBigDecimal);
     }
-    
-    
+
+    //Regla 8: Validación código sección presupuestal.
+    public String evaluateGeneralRule8(String codigoAmbito, String codigoSeccionPresupuestal) {
+        if (codigoAmbito != null && codigoSeccionPresupuestal != null) {
+            String lastThreeDigits = codigoAmbito.length() >= 3
+                    ? codigoAmbito.substring(codigoAmbito.length() - 3)
+                    : null;
+
+            int ambitoValue = Integer.parseInt(lastThreeDigits);
+            double seccionValue = Double.parseDouble(codigoSeccionPresupuestal);
+
+            if (ambitoValue >= 438 && ambitoValue <= 441) {
+                if (seccionValue >= 16.0 && seccionValue <= 45.0) {
+                    return "CUMPLE";
+                } else {
+                    return "NO CUMPLE";
+                }
+
+            } else if (ambitoValue >= 442 && ambitoValue <= 454) {
+                if (seccionValue >= 1.0 && seccionValue <= 15.0) {
+                    return "CUMPLE";
+                } else {
+                    return "NO CUMPLE";
+                }
+            } else {
+                return "NO DATA";
+            }
+
+        }
+        return "NO DATA";
+    }
 
     @Transactional
     public List<GeneralRulesEntity> getGeneralRulesData() {
