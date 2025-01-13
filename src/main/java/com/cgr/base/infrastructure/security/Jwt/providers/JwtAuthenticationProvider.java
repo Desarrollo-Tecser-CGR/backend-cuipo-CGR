@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -36,6 +37,8 @@ public class JwtAuthenticationProvider {
      * Lista blanca con los jwt creados
      */
     private HashMap<String, AuthResponseDto> listToken = new HashMap<>();
+    private static final Set<String> blacklistedTokens = new HashSet<>();
+
 
     /**
      * Crea un nuevo jwt en base al cliente recibido por parametro y lo agrega a la
@@ -101,7 +104,16 @@ public class JwtAuthenticationProvider {
 
     }
 
+    //Metodo para matar el token
+    public static void revokeToken(String token) {
+        blacklistedTokens.add(token);
+    }
+
     public boolean validateToken(String token) throws JsonProcessingException {
+        if (blacklistedTokens.contains(token)) {
+            System.out.println("El token está revocado");
+            return false;
+        }
         try {
 
             if (jwtService.validateFirma(token) != null)

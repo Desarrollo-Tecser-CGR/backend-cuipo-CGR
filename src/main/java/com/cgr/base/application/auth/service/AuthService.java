@@ -143,15 +143,15 @@ public class AuthService implements IAuthUseCase {
 
         Map<String, Object> response = new HashMap<>();
 
-        UserEntity userLogin = this.userRepositoryFull.findBySAMAccountNameWithRoles(userRequest.getUser())
-                .orElseThrow(() -> new ResourceNotFoundException("El usuario " + userRequest.getUser() + " no existe"));
+        UserEntity userLogin = this.userRepositoryFull.findBySAMAccountNameWithRoles(userRequest.getSAMAccountName())
+                .orElseThrow(() -> new ResourceNotFoundException("El usuario " + userRequest.getSAMAccountName() + " no existe"));
 
         
         try {
             
             AuthResponseDto userToken = new AuthResponseDto ();
             userToken.setIsEnable(true);
-            userToken.setSAMAccountName(userRequest.getUser());
+            userToken.setSAMAccountName(userRequest.getSAMAccountName());
 
 
             String emailToken = jwtAuthenticationProvider.createToken(userToken, userLogin.getRoles());

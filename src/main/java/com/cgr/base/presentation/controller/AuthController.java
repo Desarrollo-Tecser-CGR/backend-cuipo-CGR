@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.cgr.base.application.auth.dto.AuthRequestDto;
+import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.application.auth.dto.UserDto;
 import com.cgr.base.application.auth.usecase.IAuthUseCase;
 import com.fasterxml.jackson.core.JsonProcessingException;
