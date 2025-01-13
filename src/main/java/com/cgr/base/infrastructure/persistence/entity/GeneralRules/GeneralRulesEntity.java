@@ -60,4 +60,10 @@ public class GeneralRulesEntity {
     @Column(nullable = true)
     private String generalRule4__Period12;
 
+    @Column(nullable = true)
+    private String generalRule5;
+
+    @Column(nullable = true)
+    private String incomeDifference;
+
 }

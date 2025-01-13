@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cgr.base.infrastructure.persistence.entity.GeneralRules.DataProgGastos;
 import com.cgr.base.infrastructure.persistence.entity.GeneralRules.DataProgIngresos;
 import com.cgr.base.infrastructure.persistence.entity.GeneralRules.GeneralRulesEntity;
 import com.cgr.base.infrastructure.persistence.repository.GeneralRules.GeneralRulesRepository;
@@ -50,6 +51,7 @@ public class GeneralRulesManager {
                     if (areFieldsEqual(existing.getAccountName(), newEntity.getAccountName())) {
                         if (areFieldsEqual(existing.getPeriod(), newEntity.getPeriod())) {
                             isDuplicate = true;
+                            break;
                         }
                     }
                 }
@@ -61,7 +63,7 @@ public class GeneralRulesManager {
             }
         }
 
-        /*
+        
         
         List<DataProgGastos> progGastList = openDataProgGastRepository.findAll();
         for (DataProgGastos openData : progGastList) {
@@ -79,18 +81,21 @@ public class GeneralRulesManager {
                     if(areFieldsEqual(existing.getAccountName(), newEntity.getAccountName())){
                         if (areFieldsEqual(existing.getPeriod(), newEntity.getPeriod())) {
                             isDuplicate = true;
+                            break;
                         }
                     }
                 }
             }
             
             if (!isDuplicate) {
-                newEntities.add(newEntity);
-                existingEntries.add(newEntity);
+                if ("2".equals(openData.getCuenta())) {
+                    newEntities.add(newEntity);
+                    existingEntries.add(newEntity);
+                }
             }
         }
 
-         */
+         
         if (!newEntities.isEmpty()) {
             generalRulesRepository.saveAll(newEntities);
         }
@@ -152,24 +157,23 @@ public class GeneralRulesManager {
     public void applyGeneralRules() {
         List<GeneralRulesEntity> generalRulesData = generalRulesRepository.findAll();
         List<DataProgIngresos> progIngresosList = openDataProgIngRepository.findAll();
+        List<DataProgGastos> progGastList = openDataProgGastRepository.findAll();
 
         generalRulesData.forEach(generalRule -> {
             Optional<DataProgIngresos> matchingEntry = progIngresosList.stream().filter(
-                    openData -> {
-                        if (extractYearPeriod(openData.getPeriodo()).equals(generalRule.getPeriod())) {
-                            if (openData.getNombreAmbito().equals(generalRule.getNameAmbit())) {
-                                if (openData.getNombreEntidad().equals(generalRule.getEntityName())) {
-                                    if (openData.getNombreCuenta().equals(generalRule.getAccountName())) {
-                                        return true;
-                                    }
-                                    return false;
+                openData -> {
+                    if (extractYearPeriod(openData.getPeriodo()).equals(generalRule.getPeriod())) {
+                        if (openData.getNombreAmbito().equals(generalRule.getNameAmbit())) {
+                            if (openData.getNombreEntidad().equals(generalRule.getEntityName())) {
+                                if (openData.getNombreCuenta().equals(generalRule.getAccountName())) {
+                                    return true;
                                 }
-                                return false;
                             }
-                            return false;
                         }
-                        return false;
                     }
+                    return false;
+                }
+                
             ).findFirst();
 
             if (matchingEntry.isPresent()) {
@@ -188,7 +192,6 @@ public class GeneralRulesManager {
 
                 // Clasificación Presupuesto Inicial por Periodos
                 String period = extractPeriodByMonth(matchedData.getPeriodo());
-                BigDecimal formattedValue = new BigDecimal(presupuestoInicialValue.toString());
                 switch (period) {
                     case "3" ->
                         generalRule.setInitialBudget_Period3(new BigDecimal(presupuestoInicialValue).toPlainString());
@@ -200,9 +203,44 @@ public class GeneralRulesManager {
                         generalRule.setInitialBudget_Period12(new BigDecimal(presupuestoInicialValue).toPlainString());
                 }
 
+                //Regla 5: Comparativo Ingresos.
+                if ("1".equals(matchedData.getCuenta())) {
+                    Optional<DataProgGastos> matchingGastEntry = progGastList.stream().filter(
+                            openGast -> {
+                                if (extractYearPeriod(openGast.getPeriodo()).equals(generalRule.getPeriod())) {
+                                    if (openGast.getNombreAmbito().equals(generalRule.getNameAmbit())) {
+                                        if (openGast.getNombreEntidad().equals(generalRule.getEntityName())) {
+                                            if (openGast.getNombreCuenta().equals(generalRule.getAccountName())) {
+                                                return true;
+
+                                            }
+                                        }
+                                    }
+                                }
+                                return false;
+                            }
+                    ).findFirst();
+    
+                    if (matchingGastEntry.isPresent()) {
+                        DataProgGastos matchedGastData = matchingGastEntry.get();
+                        BigDecimal difference = calculateDifference(presupuestoInicialValue, matchedGastData.getApropiacionInicial());
+                        String resultGeneralRule5 = evaluateRule5(presupuestoInicialValue, matchedGastData.getApropiacionInicial());
+                        generalRule.setGeneralRule5(resultGeneralRule5);
+                        generalRule.setIncomeDifference(difference.toPlainString());
+                    } else {
+                        generalRule.setGeneralRule5("NO DATA");
+                        generalRule.setIncomeDifference(null);
+                    }
+                } else{
+                    generalRule.setGeneralRule5("NO DATA");
+                    generalRule.setIncomeDifference(null);
+                }
+
             } else {
                 generalRule.setGeneralRule1("NO DATA");
                 generalRule.setGeneralRule3("NO DATA");
+                generalRule.setGeneralRule5("NO DATA");
+                generalRule.setIncomeDifference(null);
             }
 
             // Regla2: Entidad en Liquidacion.
@@ -255,7 +293,8 @@ public class GeneralRulesManager {
         }
         return (presupuestoDefinitivo == 0.0 && presupuestoInicial == 0.0) ? "NO CUMPLE" : "CUMPLE";
     }
-
+    
+    //Regla 4: Validación Presupuesto Inicial por Periodos
     public String evaluateGeneralRule4(String period3Value, String periodToCompare) {
         if (period3Value == null || periodToCompare == null) {
             return "NO DATA";
@@ -269,6 +308,20 @@ public class GeneralRulesManager {
             return "NO DATA";
         }
     }
+
+    //Regla 5: Comparativo Ingresos.
+    public String evaluateRule5(Double presupuestoInicialValue, String apropiacionInicial) {
+        String presupuestoInicialStr = new BigDecimal(presupuestoInicialValue).toPlainString();
+        return presupuestoInicialStr.equals(apropiacionInicial) ? "CUMPLE" : "NO CUMPLE";
+    }
+
+    public BigDecimal calculateDifference(Double initialBudgetValue, String initialAllocation) {
+        BigDecimal initialBudgetBigDecimal = new BigDecimal(initialBudgetValue);
+        BigDecimal initialAllocationBigDecimal = new BigDecimal(initialAllocation);
+        return initialBudgetBigDecimal.subtract(initialAllocationBigDecimal);
+    }
+    
+    
 
     @Transactional
     public List<GeneralRulesEntity> getGeneralRulesData() {
