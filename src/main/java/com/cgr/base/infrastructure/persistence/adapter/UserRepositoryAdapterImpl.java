@@ -78,7 +78,10 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
         UserEntity userEntity = this.userRepositoryJpa.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("El usuario con id=" + id + " no existe"));
             if (userEntity != null ){
+
                 userEntity = this.dtoMapper.convertToDto(userDto, UserEntity.class);
+
+                userEntity.setId(id);
                 
                 List<RoleEntity> roles = this.roleRepositoryJpa.findByIdIn(userDto.getRoleIds());
                 userEntity.setRoles(roles);
