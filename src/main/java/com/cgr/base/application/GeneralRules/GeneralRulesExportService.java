@@ -18,68 +18,78 @@ import com.cgr.base.infrastructure.persistence.repository.GeneralRules.GeneralRu
 
 @Service
 public class GeneralRulesExportService {
+
     @Autowired
     private GeneralRulesRepository generalRulesRepository;
 
-    // Método para generar el archivo CSV en memoria
     public ByteArrayOutputStream generateCsvStream() throws IOException {
         List<GeneralRulesEntity> generalRulesData = generalRulesRepository.findAll();
-
+        String[] headers = getCsvHeader();
 
         CSVFormat csvFormat = CSVFormat.DEFAULT
-            .builder()
-            .setQuoteMode(QuoteMode.ALL_NON_NULL)  // Entrecomilla todos los campos no nulos
-            .setDelimiter(',')                      // Usa coma como delimitador
-            .setQuote('"')                          // Usa comillas dobles para encerrar campos
-            .setEscape('\\')                        // Usa backslash como carácter de escape
-            .setNullString("")                      // Convierte null a string vacío
-            .setHeader(getCsvHeader())              // Establece los headers
-            .build();
-            
-        // Usar un ByteArrayOutputStream para generar el CSV en memoria
+                .builder()
+                .setQuoteMode(QuoteMode.ALL_NON_NULL)
+                .setDelimiter(',')
+                .setQuote('"')
+                .setEscape('\\')
+                .setNullString("")
+                .setHeader(headers)
+                .build();
+
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
              OutputStreamWriter writer = new OutputStreamWriter(byteArrayOutputStream);
-             CSVPrinter csvPrinter = new CSVPrinter(writer, csvFormat.withHeader(getCsvHeader()))) {
+             CSVPrinter csvPrinter = new CSVPrinter(writer, csvFormat)) {
 
-            // Escribir los datos dinámicamente en el CSV
             for (GeneralRulesEntity entidad : generalRulesData) {
                 csvPrinter.printRecord(getCsvRecord(entidad));
             }
 
             writer.flush();
-            csvPrinter.flush(); // Asegura que todo se haya escrito en el archivo
             return byteArrayOutputStream;
         }
     }
 
-    // Método para obtener los nombres de los campos de la entidad como encabezado
+    private boolean shouldIncludeField(String fieldName) {
+        boolean startsWithGeneralRule = fieldName.startsWith("generalRule");
+        boolean endsWithPeriod = fieldName.matches(".*Period\\d+$");
+        
+        // Incluir si:
+        // 1. Empieza con generalRule (sin importar si termina en Period o no)
+        // 2. NO termina en Period
+        return startsWithGeneralRule || !endsWithPeriod;
+    }
+
     private String[] getCsvHeader() {
         Field[] fields = GeneralRulesEntity.class.getDeclaredFields();
-        String[] headers = new String[fields.length];
-        for (int i = 0; i < fields.length; i++) {
-            headers[i] = fields[i].getName();
+        List<String> headersList = new ArrayList<>();
+        
+        for (Field field : fields) {
+            String fieldName = field.getName();
+            if (shouldIncludeField(fieldName)) {
+                headersList.add(fieldName);
+            }
         }
-        return headers;
+        
+        return headersList.toArray(new String[0]);
     }
 
-    // Método para obtener los valores de los campos de una entidad como registro
-    // Método para obtener los valores de los campos de una entidad como registro
-private List<String> getCsvRecord(GeneralRulesEntity entidad) {
-    Field[] fields = GeneralRulesEntity.class.getDeclaredFields();
-    List<String> record = new ArrayList<>();
+    private List<String> getCsvRecord(GeneralRulesEntity entidad) {
+        Field[] fields = GeneralRulesEntity.class.getDeclaredFields();
+        List<String> record = new ArrayList<>();
 
-    for (Field field : fields) {
-        try {
-            field.setAccessible(true); // Asegura que podemos acceder a campos privados
-            Object value = field.get(entidad); // Obtener el valor del campo
-            record.add(value != null ? value.toString() : ""); // Si el valor es null, agregamos una cadena vacía
-        } catch (IllegalAccessException e) {
-            // Manejar la excepción, por ejemplo, agregando un valor por defecto
-            record.add("ERROR"); // En caso de error, agregamos "ERROR" como valor
+        for (Field field : fields) {
+            String fieldName = field.getName();
+            if (shouldIncludeField(fieldName)) {
+                try {
+                    field.setAccessible(true);
+                    Object value = field.get(entidad);
+                    record.add(value != null ? value.toString() : "");
+                } catch (IllegalAccessException e) {
+                    record.add("ERROR");
+                }
+            }
         }
+
+        return record;
     }
-
-    return record;
-}
-
 }
