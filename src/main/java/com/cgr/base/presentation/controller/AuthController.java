@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.cgr.base.application.auth.dto.AuthRequestDto;
 import com.cgr.base.application.auth.dto.AuthResponseDto;
-import com.cgr.base.application.auth.dto.UserDto;
+import com.cgr.base.application.auth.dto.UserAuthDto;
 import com.cgr.base.application.auth.usecase.IAuthUseCase;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -46,7 +46,7 @@ public class AuthController {
     }
 
     @PostMapping("/tokenEmail")
-    public ResponseEntity<?> tokenEmail(@RequestBody UserDto request, final HttpServletRequest servletRequest) throws JsonProcessingException {
+    public ResponseEntity<?> tokenEmail(@RequestBody UserAuthDto request, final HttpServletRequest servletRequest) throws JsonProcessingException {
         return ResponseEntity.ok(authUseCase.emailLogin(request));
 
     }

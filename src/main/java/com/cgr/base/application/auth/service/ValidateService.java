@@ -1,22 +1,22 @@
 package com.cgr.base.application.auth.service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 
 import com.cgr.base.application.auth.dto.AuthResponseDto;
-import com.cgr.base.application.auth.dto.UserDto;
-import com.cgr.base.application.auth.mapper.AuthMapper;
+import com.cgr.base.application.user.dto.UserDto;
 import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
 import com.cgr.base.infrastructure.persistence.entity.UserEntity;
 import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
 import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
+import com.cgr.base.infrastructure.utilities.DtoMapper;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
 @AllArgsConstructor
@@ -27,9 +27,11 @@ public class ValidateService {
 
     private final IUserRepositoryJpa userRepositoryFull;
 
+    private final DtoMapper dtoMapper;
+
     public Map<String, Object> validationToken(String token) {
         Map<String, Object> response = new HashMap<>();
-        AuthResponseDto userDto = new AuthResponseDto();
+        AuthResponseDto userResponseDto = new AuthResponseDto();
 
         try {
             if (jwtService.validateFirma(token) != null) {
@@ -49,27 +51,39 @@ public class ValidateService {
             UserEntity user = this.userRepositoryFull
                     .findBySAMAccountNameWithRoles(jwtService.getClaimUserName(token)).get();
 
-            userDto.setSAMAccountName(jwtService.getClaimUserName(token));
-            userDto.setIsEnable(true);
+            if (user.getEnabled()==true) {
+    
+                UserDto userDto = this.dtoMapper.convertToDto(user, UserDto.class);
 
-            userDto.setRoles(user.getRoles().stream().map(RoleEntity::getName).toList());
+                userResponseDto.setUser(userDto);
 
-            String newToken = jwtService.createToken(userDto, user.getRoles());
+                userResponseDto.setIsEnable(true);
 
-            List<Menu> menus = this.userRepositoryFull
-                    .findMenusByRoleNames(user.getRoles().stream().map(RoleEntity::getName).toList());
+                userResponseDto.setRoles(user.getRoles().stream().map(RoleEntity::getName).toList());
 
-            userDto.setMenus(menus);
+                String newToken = jwtService.createToken(userResponseDto, user.getRoles());
 
-            userDto.setToken(newToken);
-            userDto.setIsEnable(true);
+                List<Menu> menus = this.userRepositoryFull
+                                    .findMenusByRoleNames(user.getRoles().stream().map(RoleEntity::getName).toList());
 
-            response.put("user", userDto);
-            response.put("message", "Valid token ");
-            response.put("statusCode", 200);
-            response.put("status", "Succes");
+                userResponseDto.setMenus(menus);
 
-            return response;
+                userResponseDto.setToken(newToken);
+                userResponseDto.setIsEnable(true);
+
+                response.put("user", userResponseDto);
+                response.put("message", "Valid token ");
+                response.put("statusCode", 200);
+                response.put("status", "Succes");
+
+                return response;
+            }
+            else{
+                response.put("message", "User not enabled");
+                response.put("statusCode", 403);
+                response.put("status", "disabled");
+                return response;
+            }
 
         } catch (Exception e) {
             log.info("Error in Jwt validation: " + e.getMessage());
