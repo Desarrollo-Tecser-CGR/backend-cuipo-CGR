@@ -12,8 +12,6 @@ import com.cgr.base.application.Email.EmailService;
 import com.cgr.base.application.auth.dto.AuthRequestDto;
 import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.application.auth.dto.UserAuthDto;
-import com.cgr.base.application.auth.dto.AuthRequestDto;
-import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.application.auth.mapper.AuthMapper;
 import com.cgr.base.application.auth.usecase.IAuthUseCase;
 import com.cgr.base.application.user.dto.UserDto;
@@ -28,11 +26,6 @@ import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJp
 import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
 import com.cgr.base.infrastructure.utilities.DtoMapper;
 import com.cgr.base.infrastructure.utilities.EmailUtility;
-import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
-import com.cgr.base.infrastructure.persistence.entity.UserEntity;
-import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
-import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
-import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -118,6 +111,8 @@ public class AuthService implements IAuthUseCase {
                     UserDto userDto = this.dtoMapper.convertToDto(user, UserDto.class);
     
                     userRequestDto.setUser(userDto);
+
+                    userRequestDto.setIsEnable(true);
     
                     userRequestDto.setRoles(user.getRoles().stream().map(RoleEntity::getName).toList());
     
@@ -129,7 +124,6 @@ public class AuthService implements IAuthUseCase {
                     userRequestDto.setMenus(menus);
     
                     userRequestDto.setToken(token);
-                    userRequestDto.setIsEnable(true);
     
                     userRequest.setEmail(user.getEmail());
     
@@ -164,17 +158,24 @@ public class AuthService implements IAuthUseCase {
 
         UserEntity userLogin = this.userRepositoryFull.findBySAMAccountNameWithRoles(userRequest.getSAMAccountName())
                 .orElseThrow(() -> new ResourceNotFoundException("El usuario " + userRequest.getSAMAccountName() + " no existe"));
-
-        if (userLogin.getEnabled() == true) {
+        
+        if ((userLogin.getEnabled() == true) && ("externo".equals(String.valueOf(userLogin.getUserType()).trim()))) {
             try {
             
                 AuthResponseDto userToken = new AuthResponseDto ();
+
+                UserDto userDto = this.dtoMapper.convertToDto(userLogin, UserDto.class);
+
+                userToken.setUser(userDto);
+
                 userToken.setIsEnable(true);
     
                 String emailToken = jwtAuthenticationProvider.createToken(userToken, userLogin.getRoles());
     
-                this.emailService.sendSimpleEmail(userLogin.getEmail(), "Verificacion de Usuario", EmailUtility.getHtmlContent(emailToken));
-    
+                this.emailService.sendSimpleEmail(userDto.getEmail(), "Verificacion de Usuario", EmailUtility.getHtmlContent(emailToken));
+                
+                response.put("message", "Mail sent");
+                return response;
     
             } catch (Exception e) {
                 // TODO: handle exception
