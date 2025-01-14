@@ -31,4 +31,7 @@ public class DataProgIngresos {
 
    @Column(name = "PRESUPUESTO_INICIAL")
    private Double presupuestoInicial;
+
+   @Column(name = "CUENTA")
+   private String cuenta;
 }

@@ -25,5 +25,19 @@ public class DataProgGastos {
    @Id
    @Column(name = "NOMBRE_CUENTA")
    private String nombreCuenta;
-    
+
+   @Column(name = "CUENTA")
+   private String cuenta;
+
+   @Column(name = "APROPIACION_INICIAL")
+   private String apropiacionInicial;
+
+   @Column(name = "AMBITO_CODIGO")
+   private String codigoAmbito;
+
+   @Column(name = "COD_SECCION_PRESUPUESTAL")
+   private String codigoSeccionPresupuestal;
+
+   @Column(name = "APROPIACION_DEFINITIVA")
+   private Double apropiacionDefinitiva;
 }
