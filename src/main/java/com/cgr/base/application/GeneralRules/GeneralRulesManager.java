@@ -117,23 +117,16 @@ public class GeneralRulesManager {
     }
 
     private String extractPeriodByMonth(String dateString) {
-        // Verificar que la fecha tenga el formato correcto (8 dígitos)
         if (dateString == null || dateString.length() != 8) {
             return dateString;
         }
-
-        // Extraer el mes (posiciones 4 y 5 del string)
         String month = dateString.substring(4, 6);
-
-        // Convertir a número para facilitar la comparación
         int monthNum;
         try {
             monthNum = Integer.parseInt(month);
         } catch (NumberFormatException e) {
             return dateString;
         }
-
-        // Determinar el período según el mes
         if (monthNum >= 1 && monthNum <= 3) {
             return "3";
         } else if (monthNum >= 4 && monthNum <= 6) {
@@ -143,8 +136,6 @@ public class GeneralRulesManager {
         } else if (monthNum >= 10 && monthNum <= 12) {
             return "12";
         }
-
-        // Si el mes no es válido (1-12), retornar la fecha original
         return dateString;
     }
 
@@ -276,13 +267,31 @@ public class GeneralRulesManager {
             if (matchingGastEntry.isPresent()) {
 
                 DataProgGastos matchedData = matchingGastEntry.get();
+
+                //Regla 8: Validación código sección presupuestal.            
                 String codigoAmbito = matchedData.getCodigoAmbito();
                 String codigoSeccionPresupuestal = matchedData.getCodigoSeccionPresupuestal();
                 String resultGeneralRule8 = evaluateGeneralRule8(codigoAmbito, codigoSeccionPresupuestal);
-                
                 generalRule.setGeneralRule8(resultGeneralRule8);
+
+                //Regla 11.0: Validación inexistencia cuenta 2.3 Inversión.
+                String resultGeneralRule11_0 = evaluateGeneralRule11_0(matchedData.getCuenta());
+                generalRule.setGeneralRule11_0(resultGeneralRule11_0);
+
+                //Regla 11.1: Validación existencia cuenta 2.99 Inversión.
+                String resultGeneralRule11_1 = evaluateGeneralRule11_1(matchedData.getCuenta());
+                generalRule.setGeneralRule11_1(resultGeneralRule11_1);
+
+                // Regla12: Validacion apropiacion definitiva definitivo.
+                Double apropiaciónDefinitivaValue = matchedData.getApropiacionDefinitiva();
+                String resultGeneralRule12 = evaluateGeneralRule12(apropiaciónDefinitivaValue);
+                generalRule.setGeneralRule12(resultGeneralRule12);
+
             } else {
                 generalRule.setGeneralRule8("NO DATA");
+                generalRule.setGeneralRule11_0("NO DATA");
+                generalRule.setGeneralRule11_1("NO DATA");
+                generalRule.setGeneralRule12("NO DATA");
 
             }
 
@@ -295,9 +304,9 @@ public class GeneralRulesManager {
     // Regla1: Validacion presupuesto definitivo.
     private String evaluateGeneralRule1(Double value) {
         if (value == null || value.isNaN()) {
-            value = 0.0;
+            return "NO DATA";
         }
-        return value > 100000000 ? "CUMPLE" : "NO CUMPLE";
+        return value < 100000000 ? "NO CUMPLE" : "CUMPLE";
     }
 
     // Regla2: Entidad en Liquidacion.
@@ -308,10 +317,10 @@ public class GeneralRulesManager {
     // Regla3: Comparativo de Campos.
     public String evaluateGeneralRule3(Double presupuestoDefinitivo, Double presupuestoInicial) {
         if (presupuestoDefinitivo == null || presupuestoDefinitivo.isNaN()) {
-            presupuestoDefinitivo = 0.0;
+            return "NO DATA";
         }
         if (presupuestoInicial == null || presupuestoInicial.isNaN()) {
-            presupuestoInicial = 0.0;
+            return "NO DATA";
         }
         return (presupuestoDefinitivo == 0.0 && presupuestoInicial == 0.0) ? "NO CUMPLE" : "CUMPLE";
     }
@@ -373,6 +382,30 @@ public class GeneralRulesManager {
 
         }
         return "NO DATA";
+    }
+
+    // Regla11.0: Validacion Inexistencia Cuenta 2.3 .
+    public String evaluateGeneralRule11_0(String accountField) {
+        if (accountField == null) {
+            return "NO DATA";
+        }
+        return accountField.equals("2.3") ? "NO CUMPLE" : "CUMPLE";
+    }
+
+    // Regla11.1: Validacion Existencia Cuenta 2.99 .
+    public String evaluateGeneralRule11_1(String accountField) {
+        if (accountField == null) {
+            return "NO DATA";
+        }
+        return accountField.equals("2.99") ? "CUMPLE" : "NO CUMPLE";
+    }
+    
+    // Regla12: Validacion apropiacion definitiva definitivo.
+    private String evaluateGeneralRule12(Double value) {
+        if (value == null || value.isNaN()) {
+            return "NO DATA";
+        }
+        return value < 100000000 ? "NO CUMPLE" : "CUMPLE";
     }
 
     @Transactional
