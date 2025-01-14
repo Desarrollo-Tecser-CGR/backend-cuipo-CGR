@@ -47,11 +47,10 @@ public class GeneralRulesManager {
             boolean isDuplicate = false;
 
             for (GeneralRulesEntity existing : existingEntries) {
-                if (areFieldsEqual(existing.getEntityName(), newEntity.getEntityName())) {
-                    if (areFieldsEqual(existing.getAccountName(), newEntity.getAccountName())) {
-                        if (areFieldsEqual(existing.getPeriod(), newEntity.getPeriod())) {
+                if ((existing.getEntityName()).equals(newEntity.getEntityName())) {
+                    if ((existing.getAccountName()).equals(newEntity.getAccountName())) {
+                        if ((existing.getPeriod()).equals(newEntity.getPeriod())) {
                             isDuplicate = true;
-                            break;
                         }
                     }
                 }
@@ -75,11 +74,10 @@ public class GeneralRulesManager {
             boolean isDuplicate = false;
 
             for (GeneralRulesEntity existing : existingEntries) {
-                if (areFieldsEqual(existing.getEntityName(), newEntity.getEntityName())) {
-                    if (areFieldsEqual(existing.getAccountName(), newEntity.getAccountName())) {
-                        if (areFieldsEqual(existing.getPeriod(), newEntity.getPeriod())) {
+                if ((existing.getEntityName()).equals(newEntity.getEntityName())) {
+                    if ((existing.getAccountName()).equals(newEntity.getAccountName())) {
+                        if ((existing.getPeriod()).equals(newEntity.getPeriod())) {
                             isDuplicate = true;
-                            break;
                         }
                     }
                 }
@@ -97,20 +95,6 @@ public class GeneralRulesManager {
 
     }
 
-    private boolean areFieldsEqual(String field1, String field2) {
-        if (field1 == null && field2 == null) {
-            return true;
-        }
-        if (field1 == null || field2 == null) {
-            return false;
-        }
-        if (field1.trim().equals(field2.trim())) {
-            return true;
-        }
-
-        return false;
-
-    }
 
     private String extractYearPeriod(String period) {
         return period.length() >= 4 ? period.substring(0, 4) : period;
@@ -282,16 +266,21 @@ public class GeneralRulesManager {
                 String resultGeneralRule11_1 = evaluateGeneralRule11_1(matchedData.getCuenta());
                 generalRule.setGeneralRule11_1(resultGeneralRule11_1);
 
-                // Regla12: Validacion apropiacion definitiva definitivo.
+                // Regla12: Validacion apropiacion definitiva.
                 Double apropiaciónDefinitivaValue = matchedData.getApropiacionDefinitiva();
                 String resultGeneralRule12 = evaluateGeneralRule12(apropiaciónDefinitivaValue);
                 generalRule.setGeneralRule12(resultGeneralRule12);
+
+                // Regla13: Apropiacion definitiva diferente 0.
+                String resultGeneralRule13 = evaluateGeneralRule13(matchedData.getCuenta(), apropiaciónDefinitivaValue);
+                generalRule.setGeneralRule13(resultGeneralRule13);
 
             } else {
                 generalRule.setGeneralRule8("NO DATA");
                 generalRule.setGeneralRule11_0("NO DATA");
                 generalRule.setGeneralRule11_1("NO DATA");
                 generalRule.setGeneralRule12("NO DATA");
+                generalRule.setGeneralRule13("NO DATA");
 
             }
 
@@ -399,13 +388,29 @@ public class GeneralRulesManager {
         }
         return accountField.equals("2.99") ? "CUMPLE" : "NO CUMPLE";
     }
-    
+
     // Regla12: Validacion apropiacion definitiva definitivo.
     private String evaluateGeneralRule12(Double value) {
         if (value == null || value.isNaN()) {
             return "NO DATA";
         }
         return value < 100000000 ? "NO CUMPLE" : "CUMPLE";
+    }
+
+    // Regla13: Apropiacion definitiva diferente 0.
+    public String evaluateGeneralRule13(String accountField, Double value) {
+        if (accountField != null && value != null) {
+            return switch (accountField) {
+                case "2.1", "2.2", "2.4" -> {
+                    if (!value.equals(0.0)) {
+                        yield "CUMPLE";
+                    }
+                    yield "NO CUMPLE";
+                }
+                default -> "NO DATA";
+            };
+        }
+        return "NO DATA";   
     }
 
     @Transactional

@@ -78,4 +78,7 @@ public class GeneralRulesEntity {
     @Column(nullable = true)
     private String generalRule12;
 
+    @Column(nullable = true)
+    private String generalRule13;
+
 }
