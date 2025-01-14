@@ -26,7 +26,6 @@ public enum AuthMapper implements Function<UserModel, AuthRequestDto> {
     // Método privado común
     private AuthResponseDto mapToAuthResponseDto(String sAMAccountName) {
         return AuthResponseDto.builder()
-                .sAMAccountName(sAMAccountName)
                 .isEnable(true)
                 .build();
     }
