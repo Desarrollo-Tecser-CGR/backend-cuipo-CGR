@@ -11,11 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cgr.base.application.Email.EmailService;
 import com.cgr.base.application.auth.dto.AuthRequestDto;
 import com.cgr.base.application.auth.dto.AuthResponseDto;
-import com.cgr.base.application.auth.dto.UserDto;
+import com.cgr.base.application.auth.dto.UserAuthDto;
 import com.cgr.base.application.auth.dto.AuthRequestDto;
 import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.application.auth.mapper.AuthMapper;
 import com.cgr.base.application.auth.usecase.IAuthUseCase;
+import com.cgr.base.application.user.dto.UserDto;
 import com.cgr.base.domain.models.UserModel;
 import com.cgr.base.domain.repository.IActiveDirectoryUserRepository;
 import com.cgr.base.domain.repository.IUserRepository;
@@ -25,6 +26,7 @@ import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
 import com.cgr.base.infrastructure.persistence.entity.UserEntity;
 import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
+import com.cgr.base.infrastructure.utilities.DtoMapper;
 import com.cgr.base.infrastructure.utilities.EmailUtility;
 import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
 import com.cgr.base.infrastructure.persistence.entity.UserEntity;
@@ -49,6 +51,8 @@ public class AuthService implements IAuthUseCase {
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
     private final EmailService emailService;
+
+    private final DtoMapper dtoMapper;
 
     @Transactional
     @Override
@@ -106,27 +110,42 @@ public class AuthService implements IAuthUseCase {
 
                 UserEntity user = this.userRepositoryFull
                         .findBySAMAccountNameWithRoles(userRequest.getSAMAccountName()).get();
-                AuthResponseDto userRequestDto = AuthMapper.INSTANCE.toAuthResponDto(userRequest);
 
-                userRequestDto.setRoles(user.getRoles().stream().map(RoleEntity::getName).toList());
+            
+                if(user.getEnabled()==true){
+                    AuthResponseDto userRequestDto = new AuthResponseDto();
 
-                String token = jwtAuthenticationProvider.createToken(userRequestDto, user.getRoles());
+                    UserDto userDto = this.dtoMapper.convertToDto(user, UserDto.class);
+    
+                    userRequestDto.setUser(userDto);
+    
+                    userRequestDto.setRoles(user.getRoles().stream().map(RoleEntity::getName).toList());
+    
+                    String token = jwtAuthenticationProvider.createToken(userRequestDto, user.getRoles());
+    
+                    List<Menu> menus = this.userRepositoryFull
+                            .findMenusByRoleNames(user.getRoles().stream().map(RoleEntity::getName).toList());
+    
+                    userRequestDto.setMenus(menus);
+    
+                    userRequestDto.setToken(token);
+                    userRequestDto.setIsEnable(true);
+    
+                    userRequest.setEmail(user.getEmail());
+    
+                    response.put("user", userRequestDto);
+                    response.put("message", "User authenticated successfully");
+                    response.put("statusCode", 200);
+                    response.put("status", "success");
+                    return response;
+                }
+                else{
+                    response.put("message", "User not enabled");
+                    response.put("statusCode", 403);
+                    response.put("status", "disabled");
+                    return response; 
+                }
 
-                List<Menu> menus = this.userRepositoryFull
-                        .findMenusByRoleNames(user.getRoles().stream().map(RoleEntity::getName).toList());
-
-                userRequestDto.setMenus(menus);
-
-                userRequestDto.setToken(token);
-                userRequestDto.setIsEnable(true);
-
-                userRequest.setEmail(user.getEmail());
-
-                response.put("user", userRequestDto);
-                response.put("message", "User authenticated successfully");
-                response.put("statusCode", 200);
-                response.put("status", "success");
-                return response;
             }
 
         } catch (Exception e) {
@@ -138,33 +157,38 @@ public class AuthService implements IAuthUseCase {
 
     @Transactional
     @Override
-    public Map<String, Object> emailLogin(UserDto userRequest)
+    public Map<String, Object> emailLogin(UserAuthDto userRequest)
             throws JsonProcessingException {
 
         Map<String, Object> response = new HashMap<>();
 
-        UserEntity userLogin = this.userRepositoryFull.findBySAMAccountNameWithRoles(userRequest.getUser())
-                .orElseThrow(() -> new ResourceNotFoundException("El usuario " + userRequest.getUser() + " no existe"));
+        UserEntity userLogin = this.userRepositoryFull.findBySAMAccountNameWithRoles(userRequest.getSAMAccountName())
+                .orElseThrow(() -> new ResourceNotFoundException("El usuario " + userRequest.getSAMAccountName() + " no existe"));
 
-        
-        try {
+        if (userLogin.getEnabled() == true) {
+            try {
             
-            AuthResponseDto userToken = new AuthResponseDto ();
-            userToken.setIsEnable(true);
-            userToken.setSAMAccountName(userRequest.getUser());
-
-
-            String emailToken = jwtAuthenticationProvider.createToken(userToken, userLogin.getRoles());
-
-            this.emailService.sendSimpleEmail(userLogin.getEmail(), "Verificacion de Usuario", EmailUtility.getHtmlContent(emailToken));
-
-
-        } catch (Exception e) {
-            // TODO: handle exception
-            System.err.println("Error en la capa de aplicaciontion en service: " + e.getMessage());
+                AuthResponseDto userToken = new AuthResponseDto ();
+                userToken.setIsEnable(true);
+    
+                String emailToken = jwtAuthenticationProvider.createToken(userToken, userLogin.getRoles());
+    
+                this.emailService.sendSimpleEmail(userLogin.getEmail(), "Verificacion de Usuario", EmailUtility.getHtmlContent(emailToken));
+    
+    
+            } catch (Exception e) {
+                // TODO: handle exception
+                System.err.println("Error en la capa de aplicaciontion en service: " + e.getMessage());
+            }
+            response.put("message", "User not authenticated");
+            return response;
         }
-        response.put("message", "User not authenticated");
-        return response;
+
+        else{
+            response.put("message", "User not enabled");
+            return response;
+        }
+        
     }
 
 }

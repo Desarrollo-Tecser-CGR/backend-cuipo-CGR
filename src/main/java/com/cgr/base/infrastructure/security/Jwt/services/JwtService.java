@@ -53,7 +53,7 @@ public class JwtService {
         // System.out.println("============Scoperoles================>" + scope);
 
         String tokenCreated = JWT.create()
-                .withClaim("userName", customerJwt.getSAMAccountName())
+                .withClaim("userName", customerJwt.getUser().getSAMAccountName())
                 .withClaim("roles", rolesClaim)
                 .withClaim("isEnabled", customerJwt.getIsEnable())
                 .withIssuedAt(now)
@@ -81,7 +81,6 @@ public class JwtService {
 
     public AuthResponseDto getUserDto(String token) throws JsonProcessingException {
 
-        String email = JWT.decode(token).getClaim("userName").asString();
         boolean isEnabled = JWT.decode(token).getClaim("isEnabled").asBoolean();
 
         // List<RoleDto> roles = Arrays.stream(rolesString.split(" "))
@@ -89,7 +88,6 @@ public class JwtService {
         // .collect(Collectors.toList());
 
         return AuthResponseDto.builder()
-                .sAMAccountName(email)
                 .isEnable(isEnabled)
                 .build();
     }
