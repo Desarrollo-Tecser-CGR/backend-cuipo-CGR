@@ -95,7 +95,6 @@ public class GeneralRulesManager {
 
     }
 
-
     private String extractYearPeriod(String period) {
         return period.length() >= 4 ? period.substring(0, 4) : period;
     }
@@ -275,15 +274,54 @@ public class GeneralRulesManager {
                 String resultGeneralRule13 = evaluateGeneralRule13(matchedData.getCuenta(), apropiaciónDefinitivaValue);
                 generalRule.setGeneralRule13(resultGeneralRule13);
 
+                // Clasificación Apropiacion Definitiva por Periodos
+                Double apropiacionInicialValue = matchedData.getApropiacionInicial();
+                String period = extractPeriodByMonth(matchedData.getPeriodo());
+                switch (period) {
+                    case "3" ->
+                        generalRule.setInitialAppropriation_Period3(new BigDecimal(apropiacionInicialValue).toPlainString());
+                    case "6" ->
+                        generalRule.setInitialAppropriation_Period6(new BigDecimal(apropiacionInicialValue).toPlainString());
+                    case "9" ->
+                        generalRule.setInitialAppropriation_Period9(new BigDecimal(apropiacionInicialValue).toPlainString());
+                    case "12" ->
+                        generalRule.setInitialAppropriation_Period12(new BigDecimal(apropiacionInicialValue).toPlainString());
+                }
+
+                //Regla 14: Validación Apropiacion Definitiva por Periodos
+                String codVigencia = matchedData.getCodigoVigenciaGasto();
+                String nameVigencia = matchedData.getCodigoVigenciaGasto();
+                String resultRule14Period6 = evaluateGeneralRule14(
+                        generalRule.getInitialAppropriation_Period3(),
+                        generalRule.getInitialAppropriation_Period6(),
+                        codVigencia, nameVigencia
+                );
+                generalRule.setGeneralRule14__Period6(resultRule14Period6);
+                String resultRule14Period9 = evaluateGeneralRule14(
+                    generalRule.getInitialAppropriation_Period3(),
+                    generalRule.getInitialAppropriation_Period9(),
+                    codVigencia, nameVigencia
+                );
+                generalRule.setGeneralRule14__Period9(resultRule14Period9);
+                String resultRule14Period12 = evaluateGeneralRule14(
+                    generalRule.getInitialAppropriation_Period3(),
+                    generalRule.getInitialAppropriation_Period12(),
+                    codVigencia, nameVigencia
+                );
+                generalRule.setGeneralRule14__Period12(resultRule14Period12);
+
             } else {
                 generalRule.setGeneralRule8("NO DATA");
                 generalRule.setGeneralRule11_0("NO DATA");
                 generalRule.setGeneralRule11_1("NO DATA");
                 generalRule.setGeneralRule12("NO DATA");
                 generalRule.setGeneralRule13("NO DATA");
+                generalRule.setGeneralRule14__Period6("NO DATA");
+                generalRule.setGeneralRule14__Period9("NO DATA");
+                generalRule.setGeneralRule14__Period12("NO DATA");
+                
 
             }
-
             // Guardar Cambios
             generalRulesRepository.save(generalRule);
         });
@@ -330,13 +368,19 @@ public class GeneralRulesManager {
     }
 
     //Regla 5: Comparativo Ingresos.
-    public String evaluateGeneralRule5(Double presupuestoInicialValue, String apropiacionInicial) {
-        String presupuestoInicialStr = new BigDecimal(presupuestoInicialValue).toPlainString();
-        return presupuestoInicialStr.equals(apropiacionInicial) ? "CUMPLE" : "NO CUMPLE";
+    public String evaluateGeneralRule5(Double presupuestoInicialValue, Double apropiacionInicial) {
+        if (presupuestoInicialValue == null || apropiacionInicial == null) {
+            return "NO DATA";
+        }
+
+        BigDecimal presupuestoInicial = new BigDecimal(presupuestoInicialValue);
+        BigDecimal apropiacion = new BigDecimal(apropiacionInicial);
+
+        return presupuestoInicial.compareTo(apropiacion) == 0 ? "CUMPLE" : "NO CUMPLE";
     }
 
     //Regla 5: Diferencia.
-    public BigDecimal calculateDifference(Double initialBudgetValue, String initialAllocation) {
+    public BigDecimal calculateDifference(Double initialBudgetValue, Double initialAllocation) {
         BigDecimal initialBudgetBigDecimal = new BigDecimal(initialBudgetValue);
         BigDecimal initialAllocationBigDecimal = new BigDecimal(initialAllocation);
         return initialBudgetBigDecimal.subtract(initialAllocationBigDecimal);
@@ -407,10 +451,31 @@ public class GeneralRulesManager {
                     }
                     yield "NO CUMPLE";
                 }
-                default -> "NO DATA";
+                default ->
+                    "NO DATA";
             };
         }
-        return "NO DATA";   
+        return "NO DATA";
+    }
+
+    //Regla 14: Validación Apropiación Inicial por Periodos
+    public String evaluateGeneralRule14(String period3Value, String periodToCompare, String codVig, String nameVig) {
+        if (period3Value == null || periodToCompare == null) {
+            return "NO DATA";
+        }
+        if (codVig.equals("1.0") && nameVig.equals("VIGENCIA ACTUAL")) {
+            if (period3Value.equals(periodToCompare)) {
+                return "CUMPLE";
+            }
+            return "NO CUMPLE";
+        }
+        if (codVig.equals("4.0") && nameVig.equals("VIGENCIA FUTURA")) {
+            if (period3Value.equals(periodToCompare)) {
+                return "CUMPLE";
+            }
+            return "NO CUMPLE";
+        }
+        return "NO DATA";
     }
 
     @Transactional

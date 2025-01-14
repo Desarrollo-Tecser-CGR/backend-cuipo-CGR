@@ -81,4 +81,25 @@ public class GeneralRulesEntity {
     @Column(nullable = true)
     private String generalRule13;
 
+    @Column(nullable = true)
+    private String initialAppropriation_Period3;
+
+    @Column(nullable = true)
+    private String initialAppropriation_Period6;
+
+    @Column(nullable = true)
+    private String generalRule14__Period6;
+
+    @Column(nullable = true)
+    private String initialAppropriation_Period9;
+
+    @Column(nullable = true)
+    private String generalRule14__Period9;
+
+    @Column(nullable = true)
+    private String initialAppropriation_Period12;
+
+    @Column(nullable = true)
+    private String generalRule14__Period12;
+
 }
