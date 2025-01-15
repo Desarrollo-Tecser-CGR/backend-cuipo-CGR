@@ -53,9 +53,6 @@ public class GeneralRulesExportService {
         boolean startsWithGeneralRule = fieldName.startsWith("generalRule");
         boolean endsWithPeriod = fieldName.matches(".*Period\\d+$");
         
-        // Incluir si:
-        // 1. Empieza con generalRule (sin importar si termina en Period o no)
-        // 2. NO termina en Period
         return startsWithGeneralRule || !endsWithPeriod;
     }
 

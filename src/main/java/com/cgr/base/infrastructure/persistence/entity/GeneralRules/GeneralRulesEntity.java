@@ -102,4 +102,16 @@ public class GeneralRulesEntity {
     @Column(nullable = true)
     private String generalRule14__Period12;
 
+    @Column(nullable = true)
+    private String generalRule15_0;
+
+    @Column(nullable = true)
+    private String generalRule15_1;
+
+    @Column(nullable = true)
+    private String generalRule17_0;
+
+    @Column(nullable = true)
+    private String generalRule17_1;
+
 }

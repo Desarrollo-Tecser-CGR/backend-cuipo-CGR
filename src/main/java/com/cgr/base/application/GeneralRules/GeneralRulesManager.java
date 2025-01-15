@@ -9,9 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cgr.base.infrastructure.persistence.entity.GeneralRules.DataEjecGastos;
 import com.cgr.base.infrastructure.persistence.entity.GeneralRules.DataProgGastos;
 import com.cgr.base.infrastructure.persistence.entity.GeneralRules.DataProgIngresos;
 import com.cgr.base.infrastructure.persistence.entity.GeneralRules.GeneralRulesEntity;
+import com.cgr.base.infrastructure.persistence.repository.GeneralRules.EjecGastosRepo;
 import com.cgr.base.infrastructure.persistence.repository.GeneralRules.GeneralRulesRepository;
 import com.cgr.base.infrastructure.persistence.repository.GeneralRules.ProgGastosRepo;
 import com.cgr.base.infrastructure.persistence.repository.GeneralRules.ProgIngresosRepo;
@@ -27,6 +29,9 @@ public class GeneralRulesManager {
 
     @Autowired
     private ProgGastosRepo openDataProgGastRepository;
+
+    @Autowired
+    private EjecGastosRepo openDataEjecGastRepository;
 
     // Transferencia de Datos
     @Transactional
@@ -64,6 +69,33 @@ public class GeneralRulesManager {
 
         List<DataProgGastos> progGastList = openDataProgGastRepository.findAll();
         for (DataProgGastos openData : progGastList) {
+            GeneralRulesEntity newEntity = new GeneralRulesEntity();
+
+            newEntity.setPeriod(extractYearPeriod(openData.getPeriodo()));
+            newEntity.setNameAmbit(openData.getNombreAmbito());
+            newEntity.setEntityName(openData.getNombreEntidad());
+            newEntity.setAccountName(openData.getNombreCuenta());
+
+            boolean isDuplicate = false;
+
+            for (GeneralRulesEntity existing : existingEntries) {
+                if ((existing.getEntityName()).equals(newEntity.getEntityName())) {
+                    if ((existing.getAccountName()).equals(newEntity.getAccountName())) {
+                        if ((existing.getPeriod()).equals(newEntity.getPeriod())) {
+                            isDuplicate = true;
+                        }
+                    }
+                }
+            }
+
+            if (!isDuplicate) {
+                newEntities.add(newEntity);
+                existingEntries.add(newEntity);
+            }
+        }
+
+        List<DataEjecGastos> ejecGastList = openDataEjecGastRepository.findAll();
+        for (DataEjecGastos openData : ejecGastList) {
             GeneralRulesEntity newEntity = new GeneralRulesEntity();
 
             newEntity.setPeriod(extractYearPeriod(openData.getPeriodo()));
@@ -127,10 +159,11 @@ public class GeneralRulesManager {
         List<GeneralRulesEntity> generalRulesData = generalRulesRepository.findAll();
         List<DataProgIngresos> progIngresosList = openDataProgIngRepository.findAll();
         List<DataProgGastos> progGastList = openDataProgGastRepository.findAll();
+        List<DataEjecGastos> ejecGastList = openDataEjecGastRepository.findAll();
 
         generalRulesData.forEach(generalRule -> {
 
-            Optional<DataProgIngresos> matchingEntry = progIngresosList.stream().filter(
+            Optional<DataProgIngresos> matchProgIngresos = progIngresosList.stream().filter(
                     openData -> {
                         if (extractYearPeriod(openData.getPeriodo()).equals(generalRule.getPeriod())) {
                             if (openData.getNombreAmbito().equals(generalRule.getNameAmbit())) {
@@ -145,9 +178,9 @@ public class GeneralRulesManager {
                     }
             ).findFirst();
 
-            if (matchingEntry.isPresent()) {
+            if (matchProgIngresos.isPresent()) {
 
-                DataProgIngresos matchedData = matchingEntry.get();
+                DataProgIngresos matchedData = matchProgIngresos.get();
 
                 // Regla 1: Presupuesto Definitivo
                 Double presupuestoDefinitivoValue = matchedData.getPresupuestoDefinitivo();
@@ -173,7 +206,7 @@ public class GeneralRulesManager {
                 }
                 //Regla 5: Comparativo Ingresos.
                 if (("1".equals(matchedData.getCuenta())) && ("2".equals(matchedData.getCuenta()))) {
-                    Optional<DataProgGastos> matchingGastEntry = progGastList.stream().filter(
+                    Optional<DataProgGastos> matchProgGastos = progGastList.stream().filter(
                             openGast -> {
                                 if (extractYearPeriod(openGast.getPeriodo()).equals(generalRule.getPeriod())) {
                                     if (openGast.getNombreAmbito().equals(generalRule.getNameAmbit())) {
@@ -189,8 +222,8 @@ public class GeneralRulesManager {
                             }
                     ).findFirst();
 
-                    if (matchingGastEntry.isPresent()) {
-                        DataProgGastos matchedGastData = matchingGastEntry.get();
+                    if (matchProgGastos.isPresent()) {
+                        DataProgGastos matchedGastData = matchProgGastos.get();
                         BigDecimal difference = calculateDifference(presupuestoInicialValue, matchedGastData.getApropiacionInicial());
                         String resultGeneralRule5 = evaluateGeneralRule5(presupuestoInicialValue, matchedGastData.getApropiacionInicial());
                         generalRule.setGeneralRule5(resultGeneralRule5);
@@ -233,7 +266,7 @@ public class GeneralRulesManager {
             );
             generalRule.setGeneralRule4__Period12(resultRule4Period12);
 
-            Optional<DataProgGastos> matchingGastEntry = progGastList.stream().filter(
+            Optional<DataProgGastos> matchProgGastos = progGastList.stream().filter(
                     openGast -> {
                         if (extractYearPeriod(openGast.getPeriodo()).equals(generalRule.getPeriod())) {
                             if (openGast.getNombreAmbito().equals(generalRule.getNameAmbit())) {
@@ -247,9 +280,9 @@ public class GeneralRulesManager {
                         return false;
                     }
             ).findFirst();
-            if (matchingGastEntry.isPresent()) {
+            if (matchProgGastos.isPresent()) {
 
-                DataProgGastos matchedData = matchingGastEntry.get();
+                DataProgGastos matchedData = matchProgGastos.get();
 
                 //Regla 8: Validación código sección presupuestal.            
                 String codigoAmbito = matchedData.getCodigoAmbito();
@@ -322,6 +355,54 @@ public class GeneralRulesManager {
                 
 
             }
+
+            Optional<DataEjecGastos> matchEjecGastos = ejecGastList.stream().filter(
+                    openData -> {
+                        if (extractYearPeriod(openData.getPeriodo()).equals(generalRule.getPeriod())) {
+                            if (openData.getNombreAmbito().equals(generalRule.getNameAmbit())) {
+                                if (openData.getNombreEntidad().equals(generalRule.getEntityName())) {
+                                    if (openData.getNombreCuenta().equals(generalRule.getAccountName())) {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                        return false;
+                    }
+            ).findFirst();
+
+            if (matchEjecGastos.isPresent()) {
+
+                DataEjecGastos matchedData = matchEjecGastos.get();
+
+                //Regla 15.0: Validación Compromisos VZ Obligaciones.
+                Double compromisos = matchedData.getCompromisos();
+                Double obligaciones = matchedData.getObligaciones();
+                String resultRule15_0 = evaluateGeneralRule15_0(compromisos, obligaciones);
+                generalRule.setGeneralRule15_0(resultRule15_0);
+
+                //Regla 15.1: Validación Obligaciones VZ Pagos.
+                Double pagos = matchedData.getPagos();
+                String resultRule15_1 = evaluateGeneralRule15_1(obligaciones, pagos);
+                generalRule.setGeneralRule15_1(resultRule15_1);
+
+                //Regla 17.0: Validación existencia cuenta 2.3 Inversión.
+                String resultGeneralRule17_0 = evaluateGeneralRule17_0(matchedData.getCuenta());
+                generalRule.setGeneralRule17_0(resultGeneralRule17_0);
+
+                //Regla 17.1: Validación inexistencia cuenta 2.99 Inversión.
+                String resultGeneralRule17_1 = evaluateGeneralRule17_1(matchedData.getCuenta());
+                generalRule.setGeneralRule17_1(resultGeneralRule17_1);
+
+            } else {
+
+                generalRule.setGeneralRule15_0("NO DATA");
+                generalRule.setGeneralRule15_1("NO DATA");
+                generalRule.setGeneralRule17_0("NO DATA");
+                generalRule.setGeneralRule17_1("NO DATA");
+
+            }
+            
             // Guardar Cambios
             generalRulesRepository.save(generalRule);
         });
@@ -477,6 +558,39 @@ public class GeneralRulesManager {
         }
         return "NO DATA";
     }
+
+    //Regla 15.0: Validación Compromisos VZ Obligaciones.
+    public String evaluateGeneralRule15_0(Double compromisosValue, Double obligacionesValue) {
+        if (compromisosValue == null || obligacionesValue == null) {
+            return "NO DATA";
+        }
+        return compromisosValue < obligacionesValue ? "NO CUMPLE" : "CUMPLE";
+    }
+
+    //Regla 15.1: Validación Obligaciones VS Pagos.
+    public String evaluateGeneralRule15_1(Double obligacionesValue, Double pagosValue) {
+        if (pagosValue == null || obligacionesValue == null) {
+            return "NO DATA";
+        }
+        return obligacionesValue < pagosValue  ? "NO CUMPLE" : "CUMPLE";
+    }
+
+        // Regla17.0: Validacion Inexistencia Cuenta 2.3 .
+        public String evaluateGeneralRule17_0(String accountField) {
+            if (accountField == null) {
+                return "NO DATA";
+            }
+            return accountField.equals("2.3") ? "CUMPLE" : "NO CUMPLE";
+        }
+    
+        // Regla17.1: Validacion Existencia Cuenta 2.99 .
+        public String evaluateGeneralRule17_1(String accountField) {
+            if (accountField == null) {
+                return "NO DATA";
+            }
+            return accountField.equals("2.99") ? "NO CUMPLE" : "CUMPLE";
+        }
+    
 
     @Transactional
     public List<GeneralRulesEntity> getGeneralRulesData() {
