@@ -178,6 +178,36 @@ public class GeneralRulesManager {
                     }
             ).findFirst();
 
+            Optional<DataProgGastos> matchProgGastos = progGastList.stream().filter(
+                    openGast -> {
+                        if (extractYearPeriod(openGast.getPeriodo()).equals(generalRule.getPeriod())) {
+                            if (openGast.getNombreAmbito().equals(generalRule.getNameAmbit())) {
+                                if (openGast.getNombreEntidad().equals(generalRule.getEntityName())) {
+                                    if (openGast.getNombreCuenta().equals(generalRule.getAccountName())) {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                        return false;
+                    }
+            ).findFirst();
+
+            Optional<DataEjecGastos> matchEjecGastos = ejecGastList.stream().filter(
+                    openData -> {
+                        if (extractYearPeriod(openData.getPeriodo()).equals(generalRule.getPeriod())) {
+                            if (openData.getNombreAmbito().equals(generalRule.getNameAmbit())) {
+                                if (openData.getNombreEntidad().equals(generalRule.getEntityName())) {
+                                    if (openData.getNombreCuenta().equals(generalRule.getAccountName())) {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                        return false;
+                    }
+            ).findFirst();
+
             if (matchProgIngresos.isPresent()) {
 
                 DataProgIngresos matchedData = matchProgIngresos.get();
@@ -206,21 +236,6 @@ public class GeneralRulesManager {
                 }
                 //Regla 5: Comparativo Ingresos.
                 if (("1".equals(matchedData.getCuenta())) && ("2".equals(matchedData.getCuenta()))) {
-                    Optional<DataProgGastos> matchProgGastos = progGastList.stream().filter(
-                            openGast -> {
-                                if (extractYearPeriod(openGast.getPeriodo()).equals(generalRule.getPeriod())) {
-                                    if (openGast.getNombreAmbito().equals(generalRule.getNameAmbit())) {
-                                        if (openGast.getNombreEntidad().equals(generalRule.getEntityName())) {
-                                            if (openGast.getNombreCuenta().equals(generalRule.getAccountName())) {
-                                                return true;
-
-                                            }
-                                        }
-                                    }
-                                }
-                                return false;
-                            }
-                    ).findFirst();
 
                     if (matchProgGastos.isPresent()) {
                         DataProgGastos matchedGastData = matchProgGastos.get();
@@ -266,20 +281,6 @@ public class GeneralRulesManager {
             );
             generalRule.setGeneralRule4__Period12(resultRule4Period12);
 
-            Optional<DataProgGastos> matchProgGastos = progGastList.stream().filter(
-                    openGast -> {
-                        if (extractYearPeriod(openGast.getPeriodo()).equals(generalRule.getPeriod())) {
-                            if (openGast.getNombreAmbito().equals(generalRule.getNameAmbit())) {
-                                if (openGast.getNombreEntidad().equals(generalRule.getEntityName())) {
-                                    if (openGast.getNombreCuenta().equals(generalRule.getAccountName())) {
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
-                        return false;
-                    }
-            ).findFirst();
             if (matchProgGastos.isPresent()) {
 
                 DataProgGastos matchedData = matchProgGastos.get();
@@ -331,15 +332,15 @@ public class GeneralRulesManager {
                 );
                 generalRule.setGeneralRule14__Period6(resultRule14Period6);
                 String resultRule14Period9 = evaluateGeneralRule14(
-                    generalRule.getInitialAppropriation_Period3(),
-                    generalRule.getInitialAppropriation_Period9(),
-                    codVigencia, nameVigencia
+                        generalRule.getInitialAppropriation_Period3(),
+                        generalRule.getInitialAppropriation_Period9(),
+                        codVigencia, nameVigencia
                 );
                 generalRule.setGeneralRule14__Period9(resultRule14Period9);
                 String resultRule14Period12 = evaluateGeneralRule14(
-                    generalRule.getInitialAppropriation_Period3(),
-                    generalRule.getInitialAppropriation_Period12(),
-                    codVigencia, nameVigencia
+                        generalRule.getInitialAppropriation_Period3(),
+                        generalRule.getInitialAppropriation_Period12(),
+                        codVigencia, nameVigencia
                 );
                 generalRule.setGeneralRule14__Period12(resultRule14Period12);
 
@@ -352,24 +353,8 @@ public class GeneralRulesManager {
                 generalRule.setGeneralRule14__Period6("NO DATA");
                 generalRule.setGeneralRule14__Period9("NO DATA");
                 generalRule.setGeneralRule14__Period12("NO DATA");
-                
 
             }
-
-            Optional<DataEjecGastos> matchEjecGastos = ejecGastList.stream().filter(
-                    openData -> {
-                        if (extractYearPeriod(openData.getPeriodo()).equals(generalRule.getPeriod())) {
-                            if (openData.getNombreAmbito().equals(generalRule.getNameAmbit())) {
-                                if (openData.getNombreEntidad().equals(generalRule.getEntityName())) {
-                                    if (openData.getNombreCuenta().equals(generalRule.getAccountName())) {
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
-                        return false;
-                    }
-            ).findFirst();
 
             if (matchEjecGastos.isPresent()) {
 
@@ -386,6 +371,23 @@ public class GeneralRulesManager {
                 String resultRule15_1 = evaluateGeneralRule15_1(obligaciones, pagos);
                 generalRule.setGeneralRule15_1(resultRule15_1);
 
+                //Regla 16: Validacion Cuenta Padre Gastos.
+                if (matchProgGastos.isPresent()){
+                    DataProgGastos proGastData = matchProgGastos.get();
+                    String periodEjec = extractPeriodByMonth(matchedData.getPeriodo());
+                    String periodProg = extractPeriodByMonth(proGastData.getPeriodo());
+                    String cuentaProg = proGastData.getCuenta();
+                    String cuentaEjec = matchedData.getCuenta();
+
+                    String resultGeneralRule16 = evaluateGeneralRule16(
+                        periodEjec, periodProg,
+                        cuentaProg, cuentaEjec
+                    );
+                    generalRule.setGeneralRule16(resultGeneralRule16);
+                } else {
+                    generalRule.setGeneralRule16("NO CUMPLE");
+                }
+
                 //Regla 17.0: Validación existencia cuenta 2.3 Inversión.
                 String resultGeneralRule17_0 = evaluateGeneralRule17_0(matchedData.getCuenta());
                 generalRule.setGeneralRule17_0(resultGeneralRule17_0);
@@ -394,15 +396,19 @@ public class GeneralRulesManager {
                 String resultGeneralRule17_1 = evaluateGeneralRule17_1(matchedData.getCuenta());
                 generalRule.setGeneralRule17_1(resultGeneralRule17_1);
 
+                
             } else {
 
                 generalRule.setGeneralRule15_0("NO DATA");
                 generalRule.setGeneralRule15_1("NO DATA");
+                generalRule.setGeneralRule16("NO CUMPLE");
                 generalRule.setGeneralRule17_0("NO DATA");
                 generalRule.setGeneralRule17_1("NO DATA");
 
             }
+
             
+
             // Guardar Cambios
             generalRulesRepository.save(generalRule);
         });
@@ -572,25 +578,52 @@ public class GeneralRulesManager {
         if (pagosValue == null || obligacionesValue == null) {
             return "NO DATA";
         }
-        return obligacionesValue < pagosValue  ? "NO CUMPLE" : "CUMPLE";
+        return obligacionesValue < pagosValue ? "NO CUMPLE" : "CUMPLE";
     }
 
-        // Regla17.0: Validacion Inexistencia Cuenta 2.3 .
-        public String evaluateGeneralRule17_0(String accountField) {
-            if (accountField == null) {
-                return "NO DATA";
-            }
-            return accountField.equals("2.3") ? "CUMPLE" : "NO CUMPLE";
+    //Regla 16: Validacion Cuenta Padre Gastos.
+    private String evaluateGeneralRule16(String periodEjec, String periodProg, String cuentaProg, String cuentaEjec) {
+        
+        if (periodEjec == null || periodProg == null) {
+            return "NO DATA";
         }
-    
-        // Regla17.1: Validacion Existencia Cuenta 2.99 .
-        public String evaluateGeneralRule17_1(String accountField) {
-            if (accountField == null) {
-                return "NO DATA";
-            }
-            return accountField.equals("2.99") ? "NO CUMPLE" : "CUMPLE";
+        if (!isValidPeriod(periodEjec) || !isValidPeriod(periodProg)) {
+            return "NO DATA";
         }
+        if (cuentaProg == null || cuentaEjec == null) {
+            return "NO DATA";
+        }
+        if (periodEjec.equals(periodProg)) {
+            if (cuentaProg.equals(cuentaEjec)) {
+                return switch (cuentaProg) {
+                    case "2.1", "2.2", "2.4" -> "CUMPLE";
+                    default -> "NO CUMPLE";
+                };
+            }
+        }
+        return "NO CUMPLE";
+    }
     
+    private boolean isValidPeriod(String period) {
+        return "3".equals(period) || "6".equals(period) || "9".equals(period) || "12".equals(period);
+    }
+
+    
+    // Regla17.0: Validacion Inexistencia Cuenta 2.3 .
+    public String evaluateGeneralRule17_0(String accountField) {
+        if (accountField == null) {
+            return "NO DATA";
+        }
+        return accountField.equals("2.3") ? "CUMPLE" : "NO CUMPLE";
+    }
+
+    // Regla17.1: Validacion Existencia Cuenta 2.99 .
+    public String evaluateGeneralRule17_1(String accountField) {
+        if (accountField == null) {
+            return "NO DATA";
+        }
+        return accountField.equals("2.99") ? "NO CUMPLE" : "CUMPLE";
+    }
 
     @Transactional
     public List<GeneralRulesEntity> getGeneralRulesData() {
