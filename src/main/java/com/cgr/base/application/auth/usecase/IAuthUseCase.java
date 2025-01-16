@@ -3,7 +3,6 @@ package com.cgr.base.application.auth.usecase;
 import java.util.Map;
 
 import com.cgr.base.application.auth.dto.AuthRequestDto;
-import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.application.auth.dto.UserAuthDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
