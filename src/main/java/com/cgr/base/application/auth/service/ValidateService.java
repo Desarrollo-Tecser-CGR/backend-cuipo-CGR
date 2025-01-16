@@ -61,7 +61,7 @@ public class ValidateService {
 
                 userResponseDto.setRoles(user.getRoles().stream().map(RoleEntity::getName).toList());
 
-                String newToken = jwtService.createToken(userResponseDto, user.getRoles());
+                String newToken = jwtService.createToken(userResponseDto, user.getRoles(),3600000);
 
                 List<Menu> menus = this.userRepositoryFull
                                     .findMenusByRoleNames(user.getRoles().stream().map(RoleEntity::getName).toList());

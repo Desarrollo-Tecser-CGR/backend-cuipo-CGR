@@ -48,9 +48,9 @@ public class JwtAuthenticationProvider {
      * @return Jwt creado
      * @throws JsonProcessingException
      */
-    public String createToken(AuthResponseDto customerJwt, List<RoleEntity> roles) throws JsonProcessingException {
+    public String createToken(AuthResponseDto customerJwt, List<RoleEntity> roles, int time ) throws JsonProcessingException {
 
-        String tokenCreated = jwtService.createToken(customerJwt, roles);
+        String tokenCreated = jwtService.createToken(customerJwt, roles, time);
 
         listToken.put(tokenCreated, customerJwt);
 
@@ -149,7 +149,7 @@ public class JwtAuthenticationProvider {
 
             if (deleteToken(token).equals(" sesion cerrada")) {
                 List<RoleEntity> roles = new ArrayList<>();
-                return createToken(userDto, roles);
+                return createToken(userDto, roles,3600000);
             }
             return "";
 
