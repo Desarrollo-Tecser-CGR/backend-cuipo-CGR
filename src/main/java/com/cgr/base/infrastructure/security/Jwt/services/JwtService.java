@@ -36,12 +36,12 @@ public class JwtService {
      * @param customerJwt Cliente a utilizar en la creacion del jwt
      * @return Jwt creado
      */
-    public String createToken(AuthResponseDto customerJwt, List<RoleEntity> roles) {
+    public String createToken(AuthResponseDto customerJwt, List<RoleEntity> roles, int time) {
 
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
 
         Date now = new Date();
-        Date validity = new Date(now.getTime() + 3600000 * 2); // 1 hora en milisegundos
+        Date validity = new Date(now.getTime() + time); // 1 hora en milisegundos 3600000 * 2
 
         // String scope = customerJwt.getAuthorities().stream()
         // .map(GrantedAuthority::getAuthority)
