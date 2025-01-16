@@ -1,37 +1,37 @@
-#puerto de la aplicacion 
+# Configuración del servidor 
 server:
   port: 8001
   address: 0.0.0.0
 
-# Configuracion  de  la aplicacion  
+# Configuración de la aplicación 
 spring:
   application:
     name: baseapp
+  # Entorno activo: dev, qa, prod
   profiles:
-    active: dev  # Cambia esto según el entorno: dev, qa, prod
-  #Configuración de la base de datos MySQL
+    active: dev 
   datasource:
     username: sa
     password: Tecs2024*
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
-    database-platform: org.hibernate.dialect.SQLServer2012Dialect
     show-sql: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
+    open-in-view: false
   output:
     ansi:
       enabled: always
-  # Configuración de la seguridad de la aplicación
+  # Configuración Seguridad de la aplicación
   security:
     user:
      name: user
      password: $2a$12$od1exy/dPLCsL3yxbJeFcO/AxDCKyYVBjl/bGB.7GgM3aGOWeWc.q
-  # Clave secreta JWT
+# Clave secreta para JWT
 jwt:
    secret:
     key: "U6w3yjuQRNWNRG3IaajKZY8nyMPiu+wFLpj/7evdNEc="  
-  # Configuración de la consola de la base de datos
+# Configuración del logging
 logging:
   level:
        "[org.hibernate.SQL]": debug

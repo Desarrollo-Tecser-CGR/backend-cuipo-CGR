@@ -1,5 +1,7 @@
 package com.cgr.base.infrastructure.persistence.entity.GeneralRules;
 
+import org.hibernate.annotations.Immutable;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -9,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
+@Immutable
 @Table(name = "TMP_VW_OPENDATA_A_PROGRAMACION_INGRESOS", schema = "CUIPO")
 @NoArgsConstructor
 public class DataProgIngresos {
