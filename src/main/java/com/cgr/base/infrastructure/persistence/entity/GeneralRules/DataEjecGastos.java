@@ -36,4 +36,10 @@ public class DataEjecGastos {
 
    @Column(name = "PAGOS")
    private Double pagos;
+
+   @Column(name = "AMBITO_CODIGO")
+   private String codigoAmbito;
+
+   @Column(name = "NOM_VIGENCIA_DEL_GASTO")
+   private String nombreVigenciaGasto;
 }

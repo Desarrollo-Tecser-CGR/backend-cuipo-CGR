@@ -396,6 +396,10 @@ public class GeneralRulesManager {
                 String resultGeneralRule17_1 = evaluateGeneralRule17_1(matchedData.getCuenta());
                 generalRule.setGeneralRule17_1(resultGeneralRule17_1);
 
+                //Regla 18: Identificación Vigencia Gasto.
+                String resultGeneralRule18 = evaluateGeneralRule18(matchedData.getCodigoAmbito(),matchedData.getNombreVigenciaGasto());
+                generalRule.setGeneralRule18(resultGeneralRule18);
+
                 
             } else {
 
@@ -404,7 +408,7 @@ public class GeneralRulesManager {
                 generalRule.setGeneralRule16("NO CUMPLE");
                 generalRule.setGeneralRule17_0("NO DATA");
                 generalRule.setGeneralRule17_1("NO DATA");
-
+                generalRule.setGeneralRule18("NO DATA");
             }
 
             
@@ -630,6 +634,29 @@ public class GeneralRulesManager {
         transferDataGeneralRules();
         applyGeneralRules();
         return generalRulesRepository.findAll();
+    }
+
+    //Regla 18: Identificación Vigencia Gasto.
+    public String evaluateGeneralRule18(String codigoAmbito, String nombreVigencia) {
+        if (codigoAmbito != null && nombreVigencia != null) {
+            String lastThreeDigits = codigoAmbito.length() >= 3
+                    ? codigoAmbito.substring(codigoAmbito.length() - 3)
+                    : null;
+
+            int ambitoValue = Integer.parseInt(lastThreeDigits);
+
+            if (ambitoValue >= 442 && ambitoValue <= 454) {
+                if ("VIGENCIA ACTUAL".equals(nombreVigencia)) {
+                    return "CUMPLE";
+                } else {
+                    return "NO CUMPLE";
+                }
+            } else {
+                return "NO DATA";
+            }
+
+        }
+        return "NO DATA";
     }
 
 }
