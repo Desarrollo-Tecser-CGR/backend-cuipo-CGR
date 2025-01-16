@@ -42,4 +42,7 @@ public class DataEjecGastos {
 
    @Column(name = "NOM_VIGENCIA_DEL_GASTO")
    private String nombreVigenciaGasto;
+
+   @Column(name = "COD_CPC")
+   private String codigoCPC;
 }

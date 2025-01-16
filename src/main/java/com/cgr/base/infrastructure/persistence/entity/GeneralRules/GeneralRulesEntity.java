@@ -120,4 +120,10 @@ public class GeneralRulesEntity {
     @Column(nullable = true)
     private String generalRule18;
 
+    @Column(nullable = true)
+    private String generalRule19;
+
+    @Column(nullable = true)
+    private String generalRule20;
+
 }

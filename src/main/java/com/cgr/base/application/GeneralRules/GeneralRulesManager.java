@@ -371,21 +371,29 @@ public class GeneralRulesManager {
                 String resultRule15_1 = evaluateGeneralRule15_1(obligaciones, pagos);
                 generalRule.setGeneralRule15_1(resultRule15_1);
 
-                //Regla 16: Validacion Cuenta Padre Gastos.
-                if (matchProgGastos.isPresent()){
+                if (matchProgGastos.isPresent()) {
+
+                    //Regla 16: Validacion Cuenta Padre Gastos.
                     DataProgGastos proGastData = matchProgGastos.get();
                     String periodEjec = extractPeriodByMonth(matchedData.getPeriodo());
                     String periodProg = extractPeriodByMonth(proGastData.getPeriodo());
                     String cuentaProg = proGastData.getCuenta();
                     String cuentaEjec = matchedData.getCuenta();
-
                     String resultGeneralRule16 = evaluateGeneralRule16(
-                        periodEjec, periodProg,
-                        cuentaProg, cuentaEjec
+                            periodEjec, periodProg,
+                            cuentaProg, cuentaEjec
                     );
                     generalRule.setGeneralRule16(resultGeneralRule16);
+
+                    //Regla19: Validacion Vigencia de Gastos.
+                    String vigenciaEjec = matchedData.getNombreVigenciaGasto();
+                    String vigenciaProg = proGastData.getNombreVigenciaGasto();
+                    String resultGeneralRule19 = evaluateGeneralRule19(vigenciaEjec, vigenciaProg);
+                    generalRule.setGeneralRule19(resultGeneralRule19);
+
                 } else {
                     generalRule.setGeneralRule16("NO CUMPLE");
+                    generalRule.setGeneralRule19("NO DATA");
                 }
 
                 //Regla 17.0: Validación existencia cuenta 2.3 Inversión.
@@ -397,10 +405,13 @@ public class GeneralRulesManager {
                 generalRule.setGeneralRule17_1(resultGeneralRule17_1);
 
                 //Regla 18: Identificación Vigencia Gasto.
-                String resultGeneralRule18 = evaluateGeneralRule18(matchedData.getCodigoAmbito(),matchedData.getNombreVigenciaGasto());
+                String resultGeneralRule18 = evaluateGeneralRule18(matchedData.getCodigoAmbito(), matchedData.getNombreVigenciaGasto());
                 generalRule.setGeneralRule18(resultGeneralRule18);
 
-                
+                //Regla 20: Validación Variable CPC.
+                String resultGeneralRule20 = evaluateGeneralRule20(matchedData.getCuenta(), matchedData.getCodigoCPC());
+                generalRule.setGeneralRule20(resultGeneralRule20);
+
             } else {
 
                 generalRule.setGeneralRule15_0("NO DATA");
@@ -409,9 +420,9 @@ public class GeneralRulesManager {
                 generalRule.setGeneralRule17_0("NO DATA");
                 generalRule.setGeneralRule17_1("NO DATA");
                 generalRule.setGeneralRule18("NO DATA");
+                generalRule.setGeneralRule19("NO DATA");
+                generalRule.setGeneralRule20("NO DATA");
             }
-
-            
 
             // Guardar Cambios
             generalRulesRepository.save(generalRule);
@@ -448,7 +459,9 @@ public class GeneralRulesManager {
         if (period3Value == null || periodToCompare == null) {
             return "NO DATA";
         }
-
+        if (period3Value.isEmpty() || periodToCompare.isEmpty()) {
+            return "NO DATA";
+        }
         try {
             return Double.parseDouble(periodToCompare) >= Double.parseDouble(period3Value)
                     ? "CUMPLE"
@@ -461,6 +474,9 @@ public class GeneralRulesManager {
     //Regla 5: Comparativo Ingresos.
     public String evaluateGeneralRule5(Double presupuestoInicialValue, Double apropiacionInicial) {
         if (presupuestoInicialValue == null || apropiacionInicial == null) {
+            return "NO DATA";
+        }
+        if (presupuestoInicialValue.isNaN() || apropiacionInicial.isNaN()) {
             return "NO DATA";
         }
 
@@ -480,37 +496,41 @@ public class GeneralRulesManager {
     //Regla 8: Validación código sección presupuestal.
     public String evaluateGeneralRule8(String codigoAmbito, String codigoSeccionPresupuestal) {
         if (codigoAmbito != null && codigoSeccionPresupuestal != null) {
-            String lastThreeDigits = codigoAmbito.length() >= 3
-                    ? codigoAmbito.substring(codigoAmbito.length() - 3)
-                    : null;
 
-            int ambitoValue = Integer.parseInt(lastThreeDigits);
-            double seccionValue = Double.parseDouble(codigoSeccionPresupuestal);
+            if (!(codigoAmbito.isEmpty()) && !(codigoSeccionPresupuestal.isEmpty())) {
 
-            if (ambitoValue >= 438 && ambitoValue <= 441) {
-                if (seccionValue >= 16.0 && seccionValue <= 45.0) {
-                    return "CUMPLE";
+                String lastThreeDigits = codigoAmbito.length() >= 3
+                        ? codigoAmbito.substring(codigoAmbito.length() - 3)
+                        : null;
+
+                int ambitoValue = Integer.parseInt(lastThreeDigits);
+                double seccionValue = Double.parseDouble(codigoSeccionPresupuestal);
+
+                if (ambitoValue >= 438 && ambitoValue <= 441) {
+                    if (seccionValue >= 16.0 && seccionValue <= 45.0) {
+                        return "CUMPLE";
+                    } else {
+                        return "NO CUMPLE";
+                    }
+
+                } else if (ambitoValue >= 442 && ambitoValue <= 454) {
+                    if (seccionValue >= 1.0 && seccionValue <= 15.0) {
+                        return "CUMPLE";
+                    } else {
+                        return "NO CUMPLE";
+                    }
                 } else {
-                    return "NO CUMPLE";
+                    return "NO DATA";
                 }
-
-            } else if (ambitoValue >= 442 && ambitoValue <= 454) {
-                if (seccionValue >= 1.0 && seccionValue <= 15.0) {
-                    return "CUMPLE";
-                } else {
-                    return "NO CUMPLE";
-                }
-            } else {
-                return "NO DATA";
             }
-
         }
+
         return "NO DATA";
     }
 
     // Regla11.0: Validacion Inexistencia Cuenta 2.3 .
     public String evaluateGeneralRule11_0(String accountField) {
-        if (accountField == null) {
+        if (accountField == null || accountField.isEmpty()) {
             return "NO DATA";
         }
         return accountField.equals("2.3") ? "NO CUMPLE" : "CUMPLE";
@@ -518,7 +538,7 @@ public class GeneralRulesManager {
 
     // Regla11.1: Validacion Existencia Cuenta 2.99 .
     public String evaluateGeneralRule11_1(String accountField) {
-        if (accountField == null) {
+        if (accountField == null || accountField.isEmpty()) {
             return "NO DATA";
         }
         return accountField.equals("2.99") ? "CUMPLE" : "NO CUMPLE";
@@ -534,7 +554,8 @@ public class GeneralRulesManager {
 
     // Regla13: Apropiacion definitiva diferente 0.
     public String evaluateGeneralRule13(String accountField, Double value) {
-        if (accountField != null && value != null) {
+        if (accountField != null && value != null && !(accountField.isEmpty())) {
+
             return switch (accountField) {
                 case "2.1", "2.2", "2.4" -> {
                     if (!value.equals(0.0)) {
@@ -552,6 +573,9 @@ public class GeneralRulesManager {
     //Regla 14: Validación Apropiación Inicial por Periodos
     public String evaluateGeneralRule14(String period3Value, String periodToCompare, String codVig, String nameVig) {
         if (period3Value == null || periodToCompare == null) {
+            return "NO DATA";
+        }
+        if (period3Value.isEmpty() || periodToCompare.isEmpty()) {
             return "NO DATA";
         }
         if (codVig.equals("1.0") && nameVig.equals("VIGENCIA ACTUAL")) {
@@ -574,6 +598,9 @@ public class GeneralRulesManager {
         if (compromisosValue == null || obligacionesValue == null) {
             return "NO DATA";
         }
+        if (compromisosValue.isNaN() || obligacionesValue.isNaN()) {
+            return "NO DATA";
+        }
         return compromisosValue < obligacionesValue ? "NO CUMPLE" : "CUMPLE";
     }
 
@@ -582,40 +609,50 @@ public class GeneralRulesManager {
         if (pagosValue == null || obligacionesValue == null) {
             return "NO DATA";
         }
+        if (pagosValue.isNaN() || obligacionesValue.isNaN()) {
+            return "NO DATA";
+        }
         return obligacionesValue < pagosValue ? "NO CUMPLE" : "CUMPLE";
     }
 
     //Regla 16: Validacion Cuenta Padre Gastos.
     private String evaluateGeneralRule16(String periodEjec, String periodProg, String cuentaProg, String cuentaEjec) {
-        
+
+        if (!isValidPeriod(periodEjec) || !isValidPeriod(periodProg)) {
+            return "NO DATA";
+        }
         if (periodEjec == null || periodProg == null) {
             return "NO DATA";
         }
-        if (!isValidPeriod(periodEjec) || !isValidPeriod(periodProg)) {
+        if (periodEjec.isEmpty() || periodProg.isEmpty()) {
             return "NO DATA";
         }
         if (cuentaProg == null || cuentaEjec == null) {
             return "NO DATA";
         }
+        if (cuentaProg.isEmpty() || cuentaEjec.isEmpty()) {
+            return "NO DATA";
+        }
         if (periodEjec.equals(periodProg)) {
             if (cuentaProg.equals(cuentaEjec)) {
                 return switch (cuentaProg) {
-                    case "2.1", "2.2", "2.4" -> "CUMPLE";
-                    default -> "NO CUMPLE";
+                    case "2.1", "2.2", "2.4" ->
+                        "CUMPLE";
+                    default ->
+                        "NO CUMPLE";
                 };
             }
         }
         return "NO CUMPLE";
     }
-    
+
     private boolean isValidPeriod(String period) {
         return "3".equals(period) || "6".equals(period) || "9".equals(period) || "12".equals(period);
     }
 
-    
     // Regla17.0: Validacion Inexistencia Cuenta 2.3 .
     public String evaluateGeneralRule17_0(String accountField) {
-        if (accountField == null) {
+        if (accountField == null || accountField.isEmpty()) {
             return "NO DATA";
         }
         return accountField.equals("2.3") ? "CUMPLE" : "NO CUMPLE";
@@ -623,7 +660,7 @@ public class GeneralRulesManager {
 
     // Regla17.1: Validacion Existencia Cuenta 2.99 .
     public String evaluateGeneralRule17_1(String accountField) {
-        if (accountField == null) {
+        if (accountField == null || accountField.isEmpty()) {
             return "NO DATA";
         }
         return accountField.equals("2.99") ? "NO CUMPLE" : "CUMPLE";
@@ -639,24 +676,53 @@ public class GeneralRulesManager {
     //Regla 18: Identificación Vigencia Gasto.
     public String evaluateGeneralRule18(String codigoAmbito, String nombreVigencia) {
         if (codigoAmbito != null && nombreVigencia != null) {
-            String lastThreeDigits = codigoAmbito.length() >= 3
-                    ? codigoAmbito.substring(codigoAmbito.length() - 3)
-                    : null;
+            if (!(codigoAmbito.isEmpty()) || !(nombreVigencia.isEmpty())) {
 
-            int ambitoValue = Integer.parseInt(lastThreeDigits);
+                String lastThreeDigits = codigoAmbito.length() >= 3
+                        ? codigoAmbito.substring(codigoAmbito.length() - 3)
+                        : null;
 
-            if (ambitoValue >= 442 && ambitoValue <= 454) {
-                if ("VIGENCIA ACTUAL".equals(nombreVigencia)) {
-                    return "CUMPLE";
+                int ambitoValue = Integer.parseInt(lastThreeDigits);
+
+                if (ambitoValue >= 442 && ambitoValue <= 454) {
+                    if ("VIGENCIA ACTUAL".equals(nombreVigencia)) {
+                        return "CUMPLE";
+                    } else {
+                        return "NO CUMPLE";
+                    }
                 } else {
-                    return "NO CUMPLE";
+                    return "NO DATA";
                 }
-            } else {
-                return "NO DATA";
+
             }
+            return "NO DATA";
 
         }
         return "NO DATA";
+    }
+
+    //Regla19: Validacion Vigencia de Gastos.
+    public String evaluateGeneralRule19(String vigenciaProg, String vigenciaEjec) {
+        if (vigenciaProg == null || vigenciaEjec == null) {
+            return "NO DATA";
+        }
+        if (vigenciaProg.isEmpty() || vigenciaEjec.isEmpty()) {
+            return "NO DATA";
+        }
+        return vigenciaProg.equals(vigenciaEjec) ? "CUMPLE" : "NO CUMPLE";
+    }
+
+    //Regla 20: Validación Variable CPC.
+    public String evaluateGeneralRule20(String cuenta, String cpc) {
+        if (cuenta == null || cpc == null) {
+            return "NO DATA";
+        }
+        if (cuenta.isEmpty() || cpc.isEmpty()) {
+            return "NO DATA";
+        }
+        char lastDigitCuenta = cuenta.charAt(cuenta.length() - 1);
+        char firstDigitCpc = cpc.charAt(0);
+        return lastDigitCuenta == firstDigitCpc ? "CUMPLE" : "NO CUMPLE";
     }
 
 }
