@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Pageable;
 
+import com.cgr.base.application.user.dto.UserFilterRequestDto;
 import com.cgr.base.application.user.dto.UserWithRolesRequestDto;
 import com.cgr.base.application.user.usecase.IUserSynchronizerUseCase;
 import com.cgr.base.application.user.usecase.IUserUseCase;
@@ -36,13 +38,23 @@ public class UserController extends AbstractController {
     @PostMapping
     public ResponseEntity<?> assignRole(@Valid @RequestBody UserWithRolesRequestDto rolesRequestDto,
             BindingResult result) {
-        return requestResponse(result, () -> this.userService.assignRolesToUser(rolesRequestDto), "roles actualizados", HttpStatus.CREATED, true);
+        return requestResponse(result, () -> this.userService.assignRolesToUser(rolesRequestDto), "roles actualizados",
+                HttpStatus.CREATED, true);
     }
 
     @GetMapping("/synchronize")
     public ResponseEntity<?> synchronizeAD() {
         return requestResponse(this.synchronizerUsers.synchronizeUsers(),
                 "sistema sincronizado exitosamente con el Directorio Activo", HttpStatus.OK, true);
+    }
+
+    // ?size=?&page=?
+    @GetMapping("/filter")
+    public ResponseEntity<?> findWithFilters(@Valid @RequestBody UserFilterRequestDto userFilter,
+            BindingResult result, Pageable pageable) {
+        return requestResponse(result, () -> this.userService.findWithFilters(userFilter, pageable),
+                "listado de usuarios con filtros", HttpStatus.OK,
+                true);
     }
 
 }

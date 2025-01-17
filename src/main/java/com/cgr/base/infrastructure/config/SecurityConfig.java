@@ -39,11 +39,11 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**").permitAll();
-                    auth.requestMatchers("/api/v1/role/**").hasAnyAuthority("administrador");
-                    auth.requestMatchers("/api/v1/log/**").hasAnyAuthority("administrador");
-                    auth.requestMatchers("/api/v1/menu/**").hasAnyAuthority("administrador");
-                    auth.requestMatchers("/api/v1/user/**").hasAnyAuthority("administrador");
-
+                    auth.requestMatchers("/api/v1/role/**").hasAnyAuthority("administrador", "Coordinador");
+                    auth.requestMatchers("/api/v1/log/**").hasAnyAuthority("administrador", "Coordinador");
+                    auth.requestMatchers("/api/v1/menu/**").hasAnyAuthority("administrador", "Coordinador");
+                    auth.requestMatchers("/api/v1/user/**").hasAnyAuthority("administrador", "Coordinador");
+                    auth.requestMatchers("/api/v1/general-rules/**").hasAnyAuthority("administrador", "Coordinador", "Analista");
                     auth.anyRequest().authenticated();
                 });
 
