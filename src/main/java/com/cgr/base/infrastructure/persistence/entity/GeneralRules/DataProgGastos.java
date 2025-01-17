@@ -1,5 +1,7 @@
 package com.cgr.base.infrastructure.persistence.entity.GeneralRules;
 
+import org.hibernate.annotations.Immutable;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -9,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
+@Immutable
 @Table(name = "TMP_VW_OPENDATA_C_PROGRAMACION_GASTOS", schema = "CUIPO")
 @NoArgsConstructor
 public class DataProgGastos {
@@ -30,7 +33,7 @@ public class DataProgGastos {
    private String cuenta;
 
    @Column(name = "APROPIACION_INICIAL")
-   private String apropiacionInicial;
+   private Double apropiacionInicial;
 
    @Column(name = "AMBITO_CODIGO")
    private String codigoAmbito;
@@ -40,4 +43,10 @@ public class DataProgGastos {
 
    @Column(name = "APROPIACION_DEFINITIVA")
    private Double apropiacionDefinitiva;
+
+   @Column(name = "COD_VIGENCIA_DEL_GASTO")
+   private String codigoVigenciaGasto;
+
+   @Column(name = "NOM_VIGENCIA_DEL_GASTO")
+   private String nombreVigenciaGasto;
 }
