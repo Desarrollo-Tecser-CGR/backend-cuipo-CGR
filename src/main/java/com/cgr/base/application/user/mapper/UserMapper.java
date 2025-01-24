@@ -1,7 +1,7 @@
 package com.cgr.base.application.user.mapper;
 
 import com.cgr.base.application.user.dto.UserWithRolesResponseDto;
-import com.cgr.base.infrastructure.persistence.entity.UserEntity;
+import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
 
 public enum UserMapper {
     INSTANCE;

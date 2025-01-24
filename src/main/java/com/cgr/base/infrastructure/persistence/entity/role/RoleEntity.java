@@ -1,4 +1,4 @@
-package com.cgr.base.infrastructure.persistence.entity;
+package com.cgr.base.infrastructure.persistence.entity.role;
 
 import java.util.Date;
 import java.util.List;
@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.cgr.base.infrastructure.persistence.entity.Menu.SubMenuEntity;
+import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

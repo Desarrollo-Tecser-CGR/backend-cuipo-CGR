@@ -1,13 +1,13 @@
 package com.cgr.base.infrastructure.persistence.specification.filter;
 
-import jakarta.persistence.criteria.*;
-
 import java.util.Date;
 
 import org.springframework.data.jpa.domain.Specification;
 
 import com.cgr.base.application.user.dto.UserFilterRequestDto;
-import com.cgr.base.infrastructure.persistence.entity.UserEntity;
+import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
+
+import jakarta.persistence.criteria.Predicate;
 
 public class UserSpecification {
     public static Specification<UserEntity> conFiltros(UserFilterRequestDto filtro) {

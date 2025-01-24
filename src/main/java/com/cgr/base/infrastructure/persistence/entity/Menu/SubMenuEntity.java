@@ -2,7 +2,7 @@ package com.cgr.base.infrastructure.persistence.entity.Menu;
 
 import java.util.List;
 
-import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
+import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

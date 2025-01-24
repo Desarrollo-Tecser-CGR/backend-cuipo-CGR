@@ -9,14 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.Authentication;
 
 import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.infrastructure.exception.customException.InvalidVerificationTokenException;
-import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
+import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 

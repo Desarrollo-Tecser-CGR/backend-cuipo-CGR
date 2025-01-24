@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
+import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 
 @Repository
 public interface IRoleRepositoryJpa extends JpaRepository<RoleEntity, Long> {

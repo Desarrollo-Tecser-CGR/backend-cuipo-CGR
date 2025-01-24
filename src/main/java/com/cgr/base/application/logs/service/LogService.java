@@ -9,7 +9,7 @@ import com.cgr.base.application.auth.dto.AuthRequestDto;
 import com.cgr.base.application.logs.dto.LogDto;
 import com.cgr.base.application.logs.usecase.ILogUseCase;
 import com.cgr.base.domain.repository.ILogRepository;
-import com.cgr.base.infrastructure.persistence.entity.LogEntity;
+import com.cgr.base.infrastructure.persistence.entity.log.LogEntity;
 import com.cgr.base.infrastructure.utilities.DtoMapper;
 
 import lombok.AllArgsConstructor;

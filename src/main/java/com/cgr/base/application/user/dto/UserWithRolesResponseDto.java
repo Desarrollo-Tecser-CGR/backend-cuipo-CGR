@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.cgr.base.application.role.dto.RoleRequestDto;
-import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
+import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;

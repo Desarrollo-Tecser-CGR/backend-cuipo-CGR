@@ -1,9 +1,11 @@
-package com.cgr.base.infrastructure.persistence.entity;
+package com.cgr.base.infrastructure.persistence.entity.user;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.cgr.base.infrastructure.persistence.entity.log.LogEntity;
+import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

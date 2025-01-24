@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.role.dto.RoleRequestDto;
 import com.cgr.base.application.role.usecase.IRoleService;
-import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
+import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 
 import jakarta.validation.Valid;
 

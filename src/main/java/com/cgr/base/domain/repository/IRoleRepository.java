@@ -2,7 +2,7 @@ package com.cgr.base.domain.repository;
 
 import java.util.List;
 
-import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
+import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 
 public interface IRoleRepository {
 

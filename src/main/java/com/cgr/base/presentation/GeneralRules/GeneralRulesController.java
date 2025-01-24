@@ -1,4 +1,4 @@
-package com.cgr.base.presentation.controller.GeneralRules;
+package com.cgr.base.presentation.GeneralRules;
 
 import java.io.IOException;
 
