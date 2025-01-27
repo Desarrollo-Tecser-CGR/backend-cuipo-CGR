@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 
 import org.springframework.stereotype.Service;
 
+import com.cgr.base.infrastructure.persistence.entity.GeneralRules.AmbitosCaptura;
+
 @Service
 public class GeneralRulesEvaluator {
 
@@ -34,7 +36,6 @@ public class GeneralRulesEvaluator {
         return dateString;
     }
 
-    
     // Regla1: Validacion presupuesto definitivo.
     public String evaluateGeneralRule1(Double value) {
         if (value == null || value.isNaN()) {
@@ -59,7 +60,7 @@ public class GeneralRulesEvaluator {
         return (presupuestoDefinitivo == 0.0 && presupuestoInicial == 0.0) ? "NO CUMPLE" : "CUMPLE";
     }
 
-    //Regla 4: Validación Presupuesto Inicial por Periodos
+    // Regla 4: Validación Presupuesto Inicial por Periodos
     public String evaluateGeneralRule4(String period3Value, String periodToCompare) {
         if (period3Value == null || periodToCompare == null) {
             return "NO DATA";
@@ -76,7 +77,7 @@ public class GeneralRulesEvaluator {
         }
     }
 
-    //Regla 5: Comparativo Ingresos.
+    // Regla 5: Comparativo Ingresos.
     public String evaluateGeneralRule5(Double presupuestoInicialValue, Double apropiacionInicial) {
         if (presupuestoInicialValue == null || apropiacionInicial == null) {
             return "NO DATA";
@@ -91,14 +92,14 @@ public class GeneralRulesEvaluator {
         return presupuestoInicial.compareTo(apropiacion) == 0 ? "CUMPLE" : "NO CUMPLE";
     }
 
-    //Regla 5: Diferencia.
+    // Regla 5: Diferencia.
     public BigDecimal calculateDifference(Double initialBudgetValue, Double initialAllocation) {
         BigDecimal initialBudgetBigDecimal = new BigDecimal(initialBudgetValue);
         BigDecimal initialAllocationBigDecimal = new BigDecimal(initialAllocation);
         return initialBudgetBigDecimal.subtract(initialAllocationBigDecimal);
     }
 
-    //Regla 8: Validación código sección presupuestal.
+    // Regla 8: Validación código sección presupuestal.
     public String evaluateGeneralRule8(String codigoAmbito, String codigoSeccionPresupuestal) {
         if (codigoAmbito != null && codigoSeccionPresupuestal != null) {
 
@@ -131,6 +132,46 @@ public class GeneralRulesEvaluator {
         }
 
         return "NO DATA";
+    }
+
+    // Regla 10: Validar Vigencia del Gasto en Ambitos Captura.
+    public Double getVigenciaFieldValue(String nombreVigenciaGasto, AmbitosCaptura matchedAmbito) {
+
+        if (nombreVigenciaGasto == null || nombreVigenciaGasto.isEmpty()) {
+            return null;
+        }
+
+        return switch (nombreVigenciaGasto) {
+            case "VIGENCIA ACTUAL" -> {
+                yield matchedAmbito.getVigenciaActual();
+            }
+            case "RESERVAS" -> {
+                yield matchedAmbito.getReservas();
+            }
+            case "CXP" -> {
+                yield matchedAmbito.getCxp();
+            }
+            case "VF VA" -> {
+                yield matchedAmbito.getVfVa();
+            }
+            case "VF RESERVA" -> {
+                yield matchedAmbito.getVfReserva();
+            }
+            case "VF CXP" -> {
+                yield matchedAmbito.getVfCxp();
+            }
+            default -> {
+                yield null;
+            }
+        };
+    }
+
+    // Regla10: Validacion apropiacion definitiva definitivo.
+    public String evaluateGeneralRule10(Double vigenciaValue) {
+        if (vigenciaValue == null || vigenciaValue.isNaN()) {
+            return "NO DATA";
+        }
+        return vigenciaValue == 0 ? "NO CUMPLE" : "CUMPLE";
     }
 
     // Regla11.0: Validacion Inexistencia Cuenta 2.3 .
@@ -175,7 +216,7 @@ public class GeneralRulesEvaluator {
         return "NO DATA";
     }
 
-    //Regla 14: Validación Apropiación Inicial por Periodos
+    // Regla 14: Validación Apropiación Inicial por Periodos
     public String evaluateGeneralRule14(String period3Value, String periodToCompare, String codVig, String nameVig) {
         if (period3Value == null || periodToCompare == null) {
             return "NO DATA";
@@ -198,7 +239,7 @@ public class GeneralRulesEvaluator {
         return "NO DATA";
     }
 
-    //Regla 15.0: Validación Compromisos VZ Obligaciones.
+    // Regla 15.0: Validación Compromisos VZ Obligaciones.
     public String evaluateGeneralRule15_0(Double compromisosValue, Double obligacionesValue) {
         if (compromisosValue == null || obligacionesValue == null) {
             return "NO DATA";
@@ -209,7 +250,7 @@ public class GeneralRulesEvaluator {
         return compromisosValue < obligacionesValue ? "NO CUMPLE" : "CUMPLE";
     }
 
-    //Regla 15.1: Validación Obligaciones VS Pagos.
+    // Regla 15.1: Validación Obligaciones VS Pagos.
     public String evaluateGeneralRule15_1(Double obligacionesValue, Double pagosValue) {
         if (pagosValue == null || obligacionesValue == null) {
             return "NO DATA";
@@ -220,7 +261,7 @@ public class GeneralRulesEvaluator {
         return obligacionesValue < pagosValue ? "NO CUMPLE" : "CUMPLE";
     }
 
-    //Regla 16: Validacion Cuenta Padre Gastos.
+    // Regla 16: Validacion Cuenta Padre Gastos.
     public String evaluateGeneralRule16(String periodEjec, String periodProg, String cuentaProg, String cuentaEjec) {
 
         if (!isValidPeriod(periodEjec) || !isValidPeriod(periodProg)) {
@@ -271,7 +312,7 @@ public class GeneralRulesEvaluator {
         return accountField.equals("2.99") ? "NO CUMPLE" : "CUMPLE";
     }
 
-    //Regla 18: Identificación Vigencia Gasto.
+    // Regla 18: Identificación Vigencia Gasto.
     public String evaluateGeneralRule18(String codigoAmbito, String nombreVigencia) {
         if (codigoAmbito != null && nombreVigencia != null) {
             if (!(codigoAmbito.isEmpty()) || !(nombreVigencia.isEmpty())) {
@@ -299,7 +340,7 @@ public class GeneralRulesEvaluator {
         return "NO DATA";
     }
 
-    //Regla19: Validacion Vigencia de Gastos.
+    // Regla19: Validacion Vigencia de Gastos.
     public String evaluateGeneralRule19(String vigenciaProg, String vigenciaEjec) {
         if (vigenciaProg == null || vigenciaEjec == null) {
             return "NO DATA";
@@ -310,7 +351,7 @@ public class GeneralRulesEvaluator {
         return vigenciaProg.equals(vigenciaEjec) ? "CUMPLE" : "NO CUMPLE";
     }
 
-    //Regla 20: Validación Variable CPC.
+    // Regla 20: Validación Variable CPC.
     public String evaluateGeneralRule20(String cuenta, String cpc) {
         if (cuenta == null || cpc == null) {
             return "NO DATA";
@@ -322,5 +363,5 @@ public class GeneralRulesEvaluator {
         char firstDigitCpc = cpc.charAt(0);
         return lastDigitCuenta == firstDigitCpc ? "CUMPLE" : "NO CUMPLE";
     }
-    
+
 }
