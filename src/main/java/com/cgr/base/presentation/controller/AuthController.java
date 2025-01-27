@@ -25,7 +25,7 @@ public class AuthController {
 
     @GetMapping("/health")
     public ResponseEntity<String> checkHealth() {
-        return ResponseEntity.ok("Service is running!");
+        return ResponseEntity.ok("Service is Running!");
     }
 
     @PostMapping("/login")

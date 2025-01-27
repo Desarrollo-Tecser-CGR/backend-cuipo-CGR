@@ -3,6 +3,8 @@ package com.cgr.base.infrastructure.persistence.adapter;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +18,9 @@ import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJp
 @Component
 public class LogRepositoryAdapterImpl implements ILogRepository {
 
-    private final ILogsRepositoryJpa logRepositoryJpa;
+    private static final Logger logger = LoggerFactory.getLogger(LogRepositoryAdapterImpl.class);
 
+    private final ILogsRepositoryJpa logRepositoryJpa;
     private final IUserRepositoryJpa userRepositoryJpa;
 
     public LogRepositoryAdapterImpl(ILogsRepositoryJpa logRepositoryJpa, IUserRepositoryJpa userRepositoryJpa) {
@@ -25,12 +28,14 @@ public class LogRepositoryAdapterImpl implements ILogRepository {
         this.userRepositoryJpa = userRepositoryJpa;
     }
 
+    // Obtener todos los logs.
     @Transactional(readOnly = true)
     @Override
     public List<LogEntity> logFindAll() {
         return this.logRepositoryJpa.findAll();
     }
 
+    //Crear un nuevo log.
     @Transactional
     @Override
     public LogEntity createLog(LogEntity logEntity, String userName) {
@@ -40,7 +45,9 @@ public class LogRepositoryAdapterImpl implements ILogRepository {
             LogEntity log = this.logRepositoryJpa.save(logEntity);
             return log;
         } else {
-            throw new ResourceNotFoundException("el usuario con nombre=" + userName + " no existe");
+            String errorMsg = "User with username " + userName + " does not exist.";
+            logger.error(errorMsg);
+            throw new ResourceNotFoundException(errorMsg);
         }
     }
 

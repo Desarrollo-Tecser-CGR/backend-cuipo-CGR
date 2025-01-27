@@ -22,11 +22,13 @@ public class LogService implements ILogUseCase {
 
     private final DtoMapper dtoMapper;
 
+    // Obtener todos los registros.
     @Override
     public List<LogDto> logFindAll() {
         return this.dtoMapper.convertToListDto(this.adapterLogRepository.logFindAll(), LogDto.class);
     }
 
+    // Crear un nuevo registro.
     @Override
     public LogEntity createLog(AuthRequestDto userRequest) {
         LogEntity logEntity = new LogEntity(userRequest.getEmail(), new Date(), true, userRequest.getSAMAccountName());

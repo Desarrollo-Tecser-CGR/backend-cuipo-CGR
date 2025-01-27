@@ -4,26 +4,20 @@ import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @EnableAspectJAutoProxy
-// @ComponentScan(basePackages = "com.alcadia.bovid.Component")
 @Configuration
 public class ApplicationConfig {
 
-    /**
-     * Bean de Password Encoder para inyeccion
-     * 
-     * @return Implemetación BCryptPasswordEncoder
-     */
+    // Bean para la codificación de contraseñas.
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -41,8 +35,4 @@ public class ApplicationConfig {
         return new ModelMapper();
     }
 
-    // @Bean
-    // public JwtAuthFilter jwtAuthFilter() {
-    // return new JwtAuthFilter(jwtAuthenticationProvider);
-    // }
 }

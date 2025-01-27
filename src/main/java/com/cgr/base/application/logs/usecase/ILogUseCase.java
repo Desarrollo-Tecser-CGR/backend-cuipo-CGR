@@ -7,7 +7,8 @@ import com.cgr.base.application.logs.dto.LogDto;
 import com.cgr.base.infrastructure.persistence.entity.log.LogEntity;
 
 public interface ILogUseCase {
-    public abstract List<LogDto> logFindAll();
 
+    public abstract List<LogDto> logFindAll();
     public abstract LogEntity createLog(AuthRequestDto userRequest);
+    
 }

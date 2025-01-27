@@ -1,12 +1,12 @@
 package com.cgr.base.presentation.controller;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 
 public abstract class AbstractController {
 
@@ -34,7 +34,7 @@ public abstract class AbstractController {
     private ResponseEntity<?> buildValidationErrorResponse(BindingResult result) {
         Map<String, String> errors = new HashMap<>();
         result.getFieldErrors().forEach(error -> errors.put(error.getField(),
-                String.format("El campo %s %s", error.getField(), error.getDefaultMessage())));
-        return buildResponse(errors, "Error de validación de JSON", HttpStatus.BAD_REQUEST, false);
+                String.format("The field %s %s", error.getField(), error.getDefaultMessage())));
+        return buildResponse(errors, "JSON Validation Error.", HttpStatus.BAD_REQUEST, false);
     }
 }

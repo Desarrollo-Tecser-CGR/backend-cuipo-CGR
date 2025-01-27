@@ -5,7 +5,7 @@ import java.util.List;
 import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
 
 public interface IActiveDirectoryUserRepository {
+    
     Boolean checkAccount(String samAccountName, String password);
-
     List<UserEntity> getAllUsers();
 }

@@ -30,7 +30,7 @@ public class RoleRepositoryAdapterImpl implements IRoleRepository {
     @Override
     public RoleEntity findById(Long idRole) {
         return this.roleRepositoryJpa.findById(idRole)
-                .orElseThrow(() -> new ResourceNotFoundException("el rol con id=" + idRole + " no existe"));
+                .orElseThrow(() -> new ResourceNotFoundException("The role with id=" + idRole + " does not exist"));
     }
 
     @Transactional
@@ -47,15 +47,14 @@ public class RoleRepositoryAdapterImpl implements IRoleRepository {
         if (roleOptional.isPresent())
             return this.roleRepositoryJpa.save(roleEntity);
         else
-            throw new ResourceNotFoundException("el rol con id=" + roleEntity.getId() + " no existe");
-
+            throw new ResourceNotFoundException("The role with id=" + roleEntity.getId() + " does not exist");
     }
 
     @Transactional
     @Override
     public RoleEntity activateOrDeactivate(Long idRole) {
         RoleEntity roleEntity = this.roleRepositoryJpa.findById(idRole).orElseThrow(
-                () -> new ResourceNotFoundException("el rol con id=" + idRole + " no existe"));
+                () -> new ResourceNotFoundException("The role with id=" + idRole + " does not exist"));
 
         if (roleEntity.isEnable())
             roleEntity.setEnable(false);

@@ -17,6 +17,7 @@ public class AuthRepositoryAdapterImpl implements IUserRepository {
     this.authRepositoryJpa = authRepositoryJpa;
   }
 
+  // Buscar un usuario por SAMAccountName
   @Override
   public UserModel findBySAMAccountName(String sAMAccountName) {
 
@@ -27,10 +28,9 @@ public class AuthRepositoryAdapterImpl implements IUserRepository {
       }
 
     } catch (Exception e) {
-      // TODO: handle exception
+      return null;
     }
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'findBySAMAccountName'");
+    return null;
   }
 
 }

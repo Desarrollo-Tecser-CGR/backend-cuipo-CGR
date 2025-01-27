@@ -7,12 +7,12 @@ import lombok.Data;
 @Data
 public class PaginationResponse<T> {
 
-    private List<T> content; // List of content (data)
-    private int currentPage; // Current page number
-    private int totalPages; // Total number of pages
-    private long totalElements; // Total number of elements
-    private int pageSize; // Size of each page
-    private boolean isLastPage; // Whether the current page is the last one
+    private List<T> content;
+    private int currentPage;
+    private int totalPages;
+    private long totalElements;
+    private int pageSize;
+    private boolean isLastPage;
 
     public PaginationResponse(List<T> content, int currentPage, int totalPages, long totalElements, int pageSize,
             boolean isLastPage) {

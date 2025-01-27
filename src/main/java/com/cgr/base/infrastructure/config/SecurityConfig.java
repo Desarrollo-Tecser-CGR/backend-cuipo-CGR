@@ -27,6 +27,7 @@ public class SecurityConfig {
     private final AccessDeniedHandlerException accessDeniedHandlerException;
     private final JwtAuthFilter jwtAuthFilter;
 
+    // Configuración de la cadena de filtros de seguridad.
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -55,6 +56,7 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // Configuración de CORS
     private CorsConfigurationSource corsConfigurationSource() {
         return new CorsConfigurationSource() {
             @Override

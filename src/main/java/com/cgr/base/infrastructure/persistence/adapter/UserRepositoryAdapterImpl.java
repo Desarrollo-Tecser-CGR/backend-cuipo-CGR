@@ -17,7 +17,6 @@ import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJp
 public class UserRepositoryAdapterImpl implements IUserRoleRepository {
 
     private final IUserRepositoryJpa userRepositoryJpa;
-
     private final IRoleRepositoryJpa roleRepositoryJpa;
 
     public UserRepositoryAdapterImpl(IUserRepositoryJpa userRepositoryJpa, IRoleRepositoryJpa roleRepositoryJpa) {
@@ -37,7 +36,7 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
     public UserEntity assignRolesToUser(UserWithRolesRequestDto requestDto) {
         UserEntity user = this.userRepositoryJpa.findById(requestDto.getIdUser())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "el usuario con id=" + requestDto.getIdUser() + " no existe"));
+                        "The user with id=" + requestDto.getIdUser() + " does not exist"));
 
         List<RoleEntity> roles = this.roleRepositoryJpa.findByIdIn(requestDto.getRoleIds());
         user.setRoles(roles);

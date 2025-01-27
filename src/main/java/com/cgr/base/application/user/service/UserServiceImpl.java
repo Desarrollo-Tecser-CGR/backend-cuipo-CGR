@@ -29,6 +29,7 @@ public class UserServiceImpl implements IUserUseCase {
 
     private final IUserRepositoryJpa userRepository;
 
+    // Recupera usuarios con los roles asociados.
     @Transactional(readOnly = true)
     @Override
     public List<UserWithRolesResponseDto> findAll() {
@@ -39,6 +40,7 @@ public class UserServiceImpl implements IUserUseCase {
         return users;
     }
 
+    // Asignar roles a un usuario.
     @Transactional
     @Override
     public UserWithRolesResponseDto assignRolesToUser(UserWithRolesRequestDto requestDto) {
@@ -56,6 +58,7 @@ public class UserServiceImpl implements IUserUseCase {
         return userResponsive;
     }
 
+    // Busca usuarios con filtros personalizados y paginación.
     @Override
     public PaginationResponse<UserWithRolesResponseDto> findWithFilters(UserFilterRequestDto filtro,
             Pageable pageable) {

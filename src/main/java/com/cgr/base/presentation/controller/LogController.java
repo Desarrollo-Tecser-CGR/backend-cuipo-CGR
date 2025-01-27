@@ -21,7 +21,7 @@ public class LogController extends AbstractController {
 
     @GetMapping
     public ResponseEntity<?> getLogAll() {
-        return requestResponse(this.logService.logFindAll(), "logs de inicio de sesión", HttpStatus.OK, true);
+        return requestResponse(this.logService.logFindAll(), "Login Logs.", HttpStatus.OK, true);
     }
 
 }

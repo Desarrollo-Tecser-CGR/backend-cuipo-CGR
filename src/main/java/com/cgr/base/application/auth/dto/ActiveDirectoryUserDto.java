@@ -18,6 +18,7 @@ public class ActiveDirectoryUserDto {
     private String sAMAccountName;
     private String mail;
     private String token;
+    
     // Atributos relacionados con la cuenta y el directorio
     private String distinguishedName;
     private String objectCategory;

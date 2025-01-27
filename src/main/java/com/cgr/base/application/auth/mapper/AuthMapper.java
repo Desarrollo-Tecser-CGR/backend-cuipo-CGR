@@ -9,9 +9,9 @@ import com.cgr.base.domain.models.UserModel;
 public enum AuthMapper implements Function<UserModel, AuthRequestDto> {
     INSTANCE;
 
+    // Excepción de Método NO Implementado.
     @Override
     public AuthRequestDto apply(UserModel t) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'apply'");
     }
 
@@ -23,7 +23,7 @@ public enum AuthMapper implements Function<UserModel, AuthRequestDto> {
         return mapToAuthResponseDto(userEntity.getSAMAccountName());
     }
 
-    // Método privado común
+    // Construir un objeto AuthResponseDto a partir del SAMAccountName.
     private AuthResponseDto mapToAuthResponseDto(String sAMAccountName) {
         return AuthResponseDto.builder()
                 .sAMAccountName(sAMAccountName)

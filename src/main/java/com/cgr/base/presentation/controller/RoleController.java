@@ -30,28 +30,28 @@ public class RoleController extends AbstractController {
 
     @GetMapping
     public ResponseEntity<?> getAll() {
-        return requestResponse(this.roleService.findAll(), "roles del sistema", HttpStatus.OK, true);
+        return requestResponse(this.roleService.findAll(), "System Roles.", HttpStatus.OK, true);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
-        return requestResponse(this.roleService.findById(id), "rol encontrado", HttpStatus.OK, true);
+        return requestResponse(this.roleService.findById(id), "Role Found.", HttpStatus.OK, true);
     }
 
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody RoleEntity role, BindingResult result) {
-        return requestResponse(result, () -> this.roleService.create(role), "rol creado", HttpStatus.CREATED, true);
+        return requestResponse(result, () -> this.roleService.create(role), "Role Created.", HttpStatus.CREATED, true);
     }
 
     @PutMapping
     public ResponseEntity<?> update(@Valid @RequestBody RoleEntity role, BindingResult result) {
-        return requestResponse(result, () -> this.roleService.update(role), "rol actualizado", HttpStatus.OK, true);
+        return requestResponse(result, () -> this.roleService.update(role), "Role Updated.", HttpStatus.OK, true);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         RoleRequestDto role = this.roleService.activateOrDeactivate(id);
-        return requestResponse(role, role.isEnable() ? "rol activado" : "rol desactivado", HttpStatus.OK, true);
+        return requestResponse(role, role.isEnable() ? "Role Activated." : "Role Deactivated.", HttpStatus.OK, true);
     }
 
 }

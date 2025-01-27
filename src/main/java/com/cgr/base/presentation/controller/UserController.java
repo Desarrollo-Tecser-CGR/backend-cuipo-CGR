@@ -1,5 +1,6 @@
 package com.cgr.base.presentation.controller;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -8,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.data.domain.Pageable;
 
 import com.cgr.base.application.user.dto.UserFilterRequestDto;
 import com.cgr.base.application.user.dto.UserWithRolesRequestDto;
@@ -32,28 +32,27 @@ public class UserController extends AbstractController {
 
     @GetMapping
     public ResponseEntity<?> getAll() {
-        return requestResponse(this.userService.findAll(), "usuarios del sistema", HttpStatus.OK, true);
+        return requestResponse(this.userService.findAll(), "System Users.", HttpStatus.OK, true);
     }
 
     @PostMapping
     public ResponseEntity<?> assignRole(@Valid @RequestBody UserWithRolesRequestDto rolesRequestDto,
             BindingResult result) {
-        return requestResponse(result, () -> this.userService.assignRolesToUser(rolesRequestDto), "roles actualizados",
+        return requestResponse(result, () -> this.userService.assignRolesToUser(rolesRequestDto), "Roles Updated.",
                 HttpStatus.CREATED, true);
     }
 
     @GetMapping("/synchronize")
     public ResponseEntity<?> synchronizeAD() {
         return requestResponse(this.synchronizerUsers.synchronizeUsers(),
-                "sistema sincronizado exitosamente con el Directorio Activo", HttpStatus.OK, true);
+                "System Synchronized with Active Directory.", HttpStatus.OK, true);
     }
 
-    // ?size=?&page=?
     @GetMapping("/filter")
     public ResponseEntity<?> findWithFilters(@Valid @RequestBody UserFilterRequestDto userFilter,
             BindingResult result, Pageable pageable) {
         return requestResponse(result, () -> this.userService.findWithFilters(userFilter, pageable),
-                "listado de usuarios con filtros", HttpStatus.OK,
+                "List of Users with Filters.", HttpStatus.OK,
                 true);
     }
 

@@ -13,15 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegistrationRequestDto {
-    // private String firstName;
+
     private String sAMAccountName;
     private String password;   
-    // private String lastName;
-    // private String email;
-    // private String password;
-    // // private List<RoleDto> roles;
-    // private String codeAdmin;
-    // private String numberPhone;
-    // private Boolean enabled;
-    // private String position;
+
 }

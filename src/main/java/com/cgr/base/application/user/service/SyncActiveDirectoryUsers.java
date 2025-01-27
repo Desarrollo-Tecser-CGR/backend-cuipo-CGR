@@ -20,6 +20,7 @@ public class SyncActiveDirectoryUsers implements IUserSynchronizerUseCase {
     @Autowired
     private IUserRepositoryJpa userRepositoryDB;
 
+    // Sincroniza los usuarios del Active Directory en la BD.
     @Transactional
     @Override
     public Boolean synchronizeUsers() {

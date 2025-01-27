@@ -23,34 +23,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JwtService {
 
-    /**
-     * Llave para cifrar el jwt
-     */
     @Value("${jwt.secret.key}")
     private String secretKey;
 
-    /**
-     * Crea un nuevo jwt en base al cliente recibido por parametro y lo agrega a la
-     * lista blanca
-     * 
-     * @param customerJwt Cliente a utilizar en la creacion del jwt
-     * @return Jwt creado
-     */
     public String createToken(AuthResponseDto customerJwt, List<RoleEntity> roles) {
 
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
 
         Date now = new Date();
-        Date validity = new Date(now.getTime() + 3600000 * 2); // 1 hora en milisegundos
+        Date validity = new Date(now.getTime() + 3600000 * 2);
 
-        // String scope = customerJwt.getAuthorities().stream()
-        // .map(GrantedAuthority::getAuthority)
-        // .collect(Collectors.joining(" "));
         List<String> rolesClaim = roles.stream().map(RoleEntity::getName).toList();
-
-        // customerJwt.getRoles().stream().map(RoleDto::getAuthority).collect(Collectors.joining("
-        // "));
-        // System.out.println("============Scoperoles================>" + scope);
 
         String tokenCreated = JWT.create()
                 .withClaim("userName", customerJwt.getSAMAccountName())
@@ -68,7 +51,7 @@ public class JwtService {
     }
 
     public boolean validateToken(String token) throws JsonProcessingException {
-        // si se dispara una excepción, significa que el token no es válido
+
         if (isTokenExpired(token) != null)
             return true;
 
@@ -84,10 +67,6 @@ public class JwtService {
         String email = JWT.decode(token).getClaim("userName").asString();
         boolean isEnabled = JWT.decode(token).getClaim("isEnabled").asBoolean();
 
-        // List<RoleDto> roles = Arrays.stream(rolesString.split(" "))
-        // .map(roleAuthority -> new RoleDto(roleAuthority, isEnabled))
-        // .collect(Collectors.toList());
-
         return AuthResponseDto.builder()
                 .sAMAccountName(email)
                 .isEnable(isEnabled)
@@ -100,24 +79,21 @@ public class JwtService {
 
     public String validateFirma(String token) {
         try {
-            // Crear el algoritmo con la clave secreta
+
             Algorithm algorithm = Algorithm.HMAC256(secretKey);
 
-            // Crear el verificador para validar la firma y la integridad del token
             JWTVerifier verifier = JWT.require(algorithm)
                     .build();
 
-            // Validar el token (si es inválido, lanzará una excepción)
             verifier.verify(token);
 
-            // Si el token es válido, devuelve null
             return null;
         } catch (TokenExpiredException e) {
-            return "El token ha expirado";
+            return "The token has Expired.";
         } catch (JWTVerificationException e) {
-            return "Firma del token inválida o token corrupto";
+            return "Invalid Token Signature or Corrupted Token.";
         } catch (Exception e) {
-            return "Error inesperado al validar el token".concat(e.getMessage());
+            return "Unexpected error Validating the Token: ".concat(e.getMessage());
         }
     }
 
@@ -135,7 +111,7 @@ public class JwtService {
 
             log.info(expirationDate.toString());
 
-            return String.format("El token expiro en %d horas, %d minutos y %d segundos a las %s.", hours, minutes,
+            return String.format("The token Expired in %d hours, %d minutes, and %d seconds at %s.", hours, minutes,
                     seconds,
                     expirationDate.toString());
         }
@@ -145,12 +121,11 @@ public class JwtService {
 
     private Date extractExpiration(String token) {
 
-        System.out.println("Issu" + JWT.decode(token).getExpiresAt());
+        System.out.println("Issued at: " + JWT.decode(token).getExpiresAt());
 
         return JWT.decode(token).getExpiresAt();
     }
 
-    // Decodificar el token
     private DecodedJWT getDecodedJWT(String token) {
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
         JWTVerifier verifier = JWT.require(algorithm).build();

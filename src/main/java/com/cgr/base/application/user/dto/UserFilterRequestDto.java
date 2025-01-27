@@ -18,7 +18,7 @@ public class UserFilterRequestDto {
     private String email;
 
     private String phone;
-
+    
     private Boolean enabled;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "America/Bogota")

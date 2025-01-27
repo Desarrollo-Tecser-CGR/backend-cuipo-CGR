@@ -22,19 +22,19 @@ public class MenuService {
         return menuRepositoryJpa.findAll();
     }
 
+    // Obtiene los Menus
     public Map<String, Object> getMenus() {
         Map<String, Object> response = new HashMap<>();
         try {
-            System.out.println("MenuRepositoryJpa bean: " + menuRepositoryJpa);
             List<Menu> menus = menuRepositoryJpa.findAll();
             response.put("menus", menus);
-            response.put("message", "Menus retrieved successfully");
+            response.put("message", "Menus Retrieved Successfully.");
             response.put("statusCode", 200);
             response.put("status", "success");
             return response;
         } catch (Exception e) {
             response.put("errormsj", e.getMessage());
-            response.put("message", "Error retrieving menus");
+            response.put("message", "Error Retrieving Menus.");
             response.put("statusCode", 500);
             response.put("status", "error");
             return response;

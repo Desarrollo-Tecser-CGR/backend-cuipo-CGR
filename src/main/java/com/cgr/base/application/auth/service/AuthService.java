@@ -40,6 +40,7 @@ public class AuthService implements IAuthUseCase {
 
     private final ILogUseCase logService;
 
+    //Autenticación utilizando SAMAccountName y contraseña.
     @Transactional
     @Override
     public Map<String, Object> signIn(AuthRequestDto userRequest, HttpServletRequest servletRequest)
@@ -64,7 +65,7 @@ public class AuthService implements IAuthUseCase {
                 userDto.setIsEnable(true);
 
                 response.put("user", userDto);
-                response.put("message", "User authenticated successfully");
+                response.put("message", "User Authenticated Successfully.");
                 response.put("statusCode", 200);
                 response.put("status", "success");
                 return response;
@@ -72,12 +73,16 @@ public class AuthService implements IAuthUseCase {
             }
 
         } catch (Exception e) {
-            // TODO: handle exception
+            response.put("errormsj", e.getMessage());
+            response.put("message", "Error Authenticating User.");
+            response.put("statusCode", 500);
+            response.put("status", "error");
         }
-        return null;
+        return response;
 
     }
 
+    //Autenticación en el Active Directory mediante LDAP
     @Transactional
     @Override
     public Map<String, Object> authWithLDAPActiveDirectory(AuthRequestDto userRequest,
@@ -114,16 +119,18 @@ public class AuthService implements IAuthUseCase {
                 this.logService.createLog(userRequest);
 
                 response.put("user", userRequestDto);
-                response.put("message", "User authenticated successfully");
+                response.put("message", "User Authenticated Successfully.");
                 response.put("statusCode", 200);
                 response.put("status", "success");
                 return response;
             }
 
         } catch (Exception e) {
-            System.err.println("Error en la capa de aplicaciontion en service: " + e.getMessage());
+            response.put("errormsj", e.getMessage());
+            response.put("message", "Error Authenticating User with LDAP.");
+            response.put("statusCode", 500);
+            response.put("status", "error");
         }
-        response.put("message", "User not authenticated");
         return response;
     }
 

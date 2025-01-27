@@ -21,7 +21,7 @@ public class GeneralRulesController extends AbstractController {
 
     @GetMapping("/api/v1/general-rules/data")
     public ResponseEntity<?> getGeneralRules() {
-        return requestResponse(generalRulesManager.getGeneralRulesData(), "reglas generales", HttpStatus.OK, true);
+        return requestResponse(generalRulesManager.getGeneralRulesData(), "General Rules.", HttpStatus.OK, true);
     }
 
     @Autowired
