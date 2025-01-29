@@ -138,26 +138,15 @@ public class JwtService {
     }
 
     public Long extractUserIdFromToken(String token) {
-        System.out.println("Decoding token: " + token);
-    
-        // Extraer el userName del token
+        
         String userName = JWT.decode(token).getClaim("userName").asString();
-        System.out.println("Extracted userName: " + userName);
-    
-        // Buscar el usuario en la base de datos
         Optional<UserEntity> user = userRepo.findBySAMAccountName(userName);
-        System.out.println("User found in DB: " + user.isPresent());
     
-        // Si no se encuentra el usuario, retornamos null
         if (!user.isPresent()) {
-            //System.out.println("User not found in database.");
             return null;
         }
     
-        // Obtener el ID del usuario
         Long userId = user.get().getId();
-        System.out.println("Extracted userId: " + userId);
-    
         return userId;
     }
     

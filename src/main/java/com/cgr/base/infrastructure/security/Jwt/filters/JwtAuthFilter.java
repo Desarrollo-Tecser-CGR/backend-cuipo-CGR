@@ -116,9 +116,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         try {
 
-            Long userId = jwtService.extractUserIdFromToken(header.split(" ")[1]);
-            request.setAttribute("userId", userId);
-
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                     this.jwtService.getClaimUserName(header.split(" ")[1]), null, authorities);
 
