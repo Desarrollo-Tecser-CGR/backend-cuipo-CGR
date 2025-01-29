@@ -2,8 +2,10 @@ package com.cgr.base.infrastructure.security.Jwt.services;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,8 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
+import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
+import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +26,9 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class JwtService {
+
+    @Autowired
+    private IUserRepositoryJpa userRepo;
 
     @Value("${jwt.secret.key}")
     private String secretKey;
@@ -121,8 +128,6 @@ public class JwtService {
 
     private Date extractExpiration(String token) {
 
-        System.out.println("Issued at: " + JWT.decode(token).getExpiresAt());
-
         return JWT.decode(token).getExpiresAt();
     }
 
@@ -131,5 +136,30 @@ public class JwtService {
         JWTVerifier verifier = JWT.require(algorithm).build();
         return verifier.verify(token);
     }
+
+    public Long extractUserIdFromToken(String token) {
+        System.out.println("Decoding token: " + token);
+    
+        // Extraer el userName del token
+        String userName = JWT.decode(token).getClaim("userName").asString();
+        System.out.println("Extracted userName: " + userName);
+    
+        // Buscar el usuario en la base de datos
+        Optional<UserEntity> user = userRepo.findBySAMAccountName(userName);
+        System.out.println("User found in DB: " + user.isPresent());
+    
+        // Si no se encuentra el usuario, retornamos null
+        if (!user.isPresent()) {
+            //System.out.println("User not found in database.");
+            return null;
+        }
+    
+        // Obtener el ID del usuario
+        Long userId = user.get().getId();
+        System.out.println("Extracted userId: " + userId);
+    
+        return userId;
+    }
+    
 
 }

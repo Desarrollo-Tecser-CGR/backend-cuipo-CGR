@@ -1,4 +1,4 @@
-package com.cgr.base.presentation.controller;
+package com.cgr.base.presentation.User;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -14,6 +14,7 @@ import com.cgr.base.application.user.dto.UserFilterRequestDto;
 import com.cgr.base.application.user.dto.UserWithRolesRequestDto;
 import com.cgr.base.application.user.usecase.IUserSynchronizerUseCase;
 import com.cgr.base.application.user.usecase.IUserUseCase;
+import com.cgr.base.presentation.controller.AbstractController;
 
 import jakarta.validation.Valid;
 

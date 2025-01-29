@@ -96,8 +96,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (!isEnableEmail) {
 
-            System.out.println("User is not enabled");
-
             responseHandler(response, "User is not Enabled.", HttpServletResponse.SC_FORBIDDEN);
 
             return;
@@ -117,6 +115,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 .collect(Collectors.toList());
 
         try {
+
+            Long userId = jwtService.extractUserIdFromToken(header.split(" ")[1]);
+            request.setAttribute("userId", userId);
 
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                     this.jwtService.getClaimUserName(header.split(" ")[1]), null, authorities);
