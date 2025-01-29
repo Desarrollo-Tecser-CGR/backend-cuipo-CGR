@@ -47,6 +47,15 @@ public class UserProfile {
         return userProfileRepo.save(profile);
     }
 
+    // Método para obtener la imagen de perfil en base64
+    public String getProfileImage(Long userId) {
+        Optional<ProfileEntity> profile = userProfileRepo.findById(userId);
+        if (profile.isEmpty() || profile.get().getImageProfile() == null) {
+            throw new IllegalArgumentException("Profile Image Not Found.");
+        }
+        return profile.get().getImageProfile();
+    }
+
     // Extraer el tipo MIME de la cadena Base64.
     private String extractImageType(String base64Image) {
         String regex = "data:image/([a-zA-Z]*);base64,";
