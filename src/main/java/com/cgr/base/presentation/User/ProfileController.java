@@ -9,11 +9,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.cgr.base.application.user.dto.UserProfileDto;
 import com.cgr.base.application.user.service.UserProfile;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 
@@ -77,6 +79,31 @@ public class ProfileController {
             return new ResponseEntity<>(base64Image, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/update_profile")
+    public ResponseEntity<String> updateUserProfile(
+            @RequestBody UserProfileDto userDto,
+            HttpServletRequest request) {
+
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = header.split(" ")[1];
+
+        Long userId = jwtService.extractUserIdFromToken(token);
+
+        if (userId == null) {
+            return new ResponseEntity<>("User ID not Found.", HttpStatus.FORBIDDEN);
+        }
+
+        try {
+
+            ProfileService.updateUserProfile(userId, userDto);
+            return new ResponseEntity<>("User Profile Updated.", HttpStatus.OK);
+
+        } catch (IllegalArgumentException e) {
+
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 

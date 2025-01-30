@@ -1,13 +1,19 @@
 package com.cgr.base.application.user.service;
+
 import java.util.Base64;
+import java.util.Date;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.cgr.base.application.user.dto.UserProfileDto;
 import com.cgr.base.infrastructure.persistence.entity.user.ProfileEntity;
+import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
+import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.persistence.repository.user.ProfileRepo;
 
 @Service
@@ -16,8 +22,11 @@ public class UserProfile {
     @Autowired
     private ProfileRepo userProfileRepo;
 
-    private static final int MAX_IMAGE_SIZE = 2 * 1024 * 1024;  // 2MB
-    private static final String[] ALLOWED_FORMATS = {"image/png", "image/jpeg", "image/svg+xml"};
+    @Autowired
+    private IUserRepositoryJpa userRepo;
+
+    private static final int MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+    private static final String[] ALLOWED_FORMATS = { "image/png", "image/jpeg", "image/svg+xml" };
 
     public ProfileEntity uploadProfileImage(Long userId, String base64Image) {
 
@@ -67,4 +76,32 @@ public class UserProfile {
             throw new IllegalArgumentException("Invalid Base64 image format.");
         }
     }
+
+    // Actualizar Información de Perfil del Usuario.
+    @Transactional
+    public UserEntity updateUserProfile(Long userId, UserProfileDto userDto) {
+        Optional<UserEntity> optionalUser = userRepo.findById(userId);
+
+        if (optionalUser.isEmpty()) {
+            throw new IllegalArgumentException("User not found.");
+        }
+
+        UserEntity user = optionalUser.get();
+
+        if (userDto.getEmail() != null) {
+            user.setEmail(userDto.getEmail());
+        }
+
+        if (userDto.getFullName() != null) {
+            user.setFullName(userDto.getFullName());
+        }
+
+        if (userDto.getPhone() != null) {
+            user.setPhone(userDto.getPhone());
+        }
+
+        user.setDateModify(new Date());
+        return userRepo.save(user);
+    }
+
 }
