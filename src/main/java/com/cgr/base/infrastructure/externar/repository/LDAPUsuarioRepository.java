@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cgr.base.domain.repository.IActiveDirectoryUserRepository;
@@ -21,14 +22,27 @@ import com.unboundid.ldap.sdk.SearchScope;
 @Component
 public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
 
-    //Verificar credenciales en Active Directory
+    @Value("${LDAP_HOST}")
+    private String ldapHost;
+
+    @Value("${LDAP_PORT}")
+    private int ldapPort;
+
+    @Value("${LDAP_BASE_DN}")
+    private String baseDN;
+
+    @Value("${LDAP_DOMAIN}")
+    private String domain;
+
+    @Value("${LDAP_SERVICE_USER}")
+    private String serviceUser;
+
+    @Value("${LDAP_SERVICE_PASSWORD}")
+    private String servicePassword;
+
+    // Verificar credenciales en Active Directory
     @Override
     public Boolean checkAccount(String samAccountName, String password) {
-        
-        String ldapHost = "192.168.2.46";
-        int ldapPort = 389;
-        String baseDN = "OU=Tecser,OU=Usuarios,DC=tecser,DC=local";
-        String domain = "tecser.local";
 
         try {
             String userPrincipalName = samAccountName + "@" + domain;
@@ -65,19 +79,13 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
     // Obtener todos los usuarios del Active Directory
     @Override
     public List<UserEntity> getAllUsers() {
-        
-        String ldapHost = "192.168.2.46";
-        int ldapPort = 389;
-        String baseDN = "OU=Tecser,OU=Usuarios,DC=tecser,DC=local";
 
         List<UserEntity> users = new ArrayList<>();
 
         try {
-            
+
             LDAPConnection connection = new LDAPConnection(ldapHost, ldapPort);
 
-            String serviceUser = "cuipo.cgr@tecser.local";
-            String servicePassword = "Colombia2024*";
             connection.bind(serviceUser, servicePassword);
 
             String searchFilter = "(objectClass=user)";

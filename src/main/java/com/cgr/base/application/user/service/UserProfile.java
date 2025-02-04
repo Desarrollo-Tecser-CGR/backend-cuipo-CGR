@@ -7,7 +7,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +25,7 @@ public class UserProfile {
     @Autowired
     private IUserRepositoryJpa userRepo;
 
-    @Value("${MAX_IMAGE_SIZE}")
-    private int MAX_IMAGE_SIZE;
-    //private static final int MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+    private static final int MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
 
     private static final String[] ALLOWED_FORMATS = { "image/png", "image/jpeg", "image/svg+xml" };
 
