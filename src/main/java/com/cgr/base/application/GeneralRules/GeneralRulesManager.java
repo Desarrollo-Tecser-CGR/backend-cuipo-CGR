@@ -1,15 +1,12 @@
 package com.cgr.base.application.GeneralRules;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cgr.base.infrastructure.persistence.entity.GeneralRules.DataEjecGastos;
-import com.cgr.base.infrastructure.persistence.entity.GeneralRules.DataProgGastos;
-import com.cgr.base.infrastructure.persistence.entity.GeneralRules.DataProgIngresos;
+import com.cgr.base.application.GeneralRules.service.DataTransferService;
 import com.cgr.base.infrastructure.persistence.entity.GeneralRules.GeneralRulesEntity;
 import com.cgr.base.infrastructure.persistence.repository.GeneralRules.AmbitosCapturaRepo;
 import com.cgr.base.infrastructure.persistence.repository.GeneralRules.EjecGastosRepo;
@@ -38,97 +35,102 @@ public class GeneralRulesManager {
     @Autowired
     private GeneralRulesEvaluator Evaluator;
 
+    @Autowired
+    private DataTransferService Transfer;
+
     // Transferencia de Datos
     @Transactional
     public void transferDataGeneralRules() {
 
-        List<GeneralRulesEntity> existingEntries = generalRulesRepository.findAll();
-        List<GeneralRulesEntity> newEntities = new ArrayList<>();
+        Transfer.transferDataGeneralRules();
 
-        List<DataProgIngresos> progIngList = openDataProgIngRepository.findAll();
-        for (DataProgIngresos openData : progIngList) {
-            GeneralRulesEntity newEntity = new GeneralRulesEntity();
+        // List<GeneralRulesEntity> existingEntries = generalRulesRepository.findAll();
+        // List<GeneralRulesEntity> newEntities = new ArrayList<>();
 
-            newEntity.setPeriod(Evaluator.extractYearPeriod(openData.getPeriodo()));
-            newEntity.setNameAmbit(openData.getNombreAmbito());
-            newEntity.setEntityName(openData.getNombreEntidad());
-            newEntity.setAccountName(openData.getNombreCuenta());
+        // List<DataProgIngresos> progIngList = openDataProgIngRepository.findAll();
+        // for (DataProgIngresos openData : progIngList) {
+        //     GeneralRulesEntity newEntity = new GeneralRulesEntity();
 
-            boolean isDuplicate = false;
+        //     newEntity.setPeriod(Evaluator.extractYearPeriod(openData.getPeriodo()));
+        //     newEntity.setNameAmbit(openData.getNombreAmbito());
+        //     newEntity.setEntityName(openData.getNombreEntidad());
+        //     newEntity.setAccountName(openData.getNombreCuenta());
 
-            for (GeneralRulesEntity existing : existingEntries) {
-                if ((existing.getEntityName()).equals(newEntity.getEntityName())) {
-                    if ((existing.getAccountName()).equals(newEntity.getAccountName())) {
-                        if ((existing.getPeriod()).equals(newEntity.getPeriod())) {
-                            isDuplicate = true;
-                        }
-                    }
-                }
-            }
+        //     boolean isDuplicate = false;
 
-            if (!isDuplicate) {
-                newEntities.add(newEntity);
-                existingEntries.add(newEntity);
-            }
-        }
+        //     for (GeneralRulesEntity existing : existingEntries) {
+        //         if ((existing.getEntityName()).equals(newEntity.getEntityName())) {
+        //             if ((existing.getAccountName()).equals(newEntity.getAccountName())) {
+        //                 if ((existing.getPeriod()).equals(newEntity.getPeriod())) {
+        //                     isDuplicate = true;
+        //                 }
+        //             }
+        //         }
+        //     }
 
-        List<DataProgGastos> progGastList = openDataProgGastRepository.findAll();
-        for (DataProgGastos openData : progGastList) {
-            GeneralRulesEntity newEntity = new GeneralRulesEntity();
+        //     if (!isDuplicate) {
+        //         newEntities.add(newEntity);
+        //         existingEntries.add(newEntity);
+        //     }
+        // }
 
-            newEntity.setPeriod(Evaluator.extractYearPeriod(openData.getPeriodo()));
-            newEntity.setNameAmbit(openData.getNombreAmbito());
-            newEntity.setEntityName(openData.getNombreEntidad());
-            newEntity.setAccountName(openData.getNombreCuenta());
+        // List<DataProgGastos> progGastList = openDataProgGastRepository.findAll();
+        // for (DataProgGastos openData : progGastList) {
+        //     GeneralRulesEntity newEntity = new GeneralRulesEntity();
 
-            boolean isDuplicate = false;
+        //     newEntity.setPeriod(Evaluator.extractYearPeriod(openData.getPeriodo()));
+        //     newEntity.setNameAmbit(openData.getNombreAmbito());
+        //     newEntity.setEntityName(openData.getNombreEntidad());
+        //     newEntity.setAccountName(openData.getNombreCuenta());
 
-            for (GeneralRulesEntity existing : existingEntries) {
-                if ((existing.getEntityName()).equals(newEntity.getEntityName())) {
-                    if ((existing.getAccountName()).equals(newEntity.getAccountName())) {
-                        if ((existing.getPeriod()).equals(newEntity.getPeriod())) {
-                            isDuplicate = true;
-                        }
-                    }
-                }
-            }
+        //     boolean isDuplicate = false;
 
-            if (!isDuplicate) {
-                newEntities.add(newEntity);
-                existingEntries.add(newEntity);
-            }
-        }
+        //     for (GeneralRulesEntity existing : existingEntries) {
+        //         if ((existing.getEntityName()).equals(newEntity.getEntityName())) {
+        //             if ((existing.getAccountName()).equals(newEntity.getAccountName())) {
+        //                 if ((existing.getPeriod()).equals(newEntity.getPeriod())) {
+        //                     isDuplicate = true;
+        //                 }
+        //             }
+        //         }
+        //     }
 
-        List<DataEjecGastos> ejecGastList = openDataEjecGastRepository.findAll();
-        for (DataEjecGastos openData : ejecGastList) {
-            GeneralRulesEntity newEntity = new GeneralRulesEntity();
+        //     if (!isDuplicate) {
+        //         newEntities.add(newEntity);
+        //         existingEntries.add(newEntity);
+        //     }
+        // }
 
-            newEntity.setPeriod(Evaluator.extractYearPeriod(openData.getPeriodo()));
-            newEntity.setNameAmbit(openData.getNombreAmbito());
-            newEntity.setEntityName(openData.getNombreEntidad());
-            newEntity.setAccountName(openData.getNombreCuenta());
+        // List<DataEjecGastos> ejecGastList = openDataEjecGastRepository.findAll();
+        // for (DataEjecGastos openData : ejecGastList) {
+        //     GeneralRulesEntity newEntity = new GeneralRulesEntity();
 
-            boolean isDuplicate = false;
+        //     newEntity.setPeriod(Evaluator.extractYearPeriod(openData.getPeriodo()));
+        //     newEntity.setNameAmbit(openData.getNombreAmbito());
+        //     newEntity.setEntityName(openData.getNombreEntidad());
+        //     newEntity.setAccountName(openData.getNombreCuenta());
 
-            for (GeneralRulesEntity existing : existingEntries) {
-                if ((existing.getEntityName()).equals(newEntity.getEntityName())) {
-                    if ((existing.getAccountName()).equals(newEntity.getAccountName())) {
-                        if ((existing.getPeriod()).equals(newEntity.getPeriod())) {
-                            isDuplicate = true;
-                        }
-                    }
-                }
-            }
+        //     boolean isDuplicate = false;
 
-            if (!isDuplicate) {
-                newEntities.add(newEntity);
-                existingEntries.add(newEntity);
-            }
-        }
+        //     for (GeneralRulesEntity existing : existingEntries) {
+        //         if ((existing.getEntityName()).equals(newEntity.getEntityName())) {
+        //             if ((existing.getAccountName()).equals(newEntity.getAccountName())) {
+        //                 if ((existing.getPeriod()).equals(newEntity.getPeriod())) {
+        //                     isDuplicate = true;
+        //                 }
+        //             }
+        //         }
+        //     }
 
-        if (!newEntities.isEmpty()) {
-            generalRulesRepository.saveAll(newEntities);
-        }
+        //     if (!isDuplicate) {
+        //         newEntities.add(newEntity);
+        //         existingEntries.add(newEntity);
+        //     }
+        // }
+
+        // if (!newEntities.isEmpty()) {
+        //     generalRulesRepository.saveAll(newEntities);
+        // }
 
     }
 
