@@ -43,27 +43,28 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
     // Verificar credenciales en Active Directory
     @Override
     public Boolean checkAccount(String samAccountName, String password) {
-
-        try {
+        try (LDAPConnection connection = new LDAPConnection(ldapHost, ldapPort)) {
             String userPrincipalName = samAccountName + "@" + domain;
-            LDAPConnection connection = new LDAPConnection(ldapHost, ldapPort);
             connection.bind(userPrincipalName, password);
+
             SearchResultEntry usuario = buscarUsuarioPorSAMAccountName(connection, samAccountName, baseDN);
+            if (usuario == null) {
+                throw new IllegalArgumentException("User not found in Active Directory: " + samAccountName);
+            }
 
-            connection.close();
-
-            return usuario != null;
+            return true;
 
         } catch (LDAPBindException e) {
-            return false;
+            throw new IllegalArgumentException("Invalid credentials for user: " + samAccountName, e);
         } catch (LDAPException e) {
-            return false;
+            throw new IllegalStateException("Error connecting to LDAP server.", e);
         }
     }
 
     // Buscar usuario por SAMAccountName en el directorio LDAP.
     private SearchResultEntry buscarUsuarioPorSAMAccountName(
             LDAPConnection connection, String samAccountName, String baseDN) throws LDAPException {
+
         String searchFilter = String.format("(sAMAccountName=%s)", samAccountName);
         SearchRequest searchRequest = new SearchRequest(baseDN, SearchScope.SUB, searchFilter);
 
@@ -72,20 +73,15 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
         if (searchResult.getEntryCount() == 0) {
             return null;
         }
-
         return searchResult.getSearchEntries().get(0);
     }
 
     // Obtener todos los usuarios del Active Directory
     @Override
     public List<UserEntity> getAllUsers() {
-
         List<UserEntity> users = new ArrayList<>();
 
-        try {
-
-            LDAPConnection connection = new LDAPConnection(ldapHost, ldapPort);
-
+        try (LDAPConnection connection = new LDAPConnection(ldapHost, ldapPort)) {
             connection.bind(serviceUser, servicePassword);
 
             String searchFilter = "(objectClass=user)";
@@ -112,10 +108,12 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
                 users.add(userEntity);
             }
 
-            connection.close();
-
         } catch (LDAPException e) {
-            return new ArrayList<>();
+            throw new IllegalStateException("Error retrieving users from Active Directory.", e);
+        }
+
+        if (users.isEmpty()) {
+            throw new IllegalStateException("No users found in Active Directory.");
         }
 
         return users;
@@ -123,17 +121,20 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
 
     private Boolean isEnabledUser(String userAccountControl) {
         if (userAccountControl != null) {
-            int uacValue = Integer.parseInt(userAccountControl);
-            boolean isDisabled = (uacValue & 0x2) != 0;
-            return !isDisabled;
+            try {
+                int uacValue = Integer.parseInt(userAccountControl);
+                boolean isDisabled = (uacValue & 0x2) != 0;
+                return !isDisabled;
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid userAccountControl value: " + userAccountControl, e);
+            }
         } else {
-            return false;
+            throw new IllegalArgumentException("Missing userAccountControl attribute.");
         }
     }
 
     private Date formatWhenChanged(String whenChanged) {
         try {
-
             SimpleDateFormat adFormat = new SimpleDateFormat("yyyyMMddHHmmss");
             if (whenChanged.contains(".")) {
                 whenChanged = whenChanged.split("\\.")[0];
@@ -141,7 +142,7 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
             return adFormat.parse(whenChanged);
 
         } catch (ParseException e) {
-            return null;
+            throw new IllegalArgumentException("Error parsing 'whenChanged' attribute: " + whenChanged, e);
         }
     }
 }
