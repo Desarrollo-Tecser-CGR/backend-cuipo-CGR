@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Immutable
-@Table(name = "TMP_VW_OPENDATA_D_EJECUCION_GASTOS", schema = "CUIPO")
+@Table(name = "VW_OPENDATA_D_EJECUCION_GASTOS")
 @NoArgsConstructor
 public class DataEjecGastos {
    @Column(name = "PERIODO")
@@ -34,18 +34,18 @@ public class DataEjecGastos {
    @Column(name = "COMPROMISOS")
    private Double compromisos;
 
-   @Column(name = "OBLIGACIONES")
-   private Double obligaciones;
+   // @Column(name = "OBLIGACIONES")
+   // private Double obligaciones;
 
-   @Column(name = "PAGOS")
-   private Double pagos;
+   // @Column(name = "PAGOS")
+   // private Double pagos;
 
-   @Column(name = "AMBITO_CODIGO")
-   private String codigoAmbito;
+   // @Column(name = "AMBITO_CODIGO")
+   // private String codigoAmbito;
 
-   @Column(name = "NOM_VIGENCIA_DEL_GASTO")
-   private String nombreVigenciaGasto;
+   // @Column(name = "NOM_VIGENCIA_DEL_GASTO")
+   // private String nombreVigenciaGasto;
 
-   @Column(name = "COD_CPC")
-   private String codigoCPC;
+   // @Column(name = "COD_CPC")
+   // private String codigoCPC;
 }

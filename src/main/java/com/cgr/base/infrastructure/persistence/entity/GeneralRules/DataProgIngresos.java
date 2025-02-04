@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Immutable
-@Table(name = "TMP_VW_OPENDATA_A_PROGRAMACION_INGRESOS", schema = "CUIPO")
+@Table(name = "VW_OPENDATA_A_PROGRAMACION_INGRESOS")
 @NoArgsConstructor
 public class DataProgIngresos {
 
@@ -32,9 +32,9 @@ public class DataProgIngresos {
    @Column(name = "PRESUPUESTO_DEFINITIVO")
    private Double presupuestoDefinitivo;
 
-   @Column(name = "PRESUPUESTO_INICIAL")
-   private Double presupuestoInicial;
+   // @Column(name = "PRESUPUESTO_INICIAL")
+   // private Double presupuestoInicial;
 
-   @Column(name = "CUENTA")
-   private String cuenta;
+   // @Column(name = "CUENTA")
+   // private String cuenta;
 }
