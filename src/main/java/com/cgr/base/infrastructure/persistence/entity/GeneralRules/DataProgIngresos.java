@@ -1,5 +1,7 @@
 package com.cgr.base.infrastructure.persistence.entity.GeneralRules;
 
+import java.math.BigDecimal;
+
 import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.Column;
@@ -30,7 +32,7 @@ public class DataProgIngresos {
    private String nombreCuenta;
    
    @Column(name = "PRESUPUESTO_DEFINITIVO")
-   private Double presupuestoDefinitivo;
+   private BigDecimal presupuestoDefinitivo;
 
    // @Column(name = "PRESUPUESTO_INICIAL")
    // private Double presupuestoInicial;

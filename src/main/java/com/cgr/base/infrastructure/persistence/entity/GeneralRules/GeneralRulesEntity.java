@@ -1,5 +1,7 @@
 package com.cgr.base.infrastructure.persistence.entity.GeneralRules;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -33,8 +35,11 @@ public class GeneralRulesEntity {
     @Column(nullable = true)
     private String accountName;
 
-    // @Column(nullable = true)
-    // private String generalRule1;
+    @Column(nullable = true)
+    private BigDecimal finalBudget;
+
+    @Column(nullable = true)
+    private String generalRule1;
 
     // @Column(nullable = true)
     // private String generalRule2;

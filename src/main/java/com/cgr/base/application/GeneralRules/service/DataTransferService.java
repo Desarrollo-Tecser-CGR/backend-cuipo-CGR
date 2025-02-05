@@ -8,12 +8,11 @@ import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cgr.base.infrastructure.persistence.entity.GeneralRules.DataEjecGastos;
-import com.cgr.base.infrastructure.persistence.entity.GeneralRules.DataProgGastos;
-import com.cgr.base.infrastructure.persistence.entity.GeneralRules.DataProgIngresos;
+import com.cgr.base.application.GeneralRules.mapper.mapperEntity;
 import com.cgr.base.infrastructure.persistence.entity.GeneralRules.GeneralRulesEntity;
 import com.cgr.base.infrastructure.persistence.repository.GeneralRules.EjecGastosRepo;
 import com.cgr.base.infrastructure.persistence.repository.GeneralRules.GeneralRulesRepository;
@@ -27,35 +26,49 @@ public class DataTransferService {
     private GeneralRulesRepository generalRulesRepo;
 
     @Autowired
-    private ProgIngresosRepo ProgIngresosRepo;
+    private ProgIngresosRepo progIngresosRepo;
 
     @Autowired
-    private ProgGastosRepo ProgGastosRepo;
+    private ProgGastosRepo progGastosRepo;
 
     @Autowired
-    private EjecGastosRepo EjecGastosRepo;
+    private EjecGastosRepo ejecGastosRepo;
 
+    @Autowired
+    private mapperEntity Mapper;
+
+    // Llamada Automatica Transferencia Datos
     @Async
     @Transactional
-    public CompletableFuture<Void> transferDataGeneralRules() {
+    @Scheduled(cron = "0 0 11 * * ?")
+    public CompletableFuture<Void> scheduledTransfer() {
+        performDataTransfer();
+        return CompletableFuture.completedFuture(null);
+    }
+
+    // Llamada Manual Transferencia Datos
+    @Transactional
+    public void transferDataGeneralRules() {
+        performDataTransfer();
+    }
+
+    // Logica Transferencia Datos
+    private void performDataTransfer() {
         Set<String> existingKeys = new HashSet<>();
-        generalRulesRepo.findAll().forEach(entry -> existingKeys.add(generateKey(entry)));
+        generalRulesRepo.findAll().forEach(entry -> existingKeys.add(Mapper.generateKey(entry)));
 
         List<GeneralRulesEntity> newEntities = new ArrayList<>();
-
-        processData(ProgIngresosRepo.findAll(), newEntities, existingKeys);
-        processData(ProgGastosRepo.findAll(), newEntities, existingKeys);
-        processData(EjecGastosRepo.findAll(), newEntities, existingKeys);
+        processData(progIngresosRepo.findAll(), newEntities, existingKeys);
+        processData(progGastosRepo.findAll(), newEntities, existingKeys);
+        processData(ejecGastosRepo.findAll(), newEntities, existingKeys);
 
         saveInBatches(newEntities);
-
-        return CompletableFuture.completedFuture(null);
     }
 
     private void processData(List<?> dataList, List<GeneralRulesEntity> newEntities, Set<String> existingKeys) {
         for (Object data : dataList) {
-            GeneralRulesEntity newEntity = mapToGeneralRulesEntity(data);
-            String key = generateKey(newEntity);
+            GeneralRulesEntity newEntity = Mapper.mapToGeneralRulesEntity(data);
+            String key = Mapper.generateKey(newEntity);
 
             if (!existingKeys.contains(key)) {
                 newEntities.add(newEntity);
@@ -64,38 +77,6 @@ public class DataTransferService {
         }
     }
 
-    private GeneralRulesEntity mapToGeneralRulesEntity(Object data) {
-        GeneralRulesEntity entity = new GeneralRulesEntity();
-
-        if (data instanceof DataProgIngresos) {
-            DataProgIngresos d = (DataProgIngresos) data;
-            entity.setYear(extractYear(d.getPeriodo()));
-            entity.setPeriod(extractPeriod(d.getPeriodo()));
-            entity.setNameAmbit(d.getNombreAmbito());
-            entity.setEntityName(d.getNombreEntidad());
-            entity.setAccountName(d.getNombreCuenta());
-        } else if (data instanceof DataProgGastos) {
-            DataProgGastos d = (DataProgGastos) data;
-            entity.setYear(extractYear(d.getPeriodo()));
-            entity.setPeriod(extractPeriod(d.getPeriodo()));
-            entity.setNameAmbit(d.getNombreAmbito());
-            entity.setEntityName(d.getNombreEntidad());
-            entity.setAccountName(d.getNombreCuenta());
-        } else if (data instanceof DataEjecGastos) {
-            DataEjecGastos d = (DataEjecGastos) data;
-            entity.setYear(extractYear(d.getPeriodo()));
-            entity.setPeriod(extractPeriod(d.getPeriodo()));
-            entity.setNameAmbit(d.getNombreAmbito());
-            entity.setEntityName(d.getNombreEntidad());
-            entity.setAccountName(d.getNombreCuenta());
-        }
-
-        return entity;
-    }
-
-    private String generateKey(GeneralRulesEntity entity) {
-        return entity.getEntityName() + ":" + entity.getAccountName() + ":" + entity.getYear() + ":" + entity.getPeriod() + ":" + entity.getNameAmbit();
-    }
     
 
     private void saveInBatches(List<GeneralRulesEntity> entities) {
@@ -104,37 +85,6 @@ public class DataTransferService {
             int end = Math.min(i + batchSize, entities.size());
             generalRulesRepo.saveAll(entities.subList(i, end));
         }
-    }
-
-    private String extractYear(String periodo) {
-        return periodo != null && periodo.length() >= 4 ? periodo.substring(0, 4) : "";
-    }
-
-    private String extractPeriod(String periodo) {
-        if (periodo != null && periodo.length() >= 6) {
-            String month = periodo.substring(4, 6);
-            switch (month) {
-                case "01":
-                case "02":
-                case "03":
-                    return "3";
-                case "04":
-                case "05":
-                case "06":
-                    return "6";
-                case "07":
-                case "08":
-                case "09":
-                    return "9";
-                case "10":
-                case "11":
-                case "12":
-                    return "12";
-                default:
-                    return "";
-            }
-        }
-        return "";
     }
 
 }

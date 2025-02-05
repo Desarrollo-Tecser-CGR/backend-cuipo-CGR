@@ -1,4 +1,4 @@
-package com.cgr.base.application.GeneralRules;
+package com.cgr.base.application.GeneralRules.service;
 
 import java.math.BigDecimal;
 
@@ -37,11 +37,12 @@ public class GeneralRulesEvaluator {
     }
 
     // Regla1: Validacion presupuesto definitivo.
-    public String evaluateGeneralRule1(Double value) {
-        if (value == null || value.isNaN()) {
+    public String evaluateGeneralRule1(BigDecimal budget) {
+        if (budget == null) {
             return "NO DATA";
         }
-        return value < 100000000 ? "NO CUMPLE" : "CUMPLE";
+        BigDecimal threshold = new BigDecimal("100000000");
+        return budget.compareTo(threshold) < 0 ? "NO CUMPLE" : "CUMPLE";
     }
 
     // Regla2: Entidad en Liquidacion.
