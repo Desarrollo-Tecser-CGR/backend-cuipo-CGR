@@ -36,7 +36,7 @@ public class GeneralRulesEvaluator {
         return dateString;
     }
 
-    // Regla1: Validacion presupuesto definitivo.
+    // Regla1: Presupuesto Definitivo.
     public String evaluateGeneralRule1(BigDecimal budget) {
         if (budget == null) {
             return "NO DATA";
@@ -46,20 +46,21 @@ public class GeneralRulesEvaluator {
     }
 
     // Regla2: Entidad en Liquidacion.
-    public String evaluateGeneralRule2(String value) {
-        return value != null && value.toLowerCase().contains("liquidacion") ? "NO CUMPLE" : "CUMPLE";
-    }
+    public String evaluateGeneralRule2(String entity) {
+        if (entity == null || entity.isEmpty()) {
+            return "NO DATA";
+        }
+        return entity.toLowerCase().contains("liquidacion") ? "NO CUMPLE" : "CUMPLE";
+     }
 
     // Regla3: Comparativo de Campos.
-    public String evaluateGeneralRule3(Double presupuestoDefinitivo, Double presupuestoInicial) {
-        if (presupuestoDefinitivo == null || presupuestoDefinitivo.isNaN()) {
+    public String evaluateGeneralRule3(BigDecimal presupuestoDefinitivo, BigDecimal presupuestoInicial) {
+        if (presupuestoDefinitivo == null || presupuestoInicial == null) {
             return "NO DATA";
         }
-        if (presupuestoInicial == null || presupuestoInicial.isNaN()) {
-            return "NO DATA";
-        }
-        return (presupuestoDefinitivo == 0.0 && presupuestoInicial == 0.0) ? "NO CUMPLE" : "CUMPLE";
-    }
+        return (presupuestoDefinitivo.compareTo(BigDecimal.ZERO) == 0 
+                && presupuestoInicial.compareTo(BigDecimal.ZERO) == 0) ? "NO CUMPLE" : "CUMPLE";
+     }
 
     // Regla 4: Validación Presupuesto Inicial por Periodos
     public String evaluateGeneralRule4(String period3Value, String periodToCompare) {

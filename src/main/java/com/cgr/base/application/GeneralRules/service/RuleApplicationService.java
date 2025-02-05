@@ -25,14 +25,18 @@ public class RuleApplicationService {
 
         for (GeneralRulesEntity generalRule : generalRulesData) {
 
-            if (generalRule.getFinalBudget() != null) {
+            // Regla 1: Presupuesto Definitivo.
+            String resultGeneralRule1 = Evaluator.evaluateGeneralRule1(generalRule.getFinalBudget());
+            generalRule.setGeneralRule1(resultGeneralRule1);
 
-                String resultGeneralRule1 = Evaluator.evaluateGeneralRule1(generalRule.getFinalBudget());
-                generalRule.setGeneralRule1(resultGeneralRule1);
+            // Regla2: Entidad en Liquidacion.
+            String resultGeneralRule2 = Evaluator.evaluateGeneralRule2(generalRule.getAccountName());
+            generalRule.setGeneralRule2(resultGeneralRule2);
 
-            } else {
-                generalRule.setGeneralRule1("NO DATA");
-            }
+            // Regla3: Presupuesto Inicial vs Definitivo.
+            String resultGeneralRule3 = Evaluator.evaluateGeneralRule3(generalRule.getFinalBudget(),generalRule.getInitialBudget());
+            generalRule.setGeneralRule3(resultGeneralRule3);
+
         }
 
         generalRulesRepo.saveAll(generalRulesData);

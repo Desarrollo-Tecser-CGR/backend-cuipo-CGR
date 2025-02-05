@@ -54,8 +54,12 @@ public class mapperEntity {
         return "";
     }
 
-    public String generateKey(GeneralRulesEntity entity) {
+    public String generateKeyPeriod(GeneralRulesEntity entity) {
         return entity.getEntityName() + ":" + entity.getAccountName() + ":" + entity.getYear() + ":" + entity.getPeriod() + ":" + entity.getNameAmbit();
     }
+
+    public String generateKeyYear(GeneralRulesEntity entity) {
+        return entity.getEntityName() + ":" + entity.getAccountName() + ":" + entity.getYear() + ":" + entity.getNameAmbit();
+     }
 
 }

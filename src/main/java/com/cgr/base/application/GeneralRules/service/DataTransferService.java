@@ -40,7 +40,7 @@ public class DataTransferService {
     // Llamada Automatica Transferencia Datos
     @Async
     @Transactional
-    @Scheduled(cron = "0 0 11 * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
     public CompletableFuture<Void> scheduledTransfer() {
         performDataTransfer();
         return CompletableFuture.completedFuture(null);
@@ -55,7 +55,7 @@ public class DataTransferService {
     // Logica Transferencia Datos
     private void performDataTransfer() {
         Set<String> existingKeys = new HashSet<>();
-        generalRulesRepo.findAll().forEach(entry -> existingKeys.add(Mapper.generateKey(entry)));
+        generalRulesRepo.findAll().forEach(entry -> existingKeys.add(Mapper.generateKeyPeriod(entry)));
 
         List<GeneralRulesEntity> newEntities = new ArrayList<>();
         processData(progIngresosRepo.findAll(), newEntities, existingKeys);
@@ -68,7 +68,7 @@ public class DataTransferService {
     private void processData(List<?> dataList, List<GeneralRulesEntity> newEntities, Set<String> existingKeys) {
         for (Object data : dataList) {
             GeneralRulesEntity newEntity = Mapper.mapToGeneralRulesEntity(data);
-            String key = Mapper.generateKey(newEntity);
+            String key = Mapper.generateKeyPeriod(newEntity);
 
             if (!existingKeys.contains(key)) {
                 newEntities.add(newEntity);
@@ -76,8 +76,6 @@ public class DataTransferService {
             }
         }
     }
-
-    
 
     private void saveInBatches(List<GeneralRulesEntity> entities) {
         int batchSize = 500;

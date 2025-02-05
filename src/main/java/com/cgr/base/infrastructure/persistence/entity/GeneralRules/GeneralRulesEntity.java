@@ -39,13 +39,19 @@ public class GeneralRulesEntity {
     private BigDecimal finalBudget;
 
     @Column(nullable = true)
+    private BigDecimal initialBudget;
+
+    @Column(nullable = true)
+    private String initialBudget3;
+
+    @Column(nullable = true)
     private String generalRule1;
 
-    // @Column(nullable = true)
-    // private String generalRule2;
+    @Column(nullable = true)
+    private String generalRule2;
 
-    // @Column(nullable = true)
-    // private String generalRule3;
+    @Column(nullable = true)
+    private String generalRule3;
 
     // @Column(nullable = true)
     // private String InitialBudget_Period3;

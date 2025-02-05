@@ -34,8 +34,8 @@ public class DataProgIngresos {
    @Column(name = "PRESUPUESTO_DEFINITIVO")
    private BigDecimal presupuestoDefinitivo;
 
-   // @Column(name = "PRESUPUESTO_INICIAL")
-   // private Double presupuestoInicial;
+   @Column(name = "PRESUPUESTO_INICIAL")
+   private BigDecimal presupuestoInicial;
 
    // @Column(name = "CUENTA")
    // private String cuenta;

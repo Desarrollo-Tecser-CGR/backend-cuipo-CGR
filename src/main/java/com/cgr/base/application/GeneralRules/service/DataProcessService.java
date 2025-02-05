@@ -34,13 +34,15 @@ public class DataProcessService {
 
         generalRulesData.forEach(data -> {
             data.setFinalBudget(null);
+            data.setInitialBudget(null);
         });
         generalRulesRepo.saveAll(generalRulesData);
         generalRulesData = generalRulesRepo.findAll();
 
-        for (GeneralRulesEntity generalRule : generalRulesData) {
+        for (GeneralRulesEntity rule : generalRulesData) {
 
-            String generalRuleKey = Mapper.generateKey(generalRule);
+            String ruleKeyPeriod = Mapper.generateKeyPeriod(rule);
+            String ruleKeyYear = Mapper.generateKeyYear(rule);
 
             for (DataProgIngresos data : progIngresosList) {
                 
@@ -51,20 +53,38 @@ public class DataProcessService {
                 tempEntity.setEntityName(data.getNombreEntidad());
                 tempEntity.setAccountName(data.getNombreCuenta());
 
-                String dataKey = Mapper.generateKey(tempEntity);
+                String dataKeyPeriod = Mapper.generateKeyPeriod(tempEntity);
+                String dataKeyYear = Mapper.generateKeyYear(tempEntity);
 
-                if (generalRuleKey.equals(dataKey)) {
+                if (ruleKeyPeriod.equals(dataKeyPeriod)) {
 
                     BigDecimal presupuestoDefinitivo = data.getPresupuestoDefinitivo();
                     if (presupuestoDefinitivo != null) { 
-                        if (generalRule.getFinalBudget() == null) {
-                            generalRule.setFinalBudget(presupuestoDefinitivo);
+                        if (rule.getFinalBudget() == null) {
+                            rule.setFinalBudget(presupuestoDefinitivo);
                         } else {
-                            generalRule.setFinalBudget(generalRule.getFinalBudget().add(presupuestoDefinitivo));
+                            rule.setFinalBudget(rule.getFinalBudget().add(presupuestoDefinitivo));
+                        }
+                    }
+
+                    BigDecimal presupuestoInicial = data.getPresupuestoInicial();
+                    if (presupuestoInicial != null) { 
+                        if (rule.getInitialBudget() == null) {
+                            rule.setInitialBudget(presupuestoInicial);
+                        } else {
+                            rule.setInitialBudget(rule.getInitialBudget().add(presupuestoInicial));
                         }
                     }
                     
                 } 
+
+                if (ruleKeyYear.equals(dataKeyYear)){
+
+                    if(tempEntity.getPeriod().equals("3")){
+                        
+                    }
+
+                }
                 
             }
 
