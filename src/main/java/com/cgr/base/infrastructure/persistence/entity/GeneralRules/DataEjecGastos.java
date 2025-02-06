@@ -1,5 +1,7 @@
 package com.cgr.base.infrastructure.persistence.entity.GeneralRules;
 
+import java.math.BigDecimal;
+
 import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.Column;
@@ -21,31 +23,31 @@ public class DataEjecGastos {
    @Column(name = "AMBITO_NOMBRE")
    private String nombreAmbito;
 
+   @Column(name = "AMBITO_CODIGO")
+   private String codigoAmbito;
+
    @Column(name = "NOMBRE_ENTIDAD")
    private String nombreEntidad;
+
+   @Column(name = "CUENTA")
+   private String cuenta;
 
    @Id
    @Column(name = "NOMBRE_CUENTA")
    private String nombreCuenta;
 
-   @Column(name = "CUENTA")
-   private String cuenta;
-
    @Column(name = "COMPROMISOS")
-   private Double compromisos;
+   private BigDecimal compromisos;
 
-   // @Column(name = "OBLIGACIONES")
-   // private Double obligaciones;
+   @Column(name = "OBLIGACIONES")
+   private BigDecimal obligaciones;
 
-   // @Column(name = "PAGOS")
-   // private Double pagos;
+   @Column(name = "PAGOS")
+   private BigDecimal pagos;
 
-   // @Column(name = "AMBITO_CODIGO")
-   // private String codigoAmbito;
+   @Column(name = "NOM_VIGENCIA_DEL_GASTO")
+   private String nombreVigenciaEjec;
 
-   // @Column(name = "NOM_VIGENCIA_DEL_GASTO")
-   // private String nombreVigenciaGasto;
-
-   // @Column(name = "COD_CPC")
-   // private String codigoCPC;
+   @Column(name = "COD_CPC")
+   private String codigoCPC;
 }

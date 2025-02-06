@@ -51,54 +51,43 @@ public class GeneralRulesEvaluator {
             return "NO DATA";
         }
         return entity.toLowerCase().contains("liquidacion") ? "NO CUMPLE" : "CUMPLE";
-     }
+    }
 
-    // Regla3: Comparativo de Campos.
+    // Regla3: Presupuesto Inicial vs Definitivo.
     public String evaluateGeneralRule3(BigDecimal presupuestoDefinitivo, BigDecimal presupuestoInicial) {
         if (presupuestoDefinitivo == null || presupuestoInicial == null) {
             return "NO DATA";
         }
-        return (presupuestoDefinitivo.compareTo(BigDecimal.ZERO) == 0 
+        return (presupuestoDefinitivo.compareTo(BigDecimal.ZERO) == 0
                 && presupuestoInicial.compareTo(BigDecimal.ZERO) == 0) ? "NO CUMPLE" : "CUMPLE";
-     }
+    }
 
-    // Regla 4: Validación Presupuesto Inicial por Periodos
-    public String evaluateGeneralRule4(String period3Value, String periodToCompare) {
+    // Regla4: Presupuesto Inicial por Periodos.
+    public String evaluateGeneralRule4(BigDecimal period3Value, BigDecimal periodToCompare) {
         if (period3Value == null || periodToCompare == null) {
             return "NO DATA";
         }
-        if (period3Value.isEmpty() || periodToCompare.isEmpty()) {
-            return "NO DATA";
-        }
-        try {
-            return Double.parseDouble(periodToCompare) >= Double.parseDouble(period3Value)
-                    ? "CUMPLE"
-                    : "NO CUMPLE";
-        } catch (NumberFormatException e) {
-            return "NO DATA";
-        }
+        return periodToCompare.compareTo(period3Value) >= 0 ? "CUMPLE" : "NO CUMPLE";
     }
 
-    // Regla 5: Comparativo Ingresos.
-    public String evaluateGeneralRule5(Double presupuestoInicialValue, Double apropiacionInicial) {
-        if (presupuestoInicialValue == null || apropiacionInicial == null) {
-            return "NO DATA";
-        }
-        if (presupuestoInicialValue.isNaN() || apropiacionInicial.isNaN()) {
+    // Regla 5: Programación Gastos vs Ingresos.
+    public String evaluateGeneralRule5(BigDecimal presupuestoInicial, BigDecimal apropiacionInicial) {
+
+        if (presupuestoInicial == null || apropiacionInicial == null) {
             return "NO DATA";
         }
 
-        BigDecimal presupuestoInicial = new BigDecimal(presupuestoInicialValue);
-        BigDecimal apropiacion = new BigDecimal(apropiacionInicial);
-
-        return presupuestoInicial.compareTo(apropiacion) == 0 ? "CUMPLE" : "NO CUMPLE";
+        return presupuestoInicial.compareTo(apropiacionInicial) == 0 ? "CUMPLE" : "NO CUMPLE";
     }
 
-    // Regla 5: Diferencia.
-    public BigDecimal calculateDifference(Double initialBudgetValue, Double initialAllocation) {
-        BigDecimal initialBudgetBigDecimal = new BigDecimal(initialBudgetValue);
-        BigDecimal initialAllocationBigDecimal = new BigDecimal(initialAllocation);
-        return initialBudgetBigDecimal.subtract(initialAllocationBigDecimal);
+    // Regla 5: Diferencia Apropiación vs Presupuesto.
+    public BigDecimal calculateDifference(BigDecimal initialBudget, BigDecimal initialAllocation) {
+
+        if (initialBudget == null || initialAllocation == null) {
+            return null;
+        }
+
+        return initialBudget.subtract(initialAllocation);
     }
 
     // Regla 8: Validación código sección presupuestal.
@@ -150,16 +139,16 @@ public class GeneralRulesEvaluator {
             case "RESERVAS" -> {
                 yield matchedAmbito.getReservas();
             }
-            case "CXP" -> {
+            case "CUENTAS POR PAGAR" -> {
                 yield matchedAmbito.getCxp();
             }
-            case "VF VA" -> {
+            case "VIGENCIAS FUTURAS - VIGENCIA ACTUAL" -> {
                 yield matchedAmbito.getVfVa();
             }
-            case "VF RESERVA" -> {
+            case "VIGENCIAS FUTURAS - RESERVAS" -> {
                 yield matchedAmbito.getVfReserva();
             }
-            case "VF CXP" -> {
+            case "VIGENCIAS FUTURAS - CUENTAS POR PAGAR" -> {
                 yield matchedAmbito.getVfCxp();
             }
             default -> {
@@ -168,7 +157,7 @@ public class GeneralRulesEvaluator {
         };
     }
 
-    // Regla10: Validacion apropiacion definitiva definitivo.
+    // Regla10: Vigencia del Gasto - Programación Gastos.
     public String evaluateGeneralRule10(Double vigenciaValue) {
         if (vigenciaValue == null || vigenciaValue.isNaN()) {
             return "NO DATA";
@@ -176,142 +165,101 @@ public class GeneralRulesEvaluator {
         return vigenciaValue == 0 ? "NO CUMPLE" : "CUMPLE";
     }
 
-    // Regla11.0: Validacion Inexistencia Cuenta 2.3 .
-    public String evaluateGeneralRule11_0(String accountField) {
-        if (accountField == null || accountField.isEmpty()) {
-            return "NO DATA";
-        }
-        return accountField.equals("2.3") ? "NO CUMPLE" : "CUMPLE";
+    // Regla11.0: Validacion Inexistencia Cuenta 2.3
+    public String evaluateGeneralRule11_0(Boolean accountExists) {
+        return accountExists ? "NO CUMPLE" : "CUMPLE";
     }
 
-    // Regla11.1: Validacion Existencia Cuenta 2.99 .
-    public String evaluateGeneralRule11_1(String accountField) {
-        if (accountField == null || accountField.isEmpty()) {
-            return "NO DATA";
-        }
-        return accountField.equals("2.99") ? "CUMPLE" : "NO CUMPLE";
+    // Regla11.1: Validacion Existencia Cuenta 2.99
+    public String evaluateGeneralRule11_1(Boolean accountExists) {
+        return accountExists ? "CUMPLE" : "NO CUMPLE";
     }
 
-    // Regla12: Validacion apropiacion definitiva definitivo.
-    public String evaluateGeneralRule12(Double value) {
-        if (value == null || value.isNaN()) {
+    // Regla12: Apropiacion Definitiva.
+    public String evaluateGeneralRule12(BigDecimal appropriation) {
+        if (appropriation == null) {
             return "NO DATA";
         }
-        return value < 100000000 ? "NO CUMPLE" : "CUMPLE";
+        BigDecimal threshold = new BigDecimal("100000000");
+        return appropriation.compareTo(threshold) < 0 ? "NO CUMPLE" : "CUMPLE";
     }
 
-    // Regla13: Apropiacion definitiva diferente 0.
-    public String evaluateGeneralRule13(String accountField, Double value) {
-        if (accountField != null && value != null && !(accountField.isEmpty())) {
+    // Regla13: Apropiacion Definitiva Cuentas Padre.
+    public String evaluateGeneralRule13(String accountField, BigDecimal appropriation) {
+
+        if (accountField != null && appropriation != null && !accountField.isEmpty()) {
 
             return switch (accountField) {
                 case "2.1", "2.2", "2.4" -> {
-                    if (!value.equals(0.0)) {
+
+                    if (!appropriation.equals(BigDecimal.ZERO)) {
                         yield "CUMPLE";
                     }
                     yield "NO CUMPLE";
                 }
-                default ->
-                    "NO DATA";
+                default -> "NO DATA";
             };
         }
         return "NO DATA";
     }
 
     // Regla 14: Validación Apropiación Inicial por Periodos
-    public String evaluateGeneralRule14(String period3Value, String periodToCompare, String codVig, String nameVig) {
+    public String evaluateGeneralRule14(BigDecimal period3Value, BigDecimal periodToCompare, String codVig,
+            String nameVig) {
+
         if (period3Value == null || periodToCompare == null) {
             return "NO DATA";
         }
-        if (period3Value.isEmpty() || periodToCompare.isEmpty()) {
-            return "NO DATA";
-        }
+
         if (codVig.equals("1.0") && nameVig.equals("VIGENCIA ACTUAL")) {
-            if (period3Value.equals(periodToCompare)) {
+            if (period3Value.compareTo(periodToCompare) == 0) {
                 return "CUMPLE";
             }
             return "NO CUMPLE";
         }
         if (codVig.equals("4.0") && nameVig.equals("VIGENCIA FUTURA")) {
-            if (period3Value.equals(periodToCompare)) {
+            if (period3Value.compareTo(periodToCompare) == 0) {
                 return "CUMPLE";
             }
             return "NO CUMPLE";
         }
+
+        // Si no se cumple ninguna condición, devolver "NO DATA"
         return "NO DATA";
     }
 
     // Regla 15.0: Validación Compromisos VZ Obligaciones.
-    public String evaluateGeneralRule15_0(Double compromisosValue, Double obligacionesValue) {
+    public String evaluateGeneralRule15_0(BigDecimal compromisosValue, BigDecimal obligacionesValue) {
         if (compromisosValue == null || obligacionesValue == null) {
             return "NO DATA";
         }
-        if (compromisosValue.isNaN() || obligacionesValue.isNaN()) {
-            return "NO DATA";
-        }
-        return compromisosValue < obligacionesValue ? "NO CUMPLE" : "CUMPLE";
+        return compromisosValue.compareTo(obligacionesValue) < 0 ? "NO CUMPLE" : "CUMPLE";
     }
 
     // Regla 15.1: Validación Obligaciones VS Pagos.
-    public String evaluateGeneralRule15_1(Double obligacionesValue, Double pagosValue) {
-        if (pagosValue == null || obligacionesValue == null) {
+    public String evaluateGeneralRule15_1(BigDecimal obligacionesValue, BigDecimal pagosValue) {
+        if (obligacionesValue == null || pagosValue == null) {
             return "NO DATA";
         }
-        if (pagosValue.isNaN() || obligacionesValue.isNaN()) {
-            return "NO DATA";
-        }
-        return obligacionesValue < pagosValue ? "NO CUMPLE" : "CUMPLE";
+        return obligacionesValue.compareTo(pagosValue) < 0 ? "NO CUMPLE" : "CUMPLE";
     }
 
     // Regla 16: Validacion Cuenta Padre Gastos.
-    public String evaluateGeneralRule16(String periodEjec, String periodProg, String cuentaProg, String cuentaEjec) {
-
-        if (!isValidPeriod(periodEjec) || !isValidPeriod(periodProg)) {
-            return "NO DATA";
-        }
-        if (periodEjec == null || periodProg == null) {
-            return "NO DATA";
-        }
-        if (periodEjec.isEmpty() || periodProg.isEmpty()) {
-            return "NO DATA";
-        }
-        if (cuentaProg == null || cuentaEjec == null) {
-            return "NO DATA";
-        }
-        if (cuentaProg.isEmpty() || cuentaEjec.isEmpty()) {
-            return "NO DATA";
-        }
-        if (periodEjec.equals(periodProg)) {
-            if (cuentaProg.equals(cuentaEjec)) {
-                return switch (cuentaProg) {
-                    case "2.1", "2.2", "2.4" ->
-                        "CUMPLE";
-                    default ->
-                        "NO CUMPLE";
-                };
-            }
+    public String evaluateGeneralRule16(Boolean existBudgetPlanning, Boolean existBudgetExecution) {
+        if (existBudgetPlanning && existBudgetExecution) {
+            return "CUMPLE";
         }
         return "NO CUMPLE";
     }
 
-    public boolean isValidPeriod(String period) {
-        return "3".equals(period) || "6".equals(period) || "9".equals(period) || "12".equals(period);
+    // Regla17.0: Validacion Existencia Cuenta 2.3
+    public String evaluateGeneralRule17_0(Boolean accountExists) {
+        return accountExists ? "CUMPLE" : "NO CUMPLE";
     }
 
-    // Regla17.0: Validacion Inexistencia Cuenta 2.3 .
-    public String evaluateGeneralRule17_0(String accountField) {
-        if (accountField == null || accountField.isEmpty()) {
-            return "NO DATA";
-        }
-        return accountField.equals("2.3") ? "CUMPLE" : "NO CUMPLE";
-    }
-
-    // Regla17.1: Validacion Existencia Cuenta 2.99 .
-    public String evaluateGeneralRule17_1(String accountField) {
-        if (accountField == null || accountField.isEmpty()) {
-            return "NO DATA";
-        }
-        return accountField.equals("2.99") ? "NO CUMPLE" : "CUMPLE";
+    // Regla17.1: Validacion Inexistencia Cuenta 2.99
+    public String evaluateGeneralRule17_1(Boolean accountExists) {
+        return accountExists ? "NO CUMPLE" : "CUMPLE";
     }
 
     // Regla 18: Identificación Vigencia Gasto.

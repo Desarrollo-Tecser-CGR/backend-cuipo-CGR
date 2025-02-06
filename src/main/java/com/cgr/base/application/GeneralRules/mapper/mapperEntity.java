@@ -17,20 +17,34 @@ public class mapperEntity {
             entity.setYear(extractYear(d.getPeriodo()));
             entity.setPeriod(extractPeriod(d.getPeriodo()));
             entity.setNameAmbit(d.getNombreAmbito());
+            entity.setCodeAmbit(d.getCodigoAmbito());
             entity.setEntityName(d.getNombreEntidad());
             entity.setAccountName(d.getNombreCuenta());
+            entity.setAccount(d.getCuenta());
         } else if (data instanceof DataProgGastos d) {
             entity.setYear(extractYear(d.getPeriodo()));
             entity.setPeriod(extractPeriod(d.getPeriodo()));
             entity.setNameAmbit(d.getNombreAmbito());
+            entity.setCodeAmbit(d.getCodigoAmbito());
             entity.setEntityName(d.getNombreEntidad());
             entity.setAccountName(d.getNombreCuenta());
+            entity.setAccount(d.getCuenta());
+            entity.setCodeBudgetSection(d.getCodigoSeccionPresupuestal());
+            entity.setValidProgName(d.getNombreVigenciaProg());
+            entity.setValidProgCode(d.getCodVigenciaProg());
         } else if (data instanceof DataEjecGastos d) {
             entity.setYear(extractYear(d.getPeriodo()));
             entity.setPeriod(extractPeriod(d.getPeriodo()));
             entity.setNameAmbit(d.getNombreAmbito());
+            entity.setCodeAmbit(d.getCodigoAmbito());
             entity.setEntityName(d.getNombreEntidad());
             entity.setAccountName(d.getNombreCuenta());
+            entity.setAccount(d.getCuenta());
+            entity.setCommitments(d.getCompromisos());
+            entity.setObligations(d.getObligaciones());
+            entity.setPayments(d.getPagos());
+            entity.setValidExecName(d.getNombreVigenciaEjec());
+            entity.setCodeCPC(d.getCodigoCPC());
         }
 
         return entity;
@@ -60,6 +74,11 @@ public class mapperEntity {
 
     public String generateKeyYear(GeneralRulesEntity entity) {
         return entity.getEntityName() + ":" + entity.getAccountName() + ":" + entity.getYear() + ":" + entity.getNameAmbit();
-     }
+    }
+
+    public String generateKeyNoAccount(GeneralRulesEntity entity) {
+        return entity.getEntityName() + ":" + entity.getYear() + ":" + entity.getPeriod() + ":" + entity.getNameAmbit();
+    }
+    
 
 }

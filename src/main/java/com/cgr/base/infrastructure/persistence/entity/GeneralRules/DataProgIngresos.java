@@ -24,8 +24,14 @@ public class DataProgIngresos {
    @Column(name = "AMBITO_NOMBRE")
    private String nombreAmbito;
 
+   @Column(name = "AMBITO_CODIGO")
+   private String codigoAmbito;
+
    @Column(name = "NOMBRE_ENTIDAD")
    private String nombreEntidad;
+
+   @Column(name = "CUENTA")
+   private String cuenta;
 
    @Id
    @Column(name = "NOMBRE_CUENTA")
@@ -37,6 +43,4 @@ public class DataProgIngresos {
    @Column(name = "PRESUPUESTO_INICIAL")
    private BigDecimal presupuestoInicial;
 
-   // @Column(name = "CUENTA")
-   // private String cuenta;
 }
