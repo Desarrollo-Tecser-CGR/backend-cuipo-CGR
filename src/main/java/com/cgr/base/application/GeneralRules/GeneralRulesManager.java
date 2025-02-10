@@ -354,7 +354,7 @@ public class GeneralRulesManager {
 
     @Transactional
     public List<GeneralRulesEntity> getGeneralRulesData() {
-        Process.processData(); 
+        Process.processData();
         return generalRulesRepo.findAll();
     }
 
