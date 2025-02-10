@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Immutable
-@Table(name = "VW_OPENDATA_D_EJECUCION_GASTOS")
+@Table(name = "muestra_ejecucion_gastos")
 @NoArgsConstructor
 public class DataEjecGastos {
    @Column(name = "PERIODO")

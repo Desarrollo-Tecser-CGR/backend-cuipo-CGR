@@ -62,14 +62,14 @@ public class DataProcessService {
             data.setValidProgCode(null);
             data.setValidExecName(null);
             data.setCodeCPC(null);
-            data.setExist23IncomeProgramming(null);
-            data.setExist299IncomeProgramming(null);
-            data.setExistBudgetPlanning(null);
-            data.setExistBudgetExecution(null);
-            data.setExist23IncomeExpenseExecution(null);
-            data.setExist299IncomeExpenseExecution(null);
+            data.setExist23IncomeProg(null);
+            data.setExist299IncomeProg(null);
+            data.setExistBudgetProg(null);
+            data.setExistBudgetExec(null);
+            data.setExist23IncomeExec(null);
+            data.setExist299IncomeProg(null);
         });
-        
+
         generalRulesData = generalRulesRepo.findAll();
 
         for (GeneralRulesEntity rule : generalRulesData) {
@@ -81,8 +81,8 @@ public class DataProcessService {
             for (DataProgIngresos data : progIngresosList) {
 
                 GeneralRulesEntity tempEntity = new GeneralRulesEntity();
-                tempEntity.setYear(Mapper.extractYear(data.getPeriodo()));
-                tempEntity.setPeriod(Mapper.extractPeriod(data.getPeriodo()));
+                tempEntity.setPeriodYear(Mapper.extractYear(data.getPeriodo()));
+                tempEntity.setPeriodTrimester(Mapper.extractPeriod(data.getPeriodo()));
                 tempEntity.setNameAmbit(data.getNombreAmbito());
                 tempEntity.setEntityName(data.getNombreEntidad());
                 tempEntity.setAccountName(data.getNombreCuenta());
@@ -115,7 +115,7 @@ public class DataProcessService {
 
                 if (ruleKeyYear.equals(dataKeyYear)) {
 
-                    if (tempEntity.getPeriod().equals("3")) {
+                    if (tempEntity.getPeriodTrimester().equals("03")) {
 
                         BigDecimal presupuestoInicial = data.getPresupuestoInicial();
                         if (presupuestoInicial != null) {
@@ -130,7 +130,7 @@ public class DataProcessService {
 
                 }
 
-                if (ruleKeyNoAccount.equals(dataKeyNoAccount)){
+                if (ruleKeyNoAccount.equals(dataKeyNoAccount)) {
 
                     if (data.getCuenta().equals("1")) {
 
@@ -146,22 +146,22 @@ public class DataProcessService {
                     }
 
                     if (data.getCuenta().equals("2.3")) {
-                        rule.setExist23IncomeProgramming(true);
+                        rule.setExist23IncomeProg(true);
                     }
 
                     if (data.getCuenta().equals("2.99")) {
-                        rule.setExist299IncomeProgramming(true);
+                        rule.setExist299IncomeProg(true);
                     }
 
                 }
 
             }
 
-            for (DataProgGastos data : progGastosList){
+            for (DataProgGastos data : progGastosList) {
 
                 GeneralRulesEntity tempEntity = new GeneralRulesEntity();
-                tempEntity.setYear(Mapper.extractYear(data.getPeriodo()));
-                tempEntity.setPeriod(Mapper.extractPeriod(data.getPeriodo()));
+                tempEntity.setPeriodYear(Mapper.extractYear(data.getPeriodo()));
+                tempEntity.setPeriodTrimester(Mapper.extractPeriod(data.getPeriodo()));
                 tempEntity.setNameAmbit(data.getNombreAmbito());
                 tempEntity.setEntityName(data.getNombreEntidad());
                 tempEntity.setAccountName(data.getNombreCuenta());
@@ -170,7 +170,7 @@ public class DataProcessService {
                 String dataKeyPeriod = Mapper.generateKeyPeriod(tempEntity);
                 String dataKeyYear = Mapper.generateKeyYear(tempEntity);
 
-                if (ruleKeyNoAccount.equals(dataKeyNoAccount)){
+                if (ruleKeyNoAccount.equals(dataKeyNoAccount)) {
 
                     if (data.getCuenta().equals("1")) {
 
@@ -179,7 +179,8 @@ public class DataProcessService {
                             if (rule.getInitialAppropriation_C2() == null) {
                                 rule.setInitialAppropriation_C2(apropiacionInicial);
                             } else {
-                                rule.setInitialAppropriation_C2(rule.getInitialAppropriation_C2().add(apropiacionInicial));
+                                rule.setInitialAppropriation_C2(
+                                        rule.getInitialAppropriation_C2().add(apropiacionInicial));
                             }
                         }
 
@@ -189,14 +190,15 @@ public class DataProcessService {
 
                 if (ruleKeyYear.equals(dataKeyYear)) {
 
-                    if (tempEntity.getPeriod().equals("3")) {
+                    if (tempEntity.getPeriodTrimester().equals("03")) {
 
                         BigDecimal apropiacionDefinitiva = data.getApropiacionDefinitiva();
                         if (apropiacionDefinitiva != null) {
                             if (rule.getInitialAppropriation_P3() == null) {
                                 rule.setInitialAppropriation_P3(apropiacionDefinitiva);
                             } else {
-                                rule.setInitialAppropriation_P3(rule.getInitialAppropriation_P3().add(apropiacionDefinitiva));
+                                rule.setInitialAppropriation_P3(
+                                        rule.getInitialAppropriation_P3().add(apropiacionDefinitiva));
                             }
                         }
 
@@ -211,30 +213,29 @@ public class DataProcessService {
                         if (rule.getDefinitiveAppropriation() == null) {
                             rule.setDefinitiveAppropriation(apropiacionDefinitiva);
                         } else {
-                            rule.setDefinitiveAppropriation(rule.getDefinitiveAppropriation().add(apropiacionDefinitiva));
+                            rule.setDefinitiveAppropriation(
+                                    rule.getDefinitiveAppropriation().add(apropiacionDefinitiva));
                         }
                     }
 
                     BigDecimal apropiacionInicial = data.getApropiacionInicial();
-                        if (apropiacionInicial != null) {
-                            if (rule.getInitialAppropriation() == null) {
-                                rule.setInitialAppropriation(apropiacionInicial);
-                            } else {
-                                rule.setInitialAppropriation(rule.getInitialAppropriation().add(apropiacionInicial));
-                            }
+                    if (apropiacionInicial != null) {
+                        if (rule.getInitialAppropriation() == null) {
+                            rule.setInitialAppropriation(apropiacionInicial);
+                        } else {
+                            rule.setInitialAppropriation(rule.getInitialAppropriation().add(apropiacionInicial));
                         }
-                    
+                    }
 
                 }
-                
 
             }
 
-            for (DataEjecGastos data : ejecGastosList){
+            for (DataEjecGastos data : ejecGastosList) {
 
                 GeneralRulesEntity tempEntity = new GeneralRulesEntity();
-                tempEntity.setYear(Mapper.extractYear(data.getPeriodo()));
-                tempEntity.setPeriod(Mapper.extractPeriod(data.getPeriodo()));
+                tempEntity.setPeriodYear(Mapper.extractYear(data.getPeriodo()));
+                tempEntity.setPeriodTrimester(Mapper.extractPeriod(data.getPeriodo()));
                 tempEntity.setNameAmbit(data.getNombreAmbito());
                 tempEntity.setEntityName(data.getNombreEntidad());
                 tempEntity.setAccountName(data.getNombreCuenta());
@@ -242,31 +243,29 @@ public class DataProcessService {
                 String dataKeyNoAccount = Mapper.generateKeyNoAccount(tempEntity);
                 String dataKeyPeriod = Mapper.generateKeyPeriod(tempEntity);
 
-                if (ruleKeyPeriod.equals(dataKeyPeriod)){
+                if (ruleKeyPeriod.equals(dataKeyPeriod)) {
 
-                    if (data.getCuenta().equals("2.1") || data.getCuenta().equals("2.2") || data.getCuenta().equals("2.4")) {
-                        rule.setExistBudgetExecution(true);
+                    if (data.getCuenta().equals("2.1") || data.getCuenta().equals("2.2")
+                            || data.getCuenta().equals("2.4")) {
+                        rule.setExistBudgetExec(true);
                     }
 
                 }
 
-                if (ruleKeyNoAccount.equals(dataKeyNoAccount)){
+                if (ruleKeyNoAccount.equals(dataKeyNoAccount)) {
 
                     if (data.getCuenta().equals("2.3")) {
-                        rule.setExist23IncomeExpenseExecution(true);
+                        rule.setExist23IncomeExec(true);
                     }
-    
+
                     if (data.getCuenta().equals("2.99")) {
-                        rule.setExist299IncomeExpenseExecution(true);
+                        rule.setExist299IncomeExec(true);
                     }
 
                 }
-
-                
 
             }
 
-           
         }
 
         generalRulesRepo.saveAll(generalRulesData);

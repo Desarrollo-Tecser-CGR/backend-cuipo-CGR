@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Immutable
-@Table(name = "AMBITOS_CAPTURA", schema = "CUIPO")
+@Table(name = "AMBITOS_CAPTURA")
 @NoArgsConstructor
 public class AmbitosCaptura {
 

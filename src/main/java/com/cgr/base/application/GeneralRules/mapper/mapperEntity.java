@@ -14,16 +14,16 @@ public class mapperEntity {
         GeneralRulesEntity entity = new GeneralRulesEntity();
 
         if (data instanceof DataProgIngresos d) {
-            entity.setYear(extractYear(d.getPeriodo()));
-            entity.setPeriod(extractPeriod(d.getPeriodo()));
+            entity.setPeriodYear(extractYear(d.getPeriodo()));
+            entity.setPeriodTrimester(extractPeriod(d.getPeriodo()));
             entity.setNameAmbit(d.getNombreAmbito());
             entity.setCodeAmbit(d.getCodigoAmbito());
             entity.setEntityName(d.getNombreEntidad());
             entity.setAccountName(d.getNombreCuenta());
             entity.setAccount(d.getCuenta());
         } else if (data instanceof DataProgGastos d) {
-            entity.setYear(extractYear(d.getPeriodo()));
-            entity.setPeriod(extractPeriod(d.getPeriodo()));
+            entity.setPeriodYear(extractYear(d.getPeriodo()));
+            entity.setPeriodTrimester(extractPeriod(d.getPeriodo()));
             entity.setNameAmbit(d.getNombreAmbito());
             entity.setCodeAmbit(d.getCodigoAmbito());
             entity.setEntityName(d.getNombreEntidad());
@@ -33,8 +33,8 @@ public class mapperEntity {
             entity.setValidProgName(d.getNombreVigenciaProg());
             entity.setValidProgCode(d.getCodVigenciaProg());
         } else if (data instanceof DataEjecGastos d) {
-            entity.setYear(extractYear(d.getPeriodo()));
-            entity.setPeriod(extractPeriod(d.getPeriodo()));
+            entity.setPeriodYear(extractYear(d.getPeriodo()));
+            entity.setPeriodTrimester(extractPeriod(d.getPeriodo()));
             entity.setNameAmbit(d.getNombreAmbito());
             entity.setCodeAmbit(d.getCodigoAmbito());
             entity.setEntityName(d.getNombreEntidad());
@@ -69,15 +69,15 @@ public class mapperEntity {
     }
 
     public String generateKeyPeriod(GeneralRulesEntity entity) {
-        return entity.getEntityName() + ":" + entity.getAccountName() + ":" + entity.getYear() + ":" + entity.getPeriod() + ":" + entity.getNameAmbit();
+        return entity.getEntityName() + ":" + entity.getAccountName() + ":" + entity.getPeriodYear() + ":" + entity.getPeriodTrimester() + ":" + entity.getNameAmbit();
     }
 
     public String generateKeyYear(GeneralRulesEntity entity) {
-        return entity.getEntityName() + ":" + entity.getAccountName() + ":" + entity.getYear() + ":" + entity.getNameAmbit();
+        return entity.getEntityName() + ":" + entity.getAccountName() + ":" + entity.getPeriodYear() + ":" + entity.getNameAmbit();
     }
 
     public String generateKeyNoAccount(GeneralRulesEntity entity) {
-        return entity.getEntityName() + ":" + entity.getYear() + ":" + entity.getPeriod() + ":" + entity.getNameAmbit();
+        return entity.getEntityName() + ":" + entity.getPeriodYear() + ":" + entity.getPeriodTrimester() + ":" + entity.getNameAmbit();
     }
     
 

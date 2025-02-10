@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.GeneralRules.GeneralRulesExportService;
 import com.cgr.base.application.GeneralRules.GeneralRulesManager;
-import com.cgr.base.application.GeneralRules.service.DataTransferService;
+import com.cgr.base.application.GeneralRules.service.DataTransfer;
 import com.cgr.base.presentation.controller.AbstractController;
 
 @RestController
@@ -24,7 +24,7 @@ public class GeneralRulesController extends AbstractController {
     private GeneralRulesManager generalRulesManager;
 
     @Autowired
-    private DataTransferService Transfer;
+    private DataTransfer Transfer;
 
     @GetMapping("/data")
     public ResponseEntity<?> getGeneralRules() {
@@ -46,7 +46,7 @@ public class GeneralRulesController extends AbstractController {
 
     @PostMapping("/transfer")
     public ResponseEntity<?> transferGeneralRulesData() {
-        Transfer.transferDataGeneralRules();
+        Transfer.insertComputedColumns();
         return requestResponse(null, "Data Transfer Initiated.", HttpStatus.ACCEPTED, true);
     }
 

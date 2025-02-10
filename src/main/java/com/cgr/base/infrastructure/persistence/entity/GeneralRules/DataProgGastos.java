@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Immutable
-@Table(name = "VW_OPENDATA_C_PROGRAMACION_GASTOS")
+@Table(name = "muestra_programacion_gastos")
 @NoArgsConstructor
 public class DataProgGastos {
 

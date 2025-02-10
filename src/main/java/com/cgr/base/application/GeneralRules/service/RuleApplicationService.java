@@ -75,71 +75,71 @@ public class RuleApplicationService {
                         String resultGeneralRule10 = Evaluator.evaluateGeneralRule10(vigenciaValue);
                         data.setGeneralRule10(resultGeneralRule10);
 
-                        // Regla 11.0: Validación inexistencia cuenta 2.3 Inversión.
-                        String resultGeneralRule11_0 = Evaluator
-                                        .evaluateGeneralRule11_0(data.getExist23IncomeProgramming());
-                        data.setGeneralRule11_0(resultGeneralRule11_0);
+                        // // Regla 11.0: Validación inexistencia cuenta 2.3 Inversión.
+                        // String resultGeneralRule11_0 = Evaluator
+                        //                 .evaluateGeneralRule11_0(data.getExist23IncomeProgramming());
+                        // data.setGeneralRule11_0(resultGeneralRule11_0);
 
-                        // Regla 11.1: Validación existencia cuenta 2.99 Inversión.
-                        String resultGeneralRule11_1 = Evaluator
-                                        .evaluateGeneralRule11_1(data.getExist299IncomeProgramming());
-                        data.setGeneralRule11_1(resultGeneralRule11_1);
+                        // // Regla 11.1: Validación existencia cuenta 2.99 Inversión.
+                        // String resultGeneralRule11_1 = Evaluator
+                        //                 .evaluateGeneralRule11_1(data.getExist299IncomeProgramming());
+                        // data.setGeneralRule11_1(resultGeneralRule11_1);
 
-                        // Regla12: Apropiacion Definitiva.
-                        String resultGeneralRule12 = Evaluator.evaluateGeneralRule12(data.getDefinitiveAppropriation());
-                        data.setGeneralRule12(resultGeneralRule12);
+                        // // Regla12: Apropiacion Definitiva.
+                        // String resultGeneralRule12 = Evaluator.evaluateGeneralRule12(data.getDefinitiveAppropriation());
+                        // data.setGeneralRule12(resultGeneralRule12);
 
-                        // Regla13: Apropiacion Definitiva Cuentas Padre.
-                        String resultGeneralRule13 = Evaluator.evaluateGeneralRule13(data.getAccount(),
-                                        data.getDefinitiveAppropriation());
-                        data.setGeneralRule13(resultGeneralRule13);
+                        // // Regla13: Apropiacion Definitiva Cuentas Padre.
+                        // String resultGeneralRule13 = Evaluator.evaluateGeneralRule13(data.getAccount(),
+                        //                 data.getDefinitiveAppropriation());
+                        // data.setGeneralRule13(resultGeneralRule13);
 
-                        // Regla 14: Apropiacion Definitiva por Periodos.
-                        String resultGeneralRule14 = Evaluator.evaluateGeneralRule14(
-                                        data.getInitialAppropriation_P3(),
-                                        data.getInitialAppropriation(),
-                                        data.getValidProgCode(), data.getValidProgName());
-                        data.setGeneralRule14(resultGeneralRule14);
+                        // // Regla 14: Apropiacion Definitiva por Periodos.
+                        // String resultGeneralRule14 = Evaluator.evaluateGeneralRule14(
+                        //                 data.getInitialAppropriation_P3(),
+                        //                 data.getInitialAppropriation(),
+                        //                 data.getValidProgCode(), data.getValidProgName());
+                        // data.setGeneralRule14(resultGeneralRule14);
 
-                        // Regla 15.0: Validación Compromisos VZ Obligaciones.
-                        String resultRule15_0 = Evaluator.evaluateGeneralRule15_0(data.getCommitments(),
-                                        data.getObligations());
-                        data.setGeneralRule15_0(resultRule15_0);
+                        // // Regla 15.0: Validación Compromisos VZ Obligaciones.
+                        // String resultRule15_0 = Evaluator.evaluateGeneralRule15_0(data.getCommitments(),
+                        //                 data.getObligations());
+                        // data.setGeneralRule15_0(resultRule15_0);
 
-                        // Regla 15.1: Validación Obligaciones VZ Pagos.
-                        String resultRule15_1 = Evaluator.evaluateGeneralRule15_1(data.getObligations(),
-                                        data.getPayments());
-                        data.setGeneralRule15_1(resultRule15_1);
+                        // // Regla 15.1: Validación Obligaciones VZ Pagos.
+                        // String resultRule15_1 = Evaluator.evaluateGeneralRule15_1(data.getObligations(),
+                        //                 data.getPayments());
+                        // data.setGeneralRule15_1(resultRule15_1);
 
-                        // Regla 16: Validacion Cuenta Padre Gastos.
-                        String resultGeneralRule16 = Evaluator.evaluateGeneralRule16(data.getExistBudgetExecution(),
-                                        data.getExistBudgetPlanning());
-                        data.setGeneralRule16(resultGeneralRule16);
+                        // // Regla 16: Validacion Cuenta Padre Gastos.
+                        // String resultGeneralRule16 = Evaluator.evaluateGeneralRule16(data.getExistBudgetExecution(),
+                        //                 data.getExistBudgetPlanning());
+                        // data.setGeneralRule16(resultGeneralRule16);
 
-                        // Regla 17.0: Validación existencia cuenta 2.3 Inversión.
-                        String resultGeneralRule17_0 = Evaluator
-                                        .evaluateGeneralRule17_0(data.getExist23IncomeExpenseExecution());
-                        data.setGeneralRule17_0(resultGeneralRule17_0);
+                        // // Regla 17.0: Validación existencia cuenta 2.3 Inversión.
+                        // String resultGeneralRule17_0 = Evaluator
+                        //                 .evaluateGeneralRule17_0(data.getExist23IncomeExpenseExecution());
+                        // data.setGeneralRule17_0(resultGeneralRule17_0);
 
-                        // Regla 17.1: Validación inexistencia cuenta 2.99 Inversión.
-                        String resultGeneralRule17_1 = Evaluator
-                                        .evaluateGeneralRule17_1(data.getExist299IncomeExpenseExecution());
-                        data.setGeneralRule17_1(resultGeneralRule17_1);
+                        // // Regla 17.1: Validación inexistencia cuenta 2.99 Inversión.
+                        // String resultGeneralRule17_1 = Evaluator
+                        //                 .evaluateGeneralRule17_1(data.getExist299IncomeExpenseExecution());
+                        // data.setGeneralRule17_1(resultGeneralRule17_1);
 
-                        // Regla 18: Identificación Vigencia Gasto.
-                        String resultGeneralRule18 = Evaluator.evaluateGeneralRule18(data.getCodeAmbit(),
-                                        data.getValidExecName());
-                        data.setGeneralRule18(resultGeneralRule18);
+                        // // Regla 18: Identificación Vigencia Gasto.
+                        // String resultGeneralRule18 = Evaluator.evaluateGeneralRule18(data.getCodeAmbit(),
+                        //                 data.getValidExecName());
+                        // data.setGeneralRule18(resultGeneralRule18);
 
-                        // Regla19: Validacion Vigencia de Gastos Ejecución VS Programación.
-                        String resultGeneralRule19 = Evaluator.evaluateGeneralRule19(data.getValidExecName(),
-                                        data.getValidProgName());
-                        data.setGeneralRule19(resultGeneralRule19);
+                        // // Regla19: Validacion Vigencia de Gastos Ejecución VS Programación.
+                        // String resultGeneralRule19 = Evaluator.evaluateGeneralRule19(data.getValidExecName(),
+                        //                 data.getValidProgName());
+                        // data.setGeneralRule19(resultGeneralRule19);
 
-                        // Regla 20: Validación Variable CPC.
-                        String resultGeneralRule20 = Evaluator.evaluateGeneralRule20(data.getAccount(),
-                                        data.getCodeCPC());
-                        data.setGeneralRule20(resultGeneralRule20);
+                        // // Regla 20: Validación Variable CPC.
+                        // String resultGeneralRule20 = Evaluator.evaluateGeneralRule20(data.getAccount(),
+                        //                 data.getCodeCPC());
+                        // data.setGeneralRule20(resultGeneralRule20);
 
                 }
 
