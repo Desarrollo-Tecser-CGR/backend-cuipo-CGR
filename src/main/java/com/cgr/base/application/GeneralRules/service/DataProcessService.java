@@ -5,10 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cgr.base.application.GeneralRules.mapper.mapperEntity;
-import com.cgr.base.infrastructure.persistence.repository.GeneralRules.EjecGastosRepo;
-import com.cgr.base.infrastructure.persistence.repository.GeneralRules.GeneralRulesRepository;
-import com.cgr.base.infrastructure.persistence.repository.GeneralRules.ProgGastosRepo;
-import com.cgr.base.infrastructure.persistence.repository.GeneralRules.ProgIngresosRepo;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -21,17 +17,17 @@ public class DataProcessService {
     @PersistenceContext
     private final EntityManager entityManager;
 
-    @Autowired
-    private GeneralRulesRepository generalRulesRepo;
+    // @Autowired
+    // private GeneralRulesRepository generalRulesRepo;
 
-    @Autowired
-    private ProgIngresosRepo progIngresosRepo;
+    // @Autowired
+    // private ProgIngresosRepo progIngresosRepo;
 
-    @Autowired
-    private ProgGastosRepo ProgGastosRepo;
+    // @Autowired
+    // private ProgGastosRepo ProgGastosRepo;
 
-    @Autowired
-    private EjecGastosRepo EjecGastosRepo;
+    // @Autowired
+    // private EjecGastosRepo EjecGastosRepo;
 
     @Autowired
     private mapperEntity Mapper;
@@ -177,7 +173,7 @@ public class DataProcessService {
 
         // if (ruleKeyNoAccount.equals(dataKeyNoAccount)) {
 
-        // if (data.getCuenta().equals("1")) {
+        // if (data.getCuenta().equals("2")) {
 
         // BigDecimal apropiacionInicial = data.getApropiacionInicial();
         // if (apropiacionInicial != null) {

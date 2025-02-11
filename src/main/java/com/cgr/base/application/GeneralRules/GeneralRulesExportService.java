@@ -13,80 +13,80 @@ import org.apache.commons.csv.QuoteMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.infrastructure.persistence.entity.GeneralRules.GeneralRulesEntity;
-import com.cgr.base.infrastructure.persistence.repository.GeneralRules.GeneralRulesRepository;
+// import com.cgr.base.infrastructure.persistence.entity.GeneralRules.GeneralRulesEntity;
+// import com.cgr.base.infrastructure.persistence.repository.GeneralRules.GeneralRulesRepository;
 
-@Service
-public class GeneralRulesExportService {
+// @Service
+// public class GeneralRulesExportService {
 
-    @Autowired
-    private GeneralRulesRepository generalRulesRepository;
+//     @Autowired
+//     private GeneralRulesRepository generalRulesRepository;
 
-    public ByteArrayOutputStream generateCsvStream() throws IOException {
-        List<GeneralRulesEntity> generalRulesData = generalRulesRepository.findAll();
-        String[] headers = getCsvHeader();
+//     public ByteArrayOutputStream generateCsvStream() throws IOException {
+//         List<GeneralRulesEntity> generalRulesData = generalRulesRepository.findAll();
+//         String[] headers = getCsvHeader();
 
-        CSVFormat csvFormat = CSVFormat.DEFAULT
-                .builder()
-                .setQuoteMode(QuoteMode.ALL_NON_NULL)
-                .setDelimiter(',')
-                .setQuote('"')
-                .setEscape('\\')
-                .setNullString("")
-                .setHeader(headers)
-                .build();
+//         CSVFormat csvFormat = CSVFormat.DEFAULT
+//                 .builder()
+//                 .setQuoteMode(QuoteMode.ALL_NON_NULL)
+//                 .setDelimiter(',')
+//                 .setQuote('"')
+//                 .setEscape('\\')
+//                 .setNullString("")
+//                 .setHeader(headers)
+//                 .build();
 
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-             OutputStreamWriter writer = new OutputStreamWriter(byteArrayOutputStream);
-             CSVPrinter csvPrinter = new CSVPrinter(writer, csvFormat)) {
+//         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+//              OutputStreamWriter writer = new OutputStreamWriter(byteArrayOutputStream);
+//              CSVPrinter csvPrinter = new CSVPrinter(writer, csvFormat)) {
 
-            for (GeneralRulesEntity entidad : generalRulesData) {
-                csvPrinter.printRecord(getCsvRecord(entidad));
-            }
+//             for (GeneralRulesEntity entidad : generalRulesData) {
+//                 csvPrinter.printRecord(getCsvRecord(entidad));
+//             }
 
-            writer.flush();
-            return byteArrayOutputStream;
-        }
-    }
+//             writer.flush();
+//             return byteArrayOutputStream;
+//         }
+//     }
 
-    private boolean shouldIncludeField(String fieldName) {
-        boolean startsWithGeneralRule = fieldName.startsWith("generalRule");
-        boolean endsWithPeriod = fieldName.matches(".*Period\\d+$");
+//     private boolean shouldIncludeField(String fieldName) {
+//         boolean startsWithGeneralRule = fieldName.startsWith("generalRule");
+//         boolean endsWithPeriod = fieldName.matches(".*Period\\d+$");
         
-        return startsWithGeneralRule || !endsWithPeriod;
-    }
+//         return startsWithGeneralRule || !endsWithPeriod;
+//     }
 
-    private String[] getCsvHeader() {
-        Field[] fields = GeneralRulesEntity.class.getDeclaredFields();
-        List<String> headersList = new ArrayList<>();
+//     private String[] getCsvHeader() {
+//         Field[] fields = GeneralRulesEntity.class.getDeclaredFields();
+//         List<String> headersList = new ArrayList<>();
         
-        for (Field field : fields) {
-            String fieldName = field.getName();
-            if (shouldIncludeField(fieldName)) {
-                headersList.add(fieldName);
-            }
-        }
+//         for (Field field : fields) {
+//             String fieldName = field.getName();
+//             if (shouldIncludeField(fieldName)) {
+//                 headersList.add(fieldName);
+//             }
+//         }
         
-        return headersList.toArray(new String[0]);
-    }
+//         return headersList.toArray(new String[0]);
+//     }
 
-    private List<String> getCsvRecord(GeneralRulesEntity entidad) {
-        Field[] fields = GeneralRulesEntity.class.getDeclaredFields();
-        List<String> record = new ArrayList<>();
+//     private List<String> getCsvRecord(GeneralRulesEntity entidad) {
+//         Field[] fields = GeneralRulesEntity.class.getDeclaredFields();
+//         List<String> record = new ArrayList<>();
 
-        for (Field field : fields) {
-            String fieldName = field.getName();
-            if (shouldIncludeField(fieldName)) {
-                try {
-                    field.setAccessible(true);
-                    Object value = field.get(entidad);
-                    record.add(value != null ? value.toString() : "");
-                } catch (IllegalAccessException e) {
-                    record.add("ERROR");
-                }
-            }
-        }
+//         for (Field field : fields) {
+//             String fieldName = field.getName();
+//             if (shouldIncludeField(fieldName)) {
+//                 try {
+//                     field.setAccessible(true);
+//                     Object value = field.get(entidad);
+//                     record.add(value != null ? value.toString() : "");
+//                 } catch (IllegalAccessException e) {
+//                     record.add("ERROR");
+//                 }
+//             }
+//         }
 
-        return record;
-    }
-}
+//         return record;
+//     }
+// }

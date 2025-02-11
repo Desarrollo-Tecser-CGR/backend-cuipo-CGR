@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.infrastructure.persistence.entity.GeneralRules.AmbitosCaptura;
+// import com.cgr.base.infrastructure.persistence.entity.GeneralRules.AmbitosCaptura;
 
 @Service
 public class GeneralRulesEvaluator {
@@ -125,37 +125,37 @@ public class GeneralRulesEvaluator {
         return "NO DATA";
     }
 
-    // Regla 10: Validar Vigencia del Gasto en Ambitos Captura.
-    public Double getVigenciaFieldValue(String nombreVigenciaGasto, AmbitosCaptura matchedAmbito) {
+    // // Regla 10: Validar Vigencia del Gasto en Ambitos Captura.
+    // public Double getVigenciaFieldValue(String nombreVigenciaGasto, AmbitosCaptura matchedAmbito) {
 
-        if (nombreVigenciaGasto == null || nombreVigenciaGasto.isEmpty()) {
-            return null;
-        }
+    //     if (nombreVigenciaGasto == null || nombreVigenciaGasto.isEmpty()) {
+    //         return null;
+    //     }
 
-        return switch (nombreVigenciaGasto) {
-            case "VIGENCIA ACTUAL" -> {
-                yield matchedAmbito.getVigenciaActual();
-            }
-            case "RESERVAS" -> {
-                yield matchedAmbito.getReservas();
-            }
-            case "CUENTAS POR PAGAR" -> {
-                yield matchedAmbito.getCxp();
-            }
-            case "VIGENCIAS FUTURAS - VIGENCIA ACTUAL" -> {
-                yield matchedAmbito.getVfVa();
-            }
-            case "VIGENCIAS FUTURAS - RESERVAS" -> {
-                yield matchedAmbito.getVfReserva();
-            }
-            case "VIGENCIAS FUTURAS - CUENTAS POR PAGAR" -> {
-                yield matchedAmbito.getVfCxp();
-            }
-            default -> {
-                yield null;
-            }
-        };
-    }
+    //     return switch (nombreVigenciaGasto) {
+    //         case "VIGENCIA ACTUAL" -> {
+    //             yield matchedAmbito.getVigenciaActual();
+    //         }
+    //         case "RESERVAS" -> {
+    //             yield matchedAmbito.getReservas();
+    //         }
+    //         case "CUENTAS POR PAGAR" -> {
+    //             yield matchedAmbito.getCxp();
+    //         }
+    //         case "VIGENCIAS FUTURAS - VIGENCIA ACTUAL" -> {
+    //             yield matchedAmbito.getVfVa();
+    //         }
+    //         case "VIGENCIAS FUTURAS - RESERVAS" -> {
+    //             yield matchedAmbito.getVfReserva();
+    //         }
+    //         case "VIGENCIAS FUTURAS - CUENTAS POR PAGAR" -> {
+    //             yield matchedAmbito.getVfCxp();
+    //         }
+    //         default -> {
+    //             yield null;
+    //         }
+    //     };
+    // }
 
     // Regla10: Vigencia del Gasto - Programación Gastos.
     public String evaluateGeneralRule10(Double vigenciaValue) {

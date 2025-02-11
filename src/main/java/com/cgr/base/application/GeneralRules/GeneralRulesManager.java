@@ -1,21 +1,14 @@
 package com.cgr.base.application.GeneralRules;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.cgr.base.application.GeneralRules.mapper.mapperEntity;
 import com.cgr.base.application.GeneralRules.service.DataProcessService;
 import com.cgr.base.application.GeneralRules.service.GeneralRulesEvaluator;
 import com.cgr.base.application.GeneralRules.service.RuleApplicationService;
-import com.cgr.base.infrastructure.persistence.entity.GeneralRules.GeneralRulesEntity;
-import com.cgr.base.infrastructure.persistence.repository.GeneralRules.AmbitosCapturaRepo;
-import com.cgr.base.infrastructure.persistence.repository.GeneralRules.EjecGastosRepo;
-import com.cgr.base.infrastructure.persistence.repository.GeneralRules.GeneralRulesRepository;
-import com.cgr.base.infrastructure.persistence.repository.GeneralRules.ProgGastosRepo;
-import com.cgr.base.infrastructure.persistence.repository.GeneralRules.ProgIngresosRepo;
+import com.cgr.base.application.generalRulesModule.service.DataSourceInit;
+
 
 @Service
 public class GeneralRulesManager {
@@ -24,22 +17,25 @@ public class GeneralRulesManager {
     private DataProcessService Process;
 
     @Autowired
+    private DataSourceInit DataInit;
+
+    @Autowired
     private RuleApplicationService Apply;
 
-    @Autowired
-    private GeneralRulesRepository generalRulesRepo;
+    // @Autowired
+    // private GeneralRulesRepository generalRulesRepo;
 
-    @Autowired
-    private ProgIngresosRepo openDataProgIngRepository;
+    // @Autowired
+    // private ProgIngresosRepo openDataProgIngRepository;
 
-    @Autowired
-    private ProgGastosRepo openDataProgGastRepository;
+    // @Autowired
+    // private ProgGastosRepo openDataProgGastRepository;
 
-    @Autowired
-    private EjecGastosRepo openDataEjecGastRepository;
+    // @Autowired
+    // private EjecGastosRepo openDataEjecGastRepository;
 
-    @Autowired
-    private AmbitosCapturaRepo ambitosCapturaRepository;
+    // @Autowired
+    // private AmbitosCapturaRepo ambitosCapturaRepository;
 
     @Autowired
     private GeneralRulesEvaluator Evaluator;
@@ -352,10 +348,10 @@ public class GeneralRulesManager {
 
     // }
 
-    @Transactional
-    public List<GeneralRulesEntity> getGeneralRulesData() {
-        Process.processData();
-        return generalRulesRepo.findAll();
-    }
+    // @Transactional
+    // public List<GeneralRulesEntity> getGeneralRulesData() {
+    //     DataInit.procesarTablasOrigen();
+    //     return generalRulesRepo.findAll();
+    // }
 
 }
