@@ -1,5 +1,6 @@
 package com.cgr.base.application.generalRulesModule.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityManager;
@@ -9,18 +10,30 @@ import jakarta.transaction.Transactional;
 @Service
 public class DataSourceInit {
 
+    @Value("${TABLA_PROG_INGRESOS}")
+    private String progIngresos;
+
+    @Value("${TABLA_EJEC_INGRESOS}")
+    private String ejecIngresos;
+
+    @Value("${TABLA_PROG_GASTOS}")
+    private String progGastos;
+
+    @Value("${TABLA_EJEC_GASTOS}")
+    private String ejecGastos;
+
+    @Value("${TABLA_GENERAL_RULES}")
+    private String tablaReglas;
+
+    private String[] tablas;
+
     @PersistenceContext
     private EntityManager entityManager;
 
-    private final String[] tablas = {
-            "MUESTRA_A_PROGRAMACION_INGRESOS",
-            "MUESTRA_B_EJECUCION_INGRESOS",
-            "MUESTRA_C_PROGRAMACION_GASTOS",
-            "MUESTRA_D_EJECUCION_GASTOS"
-    };
-
     @Transactional
     public void processTablesSource() {
+
+        this.tablas = new String[]{progIngresos, ejecIngresos, progGastos, ejecGastos};
         // Paso 1: Agregar columnas TRIMESTRE y FECHA
         addComputedColumns();
 
@@ -32,6 +45,7 @@ public class DataSourceInit {
 
         // Paso 4: Consolidar datos únicos en la tabla de destino
         transferUniqueData();
+        
     }
 
     private void addComputedColumns() {
@@ -132,22 +146,24 @@ public class DataSourceInit {
 
     private void transferUniqueData() {
 
-        String createTableSQL = "IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[MUESTRA_RULES_GENERALS]') AND type in (N'U')) "
-                +
-                "CREATE TABLE [MUESTRA_RULES_GENERALS] (" +
+        String createTableSQL = "IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[" + tablaReglas + 
+                "]') AND type in (N'U')) " +
+                "CREATE TABLE [" + tablaReglas + "] (" +
                 "[CODIGO_ENTIDAD_INT] BIGINT, " +
                 "[AMBITO_CODIGO_STR] varchar(50), " +
                 "[NOMBRE_CUENTA_STR] varchar(255), " +
                 "[TRIMESTRE] INT, " +
                 "[FECHA] INT, " +
-                "CONSTRAINT PK_MUESTRA_RULES_GENERALS PRIMARY KEY CLUSTERED " +
+                "CONSTRAINT PK_"+ tablaReglas +" PRIMARY KEY CLUSTERED " +
                 "([CODIGO_ENTIDAD_INT], [AMBITO_CODIGO_STR], [NOMBRE_CUENTA_STR], [TRIMESTRE], [FECHA])" +
                 ")";
 
         entityManager.createNativeQuery(createTableSQL).executeUpdate();
 
         StringBuilder insertSQL = new StringBuilder();
-        insertSQL.append("INSERT INTO [MUESTRA_RULES_GENERALS] ");
+        insertSQL.append("INSERT INTO [");
+        insertSQL.append(tablaReglas);
+        insertSQL.append("] ");
         insertSQL.append(
                 "SELECT DISTINCT t.[CODIGO_ENTIDAD_INT], t.[AMBITO_CODIGO_STR], t.[NOMBRE_CUENTA_STR], t.[TRIMESTRE], t.[FECHA] ");
         insertSQL.append("FROM ( ");
@@ -164,7 +180,9 @@ public class DataSourceInit {
 
         insertSQL.append(") AS t ");
         insertSQL.append("WHERE NOT EXISTS ( ");
-        insertSQL.append("    SELECT 1 FROM [MUESTRA_RULES_GENERALS] m ");
+        insertSQL.append("    SELECT 1 FROM [");
+        insertSQL.append(tablaReglas);
+        insertSQL.append("] m ");
         insertSQL.append("    WHERE m.[CODIGO_ENTIDAD_INT] = t.[CODIGO_ENTIDAD_INT] ");
         insertSQL.append("    AND m.[AMBITO_CODIGO_STR] = t.[AMBITO_CODIGO_STR] ");
         insertSQL.append("    AND m.[NOMBRE_CUENTA_STR] = t.[NOMBRE_CUENTA_STR] ");
