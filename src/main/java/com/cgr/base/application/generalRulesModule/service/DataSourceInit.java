@@ -34,6 +34,7 @@ public class DataSourceInit {
         public void processTablesSource() {
 
                 this.tablas = new String[] { progIngresos, ejecIngresos, progGastos, ejecGastos };
+                
                 // Paso 1: Agregar columnas TRIMESTRE y FECHA
                 addComputedColumns();
                 generatePeriod();
@@ -155,31 +156,31 @@ public class DataSourceInit {
 
         private void createIndexes() {
                 for (String tabla : tablas) {
-                    String indexName = "IDX_" + tabla + "_COMPUTED";
-            
-                    if (indexExists(tabla, indexName)) {
-                        dropIndex(tabla, indexName);
-                    }
-            
-                    String sqlIndex = "CREATE INDEX [" + indexName + "] " +
-                            "ON [" + tabla + "] ([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD_INT], [AMBITO_CODIGO_STR])";
-                    entityManager.createNativeQuery(sqlIndex).executeUpdate();
+                        String indexName = "IDX_" + tabla + "_COMPUTED";
+
+                        if (indexExists(tabla, indexName)) {
+                                dropIndex(tabla, indexName);
+                        }
+
+                        String sqlIndex = "CREATE INDEX [" + indexName + "] " +
+                                        "ON [" + tabla
+                                        + "] ([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD_INT], [AMBITO_CODIGO_STR])";
+                        entityManager.createNativeQuery(sqlIndex).executeUpdate();
                 }
-            }
-            
-            private boolean indexExists(String tableName, String indexName) {
+        }
+
+        private boolean indexExists(String tableName, String indexName) {
                 String sql = "SELECT COUNT(*) FROM sys.indexes WHERE name = ? AND object_id = OBJECT_ID(?)";
                 Integer count = (Integer) entityManager.createNativeQuery(sql)
-                        .setParameter(1, indexName)
-                        .setParameter(2, tableName)
-                        .getSingleResult();
+                                .setParameter(1, indexName)
+                                .setParameter(2, tableName)
+                                .getSingleResult();
                 return count != null && count > 0;
-            }
-            
-            private void dropIndex(String tableName, String indexName) {
+        }
+
+        private void dropIndex(String tableName, String indexName) {
                 String sqlDrop = "DROP INDEX [" + indexName + "] ON [" + tableName + "]";
                 entityManager.createNativeQuery(sqlDrop).executeUpdate();
-            }
-            
+        }
 
 }
