@@ -34,7 +34,7 @@ public class DataSourceInit {
         public void processTablesSource() {
 
                 this.tablas = new String[] { progIngresos, ejecIngresos, progGastos, ejecGastos };
-                
+
                 // Paso 1: Agregar columnas TRIMESTRE y FECHA
                 addComputedColumns();
                 generatePeriod();
@@ -67,7 +67,7 @@ public class DataSourceInit {
 
                         if (!existColumn(tabla, "AMBITO_CODIGO_STR")) {
                                 String sqlAmbitoCodigoStr = "ALTER TABLE [" + tabla + "] " +
-                                                "ADD AMBITO_CODIGO_STR AS CAST(AMBITO_CODIGO AS NVARCHAR(255)) PERSISTED";
+                                                "ADD AMBITO_CODIGO_STR AS CAST(AMBITO_CODIGO AS NVARCHAR(50)) PERSISTED";
                                 entityManager.createNativeQuery(sqlAmbitoCodigoStr).executeUpdate();
                         }
                 }
@@ -102,14 +102,11 @@ public class DataSourceInit {
         }
 
         private void transferUniqueData() {
-                // Paso 1: Validar si la tabla de reglas generales existe
+
                 if (!tableExists(tablaReglas)) {
-                        // Si no existe, crear la tabla
                         createGeneralRulesTable();
                 }
 
-                // Paso 2: Insertar solo los registros que no existan en la tabla de reglas
-                // generales
                 for (String tabla : tablas) {
                         String sqlInsert = "INSERT INTO [" + tablaReglas + "] " +
                                         "([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO], [NOMBRE_ENTIDAD], [AMBITO_NOMBRE]) "
@@ -143,11 +140,11 @@ public class DataSourceInit {
         }
 
         private void createGeneralRulesTable() {
-                String sqlCreateTable = "CREATE TABLE [GENERAL_RULES_DATA] (" +
+                String sqlCreateTable = "CREATE TABLE [" + tablaReglas + "] (" +
                                 "[FECHA] INT, " +
                                 "[TRIMESTRE] INT, " +
                                 "[CODIGO_ENTIDAD] BIGINT, " +
-                                "[AMBITO_CODIGO] NVARCHAR(255), " +
+                                "[AMBITO_CODIGO] NVARCHAR(50), " +
                                 "[NOMBRE_ENTIDAD] NVARCHAR(255), " +
                                 "[AMBITO_NOMBRE] NVARCHAR(255), " +
                                 "CONSTRAINT PK_GeneralRules PRIMARY KEY ([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO]))";

@@ -34,9 +34,10 @@ public class generalRules extends AbstractController {
     @PostMapping("/transfer")
     public ResponseEntity<?> updatePresupuesto() {
         DataProgGastos.applyGeneralRule1();
+        DataProgGastos.applyGeneralRule2();
         return requestResponse(
                 null,
-                "Presupuesto Definitivo PG C1 updated successfully.",
+                "Apply General Rules.",
                 HttpStatus.OK,
                 true);
     }
