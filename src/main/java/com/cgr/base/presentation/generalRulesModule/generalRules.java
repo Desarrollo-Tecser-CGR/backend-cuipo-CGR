@@ -36,6 +36,7 @@ public class generalRules extends AbstractController {
         DataProgGastos.applyGeneralRule1();
         DataProgGastos.applyGeneralRule2();
         DataProgGastos.applyGeneralRule3();
+        DataProgGastos.applyGeneralRule4();
         return requestResponse(
                 null,
                 "Apply General Rules.",
