@@ -35,6 +35,7 @@ public class generalRules extends AbstractController {
     public ResponseEntity<?> updatePresupuesto() {
         DataProgGastos.applyGeneralRule1();
         DataProgGastos.applyGeneralRule2();
+        DataProgGastos.applyGeneralRule3();
         return requestResponse(
                 null,
                 "Apply General Rules.",
