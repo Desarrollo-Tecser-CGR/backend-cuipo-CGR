@@ -20,7 +20,7 @@ public class DataTransfer_PI {
         @Value("${TABLA_PROG_INGRESOS}")
         private String progIngresos;
 
-        // Regla1: Presupuesto Definitivo para Entidades que NO están en Liquidación.
+        // Regla1: Presupuesto Definitivo validando Liquidación.
         public void applyGeneralRule1() {
 
                 List<String> requiredColumns = Arrays.asList(
@@ -121,7 +121,7 @@ public class DataTransfer_PI {
                 jdbcTemplate.execute(updateMayorQuery);
         }
 
-        // Regla2: Validación de Presupuesto Inicial y Definitivo
+        // Regla2: Presupuesto Inicial VS Presupuesto Definitivo.
         public void applyGeneralRule2() {
                 List<String> requiredColumns = Arrays.asList(
                                 "REGLA_GENERAL_2",
@@ -222,8 +222,8 @@ public class DataTransfer_PI {
                 jdbcTemplate.execute(updateCumpleQuery);
         }
 
+        // Regla3: Presupuesto Inicial por Periodos.
         public void applyGeneralRule3() {
-                // 1. Verify and create required columns (sin cambios)
                 List<String> requiredColumns = Arrays.asList(
                                 "REGLA_GENERAL_3",
                                 "ALERTA_3",
@@ -249,7 +249,6 @@ public class DataTransfer_PI {
                         }
                 }
 
-                // 2.1 Update records where TRIMESTRE = '03' as NO APLICA (sin cambios)
                 String updateTrimestre03Query = String.format(
                                 """
                                                 UPDATE %s
@@ -265,7 +264,6 @@ public class DataTransfer_PI {
                                 tablaReglas);
                 jdbcTemplate.execute(updateTrimestre03Query);
 
-                // 2.2 Actualizar registros sin datos en periodo 3 y con presupuestos NULL
                 String updateNoDataQuery = String.format(
                                 """
                                                 UPDATE d
@@ -309,7 +307,6 @@ public class DataTransfer_PI {
                                 tablaReglas);
                 jdbcTemplate.execute(updateNoDataQuery);
 
-                // Actualizar registros donde los presupuestos son diferentes (excluyendo NULLs)
                 String updateNoCumpleQuery = String.format(
                                 """
                                                 UPDATE d
@@ -370,7 +367,6 @@ public class DataTransfer_PI {
                                 tablaReglas);
                 jdbcTemplate.execute(updateNoCumpleQuery);
 
-                // 3. Estados finales (sin cambios)
                 String updateCumpleQuery = String.format(
                                 """
                                                 UPDATE %s
