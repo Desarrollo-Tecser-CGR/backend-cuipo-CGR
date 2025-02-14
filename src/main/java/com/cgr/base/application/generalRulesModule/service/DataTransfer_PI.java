@@ -392,6 +392,7 @@ public class DataTransfer_PI {
                 jdbcTemplate.execute(updateOnlyNoCumpleQuery);
         }
 
+        // Regla4: Presupuesto VS Apropiacion Programados.
         public void applyGeneralRule4() {
 
                 List<String> requiredColumns = Arrays.asList(
@@ -414,7 +415,6 @@ public class DataTransfer_PI {
                         }
                 }
 
-                // 2. Update values for entities where AMBITO_CODIGO is not between 438 and 439
                 String updateNotApplicableQuery = String.format(
                                 """
                                                 UPDATE %s
@@ -427,7 +427,6 @@ public class DataTransfer_PI {
                                 tablaReglas);
                 jdbcTemplate.execute(updateNotApplicableQuery);
 
-                // 3. Update values from TABLA_PROG_INGRESOS and TABLA_EJEC_GASTOS
                 String updateValuesQuery = String.format(
                                 """
                                                 UPDATE d
@@ -474,7 +473,6 @@ public class DataTransfer_PI {
                                 tablaReglas, progIngresos, progIngresos, progGastos, progGastos);
                 jdbcTemplate.execute(updateValuesQuery);
 
-                // 4. Update NO DATA cases
                 String updateNoDataQuery = String.format(
                                 """
                                                 UPDATE %s
@@ -493,7 +491,6 @@ public class DataTransfer_PI {
                                 tablaReglas);
                 jdbcTemplate.execute(updateNoDataQuery);
 
-                // 5. Update comparison results for Rule 4A (Initial values)
                 String updateRule4AQuery = String.format(
                                 """
                                                 UPDATE %s
@@ -512,7 +509,6 @@ public class DataTransfer_PI {
                                 tablaReglas);
                 jdbcTemplate.execute(updateRule4AQuery);
 
-                // 6. Update comparison results for Rule 4B (Definitive values)
                 String updateRule4BQuery = String.format(
                                 """
                                                 UPDATE %s
