@@ -2,7 +2,7 @@
 # Configuración de la base de datos SQL
 spring:
   datasource:
-    url: jdbc:sqlserver://192.168.2.46:1433;databaseName=t-302_dev;encrypt=true;trustServerCertificate=true;
+    url: jdbc:sqlserver://192.168.2.27:1433;databaseName=t-302_dev;encrypt=true;trustServerCertificate=true;
 
    
    

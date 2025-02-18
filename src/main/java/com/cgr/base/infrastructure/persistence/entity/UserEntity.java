@@ -1,5 +1,6 @@
 package com.cgr.base.infrastructure.persistence.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
@@ -50,6 +52,9 @@ public class UserEntity {
 
     @Column(name = "user_type")
     private String userType;
+
+    @OneToMany(mappedBy = "user")
+    private List<LogEntity> logs = new ArrayList<>();
 
     @ManyToMany
     @JsonIgnoreProperties({ "users", "handler", "hibernateLazyInitializer" })
