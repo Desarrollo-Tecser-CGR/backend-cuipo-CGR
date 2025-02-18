@@ -14,6 +14,7 @@ import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.application.auth.dto.UserAuthDto;
 import com.cgr.base.application.auth.mapper.AuthMapper;
 import com.cgr.base.application.auth.usecase.IAuthUseCase;
+import com.cgr.base.application.logs.usecase.ILogUseCase;
 import com.cgr.base.application.user.dto.UserDto;
 import com.cgr.base.domain.models.UserModel;
 import com.cgr.base.domain.repository.IActiveDirectoryUserRepository;
@@ -44,6 +45,8 @@ public class AuthService implements IAuthUseCase {
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
     private final EmailService emailService;
+
+    private final ILogUseCase logService;
 
     private final DtoMapper dtoMapper;
 
@@ -101,11 +104,9 @@ public class AuthService implements IAuthUseCase {
 
             if (isAccountValid) {
 
-                System.out.println("entre acaaaaaaaa " + userRequest.getSAMAccountName());
-
                 UserEntity user = this.userRepositoryFull.findBySAMAccountNameWithRoles(userRequest.getSAMAccountName())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "El usuario " + userRequest.getSAMAccountName() + " no existe"));
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "El usuario " + userRequest.getSAMAccountName() + " no existe"));
 
                 if (user.getEnabled() == true) {
                     AuthResponseDto userRequestDto = new AuthResponseDto();
@@ -128,6 +129,7 @@ public class AuthService implements IAuthUseCase {
                     userRequestDto.setToken(token);
 
                     userRequest.setEmail(user.getEmail());
+                    this.logService.createLog(userRequest);
 
                     response.put("user", userRequestDto);
                     response.put("message", "User authenticated successfully");
