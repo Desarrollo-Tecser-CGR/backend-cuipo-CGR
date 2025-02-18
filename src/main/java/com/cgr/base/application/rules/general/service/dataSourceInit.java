@@ -1,4 +1,4 @@
-package com.cgr.base.application.generalRulesModule.service;
+package com.cgr.base.application.rules.general.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -8,7 +8,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 @Service
-public class DataSourceInit {
+public class dataSourceInit {
 
         @Value("${TABLA_PROG_INGRESOS}")
         private String progIngresos;

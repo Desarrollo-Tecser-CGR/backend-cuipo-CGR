@@ -1,4 +1,4 @@
-package com.cgr.base.application.generalRulesModule.service;
+package com.cgr.base.application.rules.general.service;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,7 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DataTransfer_EI {
+public class dataTransfer_EI {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
