@@ -39,9 +39,9 @@ public class generalRules extends AbstractController {
     public ResponseEntity<?> updatePresupuesto() {
         DataProgIngresos.applyGeneralRule1();
         DataProgIngresos.applyGeneralRule2();
-        // DataProgIngresos.applyGeneralRule3();
-        // DataProgIngresos.applyGeneralRule4();
-        //DataeJECIngresos.applyGeneralRule5();
+        DataProgIngresos.applyGeneralRule3();
+        DataProgIngresos.applyGeneralRule4();
+        DataeJECIngresos.applyGeneralRule5();
         return requestResponse(
                 null,
                 "Apply General Rules.",
