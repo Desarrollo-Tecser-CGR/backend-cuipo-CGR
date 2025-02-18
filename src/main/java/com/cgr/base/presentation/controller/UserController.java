@@ -39,32 +39,37 @@ public class UserController extends AbstractController {
     @PostMapping
     public ResponseEntity<?> assignRole(@Valid @RequestBody UserWithRolesRequestDto rolesRequestDto,
             BindingResult result) {
-        return requestResponse(result, () -> this.userService.assignRolesToUser(rolesRequestDto), "roles actualizados", HttpStatus.CREATED, true);
+        return requestResponse(result, () -> this.userService.assignRolesToUser(rolesRequestDto), "roles actualizados",
+                HttpStatus.CREATED, true);
     }
 
     @GetMapping("/synchronize")
     public ResponseEntity<?> synchronizeAD() {
         return requestResponse(this.synchronizerUsers.synchronizeUsers(),
-                "sistema sincronizado exitosamente con el Directorio Activo", HttpStatus.OK, true);         
+                "sistema sincronizado exitosamente con el Directorio Activo", HttpStatus.OK, true);
     }
 
-    @PostMapping ("/create")
-    public ResponseEntity<?> createUser(@Valid @RequestBody UserDto userRequestDto, 
+    @PostMapping("/create")
+    public ResponseEntity<?> createUser(@Valid @RequestBody UserDto userRequestDto,
             BindingResult result) {
-                if (result.hasErrors()) {
-        return requestResponse(result, "Error de validación en los datos proporcionados", HttpStatus.BAD_REQUEST, false);
-            }
-        return requestResponse(result,() -> this.userService.createUser(userRequestDto), "Usuario creado exitosamente", HttpStatus.CREATED, true);
+        if (result.hasErrors()) {
+            return requestResponse(result, "Error de validación en los datos proporcionados", HttpStatus.BAD_REQUEST,
+                    false);
+        }
+        return requestResponse(result, () -> this.userService.createUser(userRequestDto), "Usuario creado exitosamente",
+                HttpStatus.CREATED, true);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody UserDto userDto, 
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody UserDto userDto,
             BindingResult result) {
-                if (result.hasErrors()) {
-        return requestResponse(result, "Error de validación en los datos proporcionados", HttpStatus.BAD_REQUEST, false);
-            }
-        return requestResponse(result,() -> this.userService.updateUser(id, userDto), "Usuario actualizado exitosamente", HttpStatus.OK, true);
-                
+        if (result.hasErrors()) {
+            return requestResponse(result, "Error de validación en los datos proporcionados", HttpStatus.BAD_REQUEST,
+                    false);
+        }
+        return requestResponse(result, () -> this.userService.updateUser(id, userDto),
+                "Usuario actualizado exitosamente", HttpStatus.OK, true);
+
     }
 
 }

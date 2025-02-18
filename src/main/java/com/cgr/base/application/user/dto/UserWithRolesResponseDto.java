@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.cgr.base.application.logs.dto.LogDto;
 import com.cgr.base.application.role.dto.RoleRequestDto;
 import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
 
@@ -30,6 +31,8 @@ public class UserWithRolesResponseDto {
 
     private List<RoleRequestDto> roles = new ArrayList<>();
 
+    private List<LogDto> logs = new ArrayList<>();
+
     public void addRole(List<RoleEntity> rolesEntity) {
         rolesEntity.forEach(role -> {
             var role2 = new RoleRequestDto();
@@ -40,5 +43,6 @@ public class UserWithRolesResponseDto {
             roles.add(role2);
         });
     }
+
     private String userType;
 }

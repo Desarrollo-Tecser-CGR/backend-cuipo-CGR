@@ -23,9 +23,9 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
 
     @Override
     public Boolean checkAccount(String samAccountName, String password) {
-        String ldapHost = "192.168.2.46";
+        String ldapHost = "192.168.2.27";
         int ldapPort = 389;
-        String baseDN = "OU=Tecser,OU=Usuarios,DC=tecser,DC=local";
+        String baseDN = "OU=T302,OU=Usuarios,DC=tecser,DC=local";
         String domain = "tecser.local";
 
         try {
@@ -76,9 +76,9 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
 
     @Override
     public List<UserEntity> getAllUsers() {
-        String ldapHost = "192.168.2.42";
+        String ldapHost = "192.168.2.27";
         int ldapPort = 389;
-        String baseDN = "OU=Tecser,OU=Usuarios,DC=tecser,DC=local";
+        String baseDN = "OU=T302,OU=Usuarios,DC=tecser,DC=local";
 
         List<UserEntity> users = new ArrayList<>();
 
@@ -86,7 +86,7 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
             // Conectar como una cuenta de servicio
             LDAPConnection connection = new LDAPConnection(ldapHost, ldapPort);
 
-            String serviceUser = "cuipo.cgr@tecser.local";
+            String serviceUser = "t1.cgr@tecser.local";
             String servicePassword = "Colombia2024*";
             connection.bind(serviceUser, servicePassword);
 
