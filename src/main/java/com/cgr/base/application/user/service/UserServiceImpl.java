@@ -6,12 +6,17 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cgr.base.application.logs.dto.LogDto;
 import com.cgr.base.application.user.dto.UserDto;
 import com.cgr.base.application.user.dto.UserWithRolesRequestDto;
 import com.cgr.base.application.user.dto.UserWithRolesResponseDto;
 import com.cgr.base.application.user.usecase.IUserUseCase;
+import com.cgr.base.domain.repository.ILogRepository;
+import com.cgr.base.domain.repository.IRoleRepository;
 import com.cgr.base.domain.repository.IUserRoleRepository;
+import com.cgr.base.infrastructure.persistence.entity.LogEntity;
 import com.cgr.base.infrastructure.persistence.entity.UserEntity;
+import com.cgr.base.infrastructure.utilities.DtoMapper;
 
 import lombok.AllArgsConstructor;
 
@@ -20,6 +25,10 @@ import lombok.AllArgsConstructor;
 public class UserServiceImpl implements IUserUseCase {
 
     private final IUserRoleRepository userRoleRepository;
+
+    private final ILogRepository logRepository;
+
+    private final DtoMapper dtoMapper;
 
     @Transactional(readOnly = true)
     @Override
@@ -37,7 +46,10 @@ public class UserServiceImpl implements IUserUseCase {
             userResponsive.setCargo(user.getCargo());
             userResponsive.setUserType(user.getUserType());
 
+            List<LogEntity> logs = this.logRepository.findLogByUserEntityId(user.getId());
+            List<LogDto> logDtos = this.dtoMapper.convertToListDto(logs, LogDto.class);
 
+            userResponsive.setLogs(logDtos);
             userResponsive.addRole(user.getRoles());
 
             users.add(userResponsive);
@@ -64,25 +76,24 @@ public class UserServiceImpl implements IUserUseCase {
 
     @Transactional
     @Override
-    public UserDto createUser(UserDto userRequestDto){
-                
+    public UserDto createUser(UserDto userRequestDto) {
+
         UserDto user = this.userRoleRepository.createUser(userRequestDto);
 
-        if(user!=null) {
+        if (user != null) {
             return user;
         }
-        return null; 
-            
-        
+        return null;
+
     }
 
     @Override
     public UserDto updateUser(Long id, UserDto userDto) {
         UserDto user = this.userRoleRepository.updateUser(id, userDto);
 
-        if(user!=null) {
+        if (user != null) {
             return user;
         }
-        return null; 
+        return null;
     }
 }
