@@ -8,8 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.rules.general.dto.listOptionsDto;
@@ -25,11 +25,13 @@ public class generalRulesController extends AbstractController {
 
     @PostMapping("/data")
     public ResponseEntity<?> getGeneralRules(
-            @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) String quarter,
-            @RequestParam(required = false) String entityCode,
-            @RequestParam(required = false) String scopeCode) {
-        List<Map<String, Object>> result = Filter.getReglasGenerales(year, quarter, entityCode, scopeCode);
+            @RequestBody(required = false) Map<String, String> filters) {
+        String fecha = filters != null ? filters.get("fecha") : null;
+        String trimestre = filters != null ? filters.get("trimestre") : null;
+        String ambitoCodigo = filters != null ? filters.get("ambitoCodigo") : null;
+        String entidadCodigo = filters != null ? filters.get("entidadCodigo") : null;
+
+        List<Map<String, Object>> result = Filter.getFilteredRecords(fecha, trimestre, ambitoCodigo, entidadCodigo);
         return requestResponse(result, "General Rules successfully retrieved.", HttpStatus.OK, true);
     }
 
