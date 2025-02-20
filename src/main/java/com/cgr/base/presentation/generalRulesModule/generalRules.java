@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.generalRulesModule.service.DataSourceInit;
 import com.cgr.base.application.generalRulesModule.service.DataTransfer_EI;
+import com.cgr.base.application.generalRulesModule.service.DataTransfer_PG;
 import com.cgr.base.application.generalRulesModule.service.DataTransfer_PI;
 import com.cgr.base.presentation.controller.AbstractController;
 
@@ -25,6 +26,9 @@ public class generalRules extends AbstractController {
     @Autowired
     private DataTransfer_EI DataeJECIngresos;
 
+    @Autowired
+    private DataTransfer_PG DataProgGastos;
+
     @PostMapping("/init-tables")
     public ResponseEntity<?> processTables() {
         rulesInit.processTablesSource();
@@ -37,7 +41,7 @@ public class generalRules extends AbstractController {
 
     @PostMapping("/transfer")
     public ResponseEntity<?> updatePresupuesto() {
-        DataeJECIngresos.applyGeneralRule6();
+        DataProgGastos.applyGeneralRule9A();
         return requestResponse(
                 null,
                 "Apply General Rules.",
