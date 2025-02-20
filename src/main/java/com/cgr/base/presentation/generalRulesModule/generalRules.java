@@ -7,12 +7,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cgr.base.application.generalRulesModule.service.DataSourceInit;
-import com.cgr.base.application.generalRulesModule.service.DataTransfer_EI;
-import com.cgr.base.application.generalRulesModule.service.DataTransfer_PI;
-import com.cgr.base.application.generalRulesModule.service.DataTransfer_PG;
 import com.cgr.base.application.rules.general.service.dataSourceInit;
 import com.cgr.base.application.rules.general.service.dataTransfer_EG;
+import com.cgr.base.application.rules.general.service.dataTransfer_EI;
+import com.cgr.base.application.rules.general.service.dataTransfer_PG;
+import com.cgr.base.application.rules.general.service.dataTransfer_PI;
 import com.cgr.base.presentation.controller.AbstractController;
 
 @RestController
@@ -23,13 +22,13 @@ public class generalRules extends AbstractController {
     private dataSourceInit rulesInit;
 
     @Autowired
-    private DataTransfer_PI DataProgIngresos;
+    private dataTransfer_PI DataProgIngresos;
 
     @Autowired
-    private DataTransfer_EI DataEjecIngresos;
+    private dataTransfer_EI DataEjecIngresos;
 
     @Autowired
-    private DataTransfer_PG DataProgGastos;
+    private dataTransfer_PG DataProgGastos;
 
     @Autowired
     private dataTransfer_EG DataEjecGastos;
