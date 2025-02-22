@@ -172,4 +172,178 @@ public void applyGeneralRule9B() {
     jdbcTemplate.execute(updateQuery);
 }
 
+public void applyGeneralRule10() {
+
+    List<String> requiredColumns = Arrays.asList(
+        "TOTAL_10A",    
+        "REGLA_GENERAL_10A",
+        "ALERTA_10A",
+        "REGLA_GENERAL_10B",
+        "LISTA_CUENTAS_10B",
+        "ALERTA_10B",
+        "TOTAL_10C",
+        "REGLA_GENERAL_10C",
+        "ALERTA_10C"
+    );
+    
+    String checkColumnsQuery = String.format(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+      + "WHERE TABLE_NAME = '%s' "
+      + "AND COLUMN_NAME IN ('%s')",
+        tablaReglas, 
+        String.join("','", requiredColumns)
+    );
+    List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+
+    for (String column : requiredColumns) {
+        if (!existingColumns.contains(column)) {
+            String addColumnQuery = String.format(
+                "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
+                tablaReglas, 
+                column
+            );
+            jdbcTemplate.execute(addColumnQuery);
+        }
+    }
+
+    String updateQuery = String.format("""
+        ;WITH AmbitoVigencias AS (
+            SELECT 
+                AMBITO_COD,
+                STRING_AGG(CAST(COD_VIGENCIA_DEL_GASTO AS VARCHAR), ', ') AS VIGENCIAS_APLICABLES
+            FROM AMBITOS_CAPTURA ac
+            UNPIVOT (
+                COD_VIGENCIA_DEL_GASTO 
+                FOR VIGENCIA IN (VIGENCIA_AC, RESERVAS, CXP, VF_VA, VF_RESERVA, VF_CXP)
+            ) AS unpvt
+            WHERE COD_VIGENCIA_DEL_GASTO = 1
+            GROUP BY AMBITO_COD
+        ),
+        GastosCuenta2 AS (
+            SELECT 
+                g.TRIMESTRE,
+                g.FECHA,
+                g.CODIGO_ENTIDAD_INT,
+                g.AMBITO_CODIGO_STR,
+                SUM(CAST(g.APROPIACION_DEFINITIVA AS BIGINT)) AS TOTAL_10A,
+                CASE 
+                    WHEN SUM(CAST(g.APROPIACION_DEFINITIVA AS BIGINT)) < 100000000 THEN 'CUMPLE'
+                    ELSE 'NO CUMPLE'
+                END AS REGLA_GENERAL_10A
+            FROM VW_OPENDATA_C_PROGRAMACION_GASTOS g
+            INNER JOIN AmbitoVigencias av 
+                ON g.AMBITO_CODIGO_STR = av.AMBITO_COD
+               AND CHARINDEX(CAST(g.COD_VIGENCIA_DEL_GASTO AS VARCHAR), av.VIGENCIAS_APLICABLES) > 0
+            WHERE g.CUENTA = '2'
+            GROUP BY g.TRIMESTRE, g.FECHA, g.CODIGO_ENTIDAD_INT, g.AMBITO_CODIGO_STR
+        ),
+        ValoresCeroEspecificos AS (
+            SELECT 
+                g.TRIMESTRE,
+                g.FECHA,
+                g.CODIGO_ENTIDAD_INT,
+                g.AMBITO_CODIGO_STR,
+                STRING_AGG(g.CUENTA, ', ') AS LISTA_CUENTAS_10B,  
+                'NO CUMPLE' AS REGLA_GENERAL_10B
+            FROM VW_OPENDATA_C_PROGRAMACION_GASTOS g
+            INNER JOIN AmbitoVigencias av 
+                ON g.AMBITO_CODIGO_STR = av.AMBITO_COD
+               AND CHARINDEX(CAST(g.COD_VIGENCIA_DEL_GASTO AS VARCHAR), av.VIGENCIAS_APLICABLES) > 0
+            WHERE g.CUENTA IN ('2.1', '2.2', '2.4')
+              AND CAST(g.APROPIACION_DEFINITIVA AS BIGINT) = 0
+            GROUP BY g.TRIMESTRE, g.FECHA, g.CODIGO_ENTIDAD_INT, g.AMBITO_CODIGO_STR
+        ),
+        GastosCuenta299 AS (
+            SELECT 
+                g.TRIMESTRE,
+                g.FECHA,
+                g.CODIGO_ENTIDAD_INT,
+                g.AMBITO_CODIGO_STR,
+                SUM(CAST(g.APROPIACION_DEFINITIVA AS BIGINT)) AS TOTAL_10C,
+                CASE 
+                    WHEN SUM(CAST(g.APROPIACION_DEFINITIVA AS BIGINT)) < 100000000 THEN 'NO CUMPLE'
+                    ELSE 'CUMPLE'
+                END AS REGLA_GENERAL_10C
+            FROM VW_OPENDATA_C_PROGRAMACION_GASTOS g
+            INNER JOIN AmbitoVigencias av 
+                ON g.AMBITO_CODIGO_STR = av.AMBITO_COD
+               AND CHARINDEX(CAST(g.COD_VIGENCIA_DEL_GASTO AS VARCHAR), av.VIGENCIAS_APLICABLES) > 0
+            WHERE g.CUENTA = '2.99'
+            GROUP BY g.TRIMESTRE, g.FECHA, g.CODIGO_ENTIDAD_INT, g.AMBITO_CODIGO_STR
+        ),
+        QueryResultados AS (
+            SELECT 
+                COALESCE(G2.TRIMESTRE, VCE.TRIMESTRE, G299.TRIMESTRE) AS TRIMESTRE,
+                COALESCE(G2.FECHA, VCE.FECHA, G299.FECHA) AS FECHA,
+                COALESCE(G2.CODIGO_ENTIDAD_INT, VCE.CODIGO_ENTIDAD_INT, G299.CODIGO_ENTIDAD_INT) AS CODIGO_ENTIDAD_INT,
+                COALESCE(G2.AMBITO_CODIGO_STR, VCE.AMBITO_CODIGO_STR, G299.AMBITO_CODIGO_STR) AS AMBITO_CODIGO_STR,
+
+                COALESCE(G2.TOTAL_10A, '') AS TOTAL_10A,
+                COALESCE(G2.REGLA_GENERAL_10A, 'Sin cuenta #2') AS REGLA_GENERAL_10A,
+                COALESCE(VCE.LISTA_CUENTAS_10B, '') AS LISTA_CUENTAS_10B,
+                COALESCE(VCE.REGLA_GENERAL_10B, 'CUMPLE') AS REGLA_GENERAL_10B,
+                COALESCE(G299.TOTAL_10C, '') AS TOTAL_10C,
+                COALESCE(G299.REGLA_GENERAL_10C, 'Sin cuenta #2.99') AS REGLA_GENERAL_10C,
+
+                -- EJEMPLO: columnas de alerta
+                CASE 
+                    WHEN COALESCE(G2.REGLA_GENERAL_10A,'Sin cuenta #2') = 'CUMPLE' 
+                         THEN 'La entidad satisface los criterios de evaluación'
+                    WHEN COALESCE(G2.REGLA_GENERAL_10A,'Sin cuenta #2') = 'Sin cuenta #2'
+                         THEN 'Cuenta #2 no está presente'
+                    ELSE 'La entidad NO satisface los criterios de evaluación'
+                END AS ALERTA_10A,
+
+                CASE 
+                    WHEN COALESCE(VCE.REGLA_GENERAL_10B,'CUMPLE') = 'CUMPLE'
+                         THEN 'La entidad cumple los criterios de evaluación'
+                    ELSE 'La entidad no cumple los criterios de evaluación'
+                END AS ALERTA_10B,
+
+                CASE 
+                    WHEN COALESCE(G299.REGLA_GENERAL_10C,'Sin cuenta #2.99') = 'CUMPLE'
+                         THEN 'La entidad satisface los criterios de evaluación'
+                    WHEN COALESCE(G299.REGLA_GENERAL_10C,'Sin cuenta #2.99') = 'Sin cuenta #2.99'
+                         THEN 'La entidad no satisface los criterios de evaluaci'
+                    ELSE 'La entidad no satisface los criterios de evaluación'
+                END AS ALERTA_10C
+            FROM GastosCuenta2 G2
+            FULL OUTER JOIN ValoresCeroEspecificos VCE
+              ON G2.TRIMESTRE = VCE.TRIMESTRE 
+             AND G2.FECHA = VCE.FECHA
+             AND G2.CODIGO_ENTIDAD_INT = VCE.CODIGO_ENTIDAD_INT
+             AND G2.AMBITO_CODIGO_STR = VCE.AMBITO_CODIGO_STR
+            FULL OUTER JOIN GastosCuenta299 G299
+              ON COALESCE(G2.TRIMESTRE, VCE.TRIMESTRE) = G299.TRIMESTRE
+             AND COALESCE(G2.FECHA, VCE.FECHA) = G299.FECHA
+             AND COALESCE(G2.CODIGO_ENTIDAD_INT, VCE.CODIGO_ENTIDAD_INT) = G299.CODIGO_ENTIDAD_INT
+             AND COALESCE(G2.AMBITO_CODIGO_STR, VCE.AMBITO_CODIGO_STR) = G299.AMBITO_CODIGO_STR
+        )
+
+        UPDATE r
+        SET 
+            r.TOTAL_10A = v.TOTAL_10A,
+            r.REGLA_GENERAL_10A = COALESCE(v.REGLA_GENERAL_10A, 'NO_DATA'),
+            r.ALERTA_10A = v.ALERTA_10A,
+            r.LISTA_CUENTAS_10B = v.LISTA_CUENTAS_10B,
+            r.REGLA_GENERAL_10B = COALESCE(v.REGLA_GENERAL_10B, 'NO_DATA'),
+            r.ALERTA_10B = v.ALERTA_10B,
+            r.TOTAL_10C = v.TOTAL_10C,
+            r.REGLA_GENERAL_10C = COALESCE(v.REGLA_GENERAL_10C,'NO_DATA'),
+            r.ALERTA_10C = v.ALERTA_10C
+        FROM %s r  -- Aquí tu tabla de reglas: GENERAL_RULES_DATA
+        LEFT JOIN QueryResultados v
+            ON r.FECHA            = v.FECHA
+           AND r.TRIMESTRE        = v.TRIMESTRE
+           AND r.CODIGO_ENTIDAD   = v.CODIGO_ENTIDAD_INT
+           AND r.AMBITO_CODIGO    = v.AMBITO_CODIGO_STR
+        """,
+        tablaReglas 
+    );
+
+    jdbcTemplate.execute(updateQuery);
 }
+
+
+}
+
