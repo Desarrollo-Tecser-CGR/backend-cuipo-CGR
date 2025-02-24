@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cgr.base.application.rules.general.service.dataSourceInit;
 import com.cgr.base.application.rules.general.service.dataTransfer_EG;
 import com.cgr.base.application.rules.general.service.dataTransfer_EI;
-import com.cgr.base.application.rules.general.service.dataTransfer_PG;
 import com.cgr.base.application.rules.general.service.dataTransfer_PI;
 import com.cgr.base.presentation.controller.AbstractController;
 
@@ -26,9 +25,6 @@ public class generalRules extends AbstractController {
 
     @Autowired
     private dataTransfer_EI DataEjecIngresos;
-
-    @Autowired
-    private dataTransfer_PG DataProgGastos;
 
     @Autowired
     private dataTransfer_EG DataEjecGastos;
