@@ -1,7 +1,9 @@
 package com.cgr.base.application.rules.general.service;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,499 +22,175 @@ public class dataTransfer_EG {
     @Value("${TABLA_GENERAL_RULES}")
     private String tablaReglas;
 
-    // Regla 12: Compromisos, Obligaciones y/o Pagos
     public void applyGeneralRule12() {
-        // Paso 1: Verificar/crear columnas en tabla de origen (ejecGastos)
-        List<String> requiredColumnsOrigen = Arrays.asList(
-                "RELACION_RG_12A",
-                "ESTADO_RG_12A",
-                "RELACION_RG_12B",
-                "ESTADO_RG_12B");
+        // 1. Validar columnas - Usar una sola consulta batch para verificar todas las
+        // columnas
+        String checkColumnsQuery = String.format(
+                """
+                        SELECT COLUMN_NAME
+                        FROM INFORMATION_SCHEMA.COLUMNS
+                        WHERE TABLE_NAME = '%s'
+                        AND COLUMN_NAME IN (
+                            'REGLA_GENERAL_12A', 'ALERTA_12A', 'CUENTAS_NO_CUMPLE_12A', 'PORCENTAJE_NO_CUMPLE_12A', 'CUENTAS_NO_DATA_12A', 'PORCENTAJE_NO_DATA_12A',
+                            'REGLA_GENERAL_12B', 'ALERTA_12B', 'CUENTAS_NO_CUMPLE_12B', 'PORCENTAJE_NO_CUMPLE_12B', 'CUENTAS_NO_DATA_12B', 'PORCENTAJE_NO_DATA_12B'
+                        )
+                        """,
+                tablaReglas);
 
-        for (String column : requiredColumnsOrigen) {
-            String checkColumnQuery = String.format(
-                    "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME = '%s'",
-                    ejecGastos, column);
+        List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+        Set<String> existingColumnSet = new HashSet<>(existingColumns);
 
-            Integer columnExists = jdbcTemplate.queryForObject(checkColumnQuery, Integer.class);
+        // Crear columnas faltantes en un solo batch si es posible
+        StringBuilder alterTableQuery = new StringBuilder();
+        List<String> requiredColumns = Arrays.asList(
+                "REGLA_GENERAL_12A", "ALERTA_12A", "CUENTAS_NO_CUMPLE_12A", "PORCENTAJE_NO_CUMPLE_12A",
+                "CUENTAS_NO_DATA_12A", "PORCENTAJE_NO_DATA_12A",
+                "REGLA_GENERAL_12B", "ALERTA_12B", "CUENTAS_NO_CUMPLE_12B", "PORCENTAJE_NO_CUMPLE_12B",
+                "CUENTAS_NO_DATA_12B", "PORCENTAJE_NO_DATA_12B");
 
-            if (columnExists == null || columnExists == 0) {
-                String addColumnQuery = String.format(
-                        "ALTER TABLE %s ADD %s %s NULL",
-                        ejecGastos,
-                        column,
-                        column.startsWith("RELACION") ? "DECIMAL(20,0)" : "VARCHAR(50)");
-                jdbcTemplate.execute(addColumnQuery);
-                System.out.println("Columna " + column + " agregada a " + ejecGastos);
+        for (String column : requiredColumns) {
+            if (!existingColumnSet.contains(column)) {
+                String columnType = column.startsWith("PORCENTAJE_") ? "VARCHAR(MAX)"
+                        : column.startsWith("CUENTAS_") ? "NVARCHAR(MAX)" : "VARCHAR(MAX)";
+
+                alterTableQuery
+                        .append(String.format("ALTER TABLE %s ADD %s %s NULL; ", tablaReglas, column, columnType));
             }
         }
 
-        // Verificar si existe la tabla de origen
-        String checkTableExistsQuery = String.format(
-                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '%s'",
-                ejecGastos.replace("[cuipo_dev].[dbo].", ""));
-        Integer tableExists = jdbcTemplate.queryForObject(checkTableExistsQuery, Integer.class);
-
-        if (tableExists == null || tableExists == 0) {
-            String updateNoDataQuery = String.format(
-                    """
-                            UPDATE %s
-                            SET REGLA_GENERAL_12A = 'NO DATA',
-                                ALERTA_12A = 'No existe la tabla de ejecución de gastos.',
-                                REGLA_GENERAL_12B = 'NO DATA',
-                                ALERTA_12B = 'No existe la tabla de ejecución de gastos.',
-                                CUENTAS_12A = NULL,
-                                ESTADO_12A = NULL,
-                                PORCENTAJES_12A = NULL,
-                                CUENTAS_12B = NULL,
-                                ESTADO_12B = NULL,
-                                PORCENTAJES_12B = NULL
-                            """,
-                    tablaReglas);
-            jdbcTemplate.execute(updateNoDataQuery);
-            return;
+        if (alterTableQuery.length() > 0) {
+            jdbcTemplate.execute(alterTableQuery.toString());
         }
 
-        // Actualizar ESTADO_RG_12A y RELACION_RG_12A
-        String updateRG12AQuery = String.format(
-                """
-                        UPDATE %s
-                        SET ESTADO_RG_12A = CASE
-                                WHEN COMPROMISOS IS NULL OR OBLIGACIONES IS NULL THEN 'NO DATA'
-                                WHEN AMBITO_CODIGO_STR IN ('A447', 'A448', 'A449', 'A450', 'A451', 'A453', 'A454') THEN 'NO APLICA'
-                                WHEN COMPROMISOS = 0 THEN 'NO DATA'
-                                WHEN COMPROMISOS >= OBLIGACIONES THEN 'CUMPLE'
-                                ELSE 'NO CUMPLE'
-                            END,
-                            RELACION_RG_12A = CASE
-                                WHEN COMPROMISOS IS NULL OR OBLIGACIONES IS NULL THEN NULL
-                                WHEN AMBITO_CODIGO_STR IN ('A447', 'A448', 'A449', 'A450', 'A451', 'A453', 'A454') THEN NULL
-                                WHEN COMPROMISOS = 0 THEN NULL
-                                ELSE CAST(1 - (CAST(OBLIGACIONES AS DECIMAL(20,0)) / CAST(COMPROMISOS AS DECIMAL(20,0))) AS DECIMAL(20,0))
-                            END
-                        """,
-                ejecGastos);
-        jdbcTemplate.execute(updateRG12AQuery);
+        // 2. Crear índices temporales para mejorar rendimiento si no existen
+        jdbcTemplate.execute(
+                String.format(
+                        """
+                                IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IDX_TEMP_GASTOS_RULE12')
+                                CREATE NONCLUSTERED INDEX IDX_TEMP_GASTOS_RULE12 ON %s
+                                (FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO)
+                                INCLUDE (CUENTA, COMPROMISOS, OBLIGACIONES, PAGOS);
+                                """,
+                        ejecGastos));
 
-        // Actualizar ESTADO_RG_12B y RELACION_RG_12B
-        String updateRG12BQuery = String.format(
-                """
-                        UPDATE %s
-                        SET ESTADO_RG_12B = CASE
-                                WHEN OBLIGACIONES IS NULL OR PAGOS IS NULL THEN 'NO DATA'
-                                WHEN OBLIGACIONES = 0 THEN 'NO DATA'
-                                WHEN OBLIGACIONES >= PAGOS THEN 'CUMPLE'
-                                ELSE 'NO CUMPLE'
-                            END,
-                            RELACION_RG_12B = CASE
-                                WHEN OBLIGACIONES IS NULL OR PAGOS IS NULL THEN NULL
-                                WHEN OBLIGACIONES = 0 THEN NULL
-                                ELSE CAST(1 - (CAST(PAGOS AS DECIMAL(20,0)) / CAST(OBLIGACIONES AS DECIMAL(20,0))) AS DECIMAL(20,0))
-                            END
-                        """,
-                ejecGastos);
-        jdbcTemplate.execute(updateRG12BQuery);
+        // 3. Procesamiento en un solo paso - Actualizar datos de validación
+        // directamente
+        String updateQuery = String.format(
+        """
+        WITH Validacion12 AS (
+            SELECT
+                FECHA,
+                TRIMESTRE,
+                CODIGO_ENTIDAD AS CODIGO_ENTIDAD,
+                AMBITO_CODIGO AS AMBITO_CODIGO,
+                CASE WHEN AMBITO_CODIGO IN ('A447', 'A448', 'A449', 'A450', 'A451', 'A453', 'A454') THEN 1 ELSE 0 END AS NO_APLICA_A,
+                
+                -- Parte A
+                (
+                    SELECT STRING_AGG(CONVERT(NVARCHAR(MAX), g.CUENTA), ',') 
+                    FROM %s g
+                    WHERE g.FECHA = d.FECHA
+                    AND g.TRIMESTRE = d.TRIMESTRE
+                    AND g.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD
+                    AND g.AMBITO_CODIGO = d.AMBITO_CODIGO
+                    AND g.COMPROMISOS < g.OBLIGACIONES
+                    AND g.COMPROMISOS > 0
+                ) AS CUENTAS_NO_CUMPLE_A,
 
-        // Paso 2: Verificar/crear columnas en tabla de destino (tablaReglas)
-        List<String> requiredColumnsDestino = Arrays.asList(
-                "REGLA_GENERAL_12A",
-                "ALERTA_12A",
-                "REGLA_GENERAL_12B",
-                "ALERTA_12B",
-                "CUENTAS_12A",
-                "ESTADO_12A",
-                "PORCENTAJES_12A",
-                "CUENTAS_12B",
-                "ESTADO_12B",
-                "PORCENTAJES_12B");
+                (
+                    SELECT STRING_AGG(
+                        CONVERT(NVARCHAR(MAX), 
+                            CASE 
+                                WHEN g.COMPROMISOS = 0 THEN 'null'
+                                ELSE CONVERT(NVARCHAR(MAX), 1 - (g.OBLIGACIONES / NULLIF(g.COMPROMISOS, 0))) 
+                            END), ',') 
+                    FROM %s g
+                    WHERE g.FECHA = d.FECHA
+                    AND g.TRIMESTRE = d.TRIMESTRE
+                    AND g.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD
+                    AND g.AMBITO_CODIGO = d.AMBITO_CODIGO
+                    AND g.COMPROMISOS < g.OBLIGACIONES
+                    AND g.COMPROMISOS > 0
+                ) AS PORCENTAJE_NO_CUMPLE_A,
 
-        for (String column : requiredColumnsDestino) {
-            String checkColumnQuery = String.format(
-                    "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME = '%s'",
-                    tablaReglas, column);
+                -- Parte B
+                (
+                    SELECT STRING_AGG(CONVERT(NVARCHAR(MAX), g.CUENTA), ',') 
+                    FROM %s g
+                    WHERE g.FECHA = d.FECHA
+                    AND g.TRIMESTRE = d.TRIMESTRE
+                    AND g.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD
+                    AND g.AMBITO_CODIGO = d.AMBITO_CODIGO
+                    AND g.OBLIGACIONES < g.PAGOS
+                    AND g.OBLIGACIONES > 0
+                ) AS CUENTAS_NO_CUMPLE_B,
 
-            Integer columnExists = jdbcTemplate.queryForObject(checkColumnQuery, Integer.class);
-
-            if (columnExists == null || columnExists == 0) {
-                String addColumnQuery = String.format(
-                        "ALTER TABLE %s ADD %s %s NULL",
-                        tablaReglas,
-                        column,
-                        column.startsWith("REGLA_GENERAL") || column.startsWith("ALERTA") ? "VARCHAR(255)"
-                                : "NVARCHAR(MAX)");
-                jdbcTemplate.execute(addColumnQuery);
-                System.out.println("Columna " + column + " agregada a " + tablaReglas);
-            }
-        }
-
-        // Actualizar las listas en la tabla de destino - Realizamos en una sola
-        // operación para optimizar
-        String updateListsQuery = String.format(
-                """
-                        UPDATE d
-                        SET d.CUENTAS_12A = (
-                                SELECT STRING_AGG(ISNULL(CUENTA, 'NULL'), ',')
-                                FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
-                                WHERE a.FECHA = d.FECHA
-                                AND a.TRIMESTRE = d.TRIMESTRE
-                                AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                                AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                            ),
-                            d.ESTADO_12A = (
-                                SELECT STRING_AGG(ISNULL(ESTADO_RG_12A, 'NULL'), ',')
-                                FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
-                                WHERE a.FECHA = d.FECHA
-                                AND a.TRIMESTRE = d.TRIMESTRE
-                                AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                                AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                            ),
-                            d.PORCENTAJES_12A = (
-                                SELECT STRING_AGG(ISNULL(CAST(RELACION_RG_12A AS VARCHAR(50)), 'NULL'), ',')
-                                FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
-                                WHERE a.FECHA = d.FECHA
-                                AND a.TRIMESTRE = d.TRIMESTRE
-                                AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                                AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                            ),
-                            d.CUENTAS_12B = (
-                                SELECT STRING_AGG(ISNULL(CUENTA, 'NULL'), ',')
-                                FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
-                                WHERE a.FECHA = d.FECHA
-                                AND a.TRIMESTRE = d.TRIMESTRE
-                                AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                                AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                            ),
-                            d.ESTADO_12B = (
-                                SELECT STRING_AGG(ISNULL(ESTADO_RG_12B, 'NULL'), ',')
-                                FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
-                                WHERE a.FECHA = d.FECHA
-                                AND a.TRIMESTRE = d.TRIMESTRE
-                                AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                                AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                            ),
-                            d.PORCENTAJES_12B = (
-                                SELECT STRING_AGG(ISNULL(CAST(RELACION_RG_12B AS VARCHAR(50)), 'NULL'), ',')
-                                FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
-                                WHERE a.FECHA = d.FECHA
-                                AND a.TRIMESTRE = d.TRIMESTRE
-                                AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                                AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                            )
-                        FROM %s d
-                        """,
-                ejecGastos, ejecGastos,
-                ejecGastos, ejecGastos,
-                ejecGastos, ejecGastos,
-                ejecGastos, ejecGastos,
-                ejecGastos, ejecGastos,
-                ejecGastos, ejecGastos,
-                tablaReglas);
-        jdbcTemplate.execute(updateListsQuery);
-
-        // Actualizar registros sin datos relacionados
-        String updateEmptyQuery = String.format(
-                """
-                        UPDATE %s
-                        SET REGLA_GENERAL_12A = 'NO DATA',
-                            ALERTA_12A = 'No se encontraron registros relacionados en la tabla de ejecución de gastos.',
-                            REGLA_GENERAL_12B = 'NO DATA',
-                            ALERTA_12B = 'No se encontraron registros relacionados en la tabla de ejecución de gastos.'
-                        WHERE CUENTAS_12A IS NULL OR CUENTAS_12A = ''
-                        """,
-                tablaReglas);
-        jdbcTemplate.execute(updateEmptyQuery);
-
-        // Actualizar REGLA_GENERAL_12A y ALERTA_12A según estados
-        String updateRule12AQuery = String.format(
-                """
-                        UPDATE %s
-                        SET REGLA_GENERAL_12A =
-                            CASE
-                                WHEN ESTADO_12A IS NULL THEN 'NO DATA'
-                                WHEN ESTADO_12A LIKE '%%NO DATA%%' THEN 'NO DATA'
-                                WHEN ESTADO_12A LIKE '%%NO CUMPLE%%' THEN 'NO CUMPLE'
-                                WHEN ESTADO_12A LIKE '%%NO APLICA%%' AND ESTADO_12A NOT LIKE '%%CUMPLE%%' THEN 'NO APLICA'
-                                ELSE 'CUMPLE'
-                            END,
-                            ALERTA_12A =
-                            CASE
-                                WHEN ESTADO_12A IS NULL THEN 'No se encontraron datos para validar.'
-                                WHEN ESTADO_12A LIKE '%%NO DATA%%' THEN 'Los valores registrados NO son válidos para la validación.'
-                                WHEN ESTADO_12A LIKE '%%NO CUMPLE%%' THEN 'La entidad NO satisface los criterios de validación.'
-                                WHEN ESTADO_12A LIKE '%%NO APLICA%%' AND ESTADO_12A NOT LIKE '%%CUMPLE%%' THEN 'Los criterios de validación NO aplican en el ámbito.'
-                                ELSE 'La entidad satisface los criterios de validación.'
-                            END
-                        """,
-                tablaReglas);
-        jdbcTemplate.execute(updateRule12AQuery);
-
-        // Actualizar REGLA_GENERAL_12B y ALERTA_12B según estados
-        String updateRule12BQuery = String.format(
-                """
-                        UPDATE %s
-                        SET REGLA_GENERAL_12B =
-                            CASE
-                                WHEN ESTADO_12B IS NULL THEN 'NO DATA'
-                                WHEN ESTADO_12B LIKE '%%NO DATA%%' THEN 'NO DATA'
-                                WHEN ESTADO_12B LIKE '%%NO CUMPLE%%' THEN 'NO CUMPLE'
-                                ELSE 'CUMPLE'
-                            END,
-                            ALERTA_12B =
-                            CASE
-                                WHEN ESTADO_12B IS NULL THEN 'No se encontraron datos para validar.'
-                                WHEN ESTADO_12B LIKE '%%NO DATA%%' THEN 'Los valores registrados NO son válidos para la validación.'
-                                WHEN ESTADO_12B LIKE '%%NO CUMPLE%%' THEN 'La entidad NO satisface los criterios de validación.'
-                                ELSE 'La entidad satisface los criterios de validación.'
-                            END
-                        """,
-                tablaReglas);
-        jdbcTemplate.execute(updateRule12BQuery);
-    }
-
-    // Regla 12: Validación de compromisos, obligaciones y pagos
-public void applyGeneralRule12a() {
-    // Paso 1: Verificar/crear columnas en tabla de origen (ejecGastos)
-    List<String> requiredColumnsOrigen = Arrays.asList(
-            "RELACION_RG_12A", 
-            "ESTADO_RG_12A", 
-            "RELACION_RG_12B", 
-            "ESTADO_RG_12B");
-
-    for (String column : requiredColumnsOrigen) {
-        String checkColumnQuery = String.format(
-                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME = '%s'",
-                ejecGastos, column);
-
-        Integer columnExists = jdbcTemplate.queryForObject(checkColumnQuery, Integer.class);
-
-        if (columnExists == null || columnExists == 0) {
-            String addColumnQuery = String.format(
-                    "ALTER TABLE %s ADD %s %s NULL",
-                    ejecGastos,
-                    column,
-                    column.startsWith("RELACION") ? "DECIMAL(18,6)" : "VARCHAR(50)");
-            jdbcTemplate.execute(addColumnQuery);
-            System.out.println("Columna " + column + " agregada a " + ejecGastos);
-        }
-    }
-
-    // Verificar si existe la tabla de origen
-    String checkTableExistsQuery = String.format(
-            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '%s'", 
-            ejecGastos.replace("[cuipo_dev].[dbo].", ""));
-    Integer tableExists = jdbcTemplate.queryForObject(checkTableExistsQuery, Integer.class);
-
-    if (tableExists == null || tableExists == 0) {
-        String updateNoDataQuery = String.format(
-                """
-                UPDATE %s
-                SET REGLA_GENERAL_12A = 'NO DATA',
-                    ALERTA_12A = 'No existe la tabla de ejecución de gastos.',
-                    REGLA_GENERAL_12B = 'NO DATA',
-                    ALERTA_12B = 'No existe la tabla de ejecución de gastos.',
-                    CUENTAS_12A = NULL,
-                    ESTADO_12A = NULL,
-                    PORCENTAJES_12A = NULL,
-                    CUENTAS_12B = NULL,
-                    ESTADO_12B = NULL,
-                    PORCENTAJES_12B = NULL
-                """,
-                tablaReglas);
-        jdbcTemplate.execute(updateNoDataQuery);
-        return;
-    }
-
-    // Actualizar ESTADO_RG_12A y RELACION_RG_12A
-    String updateRG12AQuery = String.format(
-            """
-            UPDATE %s
-            SET ESTADO_RG_12A = CASE
-                    WHEN COMPROMISOS IS NULL OR OBLIGACIONES IS NULL THEN 'NO DATA'
-                    WHEN AMBITO_CODIGO_STR IN ('A447', 'A448', 'A449', 'A450', 'A451', 'A453', 'A454') THEN 'NO APLICA'
-                    WHEN COMPROMISOS = 0 THEN 'NO DATA'
-                    WHEN COMPROMISOS >= OBLIGACIONES THEN 'CUMPLE'
-                    ELSE 'NO CUMPLE'
-                END,
-                RELACION_RG_12A = CASE
-                    WHEN COMPROMISOS IS NULL OR OBLIGACIONES IS NULL THEN NULL
-                    WHEN AMBITO_CODIGO_STR IN ('A447', 'A448', 'A449', 'A450', 'A451', 'A453', 'A454') THEN NULL
-                    WHEN COMPROMISOS = 0 THEN NULL
-                    ELSE CAST(1 - (CAST(OBLIGACIONES AS DECIMAL(18,6)) / CAST(COMPROMISOS AS DECIMAL(18,6))) AS DECIMAL(18,6))
-                END
-            """, ejecGastos);
-    jdbcTemplate.execute(updateRG12AQuery);
-
-    // Actualizar ESTADO_RG_12B y RELACION_RG_12B
-    String updateRG12BQuery = String.format(
-            """
-            UPDATE %s
-            SET ESTADO_RG_12B = CASE
-                    WHEN OBLIGACIONES IS NULL OR PAGOS IS NULL THEN 'NO DATA'
-                    WHEN OBLIGACIONES = 0 THEN 'NO DATA'
-                    WHEN OBLIGACIONES >= PAGOS THEN 'CUMPLE'
-                    ELSE 'NO CUMPLE'
-                END,
-                RELACION_RG_12B = CASE
-                    WHEN OBLIGACIONES IS NULL OR PAGOS IS NULL THEN NULL
-                    WHEN OBLIGACIONES = 0 THEN NULL
-                    ELSE CAST(1 - (CAST(PAGOS AS DECIMAL(18,6)) / CAST(OBLIGACIONES AS DECIMAL(18,6))) AS DECIMAL(18,6))
-                END
-            """, ejecGastos);
-    jdbcTemplate.execute(updateRG12BQuery);
-
-    // Paso 2: Verificar/crear columnas en tabla de destino (tablaReglas)
-    List<String> requiredColumnsDestino = Arrays.asList(
-            "REGLA_GENERAL_12A", 
-            "ALERTA_12A", 
-            "REGLA_GENERAL_12B", 
-            "ALERTA_12B",
-            "CUENTAS_12A", 
-            "ESTADO_12A", 
-            "PORCENTAJES_12A", 
-            "CUENTAS_12B", 
-            "ESTADO_12B", 
-            "PORCENTAJES_12B");
-
-    for (String column : requiredColumnsDestino) {
-        String checkColumnQuery = String.format(
-                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME = '%s'",
-                tablaReglas, column);
-
-        Integer columnExists = jdbcTemplate.queryForObject(checkColumnQuery, Integer.class);
-
-        if (columnExists == null || columnExists == 0) {
-            String addColumnQuery = String.format(
-                    "ALTER TABLE %s ADD %s %s NULL",
-                    tablaReglas,
-                    column,
-                    column.startsWith("REGLA_GENERAL") || column.startsWith("ALERTA") ? 
-                            "VARCHAR(255)" : "NVARCHAR(MAX)");
-            jdbcTemplate.execute(addColumnQuery);
-            System.out.println("Columna " + column + " agregada a " + tablaReglas);
-        }
-    }
-
-    // Actualizar las listas en la tabla de destino - Realizamos en una sola operación para optimizar
-    String updateListsQuery = String.format(
-            """
-            UPDATE d
-            SET d.CUENTAS_12A = (
-                    SELECT STRING_AGG(ISNULL(CUENTA, 'NULL'), ',') 
-                    FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
-                    WHERE a.FECHA = d.FECHA
-                    AND a.TRIMESTRE = d.TRIMESTRE
-                    AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                    AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                ),
-                d.ESTADO_12A = (
-                    SELECT STRING_AGG(ISNULL(ESTADO_RG_12A, 'NULL'), ',') 
-                    FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
-                    WHERE a.FECHA = d.FECHA
-                    AND a.TRIMESTRE = d.TRIMESTRE
-                    AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                    AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                ),
-                d.PORCENTAJES_12A = (
-                    SELECT STRING_AGG(ISNULL(CAST(RELACION_RG_12A AS VARCHAR(50)), 'NULL'), ',') 
-                    FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
-                    WHERE a.FECHA = d.FECHA
-                    AND a.TRIMESTRE = d.TRIMESTRE
-                    AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                    AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                ),
-                d.CUENTAS_12B = (
-                    SELECT STRING_AGG(ISNULL(CUENTA, 'NULL'), ',') 
-                    FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
-                    WHERE a.FECHA = d.FECHA
-                    AND a.TRIMESTRE = d.TRIMESTRE
-                    AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                    AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                ),
-                d.ESTADO_12B = (
-                    SELECT STRING_AGG(ISNULL(ESTADO_RG_12B, 'NULL'), ',') 
-                    FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
-                    WHERE a.FECHA = d.FECHA
-                    AND a.TRIMESTRE = d.TRIMESTRE
-                    AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                    AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                ),
-                d.PORCENTAJES_12B = (
-                    SELECT STRING_AGG(ISNULL(CAST(RELACION_RG_12B AS VARCHAR(50)), 'NULL'), ',') 
-                    FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
-                    WHERE a.FECHA = d.FECHA
-                    AND a.TRIMESTRE = d.TRIMESTRE
-                    AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                    AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                )
+                (
+                    SELECT STRING_AGG(
+                        CONVERT(NVARCHAR(MAX), 
+                            CASE 
+                                WHEN g.OBLIGACIONES = 0 THEN 'null'
+                                ELSE CONVERT(NVARCHAR(MAX), 1 - (g.PAGOS / NULLIF(g.OBLIGACIONES, 0))) 
+                            END), ',') 
+                    FROM %s g
+                    WHERE g.FECHA = d.FECHA
+                    AND g.TRIMESTRE = d.TRIMESTRE
+                    AND g.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD
+                    AND g.AMBITO_CODIGO = d.AMBITO_CODIGO
+                    AND g.OBLIGACIONES < g.PAGOS
+                    AND g.OBLIGACIONES > 0
+                ) AS PORCENTAJE_NO_CUMPLE_B
             FROM %s d
-            """,
-            ejecGastos, ejecGastos,
-            ejecGastos, ejecGastos,
-            ejecGastos, ejecGastos,
-            ejecGastos, ejecGastos,
-            ejecGastos, ejecGastos,
-            ejecGastos, ejecGastos,
-            tablaReglas);
-    jdbcTemplate.execute(updateListsQuery);
+        )
 
-    // Actualizar registros sin datos relacionados
-    String updateEmptyQuery = String.format(
-            """
-            UPDATE %s
-            SET REGLA_GENERAL_12A = 'NO DATA',
-                ALERTA_12A = 'No se encontraron registros relacionados en la tabla de ejecución de gastos.',
-                REGLA_GENERAL_12B = 'NO DATA',
-                ALERTA_12B = 'No se encontraron registros relacionados en la tabla de ejecución de gastos.'
-            WHERE CUENTAS_12A IS NULL OR CUENTAS_12A = ''
-            """,
-            tablaReglas);
-    jdbcTemplate.execute(updateEmptyQuery);
-
-    // Actualizar REGLA_GENERAL_12A y ALERTA_12A según estados
-    String updateRule12AQuery = String.format(
-            """
-            UPDATE %s
-            SET REGLA_GENERAL_12A = 
-                CASE
-                    WHEN ESTADO_12A IS NULL THEN 'NO DATA'
-                    WHEN ESTADO_12A LIKE '%%NO DATA%%' THEN 'NO DATA'
-                    WHEN ESTADO_12A LIKE '%%NO CUMPLE%%' THEN 'NO CUMPLE'
-                    WHEN ESTADO_12A LIKE '%%NO APLICA%%' AND ESTADO_12A NOT LIKE '%%CUMPLE%%' THEN 'NO APLICA'
-                    ELSE 'CUMPLE'
+        UPDATE d
+        SET
+            -- Regla 12A
+            d.REGLA_GENERAL_12A = 
+                CASE 
+                    WHEN v.NO_APLICA_A = 1 THEN 'NO APLICA'
+                    WHEN v.CUENTAS_NO_CUMPLE_A IS NULL THEN 'CUMPLE'
+                    ELSE 'NO CUMPLE'
                 END,
-                ALERTA_12A = 
-                CASE
-                    WHEN ESTADO_12A IS NULL THEN 'No se encontraron datos para validar.'
-                    WHEN ESTADO_12A LIKE '%%NO DATA%%' THEN 'Los valores registrados NO son válidos para la validación.'
-                    WHEN ESTADO_12A LIKE '%%NO CUMPLE%%' THEN 'La entidad NO satisface los criterios de validación.'
-                    WHEN ESTADO_12A LIKE '%%NO APLICA%%' AND ESTADO_12A NOT LIKE '%%CUMPLE%%' THEN 'Los criterios de validación NO aplican en el ámbito.'
-                    ELSE 'La entidad satisface los criterios de validación.'
-                END
-            """,
-            tablaReglas);
-    jdbcTemplate.execute(updateRule12AQuery);
-
-    // Actualizar REGLA_GENERAL_12B y ALERTA_12B según estados
-    String updateRule12BQuery = String.format(
-            """
-            UPDATE %s
-            SET REGLA_GENERAL_12B = 
-                CASE
-                    WHEN ESTADO_12B IS NULL THEN 'NO DATA'
-                    WHEN ESTADO_12B LIKE '%%NO DATA%%' THEN 'NO DATA'
-                    WHEN ESTADO_12B LIKE '%%NO CUMPLE%%' THEN 'NO CUMPLE'
-                    ELSE 'CUMPLE'
+            d.ALERTA_12A = 
+                CASE 
+                    WHEN v.NO_APLICA_A = 1 THEN 'La entidad satisface los criterios de validación'
+                    WHEN v.CUENTAS_NO_CUMPLE_A IS NULL THEN 'La entidad satisface los criterios de validación'
+                    ELSE 'Existen cuentas que no cumplen con la validación'
                 END,
-                ALERTA_12B = 
-                CASE
-                    WHEN ESTADO_12B IS NULL THEN 'No se encontraron datos para validar.'
-                    WHEN ESTADO_12B LIKE '%%NO DATA%%' THEN 'Los valores registrados NO son válidos para la validación.'
-                    WHEN ESTADO_12B LIKE '%%NO CUMPLE%%' THEN 'La entidad NO satisface los criterios de validación.'
-                    ELSE 'La entidad satisface los criterios de validación.'
-                END
-            """,
-            tablaReglas);
-    jdbcTemplate.execute(updateRule12BQuery);
-}   
+            d.CUENTAS_NO_CUMPLE_12A = v.CUENTAS_NO_CUMPLE_A,
+            d.PORCENTAJE_NO_CUMPLE_12A = v.PORCENTAJE_NO_CUMPLE_A,
+
+            -- Regla 12B
+            d.REGLA_GENERAL_12B = 
+                CASE 
+                    WHEN v.CUENTAS_NO_CUMPLE_B IS NULL THEN 'CUMPLE'
+                    ELSE 'NO CUMPLE'
+                END,
+            d.ALERTA_12B = 
+                CASE 
+                    WHEN v.CUENTAS_NO_CUMPLE_B IS NULL THEN 'La entidad satisface los criterios de validación'
+                    ELSE 'Existen cuentas que no cumplen con la validación'
+                END,
+            d.CUENTAS_NO_CUMPLE_12B = v.CUENTAS_NO_CUMPLE_B,
+            d.PORCENTAJE_NO_CUMPLE_12B = v.PORCENTAJE_NO_CUMPLE_B
+        FROM %s d
+        INNER JOIN Validacion12 v ON 
+            v.FECHA = d.FECHA 
+            AND v.TRIMESTRE = d.TRIMESTRE 
+            AND v.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD 
+            AND v.AMBITO_CODIGO = d.AMBITO_CODIGO
+        """,
+        ejecGastos, ejecGastos, ejecGastos, ejecGastos, tablaReglas, tablaReglas);
+
+
+        jdbcTemplate.execute(updateQuery);
+
+        // 4. Limpiar recursos temporales (índice temporal)
+        jdbcTemplate.execute(
+                String.format(
+                        "IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'IDX_TEMP_GASTOS_RULE12') DROP INDEX IDX_TEMP_GASTOS_RULE12 ON %s",
+                        ejecGastos));
+    }
 
 }
