@@ -22,11 +22,11 @@ public class dataTransfer_PG {
     private String progGastos;
 
 //Regla 9A: Inexistencia cuenta 2.3 inversión
-    public void applyGeneralRule9A() {
+public void applyGeneralRule9A() {
     List<String> requiredColumns = Arrays.asList(
             "REGLA_GENERAL_9A",
             "CUENTAS_NOCUMPLE_9A",
-            "DETALLE_REGLA_9A"
+            "ALERTA_9A"
     );
 
     String checkColumnsQuery = String.format(
@@ -48,24 +48,14 @@ public class dataTransfer_PG {
     }
 
     String updateQuery = String.format("""
-        WITH IdentificadoresConCuentas AS (
+        WITH IdentificadoresAgrupados AS (
             SELECT
                 FECHA,
                 TRIMESTRE,
                 CODIGO_ENTIDAD,
                 AMBITO_CODIGO,
-                CUENTA
+                STRING_AGG(CASE WHEN CUENTA LIKE '2.3%%' THEN CUENTA END, ', ') AS CUENTAS_NOCUMPLE_9A
             FROM %s
-            WHERE CUENTA LIKE '2.3%%'
-        ),
-        IdentificadoresAgrupados AS (
-            SELECT
-                FECHA,
-                TRIMESTRE,
-                CODIGO_ENTIDAD,
-                AMBITO_CODIGO,
-                STRING_AGG(CUENTA, ', ') AS CUENTAS_NOCUMPLE_9A
-            FROM IdentificadoresConCuentas
             GROUP BY FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO
         ),
         Validaciones AS (
@@ -76,21 +66,21 @@ public class dataTransfer_PG {
                 AMBITO_CODIGO,
                 CUENTAS_NOCUMPLE_9A,
                 CASE 
-                    WHEN CUENTAS_NOCUMPLE_9A IS NOT NULL 
-                    THEN 'NO CUMPLE' 
-                    ELSE 'CUMPLE' 
+                    WHEN CUENTAS_NOCUMPLE_9A IS NULL 
+                    THEN 'CUMPLE' 
+                    ELSE 'NO CUMPLE' 
                 END AS REGLA_GENERAL_9A,
                 CASE 
                     WHEN CUENTAS_NOCUMPLE_9A IS NOT NULL 
-                    THEN 'Las cuentas ' + CUENTAS_NOCUMPLE_9A + ' no cumplen con los criterios de evaluación' 
+                    THEN 'Las cuentas ' + CUENTAS_NOCUMPLE_9A + ' no satisfacen los criterios de evaluación' 
                     ELSE 'La entidad satisface los criterios de evaluación'
-                END AS DETALLE_REGLA_9A
+                END AS ALERTA_9A
             FROM IdentificadoresAgrupados
         )
         UPDATE r
         SET
             r.CUENTAS_NOCUMPLE_9A = v.CUENTAS_NOCUMPLE_9A,
-            r.DETALLE_REGLA_9A = v.DETALLE_REGLA_9A,
+            r.ALERTA_9A = v.ALERTA_9A,
             r.REGLA_GENERAL_9A = v.REGLA_GENERAL_9A
         FROM %s r
         LEFT JOIN Validaciones v 
@@ -105,11 +95,12 @@ public class dataTransfer_PG {
     jdbcTemplate.execute(updateQuery);
 }
 
+
 public void applyGeneralRule9B() {
     List<String> requiredColumns = Arrays.asList(
             "CUENTA_ENCONTRADA_9B",
             "REGLA_GENERAL_9B",
-            "DETALLE_REGLA_9B"
+            "ALERTA_9B"
     );
 
     // Verificar si las columnas existen en la tabla
@@ -138,7 +129,7 @@ public void applyGeneralRule9B() {
         SET 
             r.CUENTA_ENCONTRADA_9B = v.CUENTA_ENCONTRADA_9B,
             r.REGLA_GENERAL_9B = v.REGLA_GENERAL_9B,
-            r.DETALLE_REGLA_9B = v.DETALLE_REGLA_9B
+            r.ALERTA_9B = v.ALERTA_9B
         FROM %s r
         INNER JOIN (
             SELECT 
@@ -155,8 +146,8 @@ public void applyGeneralRule9B() {
                 CASE 
                     WHEN MAX(CASE WHEN pg.CUENTA = '2.99' THEN 1 ELSE 0 END) = 1 
                     THEN 'La entidad satisface los criterios de evaluación' 
-                    ELSE 'La entidad no cumple con la presencia de la cuenta 2.99'
-                END AS DETALLE_REGLA_9B
+                    ELSE 'La entidad no registra la cuenta 2.99'
+                END AS ALERTA_9B
             FROM %s pg
             GROUP BY pg.FECHA, pg.TRIMESTRE, pg.CODIGO_ENTIDAD, pg.AMBITO_CODIGO
         ) v
@@ -279,32 +270,32 @@ public void applyGeneralRule10() {
                 COALESCE(G2.AMBITO_CODIGO_STR, VCE.AMBITO_CODIGO_STR, G299.AMBITO_CODIGO_STR) AS AMBITO_CODIGO_STR,
 
                 COALESCE(G2.TOTAL_10A, '') AS TOTAL_10A,
-                COALESCE(G2.REGLA_GENERAL_10A, 'Sin cuenta #2') AS REGLA_GENERAL_10A,
+                COALESCE(G2.REGLA_GENERAL_10A, 'NO DATA') AS REGLA_GENERAL_10A,
                 COALESCE(VCE.LISTA_CUENTAS_10B, '') AS LISTA_CUENTAS_10B,
                 COALESCE(VCE.REGLA_GENERAL_10B, 'CUMPLE') AS REGLA_GENERAL_10B,
                 COALESCE(G299.TOTAL_10C, '') AS TOTAL_10C,
-                COALESCE(G299.REGLA_GENERAL_10C, 'Sin cuenta #2.99') AS REGLA_GENERAL_10C,
+                COALESCE(G299.REGLA_GENERAL_10C, 'NO DATA') AS REGLA_GENERAL_10C,
 
                 -- EJEMPLO: columnas de alerta
                 CASE 
-                    WHEN COALESCE(G2.REGLA_GENERAL_10A,'Sin cuenta #2') = 'CUMPLE' 
+                    WHEN COALESCE(G2.REGLA_GENERAL_10A,'NO DATA') = 'CUMPLE' 
                          THEN 'La entidad satisface los criterios de evaluación'
-                    WHEN COALESCE(G2.REGLA_GENERAL_10A,'Sin cuenta #2') = 'Sin cuenta #2'
-                         THEN 'Cuenta #2 no está presente'
+                    WHEN COALESCE(G2.REGLA_GENERAL_10A,'NO DATA') = 'NO DATA'
+                         THEN 'La entidad no registra el número de cuenta 2'
                     ELSE 'La entidad NO satisface los criterios de evaluación'
                 END AS ALERTA_10A,
 
                 CASE 
                     WHEN COALESCE(VCE.REGLA_GENERAL_10B,'CUMPLE') = 'CUMPLE'
-                         THEN 'La entidad cumple los criterios de evaluación'
-                    ELSE 'La entidad no cumple los criterios de evaluación'
+                         THEN 'La entidad satisface los criterios de evaluación'
+                    ELSE 'La entidad no satisface los criterios de evaluación'
                 END AS ALERTA_10B,
 
                 CASE 
-                    WHEN COALESCE(G299.REGLA_GENERAL_10C,'Sin cuenta #2.99') = 'CUMPLE'
+                    WHEN COALESCE(G299.REGLA_GENERAL_10C,'NO DATA') = 'CUMPLE'
                          THEN 'La entidad satisface los criterios de evaluación'
-                    WHEN COALESCE(G299.REGLA_GENERAL_10C,'Sin cuenta #2.99') = 'Sin cuenta #2.99'
-                         THEN 'La entidad no satisface los criterios de evaluaci'
+                    WHEN COALESCE(G299.REGLA_GENERAL_10C,'NO DATA') = 'NO DATA'
+                         THEN 'La entidad no registra el número de cuenta 2.99'
                     ELSE 'La entidad no satisface los criterios de evaluación'
                 END AS ALERTA_10C
             FROM GastosCuenta2 G2
@@ -323,15 +314,15 @@ public void applyGeneralRule10() {
         UPDATE r
         SET 
             r.TOTAL_10A = v.TOTAL_10A,
-            r.REGLA_GENERAL_10A = COALESCE(v.REGLA_GENERAL_10A, 'NO_DATA'),
-            r.ALERTA_10A = v.ALERTA_10A,
+            r.REGLA_GENERAL_10A = COALESCE(v.REGLA_GENERAL_10A, 'NO DATA'),
+            r.ALERTA_10A = COALESCE(v.ALERTA_10A,'La entidad no reportó programación de gastos'),
             r.LISTA_CUENTAS_10B = v.LISTA_CUENTAS_10B,
-            r.REGLA_GENERAL_10B = COALESCE(v.REGLA_GENERAL_10B, 'NO_DATA'),
-            r.ALERTA_10B = v.ALERTA_10B,
+            r.REGLA_GENERAL_10B = COALESCE(v.REGLA_GENERAL_10B, 'NO DATA'),
+            r.ALERTA_10B = COALESCE(v.ALERTA_10B,'La entidad no reportó programación de gastos'),
             r.TOTAL_10C = v.TOTAL_10C,
-            r.REGLA_GENERAL_10C = COALESCE(v.REGLA_GENERAL_10C,'NO_DATA'),
-            r.ALERTA_10C = v.ALERTA_10C
-        FROM %s r  -- Aquí tu tabla de reglas: GENERAL_RULES_DATA
+            r.REGLA_GENERAL_10C = COALESCE(v.REGLA_GENERAL_10C,'NO DATA'),
+            r.ALERTA_10C = COALESCE(v.ALERTA_10C, 'La entidad no reportó programación de gastos')
+        FROM %s r
         LEFT JOIN QueryResultados v
             ON r.FECHA            = v.FECHA
            AND r.TRIMESTRE        = v.TRIMESTRE
