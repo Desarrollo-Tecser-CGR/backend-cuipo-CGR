@@ -72,8 +72,8 @@ public void applyGeneralRule9A() {
                 END AS REGLA_GENERAL_9A,
                 CASE 
                     WHEN CUENTAS_NOCUMPLE_9A IS NOT NULL 
-                    THEN 'Las cuentas ' + CUENTAS_NOCUMPLE_9A + ' no satisfacen los criterios de evaluación' 
-                    ELSE 'La entidad satisface los criterios de evaluación'
+                    THEN 'Las cuentas ' + CUENTAS_NOCUMPLE_9A + ' no satisfacen los criterios de validación' 
+                    ELSE 'La entidad satisface los criterios de validación'
                 END AS ALERTA_9A
             FROM IdentificadoresAgrupados
         )
@@ -145,7 +145,7 @@ public void applyGeneralRule9B() {
                 END AS REGLA_GENERAL_9B,
                 CASE 
                     WHEN MAX(CASE WHEN pg.CUENTA = '2.99' THEN 1 ELSE 0 END) = 1 
-                    THEN 'La entidad satisface los criterios de evaluación' 
+                    THEN 'La entidad satisface los criterios de validación' 
                     ELSE 'La entidad no registra la cuenta 2.99'
                 END AS ALERTA_9B
             FROM %s pg
@@ -279,24 +279,24 @@ public void applyGeneralRule10() {
                 -- EJEMPLO: columnas de alerta
                 CASE 
                     WHEN COALESCE(G2.REGLA_GENERAL_10A,'NO DATA') = 'CUMPLE' 
-                         THEN 'La entidad satisface los criterios de evaluación'
+                         THEN 'La entidad satisface los criterios de validación'
                     WHEN COALESCE(G2.REGLA_GENERAL_10A,'NO DATA') = 'NO DATA'
                          THEN 'La entidad no registra el número de cuenta 2'
-                    ELSE 'La entidad NO satisface los criterios de evaluación'
+                    ELSE 'La entidad NO satisface los criterios de validación'
                 END AS ALERTA_10A,
 
                 CASE 
                     WHEN COALESCE(VCE.REGLA_GENERAL_10B,'CUMPLE') = 'CUMPLE'
-                         THEN 'La entidad satisface los criterios de evaluación'
-                    ELSE 'La entidad no satisface los criterios de evaluación'
+                         THEN 'La entidad satisface los criterios de validación'
+                    ELSE 'La entidad no satisface los criterios de validación'
                 END AS ALERTA_10B,
 
                 CASE 
                     WHEN COALESCE(G299.REGLA_GENERAL_10C,'NO DATA') = 'CUMPLE'
-                         THEN 'La entidad satisface los criterios de evaluación'
+                         THEN 'La entidad satisface los criterios de validación'
                     WHEN COALESCE(G299.REGLA_GENERAL_10C,'NO DATA') = 'NO DATA'
                          THEN 'La entidad no registra el número de cuenta 2.99'
-                    ELSE 'La entidad no satisface los criterios de evaluación'
+                    ELSE 'La entidad no satisface los criterios de validación'
                 END AS ALERTA_10C
             FROM GastosCuenta2 G2
             FULL OUTER JOIN ValoresCeroEspecificos VCE
