@@ -25,7 +25,7 @@ public class dataTransfer_PG {
 public void applyGeneralRule9A() {
     List<String> requiredColumns = Arrays.asList(
             "REGLA_GENERAL_9A",
-            "CUENTAS_NOCUMPLE_9A",
+            "CUENTAS_NO_CUMPLEN_9A",
             "ALERTA_9A"
     );
 
@@ -54,7 +54,7 @@ public void applyGeneralRule9A() {
                 TRIMESTRE,
                 CODIGO_ENTIDAD,
                 AMBITO_CODIGO,
-                STRING_AGG(CASE WHEN CUENTA LIKE '2.3%%' THEN CUENTA END, ', ') AS CUENTAS_NOCUMPLE_9A
+                STRING_AGG(CASE WHEN CUENTA LIKE '2.3%%' THEN CUENTA END, ', ') AS CUENTAS_NO_CUMPLEN_9A
             FROM %s
             GROUP BY FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO
         ),
@@ -64,22 +64,22 @@ public void applyGeneralRule9A() {
                 TRIMESTRE,
                 CODIGO_ENTIDAD,
                 AMBITO_CODIGO,
-                CUENTAS_NOCUMPLE_9A,
+                CUENTAS_NO_CUMPLEN_9A,
                 CASE 
-                    WHEN CUENTAS_NOCUMPLE_9A IS NULL 
+                    WHEN CUENTAS_NO_CUMPLEN_9A IS NULL 
                     THEN 'CUMPLE' 
                     ELSE 'NO CUMPLE' 
                 END AS REGLA_GENERAL_9A,
                 CASE 
-                    WHEN CUENTAS_NOCUMPLE_9A IS NOT NULL 
-                    THEN 'Las cuentas ' + CUENTAS_NOCUMPLE_9A + ' no satisfacen los criterios de validación' 
+                    WHEN CUENTAS_NO_CUMPLEN_9A IS NOT NULL 
+                    THEN 'Las cuentas ' + CUENTAS_NO_CUMPLEN_9A + ' no satisfacen los criterios de validación' 
                     ELSE 'La entidad satisface los criterios de validación'
                 END AS ALERTA_9A
             FROM IdentificadoresAgrupados
         )
         UPDATE r
         SET
-            r.CUENTAS_NOCUMPLE_9A = v.CUENTAS_NOCUMPLE_9A,
+            r.CUENTAS_NO_CUMPLEN_9A = v.CUENTAS_NO_CUMPLEN_9A,
             r.ALERTA_9A = v.ALERTA_9A,
             r.REGLA_GENERAL_9A = v.REGLA_GENERAL_9A
         FROM %s r

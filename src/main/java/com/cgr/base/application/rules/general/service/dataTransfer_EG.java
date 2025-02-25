@@ -270,7 +270,7 @@ public class dataTransfer_EG {
     }
 
     // Regla 12: Validación de compromisos, obligaciones y pagos
-public void applyGeneralRule12a() {
+    public void applyGeneralRule12a() {
     // Paso 1: Verificar/crear columnas en tabla de origen (ejecGastos)
     List<String> requiredColumnsOrigen = Arrays.asList(
             "RELACION_RG_12A", 
@@ -514,5 +514,103 @@ public void applyGeneralRule12a() {
             tablaReglas);
     jdbcTemplate.execute(updateRule12BQuery);
 }   
+    
+    // Regla 15: 
+    public void applyGeneralRule15() {
+        // Lista de columnas requeridas para la regla 15
+        List<String> requiredColumns = Arrays.asList(
+            "ALERTA_15",
+             "REGLA_GENERAL_15",
+             "CUENTAS_NO_CUMPLEN_15");
+
+        String checkColumnsQuery = String.format(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+                tablaReglas,
+                "'" + String.join("','", requiredColumns) + "'"
+        );
+    
+        List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+    
+        for (String column : requiredColumns) {
+            if (!existingColumns.contains(column)) {
+                String addColumnQuery = String.format(
+                        "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
+                        tablaReglas, column
+                );
+                jdbcTemplate.execute(addColumnQuery);
+            }
+        }
+    
+        String updateQuery = String.format("""
+                WITH ejec AS (
+                    SELECT
+                        e.FECHA,
+                        e.TRIMESTRE,
+                        e.CODIGO_ENTIDAD,
+                        e.AMBITO_CODIGO,
+                        e.CUENTA,
+                        CA.ULT_DIGITO,
+                        CA.PRIMER_DIGITO,
+                        CASE
+                          WHEN e.CUENTA NOT IN (
+                              '2.1.2.02.01.000','2.1.2.02.01.001','2.1.2.02.01.002','2.1.2.02.01.003','2.1.2.02.01.004',
+                              '2.1.2.02.02.005','2.1.2.02.02.006','2.1.2.02.02.007','2.1.2.02.02.008','2.1.2.02.02.009',
+                              '2.1.5.01.00','2.1.5.01.01','2.1.5.01.02','2.1.5.01.03','2.1.5.01.04',
+                              '2.1.5.02.05','2.1.5.02.06','2.1.5.02.07','2.1.5.02.08','2.1.5.02.09',
+                              '2.3.2.02.01.000','2.3.2.02.01.001','2.3.2.02.01.002','2.3.2.02.01.003','2.3.2.02.01.004',
+                              '2.3.2.02.02.005','2.3.2.02.02.006','2.3.2.02.02.007','2.3.2.02.02.008','2.3.2.02.02.009',
+                              '2.3.5.01.00','2.3.5.01.01','2.3.5.01.02','2.3.5.01.03','2.3.5.01.04',
+                              '2.3.5.02.05','2.3.5.02.06','2.3.5.02.07','2.3.5.02.08','2.3.5.02.09',
+                              '2.4.5.01.00','2.4.5.01.01','2.4.5.01.02','2.4.5.01.03','2.4.5.01.04',
+                              '2.4.5.02.05','2.4.5.02.06','2.4.5.02.07','2.4.5.02.08','2.4.5.02.09'
+                          )
+                          THEN 'NO APLICA'
+                          WHEN CA.ULT_DIGITO = CA.PRIMER_DIGITO THEN 'OK'
+                          ELSE 'ALERTA'
+                        END AS ALERTA_RESULTADO
+                    FROM VW_OPENDATA_D_EJECUCION_GASTOS e
+                    CROSS APPLY (
+                      SELECT 
+                        RIGHT(REPLACE(e.CUENTA, '.', ''), 1) AS ULT_DIGITO,
+                        LEFT(e.COD_CPC, 1) AS PRIMER_DIGITO
+                    ) CA
+                ),
+                agg_ejec AS (
+                    SELECT
+                        FECHA,
+                        TRIMESTRE,
+                        CODIGO_ENTIDAD,
+                        AMBITO_CODIGO,
+                        CASE
+                          WHEN COUNT(CASE WHEN ALERTA_RESULTADO = 'ALERTA' THEN 1 END) = 0 THEN ''
+                          ELSE '[' + STRING_AGG(CASE WHEN ALERTA_RESULTADO = 'ALERTA' THEN CUENTA END, ', ') + ']'
+                        END AS CUENTAS_NO_CUMPLEN_15
+                    FROM ejec
+                    GROUP BY FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO
+                )
+                UPDATE r
+                SET 
+                    r.CUENTAS_NO_CUMPLEN_15 = a.CUENTAS_NO_CUMPLEN_15,
+                    r.REGLA_GENERAL_15 = CASE
+                        WHEN a.CUENTAS_NO_CUMPLEN_15 = '' THEN 'CUMPLE'
+                        WHEN a.CUENTAS_NO_CUMPLEN_15 IS NULL THEN 'NO DATA'
+                        ELSE 'NO CUMPLE'
+                    END,
+                    r.ALERTA_15 = CASE
+                        WHEN a.CUENTAS_NO_CUMPLEN_15 IS NULL THEN 'La entidad no registró ninguna de las cuentas en ejecución de gasto'
+                        WHEN a.CUENTAS_NO_CUMPLEN_15 = '' THEN 'La entidad satisface los criterios de aceptación'
+                        ELSE 'La entidad NO satisface los criterios de aceptación'
+                    END
+                FROM %s r
+                LEFT JOIN agg_ejec a
+                    ON r.FECHA = a.FECHA
+                    AND r.TRIMESTRE = a.TRIMESTRE
+                    AND r.CODIGO_ENTIDAD = a.CODIGO_ENTIDAD
+                    AND r.AMBITO_CODIGO = a.AMBITO_CODIGO;
+        """, tablaReglas);
+        jdbcTemplate.execute(updateQuery);
+    }
+    
+
 
 }
