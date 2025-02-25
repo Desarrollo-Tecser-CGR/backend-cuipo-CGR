@@ -214,8 +214,8 @@ public void applyGeneralRule10() {
             SELECT 
                 g.TRIMESTRE,
                 g.FECHA,
-                g.CODIGO_ENTIDAD_INT,
-                g.AMBITO_CODIGO_STR,
+                g.CODIGO_ENTIDAD,
+                g.AMBITO_CODIGO,
                 SUM(CAST(g.APROPIACION_DEFINITIVA AS BIGINT)) AS TOTAL_10A,
                 CASE 
                     WHEN SUM(CAST(g.APROPIACION_DEFINITIVA AS BIGINT)) < 100000000 THEN 'CUMPLE'
@@ -223,33 +223,33 @@ public void applyGeneralRule10() {
                 END AS REGLA_GENERAL_10A
             FROM VW_OPENDATA_C_PROGRAMACION_GASTOS g
             INNER JOIN AmbitoVigencias av 
-                ON g.AMBITO_CODIGO_STR = av.AMBITO_COD
+                ON g.AMBITO_CODIGO = av.AMBITO_COD
                AND CHARINDEX(CAST(g.COD_VIGENCIA_DEL_GASTO AS VARCHAR), av.VIGENCIAS_APLICABLES) > 0
             WHERE g.CUENTA = '2'
-            GROUP BY g.TRIMESTRE, g.FECHA, g.CODIGO_ENTIDAD_INT, g.AMBITO_CODIGO_STR
+            GROUP BY g.TRIMESTRE, g.FECHA, g.CODIGO_ENTIDAD, g.AMBITO_CODIGO
         ),
         ValoresCeroEspecificos AS (
             SELECT 
                 g.TRIMESTRE,
                 g.FECHA,
-                g.CODIGO_ENTIDAD_INT,
-                g.AMBITO_CODIGO_STR,
+                g.CODIGO_ENTIDAD,
+                g.AMBITO_CODIGO,
                 STRING_AGG(g.CUENTA, ', ') AS LISTA_CUENTAS_10B,  
                 'NO CUMPLE' AS REGLA_GENERAL_10B
             FROM VW_OPENDATA_C_PROGRAMACION_GASTOS g
             INNER JOIN AmbitoVigencias av 
-                ON g.AMBITO_CODIGO_STR = av.AMBITO_COD
+                ON g.AMBITO_CODIGO = av.AMBITO_COD
                AND CHARINDEX(CAST(g.COD_VIGENCIA_DEL_GASTO AS VARCHAR), av.VIGENCIAS_APLICABLES) > 0
             WHERE g.CUENTA IN ('2.1', '2.2', '2.4')
               AND CAST(g.APROPIACION_DEFINITIVA AS BIGINT) = 0
-            GROUP BY g.TRIMESTRE, g.FECHA, g.CODIGO_ENTIDAD_INT, g.AMBITO_CODIGO_STR
+            GROUP BY g.TRIMESTRE, g.FECHA, g.CODIGO_ENTIDAD, g.AMBITO_CODIGO
         ),
         GastosCuenta299 AS (
             SELECT 
                 g.TRIMESTRE,
                 g.FECHA,
-                g.CODIGO_ENTIDAD_INT,
-                g.AMBITO_CODIGO_STR,
+                g.CODIGO_ENTIDAD,
+                g.AMBITO_CODIGO,
                 SUM(CAST(g.APROPIACION_DEFINITIVA AS BIGINT)) AS TOTAL_10C,
                 CASE 
                     WHEN SUM(CAST(g.APROPIACION_DEFINITIVA AS BIGINT)) < 100000000 THEN 'NO CUMPLE'
@@ -257,17 +257,17 @@ public void applyGeneralRule10() {
                 END AS REGLA_GENERAL_10C
             FROM VW_OPENDATA_C_PROGRAMACION_GASTOS g
             INNER JOIN AmbitoVigencias av 
-                ON g.AMBITO_CODIGO_STR = av.AMBITO_COD
+                ON g.AMBITO_CODIGO = av.AMBITO_COD
                AND CHARINDEX(CAST(g.COD_VIGENCIA_DEL_GASTO AS VARCHAR), av.VIGENCIAS_APLICABLES) > 0
             WHERE g.CUENTA = '2.99'
-            GROUP BY g.TRIMESTRE, g.FECHA, g.CODIGO_ENTIDAD_INT, g.AMBITO_CODIGO_STR
+            GROUP BY g.TRIMESTRE, g.FECHA, g.CODIGO_ENTIDAD, g.AMBITO_CODIGO
         ),
         QueryResultados AS (
             SELECT 
                 COALESCE(G2.TRIMESTRE, VCE.TRIMESTRE, G299.TRIMESTRE) AS TRIMESTRE,
                 COALESCE(G2.FECHA, VCE.FECHA, G299.FECHA) AS FECHA,
-                COALESCE(G2.CODIGO_ENTIDAD_INT, VCE.CODIGO_ENTIDAD_INT, G299.CODIGO_ENTIDAD_INT) AS CODIGO_ENTIDAD_INT,
-                COALESCE(G2.AMBITO_CODIGO_STR, VCE.AMBITO_CODIGO_STR, G299.AMBITO_CODIGO_STR) AS AMBITO_CODIGO_STR,
+                COALESCE(G2.CODIGO_ENTIDAD, VCE.CODIGO_ENTIDAD, G299.CODIGO_ENTIDAD) AS CODIGO_ENTIDAD,
+                COALESCE(G2.AMBITO_CODIGO, VCE.AMBITO_CODIGO, G299.AMBITO_CODIGO) AS AMBITO_CODIGO,
 
                 COALESCE(G2.TOTAL_10A, '') AS TOTAL_10A,
                 COALESCE(G2.REGLA_GENERAL_10A, 'NO DATA') AS REGLA_GENERAL_10A,
@@ -302,13 +302,13 @@ public void applyGeneralRule10() {
             FULL OUTER JOIN ValoresCeroEspecificos VCE
               ON G2.TRIMESTRE = VCE.TRIMESTRE 
              AND G2.FECHA = VCE.FECHA
-             AND G2.CODIGO_ENTIDAD_INT = VCE.CODIGO_ENTIDAD_INT
-             AND G2.AMBITO_CODIGO_STR = VCE.AMBITO_CODIGO_STR
+             AND G2.CODIGO_ENTIDAD = VCE.CODIGO_ENTIDAD
+             AND G2.AMBITO_CODIGO = VCE.AMBITO_CODIGO
             FULL OUTER JOIN GastosCuenta299 G299
               ON COALESCE(G2.TRIMESTRE, VCE.TRIMESTRE) = G299.TRIMESTRE
              AND COALESCE(G2.FECHA, VCE.FECHA) = G299.FECHA
-             AND COALESCE(G2.CODIGO_ENTIDAD_INT, VCE.CODIGO_ENTIDAD_INT) = G299.CODIGO_ENTIDAD_INT
-             AND COALESCE(G2.AMBITO_CODIGO_STR, VCE.AMBITO_CODIGO_STR) = G299.AMBITO_CODIGO_STR
+             AND COALESCE(G2.CODIGO_ENTIDAD, VCE.CODIGO_ENTIDAD) = G299.CODIGO_ENTIDAD
+             AND COALESCE(G2.AMBITO_CODIGO, VCE.AMBITO_CODIGO) = G299.AMBITO_CODIGO
         )
 
         UPDATE r
@@ -326,8 +326,8 @@ public void applyGeneralRule10() {
         LEFT JOIN QueryResultados v
             ON r.FECHA            = v.FECHA
            AND r.TRIMESTRE        = v.TRIMESTRE
-           AND r.CODIGO_ENTIDAD   = v.CODIGO_ENTIDAD_INT
-           AND r.AMBITO_CODIGO    = v.AMBITO_CODIGO_STR
+           AND r.CODIGO_ENTIDAD   = v.CODIGO_ENTIDAD
+           AND r.AMBITO_CODIGO    = v.AMBITO_CODIGO
         """,
         tablaReglas 
     );
@@ -369,20 +369,20 @@ public void applyGeneralRule11() {
                 SELECT
                     FECHA,
                     TRIMESTRE,
-                    CODIGO_ENTIDAD_INT,
-                    AMBITO_CODIGO_STR,
+                    CODIGO_ENTIDAD,
+                    AMBITO_CODIGO,
                     COD_VIGENCIA_DEL_GASTO,
                     SUM(CAST(APROPIACION_INICIAL AS DECIMAL(18,2))) AS APROPIACION_INICIAL_TOTAL
                 FROM %s
                 WHERE COD_VIGENCIA_DEL_GASTO IN (1, 4)
-                GROUP BY FECHA, TRIMESTRE, CODIGO_ENTIDAD_INT, AMBITO_CODIGO_STR, COD_VIGENCIA_DEL_GASTO
+                GROUP BY FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO, COD_VIGENCIA_DEL_GASTO
             ),
             pivoted AS (
                 SELECT
                     FECHA,
                     TRIMESTRE,
-                    CODIGO_ENTIDAD_INT,
-                    AMBITO_CODIGO_STR,
+                    CODIGO_ENTIDAD,
+                    AMBITO_CODIGO,
                     ISNULL([1], 0) AS APROPIACION_VIG1_11,
                     ISNULL([4], 0) AS APROPIACION_VIG4_11
                 FROM base
@@ -394,8 +394,8 @@ public void applyGeneralRule11() {
             pvt_t1 AS (
                 SELECT
                     FECHA,
-                    CODIGO_ENTIDAD_INT,
-                    AMBITO_CODIGO_STR,
+                    CODIGO_ENTIDAD,
+                    AMBITO_CODIGO,
                     APROPIACION_VIG1_11 AS APROPIACION_VIG1_T3_11,
                     APROPIACION_VIG4_11 AS APROPIACION_VIG4_T3_11
                 FROM pivoted
@@ -422,12 +422,12 @@ public void applyGeneralRule11() {
                 LEFT JOIN pivoted p
                     ON grd.FECHA = p.FECHA
                     AND grd.TRIMESTRE = p.TRIMESTRE
-                    AND grd.CODIGO_ENTIDAD = p.CODIGO_ENTIDAD_INT
-                    AND grd.AMBITO_CODIGO = p.AMBITO_CODIGO_STR
+                    AND grd.CODIGO_ENTIDAD = p.CODIGO_ENTIDAD
+                    AND grd.AMBITO_CODIGO = p.AMBITO_CODIGO
                 LEFT JOIN pvt_t1
                     ON grd.FECHA = pvt_t1.FECHA
-                    AND grd.CODIGO_ENTIDAD = pvt_t1.CODIGO_ENTIDAD_INT
-                    AND grd.AMBITO_CODIGO = pvt_t1.AMBITO_CODIGO_STR
+                    AND grd.CODIGO_ENTIDAD = pvt_t1.CODIGO_ENTIDAD
+                    AND grd.AMBITO_CODIGO = pvt_t1.AMBITO_CODIGO
                 WHERE grd.TRIMESTRE IN (3, 6, 9, 12)
             )
             UPDATE r
