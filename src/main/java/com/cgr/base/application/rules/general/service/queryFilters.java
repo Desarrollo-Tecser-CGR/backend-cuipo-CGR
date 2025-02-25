@@ -42,9 +42,9 @@ public class queryFilters {
     }
     
     private List<EntidadDTO> getEntidades() {
-        String sql = String.format("SELECT DISTINCT [CODIGO_ENTIDAD], [NOMBRE_ENTIDAD] FROM [%s] ORDER BY [CODIGO_ENTIDAD]", tablaReglas);
+        String sql = String.format("SELECT DISTINCT [CODIGO_ENTIDAD], [NOMBRE_ENTIDAD], [AMBITO_CODIGO] FROM [%s] ORDER BY [CODIGO_ENTIDAD]", tablaReglas);
         return jdbcTemplate.query(sql, (rs, rowNum) ->
-                new EntidadDTO(rs.getString("CODIGO_ENTIDAD"), rs.getString("NOMBRE_ENTIDAD")));
+                new EntidadDTO(rs.getString("CODIGO_ENTIDAD"), rs.getString("NOMBRE_ENTIDAD"),rs.getString("AMBITO_CODIGO")));
     }
     
     private List<AmbitoDTO> getAmbitos() {
@@ -85,8 +85,5 @@ public class queryFilters {
 
         return jdbcTemplate.queryForList(sql.toString());
     }
-
-
-    
 
 }
