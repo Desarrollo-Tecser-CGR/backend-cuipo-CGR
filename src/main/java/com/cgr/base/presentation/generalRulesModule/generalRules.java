@@ -46,21 +46,21 @@ public class generalRules extends AbstractController {
     @PostMapping("/transfer")
     public ResponseEntity<?> updatePresupuesto() {
         DataProgIngresos.applyGeneralRule1();
-        DataProgIngresos.applyGeneralRule2();
-        DataProgIngresos.applyGeneralRule3();
-        DataProgIngresos.applyGeneralRule4();
-        DataEjecIngresos.applyGeneralRule5();
-        DataEjecIngresos.applyGeneralRule6();
-        DataProgGastos.applyGeneralRule7();
-        DataProgGastos.applyGeneralRule8();
-        DataProgGastos.applyGeneralRule9A();
-        DataProgGastos.applyGeneralRule9B();
-        DataProgGastos.applyGeneralRule10();
-        DataProgGastos.applyGeneralRule11();
-        DataEjecGastos.applyGeneralRule12();
-        DataEjecGastos.applyGeneralRule14A();
-        DataEjecGastos.applyGeneralRule14B();
-        DataEjecGastos.applyGeneralRule15();
+        // DataProgIngresos.applyGeneralRule2();
+        // DataProgIngresos.applyGeneralRule3();
+        // DataProgIngresos.applyGeneralRule4();
+        // DataEjecIngresos.applyGeneralRule5();
+        // DataEjecIngresos.applyGeneralRule6();
+        // DataProgGastos.applyGeneralRule7();
+        // DataProgGastos.applyGeneralRule8();
+        // DataProgGastos.applyGeneralRule9A();
+        // DataProgGastos.applyGeneralRule9B();
+        // DataProgGastos.applyGeneralRule10();
+        // DataProgGastos.applyGeneralRule11();
+        // DataEjecGastos.applyGeneralRule12();
+        // DataEjecGastos.applyGeneralRule14A();
+        // DataEjecGastos.applyGeneralRule14B();
+        // DataEjecGastos.applyGeneralRule15();
         return requestResponse(
                 null,
                 "Apply General Rules.",
