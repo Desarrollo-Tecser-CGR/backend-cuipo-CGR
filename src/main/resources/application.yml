@@ -27,12 +27,12 @@ spring:
   # Configuración de la base de datos MySQL
   spring:
   datasource:
-    username: sa  
-    password: Tecs2024* 
+    username: sa
+    password: Tecs2024*
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     database-platform: org.hibernate.dialect.SQLServer2012Dialect
     show-sql: false
   output:
@@ -48,9 +48,14 @@ spring:
   # Clave secreta JWT
 jwt:
   secret:
-    key: "U6w3yjuQRNWNRG3IaajKZY8nyMPiu+wFLpj/7evdNEc="  
+    key: "U6w3yjuQRNWNRG3IaajKZY8nyMPiu+wFLpj/7evdNEc="
 
 # Configuración de la consola de la base de datos
 logging:
   level:
     "[org.hibernate.SQL]": debug
+
+#Configuracion imagenes
+web:
+  resources:
+    static-locations: classpath:/static/,classpath:/public/
