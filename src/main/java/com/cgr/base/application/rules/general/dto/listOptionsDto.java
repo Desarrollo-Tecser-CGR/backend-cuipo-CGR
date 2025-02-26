@@ -23,6 +23,7 @@ public class listOptionsDto {
     public static class EntidadDTO {
         private String codigo;
         private String nombre;
+        private String ambito;
     }
     
     @Data
