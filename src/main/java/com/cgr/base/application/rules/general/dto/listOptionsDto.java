@@ -16,6 +16,7 @@ public class listOptionsDto {
     private List<String> trimestres;
     private List<EntidadDTO> entidades;
     private List<AmbitoDTO> ambitos;
+    private List<String> formularios;
     
     @Data
     @NoArgsConstructor

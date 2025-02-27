@@ -28,6 +28,7 @@ public class queryFilters {
                 .trimestres(getTrimestres())
                 .entidades(getEntidades())
                 .ambitos(getAmbitos())
+                .formularios(getFormTables())
                 .build();
     }
     
@@ -35,6 +36,12 @@ public class queryFilters {
         String sql = String.format("SELECT DISTINCT [FECHA] FROM [%s] ORDER BY [FECHA]", tablaReglas);
         return jdbcTemplate.queryForList(sql, String.class);
     }
+
+    private List<String> getFormTables() {
+        String sql = "SELECT DISTINCT [NOMBRE_TABLA] FROM [general_rules_tables] ORDER BY [NOMBRE_TABLA]";
+        return jdbcTemplate.queryForList(sql, String.class);
+    }
+    
     
     private List<String> getTrimestres() {
         String sql = String.format("SELECT DISTINCT [TRIMESTRE] FROM [%s] ORDER BY [TRIMESTRE]", tablaReglas);
