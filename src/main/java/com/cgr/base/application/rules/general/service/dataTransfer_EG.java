@@ -309,7 +309,6 @@ public class dataTransfer_EG {
                         "ALTER TABLE %s ADD %s VARCHAR(255) NULL",
                         tablaReglas, column);
                 jdbcTemplate.execute(addColumnQuery);
-                System.out.println("Columna " + column + " agregada a " + tablaReglas);
             }
         }
 
@@ -489,7 +488,6 @@ public class dataTransfer_EG {
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
                         tablaReglas, column);
                 jdbcTemplate.execute(addColumnQuery);
-                System.out.println("Columna " + column + " agregada a " + tablaReglas);
             }
         }
 

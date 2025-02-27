@@ -36,7 +36,6 @@ public class dataTransfer_PG {
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
                         tablaReglas, column);
                 jdbcTemplate.execute(addColumnQuery);
-                System.out.println("Columna " + column + " agregada a " + tablaReglas);
             }
         }
 

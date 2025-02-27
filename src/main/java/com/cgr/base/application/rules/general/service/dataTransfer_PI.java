@@ -44,7 +44,6 @@ public class dataTransfer_PI {
                         column,
                         column.equals("PRES_DEF_PI_C1_1") ? "DECIMAL(18,0)" : "VARCHAR(255)");
                 jdbcTemplate.execute(addColumnQuery);
-                System.out.println("Columna " + column + " agregada a " + tablaReglas);
             }
         }
     
@@ -417,7 +416,6 @@ public class dataTransfer_PI {
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
                         tablaReglas, column);
                 jdbcTemplate.execute(addColumnQuery);
-                System.out.println("Columna " + column + " agregada a " + tablaReglas);
             }
         }
 

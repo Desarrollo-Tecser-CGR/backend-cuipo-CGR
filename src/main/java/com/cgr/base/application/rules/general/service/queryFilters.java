@@ -91,11 +91,7 @@ public class queryFilters {
     public List<Map<String, Object>> getFilteredRecords(String fecha, String trimestre, String ambitoCodigo,
             String entidadCodigo, String formularioCodigo) {
 
-        System.out.println("🔍 Obteniendo columnas para formularioCodigo: " + formularioCodigo);
-
         List<String> columnasReglaGeneral = obtenerColumnasReglaGeneral(formularioCodigo);
-
-        System.out.println("📌 Columnas obtenidas: " + columnasReglaGeneral);
 
         StringBuilder sql = new StringBuilder("SELECT FECHA, TRIMESTRE, NOMBRE_ENTIDAD, AMBITO_NOMBRE");
 
