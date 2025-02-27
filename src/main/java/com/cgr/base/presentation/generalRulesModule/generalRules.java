@@ -61,6 +61,7 @@ public class generalRules extends AbstractController {
         // DataEjecGastos.applyGeneralRule14A();
         // DataEjecGastos.applyGeneralRule14B();
         // DataEjecGastos.applyGeneralRule15();
+        DataEjecGastos.applyGeneralRule13B();
         return requestResponse(
                 null,
                 "Apply General Rules.",

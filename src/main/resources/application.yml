@@ -25,16 +25,20 @@ spring:
   # Configuración Seguridad de la aplicación
   security:
     user:
-     name: ${SECURITY_USERNAME}
-     password: ${SECURITY_USERPASSWORD}
+      name: ${SECURITY_USERNAME}
+      password: ${SECURITY_USERPASSWORD}
+
 # Clave secreta para JWT
 jwt:
-   secret:
-    key: ${JWT_SECRET_KEY}  
+  secret:
+    key: ${JWT_SECRET_KEY}
+
 # Configuración del logging
 logging:
   level:
-       "[org.hibernate.SQL]": debug
+    "[org.hibernate.SQL]": debug
 
-
-    
+# Configuración de tablas
+TABLA_GENERAL_RULES: GENERAL_RULES_DATA
+TABLA_PROG_GASTOS: VW_OPENDATA_C_PROGRAMACION_GASTOS
+TABLA_AMBITOS_CAPTURA: AMBITOS_CAPTURA
