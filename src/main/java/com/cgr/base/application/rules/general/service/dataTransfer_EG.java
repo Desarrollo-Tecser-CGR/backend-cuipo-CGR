@@ -79,113 +79,112 @@ public class dataTransfer_EG {
         // 3. Procesamiento en un solo paso - Actualizar datos de validación
         // directamente
         String updateQuery = String.format(
-        """
-        WITH Validacion12 AS (
-            SELECT
-                FECHA,
-                TRIMESTRE,
-                CODIGO_ENTIDAD AS CODIGO_ENTIDAD,
-                AMBITO_CODIGO AS AMBITO_CODIGO,
-                CASE WHEN AMBITO_CODIGO IN ('A447', 'A448', 'A449', 'A450', 'A451', 'A453', 'A454') THEN 1 ELSE 0 END AS NO_APLICA_A,
-                
-                -- Parte A
-                (
-                    SELECT STRING_AGG(CONVERT(NVARCHAR(MAX), g.CUENTA), ',') 
-                    FROM %s g
-                    WHERE g.FECHA = d.FECHA
-                    AND g.TRIMESTRE = d.TRIMESTRE
-                    AND g.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD
-                    AND g.AMBITO_CODIGO = d.AMBITO_CODIGO
-                    AND g.COMPROMISOS < g.OBLIGACIONES
-                    AND g.COMPROMISOS > 0
-                ) AS CUENTAS_NO_CUMPLE_A,
+                """
+                        WITH Validacion12 AS (
+                            SELECT
+                                FECHA,
+                                TRIMESTRE,
+                                CODIGO_ENTIDAD AS CODIGO_ENTIDAD,
+                                AMBITO_CODIGO AS AMBITO_CODIGO,
+                                CASE WHEN AMBITO_CODIGO IN ('A447', 'A448', 'A449', 'A450', 'A451', 'A453', 'A454') THEN 1 ELSE 0 END AS NO_APLICA_A,
 
-                (
-                    SELECT STRING_AGG(
-                        CONVERT(NVARCHAR(MAX), 
-                            CASE 
-                                WHEN g.COMPROMISOS = 0 THEN 'null'
-                                ELSE CONVERT(NVARCHAR(MAX), 1 - (g.OBLIGACIONES / NULLIF(g.COMPROMISOS, 0))) 
-                            END), ',') 
-                    FROM %s g
-                    WHERE g.FECHA = d.FECHA
-                    AND g.TRIMESTRE = d.TRIMESTRE
-                    AND g.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD
-                    AND g.AMBITO_CODIGO = d.AMBITO_CODIGO
-                    AND g.COMPROMISOS < g.OBLIGACIONES
-                    AND g.COMPROMISOS > 0
-                ) AS PORCENTAJE_NO_CUMPLE_A,
+                                -- Parte A
+                                (
+                                    SELECT STRING_AGG(CONVERT(NVARCHAR(MAX), g.CUENTA), ',')
+                                    FROM %s g
+                                    WHERE g.FECHA = d.FECHA
+                                    AND g.TRIMESTRE = d.TRIMESTRE
+                                    AND g.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD
+                                    AND g.AMBITO_CODIGO = d.AMBITO_CODIGO
+                                    AND g.COMPROMISOS < g.OBLIGACIONES
+                                    AND g.COMPROMISOS > 0
+                                ) AS CUENTAS_NO_CUMPLE_A,
 
-                -- Parte B
-                (
-                    SELECT STRING_AGG(CONVERT(NVARCHAR(MAX), g.CUENTA), ',') 
-                    FROM %s g
-                    WHERE g.FECHA = d.FECHA
-                    AND g.TRIMESTRE = d.TRIMESTRE
-                    AND g.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD
-                    AND g.AMBITO_CODIGO = d.AMBITO_CODIGO
-                    AND g.OBLIGACIONES < g.PAGOS
-                    AND g.OBLIGACIONES > 0
-                ) AS CUENTAS_NO_CUMPLE_B,
+                                (
+                                    SELECT STRING_AGG(
+                                        CONVERT(NVARCHAR(MAX),
+                                            CASE
+                                                WHEN g.COMPROMISOS = 0 THEN 'null'
+                                                ELSE CONVERT(NVARCHAR(MAX), 1 - (g.OBLIGACIONES / NULLIF(g.COMPROMISOS, 0)))
+                                            END), ',')
+                                    FROM %s g
+                                    WHERE g.FECHA = d.FECHA
+                                    AND g.TRIMESTRE = d.TRIMESTRE
+                                    AND g.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD
+                                    AND g.AMBITO_CODIGO = d.AMBITO_CODIGO
+                                    AND g.COMPROMISOS < g.OBLIGACIONES
+                                    AND g.COMPROMISOS > 0
+                                ) AS PORCENTAJE_NO_CUMPLE_A,
 
-                (
-                    SELECT STRING_AGG(
-                        CONVERT(NVARCHAR(MAX), 
-                            CASE 
-                                WHEN g.OBLIGACIONES = 0 THEN 'null'
-                                ELSE CONVERT(NVARCHAR(MAX), 1 - (g.PAGOS / NULLIF(g.OBLIGACIONES, 0))) 
-                            END), ',') 
-                    FROM %s g
-                    WHERE g.FECHA = d.FECHA
-                    AND g.TRIMESTRE = d.TRIMESTRE
-                    AND g.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD
-                    AND g.AMBITO_CODIGO = d.AMBITO_CODIGO
-                    AND g.OBLIGACIONES < g.PAGOS
-                    AND g.OBLIGACIONES > 0
-                ) AS PORCENTAJE_NO_CUMPLE_B
-            FROM %s d
-        )
+                                -- Parte B
+                                (
+                                    SELECT STRING_AGG(CONVERT(NVARCHAR(MAX), g.CUENTA), ',')
+                                    FROM %s g
+                                    WHERE g.FECHA = d.FECHA
+                                    AND g.TRIMESTRE = d.TRIMESTRE
+                                    AND g.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD
+                                    AND g.AMBITO_CODIGO = d.AMBITO_CODIGO
+                                    AND g.OBLIGACIONES < g.PAGOS
+                                    AND g.OBLIGACIONES > 0
+                                ) AS CUENTAS_NO_CUMPLE_B,
 
-        UPDATE d
-        SET
-            -- Regla 12A
-            d.REGLA_GENERAL_12A = 
-                CASE 
-                    WHEN v.NO_APLICA_A = 1 THEN 'NO APLICA'
-                    WHEN v.CUENTAS_NO_CUMPLE_A IS NULL THEN 'CUMPLE'
-                    ELSE 'NO CUMPLE'
-                END,
-            d.ALERTA_12A = 
-                CASE 
-                    WHEN v.NO_APLICA_A = 1 THEN 'La entidad satisface los criterios de validación'
-                    WHEN v.CUENTAS_NO_CUMPLE_A IS NULL THEN 'La entidad satisface los criterios de validación'
-                    ELSE 'Existen cuentas que no cumplen con la validación'
-                END,
-            d.CUENTAS_NO_CUMPLE_12A = v.CUENTAS_NO_CUMPLE_A,
-            d.PORCENTAJE_NO_CUMPLE_12A = v.PORCENTAJE_NO_CUMPLE_A,
+                                (
+                                    SELECT STRING_AGG(
+                                        CONVERT(NVARCHAR(MAX),
+                                            CASE
+                                                WHEN g.OBLIGACIONES = 0 THEN 'null'
+                                                ELSE CONVERT(NVARCHAR(MAX), 1 - (g.PAGOS / NULLIF(g.OBLIGACIONES, 0)))
+                                            END), ',')
+                                    FROM %s g
+                                    WHERE g.FECHA = d.FECHA
+                                    AND g.TRIMESTRE = d.TRIMESTRE
+                                    AND g.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD
+                                    AND g.AMBITO_CODIGO = d.AMBITO_CODIGO
+                                    AND g.OBLIGACIONES < g.PAGOS
+                                    AND g.OBLIGACIONES > 0
+                                ) AS PORCENTAJE_NO_CUMPLE_B
+                            FROM %s d
+                        )
 
-            -- Regla 12B
-            d.REGLA_GENERAL_12B = 
-                CASE 
-                    WHEN v.CUENTAS_NO_CUMPLE_B IS NULL THEN 'CUMPLE'
-                    ELSE 'NO CUMPLE'
-                END,
-            d.ALERTA_12B = 
-                CASE 
-                    WHEN v.CUENTAS_NO_CUMPLE_B IS NULL THEN 'La entidad satisface los criterios de validación'
-                    ELSE 'Existen cuentas que no cumplen con la validación'
-                END,
-            d.CUENTAS_NO_CUMPLE_12B = v.CUENTAS_NO_CUMPLE_B,
-            d.PORCENTAJE_NO_CUMPLE_12B = v.PORCENTAJE_NO_CUMPLE_B
-        FROM %s d
-        INNER JOIN Validacion12 v ON 
-            v.FECHA = d.FECHA 
-            AND v.TRIMESTRE = d.TRIMESTRE 
-            AND v.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD 
-            AND v.AMBITO_CODIGO = d.AMBITO_CODIGO
-        """,
-        ejecGastos, ejecGastos, ejecGastos, ejecGastos, tablaReglas, tablaReglas);
+                        UPDATE d
+                        SET
+                            -- Regla 12A
+                            d.REGLA_GENERAL_12A =
+                                CASE
+                                    WHEN v.NO_APLICA_A = 1 THEN 'NO APLICA'
+                                    WHEN v.CUENTAS_NO_CUMPLE_A IS NULL THEN 'CUMPLE'
+                                    ELSE 'NO CUMPLE'
+                                END,
+                            d.ALERTA_12A =
+                                CASE
+                                    WHEN v.NO_APLICA_A = 1 THEN 'La entidad satisface los criterios de validación'
+                                    WHEN v.CUENTAS_NO_CUMPLE_A IS NULL THEN 'La entidad satisface los criterios de validación'
+                                    ELSE 'Existen cuentas que no cumplen con la validación'
+                                END,
+                            d.CUENTAS_NO_CUMPLE_12A = v.CUENTAS_NO_CUMPLE_A,
+                            d.PORCENTAJE_NO_CUMPLE_12A = v.PORCENTAJE_NO_CUMPLE_A,
 
+                            -- Regla 12B
+                            d.REGLA_GENERAL_12B =
+                                CASE
+                                    WHEN v.CUENTAS_NO_CUMPLE_B IS NULL THEN 'CUMPLE'
+                                    ELSE 'NO CUMPLE'
+                                END,
+                            d.ALERTA_12B =
+                                CASE
+                                    WHEN v.CUENTAS_NO_CUMPLE_B IS NULL THEN 'La entidad satisface los criterios de validación'
+                                    ELSE 'Existen cuentas que no cumplen con la validación'
+                                END,
+                            d.CUENTAS_NO_CUMPLE_12B = v.CUENTAS_NO_CUMPLE_B,
+                            d.PORCENTAJE_NO_CUMPLE_12B = v.PORCENTAJE_NO_CUMPLE_B
+                        FROM %s d
+                        INNER JOIN Validacion12 v ON
+                            v.FECHA = d.FECHA
+                            AND v.TRIMESTRE = d.TRIMESTRE
+                            AND v.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD
+                            AND v.AMBITO_CODIGO = d.AMBITO_CODIGO
+                        """,
+                ejecGastos, ejecGastos, ejecGastos, ejecGastos, tablaReglas, tablaReglas);
 
         jdbcTemplate.execute(updateQuery);
 
@@ -196,103 +195,102 @@ public class dataTransfer_EG {
                         ejecGastos));
     }
 
-    // Regla 15: 
+    // Regla 15:
     public void applyGeneralRule15() {
         // Lista de columnas requeridas para la regla 15
         List<String> requiredColumns = Arrays.asList(
-            "ALERTA_15",
-             "REGLA_GENERAL_15",
-             "CUENTAS_NO_CUMPLEN_15");
+                "ALERTA_15",
+                "REGLA_GENERAL_15",
+                "CUENTAS_NO_CUMPLEN_15");
 
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
                 tablaReglas,
-                "'" + String.join("','", requiredColumns) + "'"
-        );
-    
+                "'" + String.join("','", requiredColumns) + "'");
+
         List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
-    
+
         for (String column : requiredColumns) {
             if (!existingColumns.contains(column)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglas, column
-                );
+                        tablaReglas, column);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
-    
-        String updateQuery = String.format("""
-                WITH ejec AS (
-                    SELECT
-                        e.FECHA,
-                        e.TRIMESTRE,
-                        e.CODIGO_ENTIDAD,
-                        e.AMBITO_CODIGO,
-                        e.CUENTA,
-                        CA.ULT_DIGITO,
-                        CA.PRIMER_DIGITO,
-                        CASE
-                          WHEN e.CUENTA NOT IN (
-                              '2.1.2.02.01.000','2.1.2.02.01.001','2.1.2.02.01.002','2.1.2.02.01.003','2.1.2.02.01.004',
-                              '2.1.2.02.02.005','2.1.2.02.02.006','2.1.2.02.02.007','2.1.2.02.02.008','2.1.2.02.02.009',
-                              '2.1.5.01.00','2.1.5.01.01','2.1.5.01.02','2.1.5.01.03','2.1.5.01.04',
-                              '2.1.5.02.05','2.1.5.02.06','2.1.5.02.07','2.1.5.02.08','2.1.5.02.09',
-                              '2.3.2.02.01.000','2.3.2.02.01.001','2.3.2.02.01.002','2.3.2.02.01.003','2.3.2.02.01.004',
-                              '2.3.2.02.02.005','2.3.2.02.02.006','2.3.2.02.02.007','2.3.2.02.02.008','2.3.2.02.02.009',
-                              '2.3.5.01.00','2.3.5.01.01','2.3.5.01.02','2.3.5.01.03','2.3.5.01.04',
-                              '2.3.5.02.05','2.3.5.02.06','2.3.5.02.07','2.3.5.02.08','2.3.5.02.09',
-                              '2.4.5.01.00','2.4.5.01.01','2.4.5.01.02','2.4.5.01.03','2.4.5.01.04',
-                              '2.4.5.02.05','2.4.5.02.06','2.4.5.02.07','2.4.5.02.08','2.4.5.02.09'
-                          )
-                          THEN 'NO APLICA'
-                          WHEN CA.ULT_DIGITO = CA.PRIMER_DIGITO THEN 'OK'
-                          ELSE 'ALERTA'
-                        END AS ALERTA_RESULTADO
-                    FROM VW_OPENDATA_D_EJECUCION_GASTOS e
-                    CROSS APPLY (
-                      SELECT 
-                        RIGHT(REPLACE(e.CUENTA, '.', ''), 1) AS ULT_DIGITO,
-                        LEFT(e.COD_CPC, 1) AS PRIMER_DIGITO
-                    ) CA
-                ),
-                agg_ejec AS (
-                    SELECT
-                        FECHA,
-                        TRIMESTRE,
-                        CODIGO_ENTIDAD,
-                        AMBITO_CODIGO,
-                        CASE
-                          WHEN COUNT(CASE WHEN ALERTA_RESULTADO = 'ALERTA' THEN 1 END) = 0 THEN ''
-                          ELSE '[' + STRING_AGG(CASE WHEN ALERTA_RESULTADO = 'ALERTA' THEN CUENTA END, ', ') + ']'
-                        END AS CUENTAS_NO_CUMPLEN_15
-                    FROM ejec
-                    GROUP BY FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO
-                )
-                UPDATE r
-                SET 
-                    r.CUENTAS_NO_CUMPLEN_15 = a.CUENTAS_NO_CUMPLEN_15,
-                    r.REGLA_GENERAL_15 = CASE
-                        WHEN a.CUENTAS_NO_CUMPLEN_15 = '' THEN 'CUMPLE'
-                        WHEN a.CUENTAS_NO_CUMPLEN_15 IS NULL THEN 'NO DATA'
-                        ELSE 'NO CUMPLE'
-                    END,
-                    r.ALERTA_15 = CASE
-                        WHEN a.CUENTAS_NO_CUMPLEN_15 IS NULL THEN 'La entidad no registró ninguna de las cuentas en ejecución de gasto'
-                        WHEN a.CUENTAS_NO_CUMPLEN_15 = '' THEN 'La entidad satisface los criterios de aceptación'
-                        ELSE 'La entidad NO satisface los criterios de aceptación'
-                    END
-                FROM %s r
-                LEFT JOIN agg_ejec a
-                    ON r.FECHA = a.FECHA
-                    AND r.TRIMESTRE = a.TRIMESTRE
-                    AND r.CODIGO_ENTIDAD = a.CODIGO_ENTIDAD
-                    AND r.AMBITO_CODIGO = a.AMBITO_CODIGO;
-        """, tablaReglas);
+
+        String updateQuery = String.format(
+                """
+                                WITH ejec AS (
+                                    SELECT
+                                        e.FECHA,
+                                        e.TRIMESTRE,
+                                        e.CODIGO_ENTIDAD,
+                                        e.AMBITO_CODIGO,
+                                        e.CUENTA,
+                                        CA.ULT_DIGITO,
+                                        CA.PRIMER_DIGITO,
+                                        CASE
+                                          WHEN e.CUENTA NOT IN (
+                                              '2.1.2.02.01.000','2.1.2.02.01.001','2.1.2.02.01.002','2.1.2.02.01.003','2.1.2.02.01.004',
+                                              '2.1.2.02.02.005','2.1.2.02.02.006','2.1.2.02.02.007','2.1.2.02.02.008','2.1.2.02.02.009',
+                                              '2.1.5.01.00','2.1.5.01.01','2.1.5.01.02','2.1.5.01.03','2.1.5.01.04',
+                                              '2.1.5.02.05','2.1.5.02.06','2.1.5.02.07','2.1.5.02.08','2.1.5.02.09',
+                                              '2.3.2.02.01.000','2.3.2.02.01.001','2.3.2.02.01.002','2.3.2.02.01.003','2.3.2.02.01.004',
+                                              '2.3.2.02.02.005','2.3.2.02.02.006','2.3.2.02.02.007','2.3.2.02.02.008','2.3.2.02.02.009',
+                                              '2.3.5.01.00','2.3.5.01.01','2.3.5.01.02','2.3.5.01.03','2.3.5.01.04',
+                                              '2.3.5.02.05','2.3.5.02.06','2.3.5.02.07','2.3.5.02.08','2.3.5.02.09',
+                                              '2.4.5.01.00','2.4.5.01.01','2.4.5.01.02','2.4.5.01.03','2.4.5.01.04',
+                                              '2.4.5.02.05','2.4.5.02.06','2.4.5.02.07','2.4.5.02.08','2.4.5.02.09'
+                                          )
+                                          THEN 'NO APLICA'
+                                          WHEN CA.ULT_DIGITO = CA.PRIMER_DIGITO THEN 'OK'
+                                          ELSE 'ALERTA'
+                                        END AS ALERTA_RESULTADO
+                                    FROM VW_OPENDATA_D_EJECUCION_GASTOS e
+                                    CROSS APPLY (
+                                      SELECT
+                                        RIGHT(REPLACE(e.CUENTA, '.', ''), 1) AS ULT_DIGITO,
+                                        LEFT(e.COD_CPC, 1) AS PRIMER_DIGITO
+                                    ) CA
+                                ),
+                                agg_ejec AS (
+                                    SELECT
+                                        FECHA,
+                                        TRIMESTRE,
+                                        CODIGO_ENTIDAD,
+                                        AMBITO_CODIGO,
+                                        CASE
+                                          WHEN COUNT(CASE WHEN ALERTA_RESULTADO = 'ALERTA' THEN 1 END) = 0 THEN ''
+                                          ELSE '[' + STRING_AGG(CASE WHEN ALERTA_RESULTADO = 'ALERTA' THEN CUENTA END, ', ') + ']'
+                                        END AS CUENTAS_NO_CUMPLEN_15
+                                    FROM ejec
+                                    GROUP BY FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO
+                                )
+                                UPDATE r
+                                SET
+                                    r.CUENTAS_NO_CUMPLEN_15 = a.CUENTAS_NO_CUMPLEN_15,
+                                    r.REGLA_GENERAL_15 = CASE
+                                        WHEN a.CUENTAS_NO_CUMPLEN_15 = '' THEN 'CUMPLE'
+                                        WHEN a.CUENTAS_NO_CUMPLEN_15 IS NULL THEN 'NO DATA'
+                                        ELSE 'NO CUMPLE'
+                                    END,
+                                    r.ALERTA_15 = CASE
+                                        WHEN a.CUENTAS_NO_CUMPLEN_15 IS NULL THEN 'La entidad no registró ninguna de las cuentas en ejecución de gasto'
+                                        WHEN a.CUENTAS_NO_CUMPLEN_15 = '' THEN 'La entidad satisface los criterios de aceptación'
+                                        ELSE 'La entidad NO satisface los criterios de aceptación'
+                                    END
+                                FROM %s r
+                                LEFT JOIN agg_ejec a
+                                    ON r.FECHA = a.FECHA
+                                    AND r.TRIMESTRE = a.TRIMESTRE
+                                    AND r.CODIGO_ENTIDAD = a.CODIGO_ENTIDAD
+                                    AND r.AMBITO_CODIGO = a.AMBITO_CODIGO;
+                        """,
+                tablaReglas);
         jdbcTemplate.execute(updateQuery);
     }
 
-    
     public void applyGeneralRule14A() {
         // 1. Verificación y creación de columnas en la tabla de destino
         List<String> requiredColumns = Arrays.asList(
@@ -311,7 +309,6 @@ public class dataTransfer_EG {
                         "ALTER TABLE %s ADD %s VARCHAR(255) NULL",
                         tablaReglas, column);
                 jdbcTemplate.execute(addColumnQuery);
-                System.out.println("Columna " + column + " agregada a " + tablaReglas);
             }
         }
 
@@ -478,159 +475,199 @@ public class dataTransfer_EG {
                 "ALERTA_14B",
                 "CUENTAS_NO_DATA_14B",
                 "CUENTAS_NO_CUMPLE_14B");
-    
+
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
                 tablaReglas, "'" + String.join("','", requiredColumns) + "'");
-    
+
         List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
-    
+
         for (String column : requiredColumns) {
             if (!existingColumns.contains(column)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
                         tablaReglas, column);
                 jdbcTemplate.execute(addColumnQuery);
-                System.out.println("Columna " + column + " agregada a " + tablaReglas);
             }
         }
-    
+
         // 2. Inicialización de columnas para nueva validación
         String initializeColumnsQuery = String.format(
                 """
-                UPDATE %s
-                SET REGLA_GENERAL_14B = NULL,
-                    ALERTA_14B = NULL,
-                    CUENTAS_NO_DATA_14B = NULL,
-                    CUENTAS_NO_CUMPLE_14B = NULL
-                """,
+                        UPDATE %s
+                        SET REGLA_GENERAL_14B = NULL,
+                            ALERTA_14B = NULL,
+                            CUENTAS_NO_DATA_14B = NULL,
+                            CUENTAS_NO_CUMPLE_14B = NULL
+                        """,
                 tablaReglas);
         jdbcTemplate.execute(initializeColumnsQuery);
-    
+
         // 3. Actualizar registros sin datos en ejecGastos
         String updateNoDataQuery = String.format(
                 """
-                UPDATE d
-                SET d.REGLA_GENERAL_14B = 'NO DATA',
-                    d.ALERTA_14B = 'La Entidad NO reportó Ejecución de Gastos.'
-                FROM %s d
-                WHERE NOT EXISTS (
-                    SELECT 1 FROM %s e
-                    WHERE e.FECHA = d.FECHA
-                    AND e.TRIMESTRE = d.TRIMESTRE
-                    AND e.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                    AND e.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                )
-                """,
+                        UPDATE d
+                        SET d.REGLA_GENERAL_14B = 'NO DATA',
+                            d.ALERTA_14B = 'La Entidad NO reportó Ejecución de Gastos.'
+                        FROM %s d
+                        WHERE NOT EXISTS (
+                            SELECT 1 FROM %s e
+                            WHERE e.FECHA = d.FECHA
+                            AND e.TRIMESTRE = d.TRIMESTRE
+                            AND e.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
+                            AND e.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
+                        )
+                        """,
                 tablaReglas, ejecGastos);
         jdbcTemplate.execute(updateNoDataQuery);
-    
+
         // 4. Actualizar cuentas que no existen en progGastos
         String updateCuentasNoDataQuery = String.format(
                 """
-                UPDATE d
-                SET d.CUENTAS_NO_DATA_14B = (
-                    SELECT STRING_AGG(e.CUENTA, ', ')
-                    FROM %s e WITH (INDEX(IDX_%s_COMPUTED))
-                    WHERE e.FECHA = d.FECHA
-                    AND e.TRIMESTRE = d.TRIMESTRE
-                    AND e.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                    AND e.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                    AND NOT EXISTS (
-                        SELECT 1 FROM %s p
-                        WHERE p.FECHA = e.FECHA
-                        AND p.TRIMESTRE = e.TRIMESTRE
-                        AND p.CODIGO_ENTIDAD_INT = e.CODIGO_ENTIDAD_INT
-                        AND p.AMBITO_CODIGO_STR = e.AMBITO_CODIGO_STR
-                        AND p.CUENTA = e.CUENTA
-                    )
-                )
-                FROM %s d
-                WHERE REGLA_GENERAL_14B IS NULL
-                """,
+                        UPDATE d
+                        SET d.CUENTAS_NO_DATA_14B = (
+                            SELECT STRING_AGG(e.CUENTA, ', ')
+                            FROM %s e WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE e.FECHA = d.FECHA
+                            AND e.TRIMESTRE = d.TRIMESTRE
+                            AND e.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
+                            AND e.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
+                            AND NOT EXISTS (
+                                SELECT 1 FROM %s p
+                                WHERE p.FECHA = e.FECHA
+                                AND p.TRIMESTRE = e.TRIMESTRE
+                                AND p.CODIGO_ENTIDAD_INT = e.CODIGO_ENTIDAD_INT
+                                AND p.AMBITO_CODIGO_STR = e.AMBITO_CODIGO_STR
+                                AND p.CUENTA = e.CUENTA
+                            )
+                        )
+                        FROM %s d
+                        WHERE REGLA_GENERAL_14B IS NULL
+                        """,
                 ejecGastos, ejecGastos, progGastos, tablaReglas);
         jdbcTemplate.execute(updateCuentasNoDataQuery);
-    
+
         // 5. Actualizar cuentas con inconsistencias en COD_VIGENCIA_DEL_GASTO
         String updateCuentasNoCumpleQuery = String.format(
                 """
-                UPDATE d
-                SET d.CUENTAS_NO_CUMPLE_14B = (
-                    SELECT STRING_AGG(e.CUENTA, ', ')
-                    FROM %s e WITH (INDEX(IDX_%s_COMPUTED))
-                    INNER JOIN %s p WITH (INDEX(IDX_%s_COMPUTED))
-                        ON p.FECHA = e.FECHA
-                        AND p.TRIMESTRE = e.TRIMESTRE
-                        AND p.CODIGO_ENTIDAD_INT = e.CODIGO_ENTIDAD_INT
-                        AND p.AMBITO_CODIGO_STR = e.AMBITO_CODIGO_STR
-                        AND p.CUENTA = e.CUENTA
-                    WHERE e.FECHA = d.FECHA
-                    AND e.TRIMESTRE = d.TRIMESTRE
-                    AND e.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                    AND e.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                    AND e.COD_VIGENCIA_DEL_GASTO <> p.COD_VIGENCIA_DEL_GASTO
-                )
-                FROM %s d
-                WHERE REGLA_GENERAL_14B IS NULL
-                """,
+                        UPDATE d
+                        SET d.CUENTAS_NO_CUMPLE_14B = (
+                            SELECT STRING_AGG(e.CUENTA, ', ')
+                            FROM %s e WITH (INDEX(IDX_%s_COMPUTED))
+                            INNER JOIN %s p WITH (INDEX(IDX_%s_COMPUTED))
+                                ON p.FECHA = e.FECHA
+                                AND p.TRIMESTRE = e.TRIMESTRE
+                                AND p.CODIGO_ENTIDAD_INT = e.CODIGO_ENTIDAD_INT
+                                AND p.AMBITO_CODIGO_STR = e.AMBITO_CODIGO_STR
+                                AND p.CUENTA = e.CUENTA
+                            WHERE e.FECHA = d.FECHA
+                            AND e.TRIMESTRE = d.TRIMESTRE
+                            AND e.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
+                            AND e.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
+                            AND e.COD_VIGENCIA_DEL_GASTO <> p.COD_VIGENCIA_DEL_GASTO
+                        )
+                        FROM %s d
+                        WHERE REGLA_GENERAL_14B IS NULL
+                        """,
                 ejecGastos, ejecGastos, progGastos, progGastos, tablaReglas);
         jdbcTemplate.execute(updateCuentasNoCumpleQuery);
-    
+
         // 6. Actualizar estado NO DATA (solo cuentas sin programación)
         String updateNoDataCuentasQuery = String.format(
                 """
-                UPDATE %s
-                SET REGLA_GENERAL_14B = 'NO DATA',
-                    ALERTA_14B = 'Algunas cuentas NO tienen registro en Programación de Gastos.'
-                WHERE CUENTAS_NO_DATA_14B IS NOT NULL 
-                AND CUENTAS_NO_CUMPLE_14B IS NULL
-                AND REGLA_GENERAL_14B IS NULL
-                """,
+                        UPDATE %s
+                        SET REGLA_GENERAL_14B = 'NO DATA',
+                            ALERTA_14B = 'Algunas cuentas NO tienen registro en Programación de Gastos.'
+                        WHERE CUENTAS_NO_DATA_14B IS NOT NULL
+                        AND CUENTAS_NO_CUMPLE_14B IS NULL
+                        AND REGLA_GENERAL_14B IS NULL
+                        """,
                 tablaReglas);
         jdbcTemplate.execute(updateNoDataCuentasQuery);
-    
+
         // 7. Actualizar estado NO CUMPLE (solo inconsistencias)
         String updateNoCumpleQuery = String.format(
                 """
-                UPDATE %s
-                SET REGLA_GENERAL_14B = 'NO CUMPLE',
-                    ALERTA_14B = 'Algunas cuentas tienen inconsistencias en VIGENCIA DEL GASTO.'
-                WHERE CUENTAS_NO_CUMPLE_14B IS NOT NULL
-                AND CUENTAS_NO_DATA_14B IS NULL
-                AND REGLA_GENERAL_14B IS NULL
-                """,
+                        UPDATE %s
+                        SET REGLA_GENERAL_14B = 'NO CUMPLE',
+                            ALERTA_14B = 'Algunas cuentas tienen inconsistencias en VIGENCIA DEL GASTO.'
+                        WHERE CUENTAS_NO_CUMPLE_14B IS NOT NULL
+                        AND CUENTAS_NO_DATA_14B IS NULL
+                        AND REGLA_GENERAL_14B IS NULL
+                        """,
                 tablaReglas);
         jdbcTemplate.execute(updateNoCumpleQuery);
-    
+
         // 8. Actualizar estado NO CUMPLE (ambos problemas)
         String updateNoCumpleMixedQuery = String.format(
                 """
-                UPDATE %s
-                SET REGLA_GENERAL_14B = 'NO CUMPLE',
-                    ALERTA_14B = 'Se encontraron cuentas sin registro en Programación de Gastos y cuentas con inconsistencias en VIGENCIA DEL GASTO.'
-                WHERE CUENTAS_NO_CUMPLE_14B IS NOT NULL
-                AND CUENTAS_NO_DATA_14B IS NOT NULL
-                AND REGLA_GENERAL_14B IS NULL
-                """,
+                        UPDATE %s
+                        SET REGLA_GENERAL_14B = 'NO CUMPLE',
+                            ALERTA_14B = 'Se encontraron cuentas sin registro en Programación de Gastos y cuentas con inconsistencias en VIGENCIA DEL GASTO.'
+                        WHERE CUENTAS_NO_CUMPLE_14B IS NOT NULL
+                        AND CUENTAS_NO_DATA_14B IS NOT NULL
+                        AND REGLA_GENERAL_14B IS NULL
+                        """,
                 tablaReglas);
         jdbcTemplate.execute(updateNoCumpleMixedQuery);
-    
+
         // 9. Actualizar estado CUMPLE (sin problemas)
         String updateCumpleQuery = String.format(
                 """
-                UPDATE %s
-                SET REGLA_GENERAL_14B = 'CUMPLE',
-                    ALERTA_14B = 'La Entidad satisface los criterios de validación.'
-                WHERE CUENTAS_NO_DATA_14B IS NULL
-                AND CUENTAS_NO_CUMPLE_14B IS NULL
-                AND REGLA_GENERAL_14B IS NULL
-                """,
+                        UPDATE %s
+                        SET REGLA_GENERAL_14B = 'CUMPLE',
+                            ALERTA_14B = 'La Entidad satisface los criterios de validación.'
+                        WHERE CUENTAS_NO_DATA_14B IS NULL
+                        AND CUENTAS_NO_CUMPLE_14B IS NULL
+                        AND REGLA_GENERAL_14B IS NULL
+                        """,
                 tablaReglas);
         jdbcTemplate.execute(updateCumpleQuery);
     }
 
+    public void applyGeneralRule13B() {
+        List<String> requiredColumns = List.of("REGLA_GENERAL_13B", "ALERTA_13B");
 
+        // Verificar si las columnas existen en la tabla de reglas, si no, agregarlas
+        String checkColumnsQuery = String.format(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN ('%s')",
+                tablaReglas, String.join("','", requiredColumns));
+        List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
 
+        requiredColumns.stream()
+                .filter(column -> !existingColumns.contains(column))
+                .forEach(column -> jdbcTemplate
+                        .execute(String.format("ALTER TABLE %s ADD %s VARCHAR(MAX) NULL", tablaReglas, column)));
 
+        // Optimización del UPDATE con CTE para evitar duplicación de lógica
+        String updateQuery = String.format("""
+                WITH filtered_data AS (
+                    SELECT d.FECHA, d.TRIMESTRE, d.CODIGO_ENTIDAD, d.AMBITO_CODIGO,
+                           MAX(CASE WHEN d.CUENTA = '2.99' THEN 1 ELSE 0 END) AS tieneCuenta299
+                    FROM [dbo].[VW_OPENDATA_D_EJECUCION_GASTOS] d
+                    GROUP BY d.FECHA, d.TRIMESTRE, d.CODIGO_ENTIDAD, d.AMBITO_CODIGO
+                )
+                UPDATE r
+                SET
+                    r.REGLA_GENERAL_13B = CASE
+                        WHEN fd.FECHA IS NULL THEN 'NO DATA'
+                        WHEN fd.tieneCuenta299 = 1 THEN 'NO CUMPLE'
+                        ELSE 'CUMPLE'
+                    END,
+                    r.ALERTA_13B = CASE
+                        WHEN fd.FECHA IS NULL THEN 'La entidad no registra en ejecución de gasto'
+                        WHEN fd.tieneCuenta299 = 1 THEN 'La entidad no satisface los criterios de aceptación'
+                        ELSE 'La entidad satisface los criterios de aceptación'
+                    END
+                FROM %s r
+                LEFT JOIN filtered_data fd
+                    ON r.FECHA = fd.FECHA
+                    AND r.TRIMESTRE = fd.TRIMESTRE
+                    AND r.CODIGO_ENTIDAD = fd.CODIGO_ENTIDAD
+                    AND r.AMBITO_CODIGO = fd.AMBITO_CODIGO;
+                """, tablaReglas);
+
+        jdbcTemplate.execute(updateQuery);
+    }
 
 }

@@ -1,9 +1,12 @@
 package com.cgr.base.presentation.generalRulesModule;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,28 +47,39 @@ public class generalRules extends AbstractController {
     }
 
     @PostMapping("/transfer")
-    public ResponseEntity<?> updatePresupuesto() {
-        DataProgIngresos.applyGeneralRule1();
-        // DataProgIngresos.applyGeneralRule2();
-        // DataProgIngresos.applyGeneralRule3();
-        // DataProgIngresos.applyGeneralRule4();
-        // DataEjecIngresos.applyGeneralRule5();
-        // DataEjecIngresos.applyGeneralRule6();
-        // DataProgGastos.applyGeneralRule7();
-        // DataProgGastos.applyGeneralRule8();
-        // DataProgGastos.applyGeneralRule9A();
-        // DataProgGastos.applyGeneralRule9B();
-        // DataProgGastos.applyGeneralRule10();
-        // DataProgGastos.applyGeneralRule11();
-        // DataEjecGastos.applyGeneralRule12();
-        // DataEjecGastos.applyGeneralRule14A();
-        // DataEjecGastos.applyGeneralRule14B();
-        // DataEjecGastos.applyGeneralRule15();
-        return requestResponse(
-                null,
-                "Apply General Rules.",
-                HttpStatus.OK,
-                true);
+    public ResponseEntity<?> updatePresupuesto(@RequestBody Map<String, String> request) {
+        String rule = request.get("regla");
+    
+        if (rule == null || rule.isEmpty()) {
+            return requestResponse(null, "Rule parameter is required.", HttpStatus.BAD_REQUEST, false);
+        }
+    
+        try {
+            switch (rule.toUpperCase()) {
+                case "1"  -> DataProgIngresos.applyGeneralRule1();
+                case "2"  -> DataProgIngresos.applyGeneralRule2();
+                case "3"  -> DataProgIngresos.applyGeneralRule3();
+                case "4"  -> DataProgIngresos.applyGeneralRule4();
+                case "5"  -> DataEjecIngresos.applyGeneralRule5();
+                case "6"  -> DataEjecIngresos.applyGeneralRule6();
+                case "7"  -> DataProgGastos.applyGeneralRule7();
+                case "8"  -> DataProgGastos.applyGeneralRule8();
+                case "9A" -> DataProgGastos.applyGeneralRule9A();
+                case "9B" -> DataProgGastos.applyGeneralRule9B();
+                case "10" -> DataProgGastos.applyGeneralRule10();
+                case "11" -> DataProgGastos.applyGeneralRule11();
+                case "12" -> DataEjecGastos.applyGeneralRule12();
+                case "13B" -> DataEjecGastos.applyGeneralRule13B();
+                case "14A" -> DataEjecGastos.applyGeneralRule14A();
+                case "14B" -> DataEjecGastos.applyGeneralRule14B();
+                case "15" -> DataEjecGastos.applyGeneralRule15();
+                default -> throw new IllegalArgumentException("Invalid rule specified.");
+            }
+        } catch (IllegalArgumentException e) {
+            return requestResponse(null, e.getMessage(), HttpStatus.BAD_REQUEST, false);
+        }
+    
+        return requestResponse(null, "Applied rule " + rule, HttpStatus.OK, true);
     }
-
+    
 }
