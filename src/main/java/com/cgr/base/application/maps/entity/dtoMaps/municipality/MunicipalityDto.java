@@ -10,5 +10,3 @@ public class MunicipalityDto {
     private String mpio_ccnct;
     private String image;
 }
-
-

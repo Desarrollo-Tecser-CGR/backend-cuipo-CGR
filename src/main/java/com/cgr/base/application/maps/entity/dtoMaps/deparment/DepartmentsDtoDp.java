@@ -10,4 +10,3 @@ public class DepartmentsDtoDp
     private String dpto_ccdgo;
 
 }
-
