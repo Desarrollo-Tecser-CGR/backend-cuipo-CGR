@@ -26,12 +26,15 @@ public class generalRulesController extends AbstractController {
     @PostMapping("/data")
     public ResponseEntity<?> getGeneralRules(
             @RequestBody(required = false) Map<String, String> filters) {
+
         String fecha = filters != null ? filters.get("fecha") : null;
         String trimestre = filters != null ? filters.get("trimestre") : null;
-        String ambitoCodigo = filters != null ? filters.get("ambitoCodigo") : null;
-        String entidadCodigo = filters != null ? filters.get("entidadCodigo") : null;
+        String ambito = filters != null ? filters.get("ambito") : null;
+        String entidad = filters != null ? filters.get("entidad") : null;
+        String formulario = filters != null ? filters.get("formulario") : null;
 
-        List<Map<String, Object>> result = Filter.getFilteredRecords(fecha, trimestre, ambitoCodigo, entidadCodigo);
+        List<Map<String, Object>> result = Filter.getFilteredRecords(fecha, trimestre, ambito, entidad,
+                formulario);
         return requestResponse(result, "General Rules successfully retrieved.", HttpStatus.OK, true);
     }
 
