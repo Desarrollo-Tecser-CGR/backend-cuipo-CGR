@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.cgr.base.application.rules.general.dto.listOptionsDto;
 import com.cgr.base.application.rules.general.dto.listOptionsDto.AmbitoDTO;
 import com.cgr.base.application.rules.general.dto.listOptionsDto.EntidadDTO;
+import com.cgr.base.application.rules.general.dto.listOptionsDto.FormularioDTO;
 
 @Service
 public class queryFilters {
@@ -37,9 +38,11 @@ public class queryFilters {
         return jdbcTemplate.queryForList(sql, String.class);
     }
 
-    private List<String> getFormTables() {
-        String sql = "SELECT DISTINCT [NOMBRE_TABLA] FROM [general_rules_tables] ORDER BY [NOMBRE_TABLA]";
-        return jdbcTemplate.queryForList(sql, String.class);
+    private List<FormularioDTO> getFormTables() {
+        String sql = String.format("SELECT DISTINCT [CODIGO_TABLA], [NOMBRE_TABLA] FROM [%s] ORDER BY [CODIGO_TABLA]", "general_rules_tables");
+        return jdbcTemplate.query(sql, (rs, rowNum) -> 
+            new FormularioDTO(rs.getString("CODIGO_TABLA"), rs.getString("NOMBRE_TABLA"))
+        );
     }
     
     
