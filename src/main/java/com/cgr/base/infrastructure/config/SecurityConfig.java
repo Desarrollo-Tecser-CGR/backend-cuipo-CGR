@@ -38,13 +38,14 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**","/api/v1/departments/**", "/api/v1/municipality/**").permitAll();
+                    auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**","/api/v1/departments/**", "/api/v1/municipality/**","/swagger-ui/**").permitAll();
                     auth.requestMatchers("/api/v1/role/**").hasAnyAuthority("administrador");
                     auth.requestMatchers("/api/v1/log/**").hasAnyAuthority("administrador");
                     auth.requestMatchers("/api/v1/menu/**").hasAnyAuthority("administrador");
                     auth.requestMatchers("/api/v1/user/**").hasAnyAuthority("administrador");
                     auth.anyRequest().authenticated();
-                });
+                })
+                .httpFirewall(allowAllFirewall());
 
         http.headers(headers -> headers
                 .httpStrictTransportSecurity(hsts -> hsts

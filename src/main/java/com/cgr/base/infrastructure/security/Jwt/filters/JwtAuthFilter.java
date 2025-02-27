@@ -49,7 +49,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/api/v1/auth/**",
             "/auth",
             "/auth/",
-            "/swagger-ui.html",
             "/swagger-ui",
             "/api/v1/departments",
             "/api/v1/municipality");
