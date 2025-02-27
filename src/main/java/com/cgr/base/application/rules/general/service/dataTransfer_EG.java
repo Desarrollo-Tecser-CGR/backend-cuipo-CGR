@@ -2,7 +2,6 @@ package com.cgr.base.application.rules.general.service;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -469,7 +468,6 @@ public class dataTransfer_EG {
                 tablaReglas);
         jdbcTemplate.execute(updateEmptyQuery);
 
-        // Actualizar REGLA_GENERAL_12A y ALERTA_12A según estados
         String updateRule12AQuery = String.format(
                 """
                         UPDATE %s
@@ -493,7 +491,6 @@ public class dataTransfer_EG {
                 tablaReglas);
         jdbcTemplate.execute(updateRule12AQuery);
 
-        // Actualizar REGLA_GENERAL_12B y ALERTA_12B según estados
         String updateRule12BQuery = String.format(
                 """
                         UPDATE %s
@@ -516,77 +513,51 @@ public class dataTransfer_EG {
         jdbcTemplate.execute(updateRule12BQuery);
     }
 
-
-
-
-
-        public void applyGeneralRule13B() {
-            List<String> requiredColumns = Arrays.asList("REGLA_GENERAL_13B", "ALERTA_13B");
-
-            // Verificar si las columnas existen en la tabla de reglas, si no, agregarlas
-            String checkColumnsQuery = String.format(
-                    "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                    tablaReglas, "'" + String.join("','", requiredColumns) + "'"
-            );
-            List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
-
-            for (String column : requiredColumns) {
-                if (!existingColumns.contains(column)) {
-                    String addColumnQuery = String.format("ALTER TABLE %s ADD %s VARCHAR(MAX) NULL", tablaReglas, column);
-                    jdbcTemplate.execute(addColumnQuery);
-                }
-            }
-
-            // Conteo de registros con CUENTA = '2.99' para saber si hay "No cumple"
-            String countQuery = """
-                    SELECT COUNT(*) AS TotalRegistros
-                    FROM [dbo].[VW_OPENDATA_D_EJECUCION_GASTOS]
-                    WHERE TRIM(CUENTA) = '2.99';
-                    """;
-            int recordCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
-
-            // Actualizar tablaReglas considerando Cumple, No cumple y No Data
-            String updateQuery = String.format("""
-                    UPDATE r
-                    SET 
-                        r.REGLA_GENERAL_13B = CASE
-                            WHEN TRIM(E.CUENTA) = '2.99' THEN 'No cumple'
-                            WHEN E.CODIGO_ENTIDAD_INT IS NULL THEN 'No Data'
-                            ELSE 'Cumple'
-                        END,
-                        r.ALERTA_13B = CASE
-                            WHEN TRIM(E.CUENTA) = '2.99' THEN 'La entidad no satisface los criterios de aceptación'
-                            WHEN E.CODIGO_ENTIDAD_INT IS NULL THEN 'La entidad no registra en ejecución de gasto'
-                            ELSE 'La entidad satisface los criterios de aceptación'
-                        END
-                    FROM %s r
-                    LEFT JOIN [dbo].[VW_OPENDATA_D_EJECUCION_GASTOS] E
-                        ON r.FECHA = E.FECHA
-                        AND r.TRIMESTRE = E.TRIMESTRE
-                        AND r.CODIGO_ENTIDAD = E.CODIGO_ENTIDAD_INT
-                        AND r.AMBITO_CODIGO = E.AMBITO_CODIGO_STR;
-                    """, tablaReglas);
-
-            jdbcTemplate.execute(updateQuery);
-
-            // Si no hay registros con CUENTA = '2.99', verificar si todo es 'No Data' o 'Cumple'
-            if (recordCount == 0) {
-                String noNonCompliantQuery = String.format("""
-                        UPDATE %s
-                        SET 
-                            REGLA_GENERAL_13B = CASE
-                                WHEN REGLA_GENERAL_13B = 'No cumple' THEN 'No cumple' -- Mantener si ya estaba
-                                WHEN REGLA_GENERAL_13B IS NULL THEN 'No Data'
-                                ELSE 'Cumple'
-                            END,
-                            ALERTA_13B = CASE
-                                WHEN ALERTA_13B = 'La entidad no satisface los criterios de aceptación' THEN 'La entidad no satisface los criterios de aceptación'
-                                WHEN ALERTA_13B IS NULL THEN 'La entidad no registra en ejecución de gasto'
-                                ELSE 'La entidad satisface los criterios de aceptación'
-                            END
-                        WHERE REGLA_GENERAL_13B IS NULL OR ALERTA_13B IS NULL;
-                        """, tablaReglas);
-                jdbcTemplate.execute(noNonCompliantQuery);
-            }
-        }
+    public void applyGeneralRule13B() {
+        List<String> requiredColumns = List.of("REGLA_GENERAL_13B", "ALERTA_13B");
+    
+        // Verificar si las columnas existen en la tabla de reglas, si no, agregarlas
+        String checkColumnsQuery = String.format(
+            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN ('%s')",
+            tablaReglas, String.join("','", requiredColumns)
+        );
+        List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+    
+        requiredColumns.stream()
+            .filter(column -> !existingColumns.contains(column))
+            .forEach(column -> jdbcTemplate.execute(String.format("ALTER TABLE %s ADD %s VARCHAR(MAX) NULL", tablaReglas, column)));
+    
+        // Optimización del UPDATE con CTE para evitar duplicación de lógica
+        String updateQuery = String.format("""
+            WITH filtered_data AS (
+                SELECT d.FECHA, d.TRIMESTRE, d.CODIGO_ENTIDAD, d.AMBITO_CODIGO,
+                       MAX(CASE WHEN d.CUENTA = '2.99' THEN 1 ELSE 0 END) AS tieneCuenta299
+                FROM [dbo].[VW_OPENDATA_D_EJECUCION_GASTOS] d
+                GROUP BY d.FECHA, d.TRIMESTRE, d.CODIGO_ENTIDAD, d.AMBITO_CODIGO
+            )
+            UPDATE r
+            SET 
+                r.REGLA_GENERAL_13B = CASE
+                    WHEN fd.FECHA IS NULL THEN 'NO DATA'
+                    WHEN fd.tieneCuenta299 = 1 THEN 'NO CUMPLE'
+                    ELSE 'CUMPLE'
+                END,
+                r.ALERTA_13B = CASE
+                    WHEN fd.FECHA IS NULL THEN 'La entidad no registra en ejecución de gasto'
+                    WHEN fd.tieneCuenta299 = 1 THEN 'La entidad no satisface los criterios de aceptación'
+                    ELSE 'La entidad satisface los criterios de aceptación'
+                END
+            FROM %s r
+            LEFT JOIN filtered_data fd
+                ON r.FECHA = fd.FECHA
+                AND r.TRIMESTRE = fd.TRIMESTRE
+                AND r.CODIGO_ENTIDAD = fd.CODIGO_ENTIDAD
+                AND r.AMBITO_CODIGO = fd.AMBITO_CODIGO;
+            """, tablaReglas);
+    
+        jdbcTemplate.execute(updateQuery);
     }
+    
+
+
+}
