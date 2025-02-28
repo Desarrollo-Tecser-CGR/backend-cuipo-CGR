@@ -11,6 +11,7 @@ import com.cgr.base.application.rules.general.service.dataSourceInit;
 import com.cgr.base.application.rules.general.service.dataTransfer_EG;
 import com.cgr.base.application.rules.general.service.dataTransfer_EI;
 import com.cgr.base.application.rules.general.service.dataTransfer_PI;
+import com.cgr.base.application.rules.general.specific.specificTablesInit;
 import com.cgr.base.presentation.controller.AbstractController;
 
 @RestController
@@ -19,6 +20,9 @@ public class generalRules extends AbstractController {
 
     @Autowired
     private dataSourceInit rulesInit;
+
+    @Autowired
+    private specificTablesInit specificInit;
 
     @Autowired
     private dataTransfer_PI DataProgIngresos;
@@ -32,6 +36,16 @@ public class generalRules extends AbstractController {
     @PostMapping("/init-tables")
     public ResponseEntity<?> processTables() {
         rulesInit.processTablesSource();
+        return requestResponse(
+                null,
+                "Tables Processing Completed.",
+                HttpStatus.OK,
+                true);
+    }
+
+    @PostMapping("/init-cuentastable")
+    public ResponseEntity<?> processTable() {
+        specificInit.createTables();
         return requestResponse(
                 null,
                 "Tables Processing Completed.",
