@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.cgr.base.application.logs.dto.LogDto;
 import com.cgr.base.application.role.dto.RoleRequestDto;
-import com.cgr.base.domain.models.entity.Logs.RoleEntity;
+import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
 
 import lombok.Data;
 

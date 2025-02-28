@@ -3,7 +3,7 @@ package com.cgr.base.application.role.usecase;
 import java.util.List;
 
 import com.cgr.base.application.role.dto.RoleRequestDto;
-import com.cgr.base.domain.models.entity.Logs.RoleEntity;
+import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
 
 public interface IRoleService {
     public abstract List<RoleRequestDto> findAll();

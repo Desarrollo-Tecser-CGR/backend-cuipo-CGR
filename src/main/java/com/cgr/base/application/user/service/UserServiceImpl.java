@@ -12,10 +12,11 @@ import com.cgr.base.application.user.dto.UserWithRolesRequestDto;
 import com.cgr.base.application.user.dto.UserWithRolesResponseDto;
 import com.cgr.base.application.user.usecase.IUserUseCase;
 import com.cgr.base.domain.repository.ILogRepository;
+import com.cgr.base.domain.repository.IRoleRepository;
 import com.cgr.base.domain.repository.IUserRoleRepository;
-import com.cgr.base.domain.models.entity.Logs.LogEntity;
-import com.cgr.base.domain.models.entity.Logs.UserEntity;
-import com.cgr.base.application.utilities.DtoMapper;
+import com.cgr.base.infrastructure.persistence.entity.LogEntity;
+import com.cgr.base.infrastructure.persistence.entity.UserEntity;
+import com.cgr.base.infrastructure.utilities.DtoMapper;
 
 import lombok.AllArgsConstructor;
 
