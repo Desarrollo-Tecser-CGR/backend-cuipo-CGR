@@ -3,7 +3,7 @@ package com.cgr.base.application.auth.dto;
 import java.util.List;
 
 import com.cgr.base.application.user.dto.UserDto;
-import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
+import com.cgr.base.domain.models.entity.Menu.Menu;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
