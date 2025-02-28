@@ -2,7 +2,7 @@ package com.cgr.base.domain.repository;
 
 import java.util.List;
 
-import com.cgr.base.domain.models.entity.Logs.LogEntity;
+import com.cgr.base.infrastructure.persistence.entity.LogEntity;
 
 public interface ILogRepository {
 

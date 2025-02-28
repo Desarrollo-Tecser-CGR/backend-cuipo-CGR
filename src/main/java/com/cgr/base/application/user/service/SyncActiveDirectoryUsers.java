@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cgr.base.application.user.usecase.IUserSynchronizerUseCase;
 import com.cgr.base.domain.repository.IActiveDirectoryUserRepository;
-import com.cgr.base.domain.models.entity.Logs.UserEntity;
-import com.cgr.base.infrastructure.repositories.repositories.user.IUserRepositoryJpa;
+import com.cgr.base.infrastructure.persistence.entity.UserEntity;
+import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 
 @Service
 public class SyncActiveDirectoryUsers implements IUserSynchronizerUseCase {
