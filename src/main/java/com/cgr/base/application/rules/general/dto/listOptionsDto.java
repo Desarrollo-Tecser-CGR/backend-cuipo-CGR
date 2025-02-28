@@ -16,19 +16,29 @@ public class listOptionsDto {
     private List<String> trimestres;
     private List<EntidadDTO> entidades;
     private List<AmbitoDTO> ambitos;
-    
+    private List<FormularioDTO> formularios;
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     public static class EntidadDTO {
         private String codigo;
         private String nombre;
+        private String ambito;
     }
-    
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AmbitoDTO {
+        private String codigo;
+        private String nombre;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FormularioDTO {
         private String codigo;
         private String nombre;
     }
