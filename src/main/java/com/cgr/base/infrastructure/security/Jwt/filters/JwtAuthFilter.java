@@ -14,7 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.cgr.base.application.auth.dto.AuthResponseDto;
+import com.cgr.base.domain.dto.dtoAuth.AuthResponseDto;
 import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -49,7 +49,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/api/v1/auth/**",
             "/auth",
             "/auth/",
-            "/swagger-ui",
+            "/swagger-ui/",
+            "/swagger-ui.html",
+            "/v3/api-docs/",
+            "/v3/api-docs/**",
             "/api/v1/departments",
             "/api/v1/municipality");
 
@@ -60,6 +63,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
      * @return True la URI existe en la lista blanca, false de lo contrario
      * @throws ServletException
      */
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         System.out.println("llegué aqui shouldNotFilter");

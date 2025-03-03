@@ -1,9 +1,9 @@
 package com.cgr.base.application.maps.servicesMaps;
 
 import com.cgr.base.application.maps.entity.departments.EntityDepartments;
-import com.cgr.base.application.maps.entity.dtoMaps.deparment.DepartmentsDto;
-import com.cgr.base.application.maps.entity.dtoMaps.deparment.DepartmentsDtoDp;
-import com.cgr.base.application.maps.entity.dtoMaps.municipality.MunicipalityDto;
+import com.cgr.base.domain.dto.dtoMaps.deparment.DepartmentsDto;
+import com.cgr.base.domain.dto.dtoMaps.deparment.DepartmentsDtoDp;
+import com.cgr.base.domain.dto.dtoMaps.municipality.MunicipalityDto;
 import com.cgr.base.application.maps.repositoryMaps.RepositoryDepartment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
