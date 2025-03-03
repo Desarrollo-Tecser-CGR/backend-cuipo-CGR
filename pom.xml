@@ -37,10 +37,11 @@
         </dependency>
 		<!-- https://mvnrepository.com/artifact/io.swagger/swagger-annotations -->
 		<dependency>
-			<groupId>io.swagger</groupId>
-			<artifactId>swagger-annotations</artifactId>
-			<version>1.6.15</version>
+			<groupId>org.webjars</groupId>
+			<artifactId>swagger-ui</artifactId>
+			<version>5.20.0</version>
 		</dependency>
+
 
 		<dependency>
   			<groupId>org.springframework.boot</groupId>
@@ -131,7 +132,21 @@
                     </excludes>
                 </configuration>
             </plugin>
+
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.3</version> <configuration>
+				<argLine>
+					-javaagent:"${settings.localRepository}/net/bytebuddy/byte-buddy-agent/1.15.10/byte-buddy-agent-1.15.10.jar"
+				</argLine>
+			</configuration>
+			</plugin>
+
         </plugins>
+
+
     </build>
 
 </project>

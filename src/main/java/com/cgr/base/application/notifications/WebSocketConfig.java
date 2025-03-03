@@ -5,7 +5,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
-import com.cgr.base.presentation.controller.MyWebSocketHandler;
+import com.cgr.base.application.controller.MyWebSocketHandler;
 
 @Configuration
 @EnableWebSocket

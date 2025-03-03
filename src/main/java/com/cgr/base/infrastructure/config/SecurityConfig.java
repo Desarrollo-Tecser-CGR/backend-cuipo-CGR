@@ -12,7 +12,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import com.cgr.base.infrastructure.exception.component.AccessDeniedHandlerException;
+import com.cgr.base.application.exception.component.AccessDeniedHandlerException;
 import com.cgr.base.infrastructure.security.Jwt.filters.JwtAuthFilter;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,8 +44,8 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/v1/menu/**").hasAnyAuthority("administrador");
                     auth.requestMatchers("/api/v1/user/**").hasAnyAuthority("administrador");
                     auth.anyRequest().authenticated();
-                })
-                .httpFirewall(allowAllFirewall());
+                });
+
 
         http.headers(headers -> headers
                 .httpStrictTransportSecurity(hsts -> hsts
