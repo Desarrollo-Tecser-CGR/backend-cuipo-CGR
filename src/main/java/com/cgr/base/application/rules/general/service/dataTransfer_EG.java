@@ -670,8 +670,6 @@ public class dataTransfer_EG {
         jdbcTemplate.execute(updateQuery);
     }
 
-
-    
     public void applyGeneralRule13A() {
         // 1. Definir las columnas requeridas
         List<String> requiredColumns = Arrays.asList(
@@ -679,14 +677,14 @@ public class dataTransfer_EG {
                 "ALERTA_13A",
                 "CUENTAS_PROGRAMADAS_13A",
                 "CUENTAS_EJECUTADAS_13A");
-    
+
         // 2. Verificar y crear columnas en la tabla de destino si no existen
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
                 tablaReglas, "'" + String.join("','", requiredColumns) + "'");
-    
+
         List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
-    
+
         for (String column : requiredColumns) {
             if (!existingColumns.contains(column)) {
                 String addColumnQuery = String.format(
@@ -695,7 +693,7 @@ public class dataTransfer_EG {
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
-    
+
         // 3. Inicializar las columnas para la nueva validación
         String initializeColumnsQuery = String.format(
                 """
@@ -707,96 +705,400 @@ public class dataTransfer_EG {
                         """,
                 tablaReglas);
         jdbcTemplate.execute(initializeColumnsQuery);
-    
-        // 4 y 5. Actualizar la tabla usando CTE para obtener cuentas ejecutadas y programadas
+
+        // 4 y 5. Actualizar la tabla usando CTE para obtener cuentas ejecutadas y
+        // programadas
         // y realizar la validación en una sola consulta SQL para máxima eficiencia
         String updateQuery = String.format(
-        """
-        WITH cuentas_ejecutadas AS (
-            SELECT 
-                d.FECHA, 
-                d.TRIMESTRE, 
-                d.CODIGO_ENTIDAD_INT AS CODIGO_ENTIDAD, 
-                d.AMBITO_CODIGO_STR AS AMBITO_CODIGO,
-                STRING_AGG(d.CUENTA, ',') AS CUENTAS_EJECUTADAS_LISTA,
-                JSON_QUERY((
-                    SELECT CONCAT('[', STRING_AGG(CONCAT('"', cuenta_unica, '"'), ','), ']')
-                    FROM (SELECT DISTINCT d2.CUENTA AS cuenta_unica
-                          FROM %s d2 WITH (INDEX(IDX_%s_COMPUTED))
-                          WHERE d2.FECHA = d.FECHA
-                            AND d2.TRIMESTRE = d.TRIMESTRE
-                            AND d2.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD_INT
-                            AND d2.AMBITO_CODIGO_STR = d.AMBITO_CODIGO_STR
-                            AND d2.CUENTA IN ('2.1', '2.2', '2.3', '2.4')) AS unique_cuentas
-                )) AS CUENTAS_EJECUTADAS_13A
-            FROM %s d WITH (INDEX(IDX_%s_COMPUTED))
-            WHERE d.CUENTA IN ('2.1', '2.2', '2.3', '2.4')
-            GROUP BY d.FECHA, d.TRIMESTRE, d.CODIGO_ENTIDAD_INT, d.AMBITO_CODIGO_STR
-        ),
-        cuentas_programadas AS (
-            SELECT 
-                c.FECHA, 
-                c.TRIMESTRE, 
-                c.CODIGO_ENTIDAD_INT AS CODIGO_ENTIDAD, 
-                c.AMBITO_CODIGO_STR AS AMBITO_CODIGO,
-                STRING_AGG(c.CUENTA, ',') AS CUENTAS_PROGRAMADAS_LISTA,
-                JSON_QUERY((
-                    SELECT CONCAT('[', STRING_AGG(CONCAT('"', cuenta_unica, '"'), ','), ']')
-                    FROM (SELECT DISTINCT c2.CUENTA AS cuenta_unica
-                          FROM %s c2 WITH (INDEX(IDX_%s_COMPUTED))
-                          WHERE c2.FECHA = c.FECHA
-                            AND c2.TRIMESTRE = c.TRIMESTRE
-                            AND c2.CODIGO_ENTIDAD_INT = c.CODIGO_ENTIDAD_INT
-                            AND c2.AMBITO_CODIGO_STR = c.AMBITO_CODIGO_STR
-                            AND c2.CUENTA IN ('2.1', '2.2', '2.3', '2.4')) AS unique_cuentas
-                )) AS CUENTAS_PROGRAMADAS_13A
-            FROM %s c WITH (INDEX(IDX_%s_COMPUTED))
-            WHERE c.CUENTA IN ('2.1', '2.2', '2.3', '2.4')
-            GROUP BY c.FECHA, c.TRIMESTRE, c.CODIGO_ENTIDAD_INT, c.AMBITO_CODIGO_STR
-        )
-        UPDATE r
-        SET 
-            r.REGLA_GENERAL_13A = CASE 
-                WHEN ce.CODIGO_ENTIDAD IS NULL THEN 'NO DATA'
-                WHEN ce.CUENTAS_EJECUTADAS_13A IS NULL THEN 'NO DATA'
-                WHEN cp.CUENTAS_PROGRAMADAS_13A IS NULL THEN 'NO DATA'
-                WHEN NOT EXISTS (
-                    SELECT value FROM OPENJSON(ce.CUENTAS_EJECUTADAS_13A)
-                    EXCEPT
-                    SELECT value FROM OPENJSON(cp.CUENTAS_PROGRAMADAS_13A)
-                ) THEN 'CUMPLE'
-                ELSE 'NO CUMPLE'
-            END,
-            r.ALERTA_13A = CASE 
-                WHEN ce.CODIGO_ENTIDAD IS NULL THEN 'La entidad no registró ejecución de gastos'
-                WHEN ce.CUENTAS_EJECUTADAS_13A IS NULL THEN 'La entidad no registró gastos ejecutados para las cuentas 2.1, 2.2, 2.3 o 2.4'
-                WHEN cp.CUENTAS_PROGRAMADAS_13A IS NULL THEN 'La entidad no registró gastos programados para las cuentas 2.1, 2.2, 2.3 o 2.4'
-                WHEN NOT EXISTS (
-                    SELECT value FROM OPENJSON(ce.CUENTAS_EJECUTADAS_13A)
-                    EXCEPT
-                    SELECT value FROM OPENJSON(cp.CUENTAS_PROGRAMADAS_13A)
-                ) THEN 'La entidad ejecutó todas las cuentas programadas'
-                ELSE 'La entidad ejecutó cuentas no programadas'
-            END,
-            r.CUENTAS_PROGRAMADAS_13A = cp.CUENTAS_PROGRAMADAS_13A,
-            r.CUENTAS_EJECUTADAS_13A = ce.CUENTAS_EJECUTADAS_13A
-        FROM %s r
-        LEFT JOIN cuentas_ejecutadas ce ON 
-            r.FECHA = ce.FECHA AND 
-            r.TRIMESTRE = ce.TRIMESTRE AND 
-            r.CODIGO_ENTIDAD = ce.CODIGO_ENTIDAD AND 
-            r.AMBITO_CODIGO = ce.AMBITO_CODIGO
-        LEFT JOIN cuentas_programadas cp ON 
-            r.FECHA = cp.FECHA AND 
-            r.TRIMESTRE = cp.TRIMESTRE AND 
-            r.CODIGO_ENTIDAD = cp.CODIGO_ENTIDAD AND 
-            r.AMBITO_CODIGO = cp.AMBITO_CODIGO
-        """,
-        ejecGastos, ejecGastos, ejecGastos, ejecGastos, progGastos, progGastos, progGastos, progGastos, tablaReglas);
-        
+                """
+                        WITH cuentas_ejecutadas AS (
+                            SELECT
+                                d.FECHA,
+                                d.TRIMESTRE,
+                                d.CODIGO_ENTIDAD_INT AS CODIGO_ENTIDAD,
+                                d.AMBITO_CODIGO_STR AS AMBITO_CODIGO,
+                                STRING_AGG(d.CUENTA, ',') AS CUENTAS_EJECUTADAS_LISTA,
+                                JSON_QUERY((
+                                    SELECT CONCAT('[', STRING_AGG(CONCAT('"', cuenta_unica, '"'), ','), ']')
+                                    FROM (SELECT DISTINCT d2.CUENTA AS cuenta_unica
+                                          FROM %s d2 WITH (INDEX(IDX_%s_COMPUTED))
+                                          WHERE d2.FECHA = d.FECHA
+                                            AND d2.TRIMESTRE = d.TRIMESTRE
+                                            AND d2.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD_INT
+                                            AND d2.AMBITO_CODIGO_STR = d.AMBITO_CODIGO_STR
+                                            AND d2.CUENTA IN ('2.1', '2.2', '2.3', '2.4')) AS unique_cuentas
+                                )) AS CUENTAS_EJECUTADAS_13A
+                            FROM %s d WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE d.CUENTA IN ('2.1', '2.2', '2.3', '2.4')
+                            GROUP BY d.FECHA, d.TRIMESTRE, d.CODIGO_ENTIDAD_INT, d.AMBITO_CODIGO_STR
+                        ),
+                        cuentas_programadas AS (
+                            SELECT
+                                c.FECHA,
+                                c.TRIMESTRE,
+                                c.CODIGO_ENTIDAD_INT AS CODIGO_ENTIDAD,
+                                c.AMBITO_CODIGO_STR AS AMBITO_CODIGO,
+                                STRING_AGG(c.CUENTA, ',') AS CUENTAS_PROGRAMADAS_LISTA,
+                                JSON_QUERY((
+                                    SELECT CONCAT('[', STRING_AGG(CONCAT('"', cuenta_unica, '"'), ','), ']')
+                                    FROM (SELECT DISTINCT c2.CUENTA AS cuenta_unica
+                                          FROM %s c2 WITH (INDEX(IDX_%s_COMPUTED))
+                                          WHERE c2.FECHA = c.FECHA
+                                            AND c2.TRIMESTRE = c.TRIMESTRE
+                                            AND c2.CODIGO_ENTIDAD_INT = c.CODIGO_ENTIDAD_INT
+                                            AND c2.AMBITO_CODIGO_STR = c.AMBITO_CODIGO_STR
+                                            AND c2.CUENTA IN ('2.1', '2.2', '2.3', '2.4')) AS unique_cuentas
+                                )) AS CUENTAS_PROGRAMADAS_13A
+                            FROM %s c WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE c.CUENTA IN ('2.1', '2.2', '2.3', '2.4')
+                            GROUP BY c.FECHA, c.TRIMESTRE, c.CODIGO_ENTIDAD_INT, c.AMBITO_CODIGO_STR
+                        )
+                        UPDATE r
+                        SET
+                            r.REGLA_GENERAL_13A = CASE
+                                WHEN ce.CODIGO_ENTIDAD IS NULL THEN 'NO DATA'
+                                WHEN ce.CUENTAS_EJECUTADAS_13A IS NULL THEN 'NO DATA'
+                                WHEN cp.CUENTAS_PROGRAMADAS_13A IS NULL THEN 'NO DATA'
+                                WHEN NOT EXISTS (
+                                    SELECT value FROM OPENJSON(ce.CUENTAS_EJECUTADAS_13A)
+                                    EXCEPT
+                                    SELECT value FROM OPENJSON(cp.CUENTAS_PROGRAMADAS_13A)
+                                ) THEN 'CUMPLE'
+                                ELSE 'NO CUMPLE'
+                            END,
+                            r.ALERTA_13A = CASE
+                                WHEN ce.CODIGO_ENTIDAD IS NULL THEN 'La entidad no registró ejecución de gastos'
+                                WHEN ce.CUENTAS_EJECUTADAS_13A IS NULL THEN 'La entidad no registró gastos ejecutados para las cuentas 2.1, 2.2, 2.3 o 2.4'
+                                WHEN cp.CUENTAS_PROGRAMADAS_13A IS NULL THEN 'La entidad no registró gastos programados para las cuentas 2.1, 2.2, 2.3 o 2.4'
+                                WHEN NOT EXISTS (
+                                    SELECT value FROM OPENJSON(ce.CUENTAS_EJECUTADAS_13A)
+                                    EXCEPT
+                                    SELECT value FROM OPENJSON(cp.CUENTAS_PROGRAMADAS_13A)
+                                ) THEN 'La entidad ejecutó todas las cuentas programadas'
+                                ELSE 'La entidad ejecutó cuentas no programadas'
+                            END,
+                            r.CUENTAS_PROGRAMADAS_13A = cp.CUENTAS_PROGRAMADAS_13A,
+                            r.CUENTAS_EJECUTADAS_13A = ce.CUENTAS_EJECUTADAS_13A
+                        FROM %s r
+                        LEFT JOIN cuentas_ejecutadas ce ON
+                            r.FECHA = ce.FECHA AND
+                            r.TRIMESTRE = ce.TRIMESTRE AND
+                            r.CODIGO_ENTIDAD = ce.CODIGO_ENTIDAD AND
+                            r.AMBITO_CODIGO = ce.AMBITO_CODIGO
+                        LEFT JOIN cuentas_programadas cp ON
+                            r.FECHA = cp.FECHA AND
+                            r.TRIMESTRE = cp.TRIMESTRE AND
+                            r.CODIGO_ENTIDAD = cp.CODIGO_ENTIDAD AND
+                            r.AMBITO_CODIGO = cp.AMBITO_CODIGO
+                        """,
+                ejecGastos, ejecGastos, ejecGastos, ejecGastos, progGastos, progGastos, progGastos, progGastos,
+                tablaReglas);
+
         jdbcTemplate.execute(updateQuery);
+    }
+
+    public void applyGeneralRule16A() {
+       // 1. Definir las columnas requeridas
+       List<String> requiredColumns = Arrays.asList(
+        "REGLA_GENERAL_16A",
+        "ALERTA_16A",
+        "CUENTAS_16A",
+        "VALOR_PERIODO_VALIDACION",
+        "VALOR_PERIODO_ANTERIOR",
+        "VARIACION_TRIMESTRAL",
+        "VARIACION_MONETARIA"
+);
+
+// 2. Verificar si las columnas existen en la tabla de reglas y agregarlas si no existen
+String checkColumnsQuery = String.format(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+        tablaReglas, "'" + String.join("','", requiredColumns) + "'");
+
+List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+
+for (String column : requiredColumns) {
+    if (!existingColumns.contains(column)) {
+        String addColumnQuery = String.format(
+                "ALTER TABLE %s ADD %s VARCHAR(MAX) DEFAULT ''", // Valor por defecto vacío
+                tablaReglas, column);
+        jdbcTemplate.execute(addColumnQuery);
+    }
+}
+
+// 3. Actualizar registros sin coincidencias (NO DATA)
+String updateNoDataQuery = String.format(
+        """
+        UPDATE %s
+        SET REGLA_GENERAL_16A = 'NO DATA',
+            ALERTA_16A = 'La entidad no registró ejecución de gastos.'
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
+            WHERE a.FECHA = %s.FECHA
+            AND a.TRIMESTRE = %s.TRIMESTRE
+            AND a.CODIGO_ENTIDAD_INT = %s.CODIGO_ENTIDAD
+            AND a.AMBITO_CODIGO_STR = %s.AMBITO_CODIGO
+        )
+        """,
+        tablaReglas, ejecGastos, ejecGastos, tablaReglas, tablaReglas, tablaReglas, tablaReglas);
+jdbcTemplate.execute(updateNoDataQuery);
+
+// 4. Actualizar registros con trimestre 03 (NO APLICA)
+String updateTrimestre03Query = String.format(
+        """
+        UPDATE %s
+        SET REGLA_GENERAL_16A = 'NO APLICA',
+            ALERTA_16A = 'La validación NO aplica para el periodo inicial.'
+        WHERE TRIMESTRE = '03'
+        """,
+        tablaReglas);
+jdbcTemplate.execute(updateTrimestre03Query);
+
+// 5. Actualizar registros con trimestres diferentes a 03
+String updateVariacionesQuery = String.format(
+        """
+        WITH Datos AS (
+            SELECT
+                d.FECHA,
+                d.TRIMESTRE,
+                d.CODIGO_ENTIDAD,
+                d.AMBITO_CODIGO,
+                a.CUENTA,
+                CASE
+                    WHEN a.AMBITO_CODIGO IN ('A447', 'A448', 'A449', 'A450', 'A451', 'A4563', 'A454')
+                    THEN a.OBLIGACIONES
+                    ELSE a.COMPROMISOS
+                END AS VALOR_ACTUAL,
+                LAG(
+                    CASE
+                        WHEN a.AMBITO_CODIGO IN ('A447', 'A448', 'A449', 'A450', 'A451', 'A4563', 'A454')
+                        THEN a.OBLIGACIONES
+                        ELSE a.COMPROMISOS
+                    END
+                ) OVER (PARTITION BY a.CODIGO_ENTIDAD, a.AMBITO_CODIGO, a.CUENTA ORDER BY a.FECHA, a.TRIMESTRE) AS VALOR_ANTERIOR
+            FROM %s d
+            JOIN %s a WITH (INDEX(IDX_%s_COMPUTED)) ON a.FECHA = d.FECHA
+                AND a.TRIMESTRE = d.TRIMESTRE
+                AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
+                AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
+            WHERE d.TRIMESTRE != '03'
+        ),
+        Calculos AS (
+            SELECT
+                FECHA,
+                TRIMESTRE,
+                CODIGO_ENTIDAD,
+                AMBITO_CODIGO,
+                STRING_AGG(CUENTA, ', ') AS CUENTAS_16A,
+                STRING_AGG(CAST(VALOR_ACTUAL AS VARCHAR(MAX)), ', ') AS VALOR_PERIODO_VALIDACION,
+                STRING_AGG(CAST(VALOR_ANTERIOR AS VARCHAR(MAX)), ', ') AS VALOR_PERIODO_ANTERIOR,
+                STRING_AGG(
+                    CASE
+                        WHEN VALOR_ANTERIOR IS NULL OR VALOR_ANTERIOR = 0 THEN '' -- Valor vacío en lugar de 'null'
+                        ELSE CAST(((VALOR_ACTUAL / VALOR_ANTERIOR) - 1) * 100 AS VARCHAR(MAX))
+                    END, ', ') AS VARIACION_TRIMESTRAL,
+                STRING_AGG(
+                    CASE
+                        WHEN VALOR_ANTERIOR IS NULL THEN '' -- Valor vacío en lugar de 'null'
+                        ELSE CAST(VALOR_ACTUAL - VALOR_ANTERIOR AS VARCHAR(MAX))
+                    END, ', ') AS VARIACION_MONETARIA
+            FROM Datos
+            GROUP BY FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO
+        )
+        UPDATE d
+        SET
+            CUENTAS_16A = c.CUENTAS_16A,
+            VALOR_PERIODO_VALIDACION = c.VALOR_PERIODO_VALIDACION,
+            VALOR_PERIODO_ANTERIOR = c.VALOR_PERIODO_ANTERIOR,
+            VARIACION_TRIMESTRAL = c.VARIACION_TRIMESTRAL,
+            VARIACION_MONETARIA = c.VARIACION_MONETARIA
+        FROM %s d
+        JOIN Calculos c ON d.FECHA = c.FECHA
+            AND d.TRIMESTRE = c.TRIMESTRE
+            AND d.CODIGO_ENTIDAD = c.CODIGO_ENTIDAD
+            AND d.AMBITO_CODIGO = c.AMBITO_CODIGO
+        """,
+        tablaReglas, ejecGastos, ejecGastos, tablaReglas);
+jdbcTemplate.execute(updateVariacionesQuery);
+
+// 6. Validar estados (NO DATA, NO CUMPLE, CUMPLE)
+String updateEstadosQuery = String.format(
+        """
+        UPDATE %s
+        SET
+            REGLA_GENERAL_16A = CASE
+                WHEN VARIACION_TRIMESTRAL IS NULL OR VARIACION_TRIMESTRAL = '' THEN 'NO DATA' -- Verifica si está vacío
+                WHEN EXISTS (
+                    SELECT 1 FROM STRING_SPLIT(VARIACION_TRIMESTRAL, ',') 
+                    WHERE TRY_CAST(value AS FLOAT) < -20 OR TRY_CAST(value AS FLOAT) > 30
+                ) THEN 'NO CUMPLE'
+                ELSE 'CUMPLE'
+            END,
+            ALERTA_16A = CASE
+                WHEN VARIACION_TRIMESTRAL IS NULL OR VARIACION_TRIMESTRAL = '' THEN 'Algunas cuentas NO registran información.' -- Verifica si está vacío
+                WHEN EXISTS (
+                    SELECT 1 FROM STRING_SPLIT(VARIACION_TRIMESTRAL, ',') 
+                    WHERE TRY_CAST(value AS FLOAT) < -20 OR TRY_CAST(value AS FLOAT) > 30
+                ) THEN 'Algunas cuentas NO cumplen los requerimientos.'
+                ELSE 'La entidad satisface los criterios de validación.'
+            END
+        WHERE TRIMESTRE != '03'
+        """,
+        tablaReglas);
+jdbcTemplate.execute(updateEstadosQuery);
+
     }
 
 
 
+    public void applyGeneralRule16B() {
+        // 1. Definir las columnas requeridas (igual que 16A)
+        List<String> requiredColumns = Arrays.asList(
+            "REGLA_GENERAL_16B",
+            "ALERTA_16B",
+            "CUENTAS_16B",
+            "VALOR_PERIODO_VALIDACION",
+            "VALOR_PERIODO_ANTERIOR",
+            "VARIACION_ANUAL",
+            "VARIACION_MONETARIA"
+        );
+    
+        // 2. Verificar si las columnas existen en la tabla de reglas y agregarlas si no existen (igual que 16A)
+        String checkColumnsQuery = String.format(
+            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+            tablaReglas, "'" + String.join("','", requiredColumns) + "'"
+        );
+    
+        List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+    
+        for (String column : requiredColumns) {
+            if (!existingColumns.contains(column)) {
+                String addColumnQuery = String.format(
+                    "ALTER TABLE %s ADD %s VARCHAR(MAX) DEFAULT ''", // Valor por defecto vacío
+                    tablaReglas, column
+                );
+                jdbcTemplate.execute(addColumnQuery);
+            }
+        }
+    
+        // 3. Actualizar registros sin coincidencias (NO DATA) (igual que 16A)
+        String updateNoDataQuery = String.format(
+            """
+            UPDATE %s
+            SET REGLA_GENERAL_16B = 'NO DATA',
+                ALERTA_16B = 'La entidad no registró ejecución de gastos.'
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
+                WHERE a.FECHA = %s.FECHA
+                AND a.TRIMESTRE = %s.TRIMESTRE
+                AND a.CODIGO_ENTIDAD_INT = %s.CODIGO_ENTIDAD
+                AND a.AMBITO_CODIGO_STR = %s.AMBITO_CODIGO
+            )
+            """,
+            tablaReglas, ejecGastos, ejecGastos, tablaReglas, tablaReglas, tablaReglas, tablaReglas
+        );
+        jdbcTemplate.execute(updateNoDataQuery);
+    
+        // 4. Calcular y actualizar variaciones (comparar con el mismo trimestre del año anterior)
+        String updateVariacionesQuery = String.format(
+        """
+        WITH Datos AS (
+            SELECT
+                d.FECHA,
+                d.TRIMESTRE,
+                d.CODIGO_ENTIDAD,
+                d.AMBITO_CODIGO,
+                a.CUENTA,
+                CASE
+                    WHEN a.AMBITO_CODIGO IN ('A447', 'A448', 'A449', 'A450', 'A451', 'A4563', 'A454')
+                    THEN a.OBLIGACIONES
+                    ELSE a.COMPROMISOS
+                END AS VALOR_ACTUAL,
+                (SELECT TOP 1 
+                    CASE 
+                        WHEN a2.AMBITO_CODIGO IN ('A447', 'A448', 'A449', 'A450', 'A451', 'A4563', 'A454')
+                        THEN a2.OBLIGACIONES
+                        ELSE a2.COMPROMISOS
+                    END
+                 FROM %s a2 WITH (INDEX(IDX_%s_COMPUTED))
+                 WHERE a2.CODIGO_ENTIDAD_INT = a.CODIGO_ENTIDAD_INT
+                   AND a2.AMBITO_CODIGO_STR = a.AMBITO_CODIGO_STR
+                   AND a2.TRIMESTRE = d.TRIMESTRE
+                   AND a2.FECHA = DATEADD(YEAR, -1, d.FECHA)
+                   AND a2.CUENTA = a.CUENTA -- Aseguramos que la cuenta coincide
+                   AND (LEN(a2.CUENTA) - LEN(REPLACE(a2.CUENTA, '.', ''))) <= 2 -- Filtro para máximo 2 puntos
+                ) AS VALOR_ANTERIOR
+            FROM %s d
+            JOIN %s a WITH (INDEX(IDX_%s_COMPUTED)) ON a.FECHA = d.FECHA
+                AND a.TRIMESTRE = d.TRIMESTRE
+                AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
+                AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
+            WHERE (LEN(a.CUENTA) - LEN(REPLACE(a.CUENTA, '.', ''))) <= 2 -- Solo cuentas con máximo 2 puntos
+        ),
+        Calculos AS (
+            SELECT
+                FECHA,
+                TRIMESTRE,
+                CODIGO_ENTIDAD,
+                AMBITO_CODIGO,
+                STRING_AGG(CUENTA, ', ') AS CUENTAS_16B,
+                STRING_AGG(CAST(VALOR_ACTUAL AS VARCHAR(MAX)), ', ') AS VALOR_PERIODO_VALIDACION,
+                STRING_AGG(CAST(VALOR_ANTERIOR AS VARCHAR(MAX)), ', ') AS VALOR_PERIODO_ANTERIOR,
+                STRING_AGG(
+                    CASE
+                        WHEN VALOR_ANTERIOR IS NULL OR VALOR_ANTERIOR = 0 THEN '' -- Valor vacío en lugar de 'null'
+                        ELSE CAST(((VALOR_ACTUAL / VALOR_ANTERIOR) - 1) * 100 AS VARCHAR(MAX))
+                    END, ', ') AS VARIACION_ANUAL,
+                STRING_AGG(
+                    CASE
+                        WHEN VALOR_ANTERIOR IS NULL THEN '' -- Valor vacío en lugar de 'null'
+                        ELSE CAST(VALOR_ACTUAL - VALOR_ANTERIOR AS VARCHAR(MAX))
+                    END, ', ') AS VARIACION_MONETARIA
+            FROM Datos
+            GROUP BY FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO
+        )
+        UPDATE d
+        SET
+            CUENTAS_16B = c.CUENTAS_16B,
+            VALOR_PERIODO_VALIDACION = c.VALOR_PERIODO_VALIDACION,
+            VALOR_PERIODO_ANTERIOR = c.VALOR_PERIODO_ANTERIOR,
+            VARIACION_ANUAL = c.VARIACION_ANUAL,
+            VARIACION_MONETARIA = c.VARIACION_MONETARIA
+        FROM %s d
+        JOIN Calculos c ON d.FECHA = c.FECHA
+            AND d.TRIMESTRE = c.TRIMESTRE
+            AND d.CODIGO_ENTIDAD = c.CODIGO_ENTIDAD
+            AND d.AMBITO_CODIGO = c.AMBITO_CODIGO
+        """,
+        ejecGastos, ejecGastos, tablaReglas, ejecGastos, ejecGastos, tablaReglas
+    );
+    jdbcTemplate.execute(updateVariacionesQuery);
+    
+        // 5. Validar estados (NO DATA, NO CUMPLE, CUMPLE) (igual que 16A, pero sin la restricción de TRIMESTRE != '03')
+        String updateEstadosQuery = String.format(
+            """
+            UPDATE %s
+            SET
+                REGLA_GENERAL_16B = CASE
+                    WHEN VARIACION_ANUAL IS NULL OR VARIACION_ANUAL = '' THEN 'NO DATA' -- Verifica si está vacío
+                    WHEN EXISTS (
+                        SELECT 1 FROM STRING_SPLIT(VARIACION_ANUAL, ',') 
+                        WHERE TRY_CAST(value AS FLOAT) < -20 OR TRY_CAST(value AS FLOAT) > 30
+                    ) THEN 'NO CUMPLE'
+                    ELSE 'CUMPLE'
+                END,
+                ALERTA_16B = CASE
+                    WHEN VARIACION_ANUAL IS NULL OR VARIACION_ANUAL = '' THEN 'Algunas cuentas NO registran información.' -- Verifica si está vacío
+                    WHEN EXISTS (
+                        SELECT 1 FROM STRING_SPLIT(VARIACION_ANUAL, ',') 
+                        WHERE TRY_CAST(value AS FLOAT) < -20 OR TRY_CAST(value AS FLOAT) > 30
+                    ) THEN 'Algunas cuentas NO cumplen los requerimientos.'
+                    ELSE 'La entidad satisface los criterios de validación.'
+                END
+            """,
+            tablaReglas
+        );
+        jdbcTemplate.execute(updateEstadosQuery);
+    }
 }
