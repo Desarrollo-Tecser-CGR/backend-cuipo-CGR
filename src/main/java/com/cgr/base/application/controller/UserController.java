@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cgr.base.application.user.dto.UserDto;
-import com.cgr.base.application.user.dto.UserWithRolesRequestDto;
-import com.cgr.base.application.user.usecase.IUserSynchronizerUseCase;
-import com.cgr.base.application.user.usecase.IUserUseCase;
+import com.cgr.base.domain.dto.dtoUser.UserDto;
+import com.cgr.base.domain.dto.dtoUser.UserWithRolesRequestDto;
+import com.cgr.base.application.services.user.usecase.IUserSynchronizerUseCase;
+import com.cgr.base.application.services.user.usecase.IUserUseCase;
 
 import jakarta.validation.Valid;
 
