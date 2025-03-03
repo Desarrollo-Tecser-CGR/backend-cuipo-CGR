@@ -73,6 +73,12 @@ public class generalRules extends AbstractController {
                 case "14A" -> DataEjecGastos.applyGeneralRule14A();
                 case "14B" -> DataEjecGastos.applyGeneralRule14B();
                 case "15" -> DataEjecGastos.applyGeneralRule15();
+                case "22A" -> DataEjecIngresos.applyGeneralRule22A();
+                case "22B" -> DataEjecIngresos.applyGeneralRule22B();
+                case "22C" -> DataEjecIngresos.applyGeneralRule22C();
+                case "22D" -> DataEjecIngresos.applyGeneralRule22D();
+                case "22E" -> DataEjecIngresos.applyGeneralRule22E();
+                
                 default -> throw new IllegalArgumentException("Invalid rule specified.");
             }
         } catch (IllegalArgumentException e) {
