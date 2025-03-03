@@ -69,6 +69,7 @@ public class generalRules extends AbstractController {
                 case "10" -> DataProgGastos.applyGeneralRule10();
                 case "11" -> DataProgGastos.applyGeneralRule11();
                 case "12" -> DataEjecGastos.applyGeneralRule12();
+                case "13A" -> DataEjecGastos.applyGeneralRule13A();
                 case "13B" -> DataEjecGastos.applyGeneralRule13B();
                 case "14A" -> DataEjecGastos.applyGeneralRule14A();
                 case "14B" -> DataEjecGastos.applyGeneralRule14B();

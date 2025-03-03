@@ -670,4 +670,133 @@ public class dataTransfer_EG {
         jdbcTemplate.execute(updateQuery);
     }
 
+
+    
+    public void applyGeneralRule13A() {
+        // 1. Definir las columnas requeridas
+        List<String> requiredColumns = Arrays.asList(
+                "REGLA_GENERAL_13A",
+                "ALERTA_13A",
+                "CUENTAS_PROGRAMADAS_13A",
+                "CUENTAS_EJECUTADAS_13A");
+    
+        // 2. Verificar y crear columnas en la tabla de destino si no existen
+        String checkColumnsQuery = String.format(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+                tablaReglas, "'" + String.join("','", requiredColumns) + "'");
+    
+        List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+    
+        for (String column : requiredColumns) {
+            if (!existingColumns.contains(column)) {
+                String addColumnQuery = String.format(
+                        "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
+                        tablaReglas, column);
+                jdbcTemplate.execute(addColumnQuery);
+            }
+        }
+    
+        // 3. Inicializar las columnas para la nueva validación
+        String initializeColumnsQuery = String.format(
+                """
+                        UPDATE %s
+                        SET REGLA_GENERAL_13A = NULL,
+                            ALERTA_13A = NULL,
+                            CUENTAS_PROGRAMADAS_13A = NULL,
+                            CUENTAS_EJECUTADAS_13A = NULL
+                        """,
+                tablaReglas);
+        jdbcTemplate.execute(initializeColumnsQuery);
+    
+        // 4 y 5. Actualizar la tabla usando CTE para obtener cuentas ejecutadas y programadas
+        // y realizar la validación en una sola consulta SQL para máxima eficiencia
+        String updateQuery = String.format(
+        """
+        WITH cuentas_ejecutadas AS (
+            SELECT 
+                d.FECHA, 
+                d.TRIMESTRE, 
+                d.CODIGO_ENTIDAD_INT AS CODIGO_ENTIDAD, 
+                d.AMBITO_CODIGO_STR AS AMBITO_CODIGO,
+                STRING_AGG(d.CUENTA, ',') AS CUENTAS_EJECUTADAS_LISTA,
+                JSON_QUERY((
+                    SELECT CONCAT('[', STRING_AGG(CONCAT('"', cuenta_unica, '"'), ','), ']')
+                    FROM (SELECT DISTINCT d2.CUENTA AS cuenta_unica
+                          FROM %s d2 WITH (INDEX(IDX_%s_COMPUTED))
+                          WHERE d2.FECHA = d.FECHA
+                            AND d2.TRIMESTRE = d.TRIMESTRE
+                            AND d2.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD_INT
+                            AND d2.AMBITO_CODIGO_STR = d.AMBITO_CODIGO_STR
+                            AND d2.CUENTA IN ('2.1', '2.2', '2.3', '2.4')) AS unique_cuentas
+                )) AS CUENTAS_EJECUTADAS_13A
+            FROM %s d WITH (INDEX(IDX_%s_COMPUTED))
+            WHERE d.CUENTA IN ('2.1', '2.2', '2.3', '2.4')
+            GROUP BY d.FECHA, d.TRIMESTRE, d.CODIGO_ENTIDAD_INT, d.AMBITO_CODIGO_STR
+        ),
+        cuentas_programadas AS (
+            SELECT 
+                c.FECHA, 
+                c.TRIMESTRE, 
+                c.CODIGO_ENTIDAD_INT AS CODIGO_ENTIDAD, 
+                c.AMBITO_CODIGO_STR AS AMBITO_CODIGO,
+                STRING_AGG(c.CUENTA, ',') AS CUENTAS_PROGRAMADAS_LISTA,
+                JSON_QUERY((
+                    SELECT CONCAT('[', STRING_AGG(CONCAT('"', cuenta_unica, '"'), ','), ']')
+                    FROM (SELECT DISTINCT c2.CUENTA AS cuenta_unica
+                          FROM %s c2 WITH (INDEX(IDX_%s_COMPUTED))
+                          WHERE c2.FECHA = c.FECHA
+                            AND c2.TRIMESTRE = c.TRIMESTRE
+                            AND c2.CODIGO_ENTIDAD_INT = c.CODIGO_ENTIDAD_INT
+                            AND c2.AMBITO_CODIGO_STR = c.AMBITO_CODIGO_STR
+                            AND c2.CUENTA IN ('2.1', '2.2', '2.3', '2.4')) AS unique_cuentas
+                )) AS CUENTAS_PROGRAMADAS_13A
+            FROM %s c WITH (INDEX(IDX_%s_COMPUTED))
+            WHERE c.CUENTA IN ('2.1', '2.2', '2.3', '2.4')
+            GROUP BY c.FECHA, c.TRIMESTRE, c.CODIGO_ENTIDAD_INT, c.AMBITO_CODIGO_STR
+        )
+        UPDATE r
+        SET 
+            r.REGLA_GENERAL_13A = CASE 
+                WHEN ce.CODIGO_ENTIDAD IS NULL THEN 'NO DATA'
+                WHEN ce.CUENTAS_EJECUTADAS_13A IS NULL THEN 'NO DATA'
+                WHEN cp.CUENTAS_PROGRAMADAS_13A IS NULL THEN 'NO DATA'
+                WHEN NOT EXISTS (
+                    SELECT value FROM OPENJSON(ce.CUENTAS_EJECUTADAS_13A)
+                    EXCEPT
+                    SELECT value FROM OPENJSON(cp.CUENTAS_PROGRAMADAS_13A)
+                ) THEN 'CUMPLE'
+                ELSE 'NO CUMPLE'
+            END,
+            r.ALERTA_13A = CASE 
+                WHEN ce.CODIGO_ENTIDAD IS NULL THEN 'La entidad no registró ejecución de gastos'
+                WHEN ce.CUENTAS_EJECUTADAS_13A IS NULL THEN 'La entidad no registró gastos ejecutados para las cuentas 2.1, 2.2, 2.3 o 2.4'
+                WHEN cp.CUENTAS_PROGRAMADAS_13A IS NULL THEN 'La entidad no registró gastos programados para las cuentas 2.1, 2.2, 2.3 o 2.4'
+                WHEN NOT EXISTS (
+                    SELECT value FROM OPENJSON(ce.CUENTAS_EJECUTADAS_13A)
+                    EXCEPT
+                    SELECT value FROM OPENJSON(cp.CUENTAS_PROGRAMADAS_13A)
+                ) THEN 'La entidad ejecutó todas las cuentas programadas'
+                ELSE 'La entidad ejecutó cuentas no programadas'
+            END,
+            r.CUENTAS_PROGRAMADAS_13A = cp.CUENTAS_PROGRAMADAS_13A,
+            r.CUENTAS_EJECUTADAS_13A = ce.CUENTAS_EJECUTADAS_13A
+        FROM %s r
+        LEFT JOIN cuentas_ejecutadas ce ON 
+            r.FECHA = ce.FECHA AND 
+            r.TRIMESTRE = ce.TRIMESTRE AND 
+            r.CODIGO_ENTIDAD = ce.CODIGO_ENTIDAD AND 
+            r.AMBITO_CODIGO = ce.AMBITO_CODIGO
+        LEFT JOIN cuentas_programadas cp ON 
+            r.FECHA = cp.FECHA AND 
+            r.TRIMESTRE = cp.TRIMESTRE AND 
+            r.CODIGO_ENTIDAD = cp.CODIGO_ENTIDAD AND 
+            r.AMBITO_CODIGO = cp.AMBITO_CODIGO
+        """,
+        ejecGastos, ejecGastos, ejecGastos, ejecGastos, progGastos, progGastos, progGastos, progGastos, tablaReglas);
+        
+        jdbcTemplate.execute(updateQuery);
+    }
+
+
+
 }
