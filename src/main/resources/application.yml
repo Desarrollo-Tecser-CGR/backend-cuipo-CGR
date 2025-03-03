@@ -32,7 +32,7 @@ spring:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     database-platform: org.hibernate.dialect.SQLServer2012Dialect
     show-sql: false
   output:
@@ -59,3 +59,16 @@ logging:
 web:
   resources:
     static-locations: classpath:/static/,classpath:/public/
+
+    # Configuración de Swagger OpenAPI
+    springdoc:
+      api-docs:
+        enabled: true
+        path: /api-docs
+      swagger-ui:
+        enabled: true
+        path: /swagger-ui
+        operationsSorter: method
+        tagsSorter: alpha
+        disable-swagger-default-url: true
+

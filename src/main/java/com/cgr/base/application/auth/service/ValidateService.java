@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 
 import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.application.user.dto.UserDto;
-import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
-import com.cgr.base.infrastructure.persistence.entity.UserEntity;
-import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
-import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
+import com.cgr.base.domain.models.entity.Logs.RoleEntity;
+import com.cgr.base.domain.models.entity.Logs.UserEntity;
+import com.cgr.base.domain.models.entity.Menu.Menu;
+import com.cgr.base.infrastructure.repositories.repositories.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.cgr.base.infrastructure.utilities.DtoMapper;
 
