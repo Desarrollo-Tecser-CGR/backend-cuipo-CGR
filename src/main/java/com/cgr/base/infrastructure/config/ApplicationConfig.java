@@ -41,8 +41,5 @@ public class ApplicationConfig {
         return new ModelMapper();
     }
 
-    // @Bean
-    // public JwtAuthFilter jwtAuthFilter() {
-    // return new JwtAuthFilter(jwtAuthenticationProvider);
-    // }
+
 }

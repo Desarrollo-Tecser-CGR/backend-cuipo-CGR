@@ -13,5 +13,6 @@ public class EntityProvitionalPlan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long entity_id;
     private String entity_nit;
-    private String entity_name;
+    @Column(name = "entity_name")
+    private String entityName;
 }

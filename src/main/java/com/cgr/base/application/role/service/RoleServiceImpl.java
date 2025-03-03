@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cgr.base.application.role.dto.RoleRequestDto;
 import com.cgr.base.application.role.usecase.IRoleService;
 import com.cgr.base.domain.repository.IRoleRepository;
-import com.cgr.base.infrastructure.persistence.entity.RoleEntity;
-import com.cgr.base.infrastructure.utilities.DtoMapper;
+import com.cgr.base.domain.models.entity.Logs.RoleEntity;
+import com.cgr.base.application.utilities.DtoMapper;
 
 import lombok.AllArgsConstructor;
 
