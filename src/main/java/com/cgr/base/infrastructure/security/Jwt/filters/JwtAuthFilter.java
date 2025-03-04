@@ -49,10 +49,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/api/v1/auth/**",
             "/auth",
             "/auth/",
-            "/swagger-ui/",
-            "/swagger-ui.html",
-            "/v3/api-docs/",
-            "/v3/api-docs/**",
             "/api/v1/departments",
             "/api/v1/municipality");
 
@@ -97,6 +93,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         System.out.println("=======header +  jwtauth" + header);
+
+        String requestUri = request.getRequestURI();
+
+
+        if (requestUri.startsWith("/v3/api-docs/") || requestUri.equals("/v3/api-docs") || requestUri.startsWith("/swagger-ui/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
 
         if (header == null) {
             responseHandler(response, "Token requerido", HttpServletResponse.SC_FORBIDDEN);
