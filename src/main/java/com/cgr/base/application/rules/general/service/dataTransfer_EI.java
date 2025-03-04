@@ -515,7 +515,7 @@ public class dataTransfer_EI {
     public void applyGeneralRule22A() {
 
         // 1) Define las columnas requeridas
-        List<String> requiredColumns = Arrays.asList("TOTAL_RECAUDO_22");
+        List<String> requiredColumns = Arrays.asList("ICLD");
 
         // 2) Consulta INFORMATION_SCHEMA.COLUMNS con TABLE_NAME = '%s' 
         //    y COLUMN_NAME IN (%s), usando la técnica de tu applyGeneralRule6()
@@ -570,7 +570,7 @@ public class dataTransfer_EI {
             )
             UPDATE r
             SET
-                r.TOTAL_RECAUDO_22 = CAST(v.SUMA_RECAUDO AS VARCHAR(MAX))
+                r.ICLD = CAST(v.SUMA_RECAUDO AS VARCHAR(MAX))
             FROM %s r
             JOIN Validaciones_22A v
                ON  r.FECHA          = v.FECHA
@@ -1014,4 +1014,5 @@ public class dataTransfer_EI {
 
         jdbcTemplate.execute(updateQuery);
     }
+
 }
