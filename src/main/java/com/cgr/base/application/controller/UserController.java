@@ -1,5 +1,6 @@
 package com.cgr.base.application.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -20,6 +21,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/user")
+@SecurityRequirement(name = "BearerAuth")
 public class UserController extends AbstractController {
 
     private IUserUseCase userService;
