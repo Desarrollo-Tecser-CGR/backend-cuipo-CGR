@@ -2,12 +2,14 @@ package com.cgr.base.application.rules.general.service;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class dataTransfer_PI {
@@ -24,58 +26,61 @@ public class dataTransfer_PI {
     @Value("${TABLA_PROG_GASTOS}")
     private String progGastos;
 
-    // Regla1: Presupuesto Definitivo para Entidades NO en Liquidación.
+    // Regla1: Presupuesto Definitivo para Entidades NO 'en Liquidación'.
+    @Transactional
+    @Async
     public void applyGeneralRule1() {
-        List<String> requiredColumns = Arrays.asList("VAL_PRESUPUESTO_1", "REGLA_GENERAL_1", "ALERTA_1");
+        String[] requiredColumns = { "VAL_PRESUPUESTO_1", "REGLA_GENERAL_1", "ALERTA_1" };
 
-        String checkColumnsQuery = String.format(
-                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN ('%s')",
-                tablaReglas, String.join("','", requiredColumns));
+        Arrays.stream(requiredColumns).forEach(column -> {
+            String checkColumnQuery = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?";
+            Integer columnExists = jdbcTemplate.queryForObject(checkColumnQuery, Integer.class, tablaReglas, column);
 
-        List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
-
-        List<String> missingColumns = requiredColumns.stream()
-                .filter(col -> !existingColumns.contains(col))
-                .collect(Collectors.toList());
-
-        if (!missingColumns.isEmpty()) {
-            for (String column : missingColumns) {
-                String addColumnQuery = String.format(
-                        "ALTER TABLE %s ADD %s %s NULL",
-                        tablaReglas,
-                        column,
-                        column.equals("VAL_PRESUPUESTO_1") ? "DECIMAL(18,0)" : "VARCHAR(255)");
-                jdbcTemplate.execute(addColumnQuery);
+            if (columnExists == null || columnExists == 0) {
+                String columnType = column.equals("VAL_PRESUPUESTO_1") ? "DECIMAL(18,0)" : "VARCHAR(10)";
+                jdbcTemplate.execute(String.format("ALTER TABLE %s ADD %s %s NULL", tablaReglas, column, columnType));
             }
-        }
+        });
 
-        String updateLiquidacionQuery = String.format(
+        jdbcTemplate.execute(String.format(
                 """
                         UPDATE %s
                         SET REGLA_GENERAL_1 = 'NO APLICA',
-                            ALERTA_1 = 'Los Criterios de Validación NO Aplican para Entidades en Liquidación.'
+                            ALERTA_1 = '6'
                         WHERE NOMBRE_ENTIDAD LIKE '%%En Liquidaci%%'
                         """,
-                tablaReglas);
-        jdbcTemplate.execute(updateLiquidacionQuery);
+                tablaReglas));
 
-        String cuentaCheckQuery = String.format("SELECT COUNT(*) FROM %s WHERE CUENTA = '1'", progIngresos);
-        Integer cuentaExists = jdbcTemplate.queryForObject(cuentaCheckQuery, Integer.class);
+        Integer totalRecords = jdbcTemplate.queryForObject(
+                String.format("SELECT COUNT(*) FROM %s", progIngresos), Integer.class);
 
-        if (cuentaExists == null || cuentaExists == 0) {
-            String updateNoDataQuery = String.format(
+        if (totalRecords == null || totalRecords == 0) {
+            jdbcTemplate.execute(String.format(
                     """
                             UPDATE %s
                             SET REGLA_GENERAL_1 = 'NO DATA',
-                                ALERTA_1 = 'No Existen Registros para la Cuenta 1.',
-                                VAL_PRESUPUESTO_1 = NULL
+                                ALERTA_1 = '3'
                             """,
-                    tablaReglas);
-            jdbcTemplate.execute(updateNoDataQuery);
+                    tablaReglas));
             return;
         }
 
-        String updatePresupuestoQuery = String.format(
+        Integer cuentaExists = jdbcTemplate.queryForObject(
+                String.format("SELECT COUNT(*) FROM %s WHERE CUENTA = '1'", progIngresos), Integer.class);
+
+        if (cuentaExists == null || cuentaExists == 0) {
+            jdbcTemplate.execute(String.format(
+                    """
+                            UPDATE %s
+                            SET REGLA_GENERAL_1 = 'NO DATA',
+                                ALERTA_1 = '4',
+                                VAL_PRESUPUESTO_1 = NULL
+                            """,
+                    tablaReglas));
+            return;
+        }
+
+        jdbcTemplate.execute(String.format(
                 """
                         UPDATE d
                         SET d.VAL_PRESUPUESTO_1 = a.PRESUPUESTO_DEFINITIVO
@@ -84,32 +89,36 @@ public class dataTransfer_PI {
                             ON a.FECHA = d.FECHA
                             AND a.TRIMESTRE = d.TRIMESTRE
                             AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                            AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
                         WHERE a.CUENTA = '1'
                         """,
-                tablaReglas, progIngresos, progIngresos);
-        jdbcTemplate.execute(updatePresupuestoQuery);
+                tablaReglas, progIngresos, progIngresos));
 
-        String updateValidationsQuery = String.format(
+        jdbcTemplate.execute(String.format(
                 """
                         UPDATE %s
-                        SET
-                            REGLA_GENERAL_1 =
-                                CASE
-                                    WHEN VAL_PRESUPUESTO_1 IS NULL THEN 'NO DATA'
-                                    WHEN VAL_PRESUPUESTO_1 < 100000000 THEN 'NO CUMPLE'
-                                    ELSE 'CUMPLE'
-                                END,
-                            ALERTA_1 =
-                                CASE
-                                    WHEN VAL_PRESUPUESTO_1 IS NULL THEN 'No se Registra Presupuesto Definitivo en la Cuenta 1.'
-                                    WHEN VAL_PRESUPUESTO_1 < 100000000 THEN 'La entidad NO Satisface los Criterios de Validación.'
-                                    ELSE 'La Entidad satisface los Criterios de Validación.'
-                                END
-                        WHERE REGLA_GENERAL_1 IS NULL
+                        SET REGLA_GENERAL_1 = 'NO DATA',
+                            ALERTA_1 = '5'
+                        WHERE VAL_PRESUPUESTO_1 IS NULL
                         """,
-                tablaReglas);
-        jdbcTemplate.execute(updateValidationsQuery);
+                tablaReglas));
+
+        jdbcTemplate.execute(String.format(
+                """
+                        UPDATE %s
+                        SET REGLA_GENERAL_1 = 'NO CUMPLE',
+                            ALERTA_1 = '2'
+                        WHERE VAL_PRESUPUESTO_1 < 100000000 AND REGLA_GENERAL_1 IS NULL
+                        """,
+                tablaReglas));
+
+        jdbcTemplate.execute(String.format(
+                """
+                        UPDATE %s
+                        SET REGLA_GENERAL_1 = 'CUMPLE',
+                            ALERTA_1 = '1'
+                        WHERE VAL_PRESUPUESTO_1 >= 100000000 AND REGLA_GENERAL_1 IS NULL
+                        """,
+                tablaReglas));
     }
 
     // Regla2: Presupuesto Inicial VS Presupuesto Definitivo.
@@ -125,28 +134,38 @@ public class dataTransfer_PI {
                 tablaReglas, "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+        requiredColumns.stream()
+                .filter(column -> !existingColumns.contains(column))
+                .forEach(column -> jdbcTemplate.execute(
+                        String.format("ALTER TABLE %s ADD %s VARCHAR(MAX) NULL", tablaReglas, column)));
 
-        for (String column : requiredColumns) {
-            if (!existingColumns.contains(column)) {
-                String addColumnQuery = String.format(
-                        "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglas, column);
-                jdbcTemplate.execute(addColumnQuery);
-            }
-        }
+        String updateNoDataEntityQuery = String.format(
+                """
+                        UPDATE %s
+                        SET REGLA_GENERAL_2 = 'NO DATA',
+                            ALERTA_2 = '3'
+                        WHERE NOT EXISTS (
+                            SELECT 1 FROM %s a
+                            WHERE a.FECHA = %s.FECHA
+                            AND a.TRIMESTRE = %s.TRIMESTRE
+                            AND a.CODIGO_ENTIDAD_INT = %s.CODIGO_ENTIDAD
+
+                        )
+                        """,
+                tablaReglas, progIngresos, tablaReglas, tablaReglas, tablaReglas);
+        jdbcTemplate.execute(updateNoDataEntityQuery);
 
         String updateNoDataQuery = String.format(
                 """
                         UPDATE d
                         SET d.REGLA_GENERAL_2 = 'NO DATA',
-                            d.ALERTA_2 = 'No se registran datos de Presupuesto para algunas cuentas.',
+                            d.ALERTA_2 = '7',
                             d.CUENTAS_NO_DATA_2 = (
                                 SELECT STRING_AGG(a.CUENTA, ', ')
                                 FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
                                 WHERE a.FECHA = d.FECHA
                                 AND a.TRIMESTRE = d.TRIMESTRE
                                 AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                                AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
                                 AND (a.PRESUPUESTO_INICIAL IS NULL OR a.PRESUPUESTO_DEFINITIVO IS NULL)
                             )
                         FROM %s d
@@ -155,7 +174,6 @@ public class dataTransfer_PI {
                             WHERE a.FECHA = d.FECHA
                             AND a.TRIMESTRE = d.TRIMESTRE
                             AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                            AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
                             AND (a.PRESUPUESTO_INICIAL IS NULL OR a.PRESUPUESTO_DEFINITIVO IS NULL)
                         )
                         """,
@@ -166,14 +184,13 @@ public class dataTransfer_PI {
                 """
                         UPDATE d
                         SET d.REGLA_GENERAL_2 = 'NO CUMPLE',
-                            d.ALERTA_2 = 'Algunas cuentas NO satisfacen los Criterios de Validación.',
+                            d.ALERTA_2 = '8',
                             d.CUENTAS_NO_CUMPLE_2 = (
                                 SELECT STRING_AGG(a.CUENTA, ', ')
                                 FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
                                 WHERE a.FECHA = d.FECHA
                                 AND a.TRIMESTRE = d.TRIMESTRE
                                 AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                                AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
                                 AND a.PRESUPUESTO_INICIAL = '0'
                                 AND a.PRESUPUESTO_DEFINITIVO = '0'
                             )
@@ -183,7 +200,6 @@ public class dataTransfer_PI {
                             WHERE a.FECHA = d.FECHA
                             AND a.TRIMESTRE = d.TRIMESTRE
                             AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                            AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
                             AND a.PRESUPUESTO_INICIAL = '0'
                             AND a.PRESUPUESTO_DEFINITIVO = '0'
                         )
@@ -195,7 +211,7 @@ public class dataTransfer_PI {
                 """
                         UPDATE %s
                         SET REGLA_GENERAL_2 = 'NO DATA',
-                            ALERTA_2 = 'Algunas cuentas NO satisfacen los Criterios de Validación o NO registran Presupuesto.'
+                            ALERTA_2 = '9'
                         WHERE CUENTAS_NO_CUMPLE_2 IS NOT NULL AND CUENTAS_NO_DATA_2 IS NOT NULL
                         """,
                 tablaReglas);
@@ -205,7 +221,7 @@ public class dataTransfer_PI {
                 """
                         UPDATE %s
                         SET REGLA_GENERAL_2 = 'CUMPLE',
-                            ALERTA_2 = 'La Entidad satisface los Criterios de Validación.'
+                            ALERTA_2 = '1'
                         WHERE CUENTAS_NO_CUMPLE_2 IS NULL AND CUENTAS_NO_DATA_2 IS NULL
                         """,
                 tablaReglas);

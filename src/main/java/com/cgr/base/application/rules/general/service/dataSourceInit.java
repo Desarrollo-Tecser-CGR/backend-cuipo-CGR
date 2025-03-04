@@ -1,6 +1,7 @@
 package com.cgr.base.application.rules.general.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityManager;
@@ -47,6 +48,8 @@ public class dataSourceInit {
 
         }
 
+        @Async
+        @Transactional
         private void addComputedColumns() {
                 for (String tabla : tablas) {
                         if (!existColumn(tabla, "TRIMESTRE")) {
@@ -64,119 +67,117 @@ public class dataSourceInit {
                                                 "ADD CODIGO_ENTIDAD_INT AS TRY_CAST(CODIGO_ENTIDAD AS BIGINT) PERSISTED";
                                 entityManager.createNativeQuery(sqlCodigoEntidadInt).executeUpdate();
                         }
-
-                        if (!existColumn(tabla, "AMBITO_CODIGO_STR")) {
-                                String sqlAmbitoCodigoStr = "ALTER TABLE [" + tabla + "] " +
-                                                "ADD AMBITO_CODIGO_STR AS CAST(AMBITO_CODIGO AS NVARCHAR(50)) PERSISTED";
-                                entityManager.createNativeQuery(sqlAmbitoCodigoStr).executeUpdate();
-                        }
                 }
         }
 
         private boolean existColumn(String tabla, String columna) {
                 String sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS " +
-                                "WHERE TABLE_NAME = ? AND COLUMN_NAME = ?";
-                Integer count = (Integer) entityManager.createNativeQuery(sql)
+                                "WHERE LOWER(TABLE_NAME) = LOWER(?) AND COLUMN_NAME = ?";
+
+                Number count = (Number) entityManager.createNativeQuery(sql)
                                 .setParameter(1, tabla)
                                 .setParameter(2, columna)
                                 .getSingleResult();
-                return count != null && count > 0;
+
+                return count != null && count.intValue() > 0;
         }
 
-        private void generatePeriod() {
+        @Async
+        @Transactional
+        public void generatePeriod() {
                 for (String tabla : tablas) {
                         String sql = "UPDATE [" + tabla + "] " +
-                                        "SET [FECHA] = CAST(SUBSTRING(CAST([PERIODO] AS VARCHAR(8)), 1, 4) AS INT), " +
-                                        "    [TRIMESTRE] = CASE " +
-                                        "        WHEN CAST(SUBSTRING(CAST([PERIODO] AS VARCHAR(8)), 5, 2) AS INT) BETWEEN 1 AND 3 THEN 03 "
-                                        +
-                                        "        WHEN CAST(SUBSTRING(CAST([PERIODO] AS VARCHAR(8)), 5, 2) AS INT) BETWEEN 4 AND 6 THEN 06 "
-                                        +
-                                        "        WHEN CAST(SUBSTRING(CAST([PERIODO] AS VARCHAR(8)), 5, 2) AS INT) BETWEEN 7 AND 9 THEN 09 "
-                                        +
-                                        "        WHEN CAST(SUBSTRING(CAST([PERIODO] AS VARCHAR(8)), 5, 2) AS INT) BETWEEN 10 AND 12 THEN 12 "
-                                        +
-                                        "    END";
+                                        "SET [FECHA] = PERIODO / 10000, " +
+                                        "    [TRIMESTRE] = ((((PERIODO % 10000) / 100) - 1) / 3 + 1) * 3";
+
                         entityManager.createNativeQuery(sql).executeUpdate();
                 }
         }
 
-        private void transferUniqueData() {
-
+        @Transactional
+        public void transferUniqueData() {
                 if (!tableExists(tablaReglas)) {
                         createGeneralRulesTable();
                 }
 
                 for (String tabla : tablas) {
-                        String sqlInsert = "INSERT INTO [" + tablaReglas + "] " +
-                                        "([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO], [NOMBRE_ENTIDAD], [AMBITO_NOMBRE]) "
-                                        +
-                                        "SELECT DISTINCT " +
-                                        "    t.[FECHA], " +
-                                        "    t.[TRIMESTRE], " +
-                                        "    t.[CODIGO_ENTIDAD_INT] AS CODIGO_ENTIDAD, " +
-                                        "    t.[AMBITO_CODIGO_STR] AS AMBITO_CODIGO, " +
-                                        "    t.[NOMBRE_ENTIDAD], " +
-                                        "    t.[AMBITO_NOMBRE] " +
-                                        "FROM [" + tabla + "] t " +
-                                        "WHERE NOT EXISTS ( " +
-                                        "    SELECT 1 " +
-                                        "    FROM [" + tablaReglas + "] r " +
-                                        "    WHERE r.[FECHA] = t.[FECHA] " +
-                                        "      AND r.[TRIMESTRE] = t.[TRIMESTRE] " +
-                                        "      AND r.[CODIGO_ENTIDAD] = t.[CODIGO_ENTIDAD_INT] " +
-                                        "      AND r.[AMBITO_CODIGO] = t.[AMBITO_CODIGO_STR] " +
-                                        ")";
+                        String sqlInsert = String.format(
+                                        "MERGE INTO [%s] AS target " +
+                                                        "USING ( " +
+                                                        "    SELECT DISTINCT " +
+                                                        "        t.[FECHA], t.[TRIMESTRE], t.[CODIGO_ENTIDAD_INT] AS CODIGO_ENTIDAD, "
+                                                        +
+                                                        "        t.[AMBITO_CODIGO], t.[NOMBRE_ENTIDAD], t.[AMBITO_NOMBRE] "
+                                                        +
+                                                        "    FROM [%s] t " +
+                                                        ") AS source " +
+                                                        "ON target.[FECHA] = source.[FECHA] " +
+                                                        "AND target.[TRIMESTRE] = source.[TRIMESTRE] " +
+                                                        "AND target.[CODIGO_ENTIDAD] = source.[CODIGO_ENTIDAD] " +
+                                                        "WHEN NOT MATCHED THEN " +
+                                                        "INSERT ([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO], [NOMBRE_ENTIDAD], [AMBITO_NOMBRE]) "
+                                                        +
+                                                        "VALUES (source.[FECHA], source.[TRIMESTRE], source.[CODIGO_ENTIDAD], source.[AMBITO_CODIGO], source.[NOMBRE_ENTIDAD], source.[AMBITO_NOMBRE]);",
+                                        tablaReglas, tabla);
+
                         entityManager.createNativeQuery(sqlInsert).executeUpdate();
+                        entityManager.flush();
+                        entityManager.clear();
                 }
         }
 
-        private boolean tableExists(String tableName) {
-                String sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?";
-                Integer count = (Integer) entityManager.createNativeQuery(sql)
+        public boolean tableExists(String tableName) {
+                String sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE LOWER(TABLE_NAME) = LOWER(?)";
+
+                Number count = (Number) entityManager.createNativeQuery(sql)
                                 .setParameter(1, tableName)
                                 .getSingleResult();
-                return count != null && count > 0;
+
+                return count != null && count.intValue() > 0;
         }
 
-        private void createGeneralRulesTable() {
-                String sqlCreateTable = "CREATE TABLE [" + tablaReglas + "] (" +
-                                "[FECHA] INT, " +
-                                "[TRIMESTRE] INT, " +
-                                "[CODIGO_ENTIDAD] BIGINT, " +
-                                "[AMBITO_CODIGO] NVARCHAR(50), " +
-                                "[NOMBRE_ENTIDAD] NVARCHAR(255), " +
-                                "[AMBITO_NOMBRE] NVARCHAR(255), " +
-                                "CONSTRAINT PK_GeneralRules PRIMARY KEY ([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO]))";
-                entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
+        @Transactional
+        public void createGeneralRulesTable() {
+                if (!tableExists(tablaReglas)) {
+                        String sqlCreateTable = "IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '"
+                                        + tablaReglas + "') " +
+                                        "CREATE TABLE [" + tablaReglas + "] (" +
+                                        "[FECHA] INT, " +
+                                        "[TRIMESTRE] INT, " +
+                                        "[CODIGO_ENTIDAD] BIGINT, " +
+                                        "[AMBITO_CODIGO] NVARCHAR(50), " +
+                                        "[NOMBRE_ENTIDAD] NVARCHAR(255), " +
+                                        "[AMBITO_NOMBRE] NVARCHAR(255), " +
+                                        "CONSTRAINT PK_GeneralRules PRIMARY KEY ([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD]))";
+
+                        entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
+                }
         }
 
-        private void createIndexes() {
+        @Transactional
+        public void createIndexes() {
                 for (String tabla : tablas) {
                         String indexName = "IDX_" + tabla + "_COMPUTED";
 
-                        if (indexExists(tabla, indexName)) {
-                                dropIndex(tabla, indexName);
-                        }
+                        dropIndex(tabla, indexName);
 
-                        String sqlIndex = "CREATE INDEX [" + indexName + "] " +
-                                        "ON [" + tabla
-                                        + "] ([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD_INT], [AMBITO_CODIGO_STR])";
+                        String sqlIndex = String.format(
+                                        "IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = '%s' AND object_id = OBJECT_ID('%s')) "
+                                                        +
+                                                        "CREATE INDEX [%s] ON [%s] ([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD_INT]);",
+                                        indexName, tabla, indexName, tabla);
+
                         entityManager.createNativeQuery(sqlIndex).executeUpdate();
                 }
         }
 
-        private boolean indexExists(String tableName, String indexName) {
-                String sql = "SELECT COUNT(*) FROM sys.indexes WHERE name = ? AND object_id = OBJECT_ID(?)";
-                Integer count = (Integer) entityManager.createNativeQuery(sql)
-                                .setParameter(1, indexName)
-                                .setParameter(2, tableName)
-                                .getSingleResult();
-                return count != null && count > 0;
-        }
-
         private void dropIndex(String tableName, String indexName) {
-                String sqlDrop = "DROP INDEX [" + indexName + "] ON [" + tableName + "]";
+                String sqlDrop = String.format(
+                                "IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = '%s' AND object_id = OBJECT_ID('%s')) "
+                                                +
+                                                "DROP INDEX [%s] ON [%s];",
+                                indexName, tableName, indexName, tableName);
+
                 entityManager.createNativeQuery(sqlDrop).executeUpdate();
         }
 
