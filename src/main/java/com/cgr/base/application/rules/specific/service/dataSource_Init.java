@@ -1,6 +1,5 @@
 package com.cgr.base.application.rules.specific.service;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -14,66 +13,73 @@ public class dataSource_Init {
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Value("${TABLA_SPECIFIC_RULES}")
-    private String reglasEspecificas;
-
     @Transactional
     public void processTablesSourceS() {
 
-        // Paso 1: Calculo Indice GF/ICLD Ley 617
-         indicadorGFvsICLD();
-
-        // Paso 2: Creación Tabla Limite GF Ley 617
+        // Creación Tabla Limite GF Ley 617
         tablaLimiteGF();
+
+        // Creación Tabla Parametros Anuales
+        tablaParametrosAnuales();
     }
 
     @Async
     @Transactional
-    public void indicadorGFvsICLD() {
-
-        if (!existColumn(reglasEspecificas, "INDICADOR_GF_ICLD")) {
-            String sqlAgregarColumna = "ALTER TABLE [" + reglasEspecificas + "] ADD [INDICADOR_GF_ICLD] VARCHAR(50)";
-            entityManager.createNativeQuery(sqlAgregarColumna).executeUpdate();
+    public void tablaParametrosAnuales() {
+    
+        // 1. Verificar si la tabla existe
+        String checkTableQuery = """
+                IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'PARAMETRIZACION_ANUAL')
+                SELECT 1 ELSE SELECT 0;
+                """;
+        Number tableExists = (Number) entityManager.createNativeQuery(checkTableQuery).getSingleResult();
+    
+        // 2. Si la tabla no existe, crearla y poblarla
+        if (tableExists.intValue() == 0) {
+            String createTableSQL = """
+                    CREATE TABLE PARAMETRIZACION_ANUAL (
+                        ID INT IDENTITY(1,1) PRIMARY KEY,
+                        FECHA INT NOT NULL,
+                        SMMLV DECIMAL(18,2) NOT NULL,
+                        IPC DECIMAL(18,2) NOT NULL,
+                        INFLACION DECIMAL(18,2) NOT NULL
+                    );
+                    """;
+            entityManager.createNativeQuery(createTableSQL).executeUpdate();
+    
+            String insertDataSQL = """
+                    INSERT INTO PARAMETRIZACION_ANUAL (FECHA, SMMLV, IPC, INFLACION) VALUES
+                    (2000, 260100, 8.75, 9.23),
+                    (2001, 286000, 7.65, 8.02),
+                    (2002, 309000, 6.99, 7.51),
+                    (2003, 332000, 6.49, 6.99),
+                    (2004, 358000, 5.99, 6.24),
+                    (2005, 381500, 5.49, 5.99),
+                    (2006, 408000, 4.99, 5.52),
+                    (2007, 433700, 4.52, 5.02),
+                    (2008, 461500, 5.52, 7.67),
+                    (2009, 496900, 4.22, 3.12),
+                    (2010, 515000, 3.27, 2.73),
+                    (2011, 535600, 3.73, 3.42),
+                    (2012, 566700, 3.17, 2.85),
+                    (2013, 589500, 3.22, 3.27),
+                    (2014, 616000, 3.32, 3.89),
+                    (2015, 644400, 3.82, 6.77),
+                    (2016, 689500, 5.24, 5.75),
+                    (2017, 737717, 4.09, 4.09),
+                    (2018, 781242, 3.18, 3.18),
+                    (2019, 828116, 3.50, 3.80),
+                    (2020, 877803, 2.97, 1.61),
+                    (2021, 908526, 5.62, 5.62),
+                    (2022, 1000000, 10.15, 13.12),
+                    (2023, 1160000, 11.68, 9.28),
+                    (2024, 1300000, 9.28, 7.52);
+                    """;
+            entityManager.createNativeQuery(insertDataSQL).executeUpdate();
         }
-
-        String updateQuery = "UPDATE SPECIFIC_RULES_DATA " +
-                "SET PORCENTAJE_GF = " +
-                "    CASE " +
-                "        WHEN S.INDICADOR_GF_ICLD IS NULL OR S.INDICADOR_GF_ICLD = 'ERROR' THEN 'NO DATA' " +
-                "        WHEN C.LIMITE_PORCENTAJE IS NULL THEN 'NO DATA' " +
-                "        WHEN TRY_CAST(S.INDICADOR_GF_ICLD AS FLOAT) > C.LIMITE_PORCENTAJE THEN 'EXCEDE' " +
-                "        ELSE 'NO EXCEDE' " +
-                "    END, " +
-                "    ALERTA_GF = " +
-                "    CASE " +
-                "        WHEN S.INDICADOR_GF_ICLD IS NULL THEN 'No se encontró razón GF/ICLD en SPECIFIC_RULES_DATA' " +
-                "        WHEN S.INDICADOR_GF_ICLD = 'ERROR' THEN 'INDICADOR_GF_ICLD contiene un error y no puede ser procesado' "
-                +
-                "        WHEN CAT.CATEGORIA IS NULL THEN 'No se encontró categoría para la entidad' " +
-                "        WHEN C.LIMITE_PORCENTAJE IS NULL THEN 'No se encontró límite de gasto de funcionamiento' " +
-                "        WHEN TRY_CAST(S.INDICADOR_GF_ICLD AS FLOAT) > C.LIMITE_PORCENTAJE THEN 'El gasto de funcionamiento excede el límite permitido' "
-                +
-                "        ELSE 'El gasto de funcionamiento está dentro del límite permitido' " +
-                "    END " +
-                "FROM SPECIFIC_RULES_DATA S " +
-                "LEFT JOIN CATEGORIAS CAT ON S.CODIGO_ENTIDAD = CAT.CODIGO_ENTIDAD AND S.AMBITO_CODIGO = CAT.AMBITO_CODIGO "
-                +
-                "LEFT JOIN LIMITE_GASTOS_FUNCIONAMIENTO C ON CAT.AMBITO_CODIGO = C.AMBITO_CODIGO AND CAT.CATEGORIA = C.CATEGORIA_CODIGO;";
-
-        entityManager.createNativeQuery(updateQuery).executeUpdate();
     }
+    
 
-    private boolean existColumn(String tabla, String columna) {
-        String sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS " +
-                "WHERE LOWER(TABLE_NAME) = LOWER(?) AND COLUMN_NAME = ?";
-
-        Number count = (Number) entityManager.createNativeQuery(sql)
-                .setParameter(1, tabla)
-                .setParameter(2, columna)
-                .getSingleResult();
-
-        return count != null && count.intValue() > 0;
-    }
 
     @Async
     @Transactional
