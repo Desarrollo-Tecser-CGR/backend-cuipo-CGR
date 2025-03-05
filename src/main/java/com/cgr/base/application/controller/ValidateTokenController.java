@@ -15,13 +15,14 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/v1/token")
 public class ValidateTokenController extends AbstractController {
     private ValidateService validateService;
 
-    @PostMapping("/verificarToken")
+    @PostMapping()
     public ResponseEntity<?> validateEmailToken(@Valid @RequestBody TokenDto tokenDto, BindingResult result) {
-        return requestResponse(result, () -> validateService.validationToken(tokenDto.getToken()), "Token valido", HttpStatus.OK, true);
+        return requestResponse(result, () -> validateService.validationToken(tokenDto.getToken()), "Token valido",
+                HttpStatus.OK, true);
     }
 
 }
