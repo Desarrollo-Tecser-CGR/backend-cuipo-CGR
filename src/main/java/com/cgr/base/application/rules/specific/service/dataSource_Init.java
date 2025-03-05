@@ -16,25 +16,26 @@ public class dataSource_Init {
     @Transactional
     public void processTablesSourceS() {
 
-        // Creación Tabla Limite GF Ley 617
+        // Creación Tabla Limite GF Ley 617.
         tablaLimiteGF();
 
-        // Creación Tabla Parametros Anuales
+        // Creación Tabla Parametros Anuales.
         tablaParametrosAnuales();
+
+        // Creación Tabla Honorarios por Categoria.
+        tablaHonorarios();
     }
 
     @Async
     @Transactional
     public void tablaParametrosAnuales() {
-    
-        // 1. Verificar si la tabla existe
+
         String checkTableQuery = """
                 IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'PARAMETRIZACION_ANUAL')
                 SELECT 1 ELSE SELECT 0;
                 """;
         Number tableExists = (Number) entityManager.createNativeQuery(checkTableQuery).getSingleResult();
-    
-        // 2. Si la tabla no existe, crearla y poblarla
+
         if (tableExists.intValue() == 0) {
             String createTableSQL = """
                     CREATE TABLE PARAMETRIZACION_ANUAL (
@@ -46,7 +47,7 @@ public class dataSource_Init {
                     );
                     """;
             entityManager.createNativeQuery(createTableSQL).executeUpdate();
-    
+
             String insertDataSQL = """
                     INSERT INTO PARAMETRIZACION_ANUAL (FECHA, SMMLV, IPC, INFLACION) VALUES
                     (2000, 260100, 8.75, 9.23),
@@ -78,51 +79,82 @@ public class dataSource_Init {
             entityManager.createNativeQuery(insertDataSQL).executeUpdate();
         }
     }
-    
-
 
     @Async
     @Transactional
     public void tablaLimiteGF() {
 
         String checkTableQuery = """
-                IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'LIMITE_GASTOS_FUNCIONAMIENTO')
+                IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'PORCENTAJE_LIMITE_GF')
                 SELECT 1 ELSE SELECT 0;
                 """;
         Number tableExists = (Number) entityManager.createNativeQuery(checkTableQuery).getSingleResult();
 
         if (tableExists.intValue() == 0) {
             String createTableSQL = """
-                    CREATE TABLE LIMITE_GASTOS_FUNCIONAMIENTO (
+                    CREATE TABLE PORCENTAJE_LIMITE_GF (
                         ID INT IDENTITY(1,1) PRIMARY KEY,
                         AMBITO_CODIGO VARCHAR(10) NOT NULL,
                         CATEGORIA_CODIGO VARCHAR(10) NOT NULL,
-                        CATEGORIA_NOMBRE VARCHAR(50) NOT NULL,
                         LIMITE_PORCENTAJE INT NOT NULL
                     );
                     """;
             entityManager.createNativeQuery(createTableSQL).executeUpdate();
 
             String insertDataSQL = """
-                    MERGE INTO LIMITE_GASTOS_FUNCIONAMIENTO AS target
+                    MERGE INTO PORCENTAJE_LIMITE_GF AS target
                     USING (VALUES
-                        ('A438', 'E', 'Especial', 50),
-                        ('A438', '1', 'Primera', 55),
-                        ('A438', '2', 'Segunda', 60),
-                        ('A438', '3', 'Tercera', 70),
-                        ('A438', '4', 'Cuarta', 70),
-                        ('A439', 'E', 'Especial', 50),
-                        ('A439', '1', 'Primera', 65),
-                        ('A439', '2', 'Segunda', 70),
-                        ('A439', '3', 'Tercera', 70),
-                        ('A439', '4', 'Cuarta', 80),
-                        ('A439', '5', 'Quinta', 80),
-                        ('A439', '6', 'Sexta', 80)
-                    ) AS source (AMBITO_CODIGO, CATEGORIA_CODIGO, CATEGORIA_NOMBRE, LIMITE_PORCENTAJE)
+                        ('A438', 'E', 50),
+                        ('A438', '1', 55),
+                        ('A438', '2', 60),
+                        ('A438', '3', 70),
+                        ('A438', '4', 70),
+                        ('A439', 'E', 50),
+                        ('A439', '1', 65),
+                        ('A439', '2', 70),
+                        ('A439', '3', 70),
+                        ('A439', '4', 80),
+                        ('A439', '5', 80),
+                        ('A439', '6', 80)
+                    ) AS source (AMBITO_CODIGO, CATEGORIA_CODIGO, LIMITE_PORCENTAJE)
                     ON target.AMBITO_CODIGO = source.AMBITO_CODIGO AND target.CATEGORIA_CODIGO = source.CATEGORIA_CODIGO
                     WHEN NOT MATCHED THEN
-                    INSERT (AMBITO_CODIGO, CATEGORIA_CODIGO, CATEGORIA_NOMBRE, LIMITE_PORCENTAJE)
-                    VALUES (source.AMBITO_CODIGO, source.CATEGORIA_CODIGO, source.CATEGORIA_NOMBRE, source.LIMITE_PORCENTAJE);
+                    INSERT (AMBITO_CODIGO, CATEGORIA_CODIGO, LIMITE_PORCENTAJE)
+                    VALUES (source.AMBITO_CODIGO, source.CATEGORIA_CODIGO, source.LIMITE_PORCENTAJE);
+                    """;
+            entityManager.createNativeQuery(insertDataSQL).executeUpdate();
+        }
+    }
+
+    @Async
+    @Transactional
+    public void tablaHonorarios() {
+
+        String checkTableQuery = """
+                IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'HONORARIOS_CATEGORIA')
+                SELECT 1 ELSE SELECT 0;
+                """;
+        Number tableExists = (Number) entityManager.createNativeQuery(checkTableQuery).getSingleResult();
+
+        if (tableExists.intValue() == 0) {
+            String createTableSQL = """
+                    CREATE TABLE HONORARIOS_CATEGORIA (
+                        ID INT IDENTITY(1,1) PRIMARY KEY,
+                        CATEGORIA_CODIGO VARCHAR(10) NOT NULL,
+                        VALORES_HONORARIOS INT NOT NULL
+                    );
+                    """;
+            entityManager.createNativeQuery(createTableSQL).executeUpdate();
+
+            String insertDataSQL = """
+                    INSERT INTO HONORARIOS_CATEGORIA (CATEGORIA_CODIGO, VALORES_HONORARIOS) VALUES
+                    ('E', 685370),
+                    ('1', 580721),
+                    ('2', 419759),
+                    ('3', 336714),
+                    ('4', 281675),
+                    ('5', 226856),
+                    ('6', 171399);
                     """;
             entityManager.createNativeQuery(insertDataSQL).executeUpdate();
         }

@@ -40,10 +40,10 @@ public class dataSourceInit {
                 generatePeriod();
 
                 // Paso 3: Consolidar Datos Unicos en la Tabla de Destino.
-                transferUniqueData();
+                //transferUniqueData();
 
                 // Paso 2: Crear Indices en las Tablas de Origen.
-                createIndexes();
+                //createIndexes();
 
         }
 
@@ -65,11 +65,6 @@ public class dataSourceInit {
                                 entityManager.createNativeQuery(sqlCodigoEntidadInt).executeUpdate();
                         }
 
-                        if (!existColumn(tabla, "AMBITO_CODIGO_STR")) {
-                                String sqlAmbitoCodigoStr = "ALTER TABLE [" + tabla + "] " +
-                                                "ADD AMBITO_CODIGO_STR AS CAST(AMBITO_CODIGO AS NVARCHAR(50)) PERSISTED";
-                                entityManager.createNativeQuery(sqlAmbitoCodigoStr).executeUpdate();
-                        }
                 }
         }
 
@@ -86,17 +81,8 @@ public class dataSourceInit {
         private void generatePeriod() {
                 for (String tabla : tablas) {
                         String sql = "UPDATE [" + tabla + "] " +
-                                        "SET [FECHA] = CAST(SUBSTRING(CAST([PERIODO] AS VARCHAR(8)), 1, 4) AS INT), " +
-                                        "    [TRIMESTRE] = CASE " +
-                                        "        WHEN CAST(SUBSTRING(CAST([PERIODO] AS VARCHAR(8)), 5, 2) AS INT) BETWEEN 1 AND 3 THEN 03 "
-                                        +
-                                        "        WHEN CAST(SUBSTRING(CAST([PERIODO] AS VARCHAR(8)), 5, 2) AS INT) BETWEEN 4 AND 6 THEN 06 "
-                                        +
-                                        "        WHEN CAST(SUBSTRING(CAST([PERIODO] AS VARCHAR(8)), 5, 2) AS INT) BETWEEN 7 AND 9 THEN 09 "
-                                        +
-                                        "        WHEN CAST(SUBSTRING(CAST([PERIODO] AS VARCHAR(8)), 5, 2) AS INT) BETWEEN 10 AND 12 THEN 12 "
-                                        +
-                                        "    END";
+                                        "SET [FECHA] = PERIODO / 10000, " +
+                                        "    [TRIMESTRE] = ((((PERIODO % 10000) / 100) - 1) / 3 + 1) * 3";
                         entityManager.createNativeQuery(sql).executeUpdate();
                 }
         }
