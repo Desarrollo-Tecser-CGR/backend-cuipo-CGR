@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.cgr.base.domain.repository.IActiveDirectoryUserRepository;
+import com.cgr.base.infrastructure.repositories.repositories.repositoryActiveDirectory.IActiveDirectoryUserRepository;
 import com.cgr.base.domain.models.entity.Logs.UserEntity;
 import com.unboundid.ldap.sdk.LDAPBindException;
 import com.unboundid.ldap.sdk.LDAPConnection;
@@ -23,7 +23,7 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
 
     @Override
     public Boolean checkAccount(String samAccountName, String password) {
-        String ldapHost = "192.168.2.27";
+        String ldapHost = "192.168.2.56";
         int ldapPort = 389;
         String baseDN = "OU=T302,OU=Usuarios,DC=tecser,DC=local";
         String domain = "tecser.local";
@@ -76,7 +76,7 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
 
     @Override
     public List<UserEntity> getAllUsers() {
-        String ldapHost = "192.168.2.27";
+        String ldapHost = "192.168.2.56";
         int ldapPort = 389;
         String baseDN = "OU=T302,OU=Usuarios,DC=tecser,DC=local";
 

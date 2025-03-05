@@ -8,11 +8,12 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 public class ControllerNotification {
+   /**
  @MessageMapping ("/notification/{roomId}")
  @SendTo ("/topic/{roomId}")
     public EntityNotification Notification(@DestinationVariable String roomid,EntityNotification entityNotification)
     {
         System.out.println("ejecuntando Socket");
         return new EntityNotification(entityNotification.getNotification(),entityNotification.getSubject());
-    }
+    }*/
 }

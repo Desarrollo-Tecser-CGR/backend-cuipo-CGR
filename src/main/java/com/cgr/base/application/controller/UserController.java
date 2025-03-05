@@ -1,5 +1,6 @@
 package com.cgr.base.application.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -11,15 +12,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cgr.base.application.user.dto.UserDto;
-import com.cgr.base.application.user.dto.UserWithRolesRequestDto;
-import com.cgr.base.application.user.usecase.IUserSynchronizerUseCase;
-import com.cgr.base.application.user.usecase.IUserUseCase;
+import com.cgr.base.domain.dto.dtoUser.UserDto;
+import com.cgr.base.domain.dto.dtoUser.UserWithRolesRequestDto;
+import com.cgr.base.application.services.user.usecase.IUserSynchronizerUseCase;
+import com.cgr.base.application.services.user.usecase.IUserUseCase;
 
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/user")
+@SecurityRequirement(name = "BearerAuth")
 public class UserController extends AbstractController {
 
     private IUserUseCase userService;
