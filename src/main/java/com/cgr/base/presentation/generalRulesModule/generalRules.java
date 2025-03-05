@@ -16,6 +16,7 @@ import com.cgr.base.application.rules.general.service.dataTransfer_EI;
 import com.cgr.base.application.rules.general.service.dataTransfer_PG;
 import com.cgr.base.application.rules.general.service.dataTransfer_PI;
 import com.cgr.base.application.rules.specific.service.dataSource_Init;
+import com.cgr.base.application.rules.specific.service.dataTransfer_GF;
 import com.cgr.base.presentation.controller.AbstractController;
 
 @RestController
@@ -39,6 +40,9 @@ public class generalRules extends AbstractController {
 
     @Autowired
     private dataSource_Init rulesSInit;
+
+    @Autowired
+    private dataTransfer_GF DataGF;
 
     @PostMapping("/init-tables")
     public ResponseEntity<?> processTables() {
@@ -90,6 +94,26 @@ public class generalRules extends AbstractController {
                 case "15" -> DataEjecGastos.applyGeneralRule15();
                 case "16A" -> DataEjecGastos.applyGeneralRule16A();
                 case "16B" -> DataEjecGastos.applyGeneralRule16B();
+                default -> throw new IllegalArgumentException("Invalid rule specified.");
+            }
+        } catch (IllegalArgumentException e) {
+            return requestResponse(null, e.getMessage(), HttpStatus.BAD_REQUEST, false);
+        }
+    
+        return requestResponse(null, "Applied rule " + rule, HttpStatus.OK, true);
+    }
+
+    @PostMapping("/specific")
+    public ResponseEntity<?> updateSpecific(@RequestBody Map<String, String> request) {
+        String rule = request.get("regla");
+    
+        if (rule == null || rule.isEmpty()) {
+            return requestResponse(null, "Rule parameter is required.", HttpStatus.BAD_REQUEST, false);
+        }
+    
+        try {
+            switch (rule.toUpperCase()) {
+                case "GF"  -> DataGF.applySpecificRuleGF();
                 default -> throw new IllegalArgumentException("Invalid rule specified.");
             }
         } catch (IllegalArgumentException e) {
