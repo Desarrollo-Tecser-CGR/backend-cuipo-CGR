@@ -113,6 +113,11 @@ public class AuthService implements IAuthUseCase {
 
                     UserDto userDto = this.dtoMapper.convertToDto(user, UserDto.class);
 
+                    // Asignar IDs de roles
+                    userDto.setRoleIds(user.getRoles().stream()
+                            .map(RoleEntity::getId)
+                            .toList());
+
                     userRequestDto.setUser(userDto);
 
                     userRequestDto.setIsEnable(true);
