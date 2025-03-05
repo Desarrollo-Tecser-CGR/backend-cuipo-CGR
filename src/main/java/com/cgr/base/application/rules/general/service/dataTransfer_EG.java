@@ -791,4 +791,66 @@ public class dataTransfer_EG {
         // 3) Ejecutar la query
         jdbcTemplate.execute(updateQuery);
     }
+
+    public void applyGeneralRule25B() {
+
+        List<String> requiredColumns = Arrays.asList("ALERTA_25_CA0105");
+
+        String checkColumnsQuery = String.format(
+            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+          + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+          tablaReglasEspecificas,
+            "'" + String.join("','", requiredColumns) + "'"
+        );
+
+        List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+
+        for (String col : requiredColumns) {
+            if (!existingCols.contains(col)) {
+                String addColumnQuery = String.format(
+                    "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
+                    tablaReglasEspecificas, col
+                );
+                jdbcTemplate.execute(addColumnQuery);
+            }
+        }
+
+
+        String updateQuery = String.format("""
+            WITH Regla25B AS (
+                SELECT 
+                    T1.TRIMESTRE,
+                    T1.FECHA,
+                    T1.CODIGO_ENTIDAD,
+                    T1.AMBITO_CODIGO,
+                    CASE 
+                       WHEN EXISTS (
+                           SELECT 1
+                           FROM %s T2
+                           WHERE T2.CODIGO_ENTIDAD = T1.CODIGO_ENTIDAD
+                             AND T2.CUENTA = '2.1.3.05.04.001.13.01'
+                       ) THEN 'Existe la cuenta Transferencia de la sobretasa ambiental a las corporaciones autónomas regionales'
+                       ELSE 'La cuenta "Transferencia de la sobretasa ambiental a las corporaciones autónomas regionales" NO se encuentra en el formulario'
+                    END AS ALERTA_25_CA0105
+                FROM %s T1
+                -- Opcionalmente, puedes filtrar T1 si no quieres toda la tabla
+            )
+            UPDATE r
+            SET
+                r.ALERTA_25_CA0105 = b.ALERTA_25_CA0105
+            FROM %s r
+            JOIN Regla25B b
+               ON  r.FECHA          = b.FECHA
+               AND r.TRIMESTRE      = b.TRIMESTRE
+               AND r.CODIGO_ENTIDAD = b.CODIGO_ENTIDAD
+               AND r.AMBITO_CODIGO  = b.AMBITO_CODIGO
+            ;
+            """,
+            ejecGastos,
+            ejecGastos,
+            tablaReglasEspecificas
+        );
+
+        jdbcTemplate.execute(updateQuery);
+    }
 }

@@ -596,7 +596,7 @@ public class dataTransfer_EI {
      * REGLA 22B:
      *  - Verifica/crea columnas:
      *      ALERTA_22_INGRESOS_NO_EN_ICLD_CA078
-     *      ALERTA_ICLD_NO_EN_INGRESOS
+     *      ALERTA_22_ICLD_NO_EN_INGRESOS_CA078
      *  - Actualiza cada columna con la lista de cuentas que falten.
      */
     public void applyGeneralRule22B() {
@@ -604,7 +604,7 @@ public class dataTransfer_EI {
         // 1) Define las columnas a verificar
         List<String> requiredColumns = Arrays.asList(
             "ALERTA_22_INGRESOS_NO_EN_ICLD_CA078",
-            "ALERTA_ICLD_NO_EN_INGRESOS"
+            "ALERTA_22_ICLD_NO_EN_INGRESOS_CA078"
         );
 
         // 2) Consulta INFORMATION_SCHEMA.COLUMNS con TABLE_NAME = '%s'
@@ -674,7 +674,7 @@ public class dataTransfer_EI {
                     STRING_AGG(
                       CASE WHEN e2.CUENTA IS NULL THEN c2.CUENTA END,
                       ', '
-                    ) AS ALERTA_ICLD_NO_EN_INGRESOS
+                    ) AS ALERTA_22_ICLD_NO_EN_INGRESOS_CA078
                 FROM T1
                 CROSS JOIN %s c2
                 LEFT JOIN %s e2
@@ -701,7 +701,7 @@ public class dataTransfer_EI {
                     t1.CODIGO_ENTIDAD,
                     t1.AMBITO_CODIGO,
                     t1.ALERTA_22_INGRESOS_NO_EN_ICLD_CA078,
-                    t2.ALERTA_ICLD_NO_EN_INGRESOS
+                    t2.ALERTA_22_ICLD_NO_EN_INGRESOS_CA078
                 FROM T1
                 JOIN T2
                   ON  t1.FECHA          = t2.FECHA
@@ -712,7 +712,7 @@ public class dataTransfer_EI {
             UPDATE r
             SET
                 r.ALERTA_22_INGRESOS_NO_EN_ICLD_CA078 = v.ALERTA_22_INGRESOS_NO_EN_ICLD_CA078,
-                r.ALERTA_ICLD_NO_EN_INGRESOS         = v.ALERTA_ICLD_NO_EN_INGRESOS
+                r.ALERTA_22_ICLD_NO_EN_INGRESOS_CA078         = v.ALERTA_22_ICLD_NO_EN_INGRESOS_CA078
             FROM %s r
             JOIN Validaciones_22B v
                ON  r.FECHA          = v.FECHA
