@@ -548,11 +548,12 @@ public class dataTransfer_EI {
                     e.TRIMESTRE,
                     e.CODIGO_ENTIDAD,
                     e.AMBITO_CODIGO,
-                    SUM(
-                        CASE WHEN c.CUENTA IS NOT NULL THEN CAST(e.TOTAL_RECAUDO AS FLOAT)
-                             ELSE 0
-                        END
-                    ) AS SUMA_RECAUDO
+                    CONVERT(DECIMAL(15,2), SUM(
+                    CASE 
+                        WHEN c.CUENTA IS NOT NULL THEN CAST(TOTAL_RECAUDO AS FLOAT)
+                        ELSE 0
+                    END
+                ) / 1000) AS SUMA_RECAUDO
                 FROM %s e
                 LEFT JOIN %s c
                    ON  e.AMBITO_CODIGO = c.AMBITO_CODIGO
@@ -570,7 +571,7 @@ public class dataTransfer_EI {
             )
             UPDATE r
             SET
-                r.ICLD = CAST(v.SUMA_RECAUDO AS VARCHAR(MAX))
+                r.ICLD = v.SUMA_RECAUDO
             FROM %s r
             JOIN Validaciones_22A v
                ON  r.FECHA          = v.FECHA
