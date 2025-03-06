@@ -113,7 +113,7 @@ public class generalRules extends AbstractController {
     
         try {
             switch (rule.toUpperCase()) {
-                case "GF"  -> DataGF.applySpecificRuleGF();
+                case "GF27"  -> DataGF.applySpecificRuleGF27();
                 default -> throw new IllegalArgumentException("Invalid rule specified.");
             }
         } catch (IllegalArgumentException e) {

@@ -83,7 +83,6 @@ public class dataParameter_Init {
     @Transactional
     public void tablaLimites() {
 
-        // Verificar si la tabla ya existe
         String checkTableQuery = """
                 IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'PORCENTAJES_LIMITES')
                 SELECT 1 ELSE SELECT 0;
@@ -91,7 +90,7 @@ public class dataParameter_Init {
         Number tableExists = (Number) entityManager.createNativeQuery(checkTableQuery).getSingleResult();
 
         if (tableExists.intValue() == 0) {
-            // Crear la tabla con la nueva columna MAX_SESIONES_ASAM
+
             String createTableSQL = """
                     CREATE TABLE PORCENTAJES_LIMITES (
                         ID INT IDENTITY(1,1) PRIMARY KEY,
@@ -109,7 +108,6 @@ public class dataParameter_Init {
                     """;
             entityManager.createNativeQuery(createTableSQL).executeUpdate();
 
-            // Insertar datos en la tabla
             String insertDataSQL = """
                     MERGE INTO PORCENTAJES_LIMITES AS target
                     USING (VALUES

@@ -15,15 +15,15 @@ public class dataTransfer_GF {
 
     @Async
     @Transactional
-    public void applySpecificRuleGF() {
+    public void applySpecificRuleGF27() {
 
-        if (!existColumn("SPECIFIC_RULES_DATA", "VAL_RAZON_GF_ICLD_GF")) {
-            String sqlAgregarColumna = "ALTER TABLE [SPECIFIC_RULES_DATA] ADD [VAL_RAZON_GF_ICLD_GF] VARCHAR(50)";
+        if (!existColumn("SPECIFIC_RULES_DATA", "INDICADOR_GF_ICLD")) {
+            String sqlAgregarColumna = "ALTER TABLE [SPECIFIC_RULES_DATA] ADD [INDICADOR_GF_ICLD] VARCHAR(50)";
             entityManager.createNativeQuery(sqlAgregarColumna).executeUpdate();
         }
 
         String sqlCalculo = "UPDATE [SPECIFIC_RULES_DATA] " +
-                "SET VAL_RAZON_GF_ICLD_GF = CASE " +
+                "SET INDICADOR_GF_ICLD = CASE " +
                 "WHEN TRY_CAST(REPLACE(GASTOS_FUNCIONAMIENTO, ',', '') AS FLOAT) IS NULL " +
                 "     OR TRY_CAST(REPLACE(ICLD, ',', '') AS FLOAT) IS NULL " +
                 "     OR TRY_CAST(REPLACE(ICLD, ',', '') AS FLOAT) = 0 " +
@@ -35,34 +35,34 @@ public class dataTransfer_GF {
         entityManager.createNativeQuery(sqlCalculo).executeUpdate();
 
         String checkColumnsQuery = """
-                    IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'SPECIFIC_RULES_DATA' AND COLUMN_NAME = 'REGLA_ESPECIFICA_GF')
-                        ALTER TABLE SPECIFIC_RULES_DATA ADD REGLA_ESPECIFICA_GF VARCHAR(10);
-                    IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'SPECIFIC_RULES_DATA' AND COLUMN_NAME = 'ALERTA_GF')
-                        ALTER TABLE SPECIFIC_RULES_DATA ADD ALERTA_GF VARCHAR(255);
+                    IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'SPECIFIC_RULES_DATA' AND COLUMN_NAME = 'REGLA_ESPECIFICA_GF27')
+                        ALTER TABLE SPECIFIC_RULES_DATA ADD REGLA_ESPECIFICA_GF27 VARCHAR(10);
+                    IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'SPECIFIC_RULES_DATA' AND COLUMN_NAME = 'ALERTA_GF27')
+                        ALTER TABLE SPECIFIC_RULES_DATA ADD ALERTA_GF27 VARCHAR(255);
                 """;
         entityManager.createNativeQuery(checkColumnsQuery).executeUpdate();
 
         String updateQuery = """
                     UPDATE SPECIFIC_RULES_DATA
-                    SET REGLA_ESPECIFICA_GF =
+                    SET REGLA_ESPECIFICA_GF27 =
                         CASE
-                            WHEN S.VAL_RAZON_GF_ICLD_GF IS NULL OR S.VAL_RAZON_GF_ICLD_GF = 'ERROR' THEN 'NO DATA'
-                            WHEN C.LIMITE_PORCENTAJE IS NULL THEN 'NO DATA'
-                            WHEN TRY_CAST(S.VAL_RAZON_GF_ICLD_GF AS FLOAT) > C.LIMITE_PORCENTAJE THEN 'EXCEDE'
+                            WHEN S.INDICADOR_GF_ICLD IS NULL OR S.INDICADOR_GF_ICLD = 'ERROR' THEN 'NO DATA'
+                            WHEN C.LIM_GF_ICLD IS NULL THEN 'NO DATA'
+                            WHEN TRY_CAST(S.INDICADOR_GF_ICLD AS FLOAT) > C.LIM_GF_ICLD THEN 'EXCEDE'
                             ELSE 'NO EXCEDE'
                         END,
-                        ALERTA_GF =
+                        ALERTA_GF27 =
                         CASE
-                            WHEN S.VAL_RAZON_GF_ICLD_GF IS NULL THEN 'No se encontró razón GF/ICLD en SPECIFIC_RULES_DATA'
-                            WHEN S.VAL_RAZON_GF_ICLD_GF = 'ERROR' THEN 'VAL_RAZON_GF_ICLD_GF contiene un error y no puede ser procesado'
+                            WHEN S.INDICADOR_GF_ICLD IS NULL THEN 'No se encontró razón GF/ICLD en SPECIFIC_RULES_DATA'
+                            WHEN S.INDICADOR_GF_ICLD = 'ERROR' THEN 'razón GF/ICLD contiene un error y no puede ser procesado'
                             WHEN CAT.CATEGORIA IS NULL THEN 'No se encontró categoría para la entidad'
-                            WHEN C.LIMITE_PORCENTAJE IS NULL THEN 'No se encontró límite de gasto de funcionamiento'
-                            WHEN TRY_CAST(S.VAL_RAZON_GF_ICLD_GF AS FLOAT) > C.LIMITE_PORCENTAJE THEN 'El gasto de funcionamiento excede el límite permitido'
+                            WHEN C.LIM_GF_ICLD IS NULL THEN 'No se encontró límite de gasto de funcionamiento'
+                            WHEN TRY_CAST(S.INDICADOR_GF_ICLD AS FLOAT) > C.LIM_GF_ICLD THEN 'El gasto de funcionamiento excede el límite permitido'
                             ELSE 'El gasto de funcionamiento está dentro del límite permitido'
                         END
                     FROM SPECIFIC_RULES_DATA S
                     LEFT JOIN CATEGORIAS CAT ON S.CODIGO_ENTIDAD = CAT.CODIGO_ENTIDAD AND S.AMBITO_CODIGO = CAT.AMBITO_CODIGO
-                    LEFT JOIN PORCENTAJE_LIMITE_GF C ON CAT.AMBITO_CODIGO = C.AMBITO_CODIGO AND CAT.CATEGORIA = C.CATEGORIA_CODIGO;
+                    LEFT JOIN PORCENTAJES_LIMITES C ON CAT.AMBITO_CODIGO = C.AMBITO_CODIGO AND CAT.CATEGORIA = C.CATEGORIA_CODIGO;
                 """;
         entityManager.createNativeQuery(updateQuery).executeUpdate();
 
