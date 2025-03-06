@@ -24,7 +24,7 @@ public class exportService {
 
     public exportService(queryFilters queryFilters) {
         this.queryFilters = queryFilters;
-        this.listOptions = new listOptionsDto();
+        this.listOptions = queryFilters.getListOptions();
     }
 
     public ByteArrayOutputStream generateCsvStream(Map<String, String> filters) throws IOException {
@@ -34,23 +34,26 @@ public class exportService {
         String entidadCodigo = filters.get("entidad");
         String formularioCodigo = filters.get("formulario");
 
-        // Obtener los datos filtrados
         List<Map<String, Object>> filteredData = queryFilters.getFilteredRecords(fecha, trimestre, ambitoCodigo, entidadCodigo, formularioCodigo);
 
-        // Obtener nombres de ámbito y entidad
-        String ambitoNombre = listOptions.getAmbitos() != null ? listOptions.getAmbitos().stream()
+        String ambitoNombre = listOptions.getAmbitos().stream()
                 .filter(a -> a.getCodigo().equals(ambitoCodigo))
                 .map(listOptionsDto.AmbitoDTO::getNombre)
                 .findFirst()
-                .orElse("Desconocido") : "Desconocido";
+                .orElse(null);
         
-        String entidadNombre = listOptions.getEntidades() != null ? listOptions.getEntidades().stream()
+        String entidadNombre = listOptions.getEntidades().stream()
                 .filter(e -> e.getCodigo().equals(entidadCodigo))
                 .map(listOptionsDto.EntidadDTO::getNombre)
                 .findFirst()
-                .orElse("Desconocido") : "Desconocido";
+                .orElse(null);
 
-        // Obtener fecha y hora actual en zona horaria de Colombia
+        String formularioNombre = listOptions.getFormularios().stream()
+                .filter(f -> f.getCodigo().equals(formularioCodigo))
+                .map(listOptionsDto.FormularioDTO::getNombre)
+                .findFirst()
+                .orElse(null);
+
         ZoneId colombiaZone = ZoneId.of("America/Bogota");
         String fechaHoraGeneracion = ZonedDateTime.now(colombiaZone).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
@@ -66,22 +69,19 @@ public class exportService {
              OutputStreamWriter writer = new OutputStreamWriter(byteArrayOutputStream);
              CSVPrinter csvPrinter = new CSVPrinter(writer, csvFormat)) {
 
-            // Escribir filtros como bloque inicial
             csvPrinter.printRecord("Reporte generado el:", fechaHoraGeneracion);
             csvPrinter.printRecord("Filtros Aplicados:");
-            csvPrinter.printRecord("Fecha", fecha);
-            csvPrinter.printRecord("Trimestre", trimestre);
-            csvPrinter.printRecord("Ámbito", ambitoCodigo + " - " + ambitoNombre);
-            csvPrinter.printRecord("Entidad", entidadCodigo + " - " + entidadNombre);
-            csvPrinter.printRecord("Formulario", formularioCodigo);
+            if (fecha != null) csvPrinter.printRecord("Fecha", fecha);
+            if (trimestre != null) csvPrinter.printRecord("Trimestre", trimestre);
+            if (ambitoCodigo != null && ambitoNombre != null) csvPrinter.printRecord("Ámbito", ambitoCodigo + " - " + ambitoNombre);
+            if (entidadCodigo != null && entidadNombre != null) csvPrinter.printRecord("Entidad", entidadCodigo + " - " + entidadNombre);
+            if (formularioCodigo != null && formularioNombre != null) csvPrinter.printRecord("Formulario", formularioCodigo + " - " + formularioNombre);
             csvPrinter.println();
 
-            // Obtener encabezados dinámicos
             if (!filteredData.isEmpty()) {
                 csvPrinter.printRecord(filteredData.get(0).keySet());
             }
 
-            // Escribir los datos
             for (Map<String, Object> record : filteredData) {
                 csvPrinter.printRecord(record.values());
             }
@@ -91,5 +91,4 @@ public class exportService {
             return byteArrayOutputStream;
         }
     }
-    
 }
