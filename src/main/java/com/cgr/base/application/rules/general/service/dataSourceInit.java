@@ -40,10 +40,10 @@ public class dataSourceInit {
                 generatePeriod();
 
                 // Paso 3: Consolidar Datos Unicos en la Tabla de Destino.
-                //transferUniqueData();
+                transferUniqueData();
 
                 // Paso 2: Crear Indices en las Tablas de Origen.
-                //createIndexes();
+                createIndexes();
 
         }
 
@@ -65,6 +65,11 @@ public class dataSourceInit {
                                 entityManager.createNativeQuery(sqlCodigoEntidadInt).executeUpdate();
                         }
 
+                        if (!existColumn(tabla, "AMBITO_CODIGO_STR")) {
+                                String sqlAmbitoCodigoStr = "ALTER TABLE [" + tabla + "] " +
+                                                "ADD AMBITO_CODIGO_STR AS CAST(AMBITO_CODIGO AS NVARCHAR(50)) PERSISTED";
+                                entityManager.createNativeQuery(sqlAmbitoCodigoStr).executeUpdate();
+                        }
                 }
         }
 

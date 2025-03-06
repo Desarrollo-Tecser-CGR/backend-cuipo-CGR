@@ -15,7 +15,7 @@ import com.cgr.base.application.rules.general.service.dataTransfer_EG;
 import com.cgr.base.application.rules.general.service.dataTransfer_EI;
 import com.cgr.base.application.rules.general.service.dataTransfer_PG;
 import com.cgr.base.application.rules.general.service.dataTransfer_PI;
-import com.cgr.base.application.rules.specific.service.dataSource_Init;
+import com.cgr.base.application.rules.specific.service.dataParameter_Init;
 import com.cgr.base.application.rules.specific.service.dataTransfer_GF;
 import com.cgr.base.presentation.controller.AbstractController;
 
@@ -39,7 +39,7 @@ public class generalRules extends AbstractController {
     private dataTransfer_EG DataEjecGastos;
 
     @Autowired
-    private dataSource_Init rulesSInit;
+    private dataParameter_Init parameterInit;
 
     @Autowired
     private dataTransfer_GF DataGF;
@@ -56,7 +56,7 @@ public class generalRules extends AbstractController {
 
     @PostMapping("/init-specific")
     public ResponseEntity<?> processTablesS() {
-        rulesSInit.processTablesSourceS();
+        parameterInit.processTablesSourceS();
         return requestResponse(
                 null,
                 "Tables Processing Completed.",
