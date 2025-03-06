@@ -80,69 +80,68 @@ public class dataParameter_Init {
     }
 
     @Async
-    @Transactional
-    public void tablaLimites() {
+@Transactional
+public void tablaLimites() {
 
-        String checkTableQuery = """
-                IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'PORCENTAJES_LIMITES')
-                SELECT 1 ELSE SELECT 0;
+    String checkTableQuery = """
+            IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'PORCENTAJES_LIMITES')
+            SELECT 1 ELSE SELECT 0;
+            """;
+    Number tableExists = (Number) entityManager.createNativeQuery(checkTableQuery).getSingleResult();
+
+    if (tableExists.intValue() == 0) {
+
+        String createTableSQL = """
+                CREATE TABLE PORCENTAJES_LIMITES (
+                    ID INT IDENTITY(1,1) PRIMARY KEY,
+                    AMBITO_CODIGO VARCHAR(10) NOT NULL,
+                    CATEGORIA_CODIGO VARCHAR(10) NOT NULL,
+                    LIM_GF_ICLD DECIMAL(5,2),
+                    MAX_SESIONES_CONC INT,
+                    LIM_GASTOS_ICLD DECIMAL(5,2),
+                    LIM_GASTOS_SMMLV INT,
+                    REMU_DIPUTADOS_SMMLV INT,
+                    LIM_GASTO_ASAMBLEA INT,
+                    MAX_SESIONES_ASAM INT
+                );
                 """;
-        Number tableExists = (Number) entityManager.createNativeQuery(checkTableQuery).getSingleResult();
+        entityManager.createNativeQuery(createTableSQL).executeUpdate();
 
-        if (tableExists.intValue() == 0) {
-
-            String createTableSQL = """
-                    CREATE TABLE PORCENTAJES_LIMITES (
-                        ID INT IDENTITY(1,1) PRIMARY KEY,
-                        AMBITO_CODIGO VARCHAR(10) NOT NULL,
-                        CATEGORIA_CODIGO VARCHAR(10) NOT NULL,
-                        LIM_GF_ICLD DECIMAL(5,2),
-                        VAL_SESION_CONC INT,
-                        MAX_SESIONES_CONC INT,
-                        LIM_GASTOS_ICLD DECIMAL(5,2),
-                        LIM_GASTOS_SMMLV INT,
-                        REMU_DIPUTADOS_SMMLV INT,
-                        LIM_GASTO_ASAMBLEA INT,
-                        MAX_SESIONES_ASAM INT -- Nueva columna agregada
-                    );
-                    """;
-            entityManager.createNativeQuery(createTableSQL).executeUpdate();
-
-            String insertDataSQL = """
-                    MERGE INTO PORCENTAJES_LIMITES AS target
-                    USING (VALUES
-                        ('A438', 'E', 50, NULL, NULL, 2.2, NULL, 30, 80, 9),
-                        ('A438', '1', 55, NULL, NULL, 2.7, NULL, 26, 60, 9),
-                        ('A438', '2', 60, NULL, NULL, 3.2, NULL, 25, 60, 9),
-                        ('A438', '3', 70, NULL, NULL, 3.7, NULL, 18, 25, 9),
-                        ('A438', '4', 70, NULL, NULL, 3.7, NULL, 18, 25, 9),
-                        ('A439', 'E', 50, 685370, 190, 1.6, NULL, NULL, NULL, NULL),
-                        ('A439', '1', 65, 580721, 190, 1.7, NULL, NULL, NULL, NULL),
-                        ('A439', '2', 70, 419759, 190, 2.2, NULL, NULL, NULL, NULL),
-                        ('A439', '3', 70, 336714, 90, NULL, 350, NULL, NULL, NULL),
-                        ('A439', '4', 80, 281675, 90, NULL, 280, NULL, NULL, NULL),
-                        ('A439', '5', 80, 226856, 90, NULL, 190, NULL, NULL, NULL),
-                        ('A439', '6', 80, 171399, 90, NULL, 150, NULL, NULL, NULL),
-                        ('A440', '0', NULL, NULL, NULL, 3.0, NULL, NULL, NULL, NULL),
-                        ('A441', '3', NULL, NULL, NULL, 3.7, NULL, NULL, NULL, NULL)
-                    ) AS source (
-                        AMBITO_CODIGO, CATEGORIA_CODIGO, LIM_GF_ICLD, VAL_SESION_CONC, MAX_SESIONES_CONC,
-                        LIM_GASTOS_ICLD, LIM_GASTOS_SMMLV, REMU_DIPUTADOS_SMMLV, LIM_GASTO_ASAMBLEA, MAX_SESIONES_ASAM
-                    )
-                    ON target.AMBITO_CODIGO = source.AMBITO_CODIGO AND target.CATEGORIA_CODIGO = source.CATEGORIA_CODIGO
-                    WHEN NOT MATCHED THEN
-                    INSERT (
-                        AMBITO_CODIGO, CATEGORIA_CODIGO, LIM_GF_ICLD, VAL_SESION_CONC, MAX_SESIONES_CONC,
-                        LIM_GASTOS_ICLD, LIM_GASTOS_SMMLV, REMU_DIPUTADOS_SMMLV, LIM_GASTO_ASAMBLEA, MAX_SESIONES_ASAM
-                    )
-                    VALUES (
-                        source.AMBITO_CODIGO, source.CATEGORIA_CODIGO, source.LIM_GF_ICLD, source.VAL_SESION_CONC, source.MAX_SESIONES_CONC,
-                        source.LIM_GASTOS_ICLD, source.LIM_GASTOS_SMMLV, source.REMU_DIPUTADOS_SMMLV, source.LIM_GASTO_ASAMBLEA, source.MAX_SESIONES_ASAM
-                    );
-                    """;
-            entityManager.createNativeQuery(insertDataSQL).executeUpdate();
-        }
-
+        String insertDataSQL = """
+                MERGE INTO PORCENTAJES_LIMITES AS target
+                USING (VALUES
+                    ('A438', 'E', 50, NULL, 2.2, NULL, 30, 80, 9),
+                    ('A438', '1', 55, NULL, 2.7, NULL, 26, 60, 9),
+                    ('A438', '2', 60, NULL, 3.2, NULL, 25, 60, 9),
+                    ('A438', '3', 70, NULL, 3.7, NULL, 18, 25, 9),
+                    ('A438', '4', 70, NULL, 3.7, NULL, 18, 25, 9),
+                    ('A439', 'E', 50, 190, 1.6, NULL, NULL, NULL, NULL),
+                    ('A439', '1', 65, 190, 1.7, NULL, NULL, NULL, NULL),
+                    ('A439', '2', 70, 190, 2.2, NULL, NULL, NULL, NULL),
+                    ('A439', '3', 70, 90, NULL, 350, NULL, NULL, NULL),
+                    ('A439', '4', 80, 90, NULL, 280, NULL, NULL, NULL),
+                    ('A439', '5', 80, 90, NULL, 190, NULL, NULL, NULL),
+                    ('A439', '6', 80, 90, NULL, 150, NULL, NULL, NULL),
+                    ('A440', '0', NULL, NULL, 3.0, NULL, NULL, NULL, NULL),
+                    ('A441', '3', NULL, NULL, 3.7, NULL, NULL, NULL, NULL)
+                ) AS source (
+                    AMBITO_CODIGO, CATEGORIA_CODIGO, LIM_GF_ICLD, MAX_SESIONES_CONC,
+                    LIM_GASTOS_ICLD, LIM_GASTOS_SMMLV, REMU_DIPUTADOS_SMMLV, LIM_GASTO_ASAMBLEA, MAX_SESIONES_ASAM
+                )
+                ON target.AMBITO_CODIGO = source.AMBITO_CODIGO AND target.CATEGORIA_CODIGO = source.CATEGORIA_CODIGO
+                WHEN NOT MATCHED THEN
+                INSERT (
+                    AMBITO_CODIGO, CATEGORIA_CODIGO, LIM_GF_ICLD, MAX_SESIONES_CONC,
+                    LIM_GASTOS_ICLD, LIM_GASTOS_SMMLV, REMU_DIPUTADOS_SMMLV, LIM_GASTO_ASAMBLEA, MAX_SESIONES_ASAM
+                )
+                VALUES (
+                    source.AMBITO_CODIGO, source.CATEGORIA_CODIGO, source.LIM_GF_ICLD, source.MAX_SESIONES_CONC,
+                    source.LIM_GASTOS_ICLD, source.LIM_GASTOS_SMMLV, source.REMU_DIPUTADOS_SMMLV, source.LIM_GASTO_ASAMBLEA, source.MAX_SESIONES_ASAM
+                );
+                """;
+        entityManager.createNativeQuery(insertDataSQL).executeUpdate();
     }
+}
+
 
 }
