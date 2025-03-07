@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class EntityProvitionalPlan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long entity_id;
+    private Integer entity_id;
     private String entity_nit;
     @Column(name = "entity_name")
     private String entityName;
