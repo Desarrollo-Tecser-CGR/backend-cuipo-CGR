@@ -1,5 +1,6 @@
 package com.cgr.base.application.maps.entity.departments;
 
+
 import com.cgr.base.application.maps.entity.municipalities.EntityMunicipality;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,7 +33,9 @@ public class EntityDepartments {
     private String geometry;
     private String image;
 
-
     @OneToMany(mappedBy = "department", fetch = FetchType.EAGER)
     private List<EntityMunicipality> municipalitie;
+
+
+
 }

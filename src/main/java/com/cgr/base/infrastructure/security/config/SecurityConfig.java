@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**","/api/v1/departments/**", "/api/v1/municipality/**","/swagger-ui/**","/notification/{roomId}/**","/topic/{roomId}/**").permitAll();
+                    auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**","/ws/**","/app/**", "/topic/**").permitAll();
                     auth.requestMatchers("/api/v1/role/**").hasAnyAuthority("administrador");
                     auth.requestMatchers("/api/v1/log/**").hasAnyAuthority("administrador");
                     auth.requestMatchers("/api/v1/menu/**").hasAnyAuthority("administrador");
