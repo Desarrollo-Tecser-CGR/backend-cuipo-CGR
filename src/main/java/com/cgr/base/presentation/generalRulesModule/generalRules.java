@@ -15,7 +15,6 @@ import com.cgr.base.application.rules.general.service.dataTransfer_EG;
 import com.cgr.base.application.rules.general.service.dataTransfer_EI;
 import com.cgr.base.application.rules.general.service.dataTransfer_PG;
 import com.cgr.base.application.rules.general.service.dataTransfer_PI;
-import com.cgr.base.application.rules.general.specific.specificTablesInit;
 import com.cgr.base.presentation.controller.AbstractController;
 
 @RestController
@@ -24,9 +23,6 @@ public class generalRules extends AbstractController {
 
     @Autowired
     private dataSourceInit rulesInit;
-
-    @Autowired
-    private specificTablesInit specificInit;
 
     @Autowired
     private dataTransfer_PI DataProgIngresos;
@@ -50,34 +46,24 @@ public class generalRules extends AbstractController {
                 true);
     }
 
-    @PostMapping("/init-cuentastable")
-    public ResponseEntity<?> processTable() {
-        specificInit.createTables();
-        return requestResponse(
-                null,
-                "Tables Processing Completed.",
-                HttpStatus.OK,
-                true);
-    }
-
     @PostMapping("/transfer")
     public ResponseEntity<?> updatePresupuesto(@RequestBody Map<String, String> request) {
         String rule = request.get("regla");
-    
+
         if (rule == null || rule.isEmpty()) {
             return requestResponse(null, "Rule parameter is required.", HttpStatus.BAD_REQUEST, false);
         }
-    
+
         try {
             switch (rule.toUpperCase()) {
-                case "1"  -> DataProgIngresos.applyGeneralRule1();
-                case "2"  -> DataProgIngresos.applyGeneralRule2();
-                case "3"  -> DataProgIngresos.applyGeneralRule3();
-                case "4"  -> DataProgIngresos.applyGeneralRule4();
-                case "5"  -> DataEjecIngresos.applyGeneralRule5();
-                case "6"  -> DataEjecIngresos.applyGeneralRule6();
-                case "7"  -> DataProgGastos.applyGeneralRule7();
-                case "8"  -> DataProgGastos.applyGeneralRule8();
+                case "1" -> DataProgIngresos.applyGeneralRule1();
+                case "2" -> DataProgIngresos.applyGeneralRule2();
+                case "3" -> DataProgIngresos.applyGeneralRule3();
+                case "4" -> DataProgIngresos.applyGeneralRule4();
+                case "5" -> DataEjecIngresos.applyGeneralRule5();
+                case "6" -> DataEjecIngresos.applyGeneralRule6();
+                case "7" -> DataProgGastos.applyGeneralRule7();
+                case "8" -> DataProgGastos.applyGeneralRule8();
                 case "9A" -> DataProgGastos.applyGeneralRule9A();
                 case "9B" -> DataProgGastos.applyGeneralRule9B();
                 case "10" -> DataProgGastos.applyGeneralRule10();
@@ -92,8 +78,8 @@ public class generalRules extends AbstractController {
         } catch (IllegalArgumentException e) {
             return requestResponse(null, e.getMessage(), HttpStatus.BAD_REQUEST, false);
         }
-    
+
         return requestResponse(null, "Applied rule " + rule, HttpStatus.OK, true);
     }
-    
+
 }
