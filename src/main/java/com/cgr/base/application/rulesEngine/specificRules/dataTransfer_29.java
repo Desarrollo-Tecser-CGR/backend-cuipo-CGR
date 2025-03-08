@@ -6,7 +6,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 @Service
 
@@ -20,6 +25,51 @@ public class dataTransfer_29 {
 
     @Value("${TABLA_E029}")
     private String tablaE029;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Async
+    @Transactional
+    public void applySpecificRule29() {
+
+        createTableE029();
+        applyGeneralRule29A();
+        applyGeneralRule29B();
+        applyGeneralRule29C();
+
+    }
+
+    private void createTableE029() {
+        String sqlCheckTable = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'E029'";
+        String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'TABLA_E029')"
+                +
+                " BEGIN " +
+                " CREATE TABLE [" + tablaE029 + "] (" +
+                "FECHA varchar(50)," +
+                "TRIMESTRE varchar(50)," +
+                "CODIGO_ENTIDAD VARCHAR(50), " +
+                "AMBITO_CODIGO VARCHAR(50), " +
+                "GASTOS_FUNCIONAMIENTO_ASAM DECIMAL(18,2), " +
+                "CATEGORIA VARCHAR(50), " +
+                "NO_DIPUTADOS INT, " +
+                "LIM_GASTO_ASAMBLEA DECIMAL(18,2), " +
+                "MAX_SESIONES_ASAM INT, " +
+                "REMU_DIPUTADOS_SMMLV DECIMAL(18,2), " +
+                "SMMLV DECIMAL(18,2), " +
+                "GASTOS_ASAMBLEA DECIMAL(18,2), " +
+                "REMUNERACION_DIPUTADOS DECIMAL(18,2), " +
+                "PRESTACIONES_SOCIALES DECIMAL(18,2), " +
+                "ALERTA VARCHAR(200), " +
+                "CUENTAS VARCHAR(MAX)" +
+                "); " +
+                "END";
+                Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
+
+                if (count == 0) {
+                    entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
+                }
+    }
 
     public void applyGeneralRule29A() {
         // 1. Verificar que la tabla destino tenga las columnas necesarias.

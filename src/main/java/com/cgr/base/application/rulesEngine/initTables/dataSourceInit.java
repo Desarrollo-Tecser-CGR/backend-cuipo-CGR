@@ -25,6 +25,9 @@ public class dataSourceInit {
         @Value("${TABLA_GENERAL_RULES}")
         private String tablaReglas;
 
+        @Value("${TABLA_SPECIFIC_RULES}")
+        private String tablaSpecific;
+
         private String[] tablas;
 
         @PersistenceContext
@@ -44,6 +47,9 @@ public class dataSourceInit {
 
                 // Paso 2: Crear Indices en las Tablas de Origen.
                 createIndexes();
+
+                createSpecificDataTable();
+                aggregatedDataSpecificTable();
 
         }
 
@@ -169,6 +175,70 @@ public class dataSourceInit {
         private void dropIndex(String tableName, String indexName) {
                 String sqlDrop = "DROP INDEX [" + indexName + "] ON [" + tableName + "]";
                 entityManager.createNativeQuery(sqlDrop).executeUpdate();
+        }
+
+        private void createSpecificDataTable() {
+                String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'TABLA_SPECIFIC_RULES')"
+                                +
+                                " BEGIN " +
+                                " CREATE TABLE [" + tablaSpecific + "] (" +
+                                "[FECHA] INT, " +
+                                "[TRIMESTRE] INT, " +
+                                "[CODIGO_ENTIDAD] BIGINT, " +
+                                "[AMBITO_CODIGO] NVARCHAR(50), " +
+                                "[NOMBRE_ENTIDAD] VARCHAR(255), " +
+                                "[AMBITO_NOMBRE] VARCHAR(50), " +
+                                "CONSTRAINT PK_AggregatedData PRIMARY KEY ([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO], [NOMBRE_ENTIDAD], [AMBITO_NOMBRE])"
+                                +
+                                " ) " +
+                                " END";
+                entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
+        }
+
+        private void aggregatedDataSpecificTable() {
+                String sqlInsertData = "INSERT INTO [" + tablaSpecific + "] " +
+                                "([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO], [NOMBRE_ENTIDAD], [AMBITO_NOMBRE]) "
+                                +
+                                "SELECT DISTINCT " +
+                                "    t.[FECHA], " +
+                                "    t.[TRIMESTRE], " +
+                                "    t.[CODIGO_ENTIDAD_INT] AS CODIGO_ENTIDAD, " +
+                                "    t.[AMBITO_CODIGO_STR] AS AMBITO_CODIGO, " +
+                                "    t.[NOMBRE_ENTIDAD], " +
+                                "    t.[AMBITO_NOMBRE] " +
+                                "FROM [" + ejecGastos + "] t " +
+                                "WHERE t.[AMBITO_CODIGO_STR] IN ('A438', 'A439', 'A440', 'A441') " +
+                                "AND NOT EXISTS ( " +
+                                "    SELECT 1 " +
+                                "    FROM [" + tablaSpecific + "] " + "r " +
+                                "    WHERE r.[FECHA] = t.[FECHA] " +
+                                "      AND r.[TRIMESTRE] = t.[TRIMESTRE] " +
+                                "      AND r.[CODIGO_ENTIDAD] = t.[CODIGO_ENTIDAD_INT] " +
+                                "      AND r.[AMBITO_CODIGO] = t.[AMBITO_CODIGO_STR] " +
+                                ")";
+                entityManager.createNativeQuery(sqlInsertData).executeUpdate();
+
+                String sqlInsertData2 = "INSERT INTO [" + tablaSpecific + "] " +
+                                "([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO], [NOMBRE_ENTIDAD], [AMBITO_NOMBRE]) "
+                                +
+                                "SELECT DISTINCT " +
+                                "    t.[FECHA], " +
+                                "    t.[TRIMESTRE], " +
+                                "    t.[CODIGO_ENTIDAD_INT] AS CODIGO_ENTIDAD, " +
+                                "    t.[AMBITO_CODIGO_STR] AS AMBITO_CODIGO, " +
+                                "    t.[NOMBRE_ENTIDAD], " +
+                                "    t.[AMBITO_NOMBRE] " +
+                                "FROM [" + ejecIngresos + "] t " +
+                                "WHERE t.[AMBITO_CODIGO_STR] IN ('A438', 'A439', 'A440', 'A441') " +
+                                "AND NOT EXISTS ( " +
+                                "    SELECT 1 " +
+                                "    FROM [" + tablaSpecific + "] " + "r " +
+                                "    WHERE r.[FECHA] = t.[FECHA] " +
+                                "      AND r.[TRIMESTRE] = t.[TRIMESTRE] " +
+                                "      AND r.[CODIGO_ENTIDAD] = t.[CODIGO_ENTIDAD_INT] " +
+                                "      AND r.[AMBITO_CODIGO] = t.[AMBITO_CODIGO_STR] " +
+                                ")";
+                entityManager.createNativeQuery(sqlInsertData2).executeUpdate();
         }
 
 }
