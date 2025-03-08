@@ -6,7 +6,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class dataTransfer_25 {
@@ -19,6 +21,15 @@ public class dataTransfer_25 {
 
     @Value("${TABLA_SPECIFIC_RULES}")
     private String tablaReglasEspecificas;
+
+    @Async
+    @Transactional
+    public void applySpecificRule25() {
+
+        applyGeneralRule25A();
+        applyGeneralRule25B();
+
+    }
 
     public void applyGeneralRule25A() {
 

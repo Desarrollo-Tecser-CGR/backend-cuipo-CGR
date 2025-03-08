@@ -20,7 +20,7 @@ public class dataTransfer_24 {
     @Value("${TABLA_MEDIDAS_ICLD}")
     private String tablaMedidasICLD;
 
-    public void applyGeneralRule24() {
+    public void applySpecificRule24() {
         // Nombre de la tabla destino para insertar las medidas calculadas.
         // Se asume que 'tablaMedidasGF' y 'tablaReglasEspecificas' están definidas en
         // tu clase.

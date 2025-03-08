@@ -6,7 +6,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class dataTransfer_22 {
@@ -22,6 +24,18 @@ public class dataTransfer_22 {
 
     @Value("${TABLA_EJEC_INGRESOS}")
     private String ejecIngresos;
+
+    @Async
+    @Transactional
+    public void applySpecificRule22() {
+
+        applyGeneralRule22A();
+        applyGeneralRule22B();
+        applyGeneralRule22C();
+        applyGeneralRule22D();
+        applyGeneralRule22E();
+
+    }
 
     public void applyGeneralRule22A() {
 

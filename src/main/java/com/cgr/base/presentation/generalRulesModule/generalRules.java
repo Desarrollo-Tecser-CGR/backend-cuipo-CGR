@@ -14,20 +14,14 @@ import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EG;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EI;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_PG;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_PI;
-import com.cgr.base.application.rulesEngine.initTables.dataParameter_Init;
-import com.cgr.base.application.rulesEngine.initTables.dataSourceInit;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_27;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_28;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_GF;
 import com.cgr.base.presentation.controller.AbstractController;
 
 @RestController
-//@RequestMapping("/api/v1/rules/general")
 @RequestMapping("/api/v1/rules/general")
 public class generalRules extends AbstractController {
-
-    @Autowired
-    private dataSourceInit rulesInit;
 
     @Autowired
     private dataTransfer_PI DataProgIngresos;
@@ -42,9 +36,6 @@ public class generalRules extends AbstractController {
     private dataTransfer_EG DataEjecGastos;
 
     @Autowired
-    private dataParameter_Init parameterInit;
-
-    @Autowired
     private dataTransfer_GF DataGF;
 
     @Autowired
@@ -52,26 +43,6 @@ public class generalRules extends AbstractController {
 
     @Autowired
     private dataTransfer_28 ruleS28;
-
-    @PostMapping("/init-tables")
-    public ResponseEntity<?> processTables() {
-        rulesInit.processTablesSource();
-        return requestResponse(
-                null,
-                "Tables Processing Completed.",
-                HttpStatus.OK,
-                true);
-    }
-
-    @PostMapping("/init-specific")
-    public ResponseEntity<?> processTablesS() {
-        parameterInit.processTablesSourceS();
-        return requestResponse(
-                null,
-                "Tables Processing Completed.",
-                HttpStatus.OK,
-                true);
-    }
 
     @PostMapping("/transfer")
     public ResponseEntity<?> updatePresupuesto(@RequestBody Map<String, String> request) {

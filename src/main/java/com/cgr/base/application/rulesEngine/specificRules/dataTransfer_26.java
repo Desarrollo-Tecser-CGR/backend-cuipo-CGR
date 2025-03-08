@@ -20,7 +20,7 @@ public class dataTransfer_26 {
     @Value("${TABLA_MEDIDAS_GF}")
     private String tablaMedidasGF;
 
-    public void applyGeneralRule26() {
+    public void applySpecificRule26() {
 
         // 1. Verificar que la tabla MEDIDAS_GF tenga las columnas necesarias.
         List<String> requiredColumns = Arrays.asList(

@@ -70,11 +70,10 @@ public class dataTransfer_GF {
 
     private boolean existColumn(String tabla, String columna) {
         String sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS " +
-                "WHERE TABLE_NAME = ? AND COLUMN_NAME = ?";
-        Number count = (Number) entityManager.createNativeQuery(sql)
-                .setParameter(1, tabla)
-                .setParameter(2, columna)
-                .getSingleResult();
+                "WHERE TABLE_NAME = '" + tabla + "' " +
+                "AND COLUMN_NAME = '" + columna + "'";
+        Number count = (Number) entityManager.createNativeQuery(sql).getSingleResult();
         return count != null && count.intValue() > 0;
     }
+
 }
