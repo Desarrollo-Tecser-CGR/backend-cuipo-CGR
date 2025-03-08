@@ -1,4 +1,4 @@
-package com.cgr.base.application.rules.general.service;
+package com.cgr.base.application.rulesEngine.management.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,7 +14,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.QuoteMode;
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.application.rules.general.dto.listOptionsDto;
+import com.cgr.base.application.rulesEngine.management.dto.listOptionsDto;
 
 @Service
 public class exportService {

@@ -1,4 +1,4 @@
-package com.cgr.base.application.rules.general.service;
+package com.cgr.base.application.rulesEngine.initTables;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

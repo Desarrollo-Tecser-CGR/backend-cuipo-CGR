@@ -1,4 +1,4 @@
-package com.cgr.base.application.rules.general.service;
+package com.cgr.base.application.rulesEngine.generalRules;
 
 import java.util.Arrays;
 import java.util.HashSet;

@@ -1,4 +1,4 @@
-package com.cgr.base.application.rules.specific.service;
+package com.cgr.base.application.rulesEngine.initTables;
 
 import java.util.Arrays;
 import java.util.List;

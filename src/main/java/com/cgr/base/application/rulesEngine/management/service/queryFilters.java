@@ -1,4 +1,4 @@
-package com.cgr.base.application.rules.general.service;
+package com.cgr.base.application.rulesEngine.management.service;
 
 import java.util.List;
 import java.util.Map;
@@ -9,10 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.application.rules.general.dto.listOptionsDto;
-import com.cgr.base.application.rules.general.dto.listOptionsDto.AmbitoDTO;
-import com.cgr.base.application.rules.general.dto.listOptionsDto.EntidadDTO;
-import com.cgr.base.application.rules.general.dto.listOptionsDto.FormularioDTO;
+import com.cgr.base.application.rulesEngine.management.dto.listOptionsDto;
+import com.cgr.base.application.rulesEngine.management.dto.listOptionsDto.AmbitoDTO;
+import com.cgr.base.application.rulesEngine.management.dto.listOptionsDto.EntidadDTO;
+import com.cgr.base.application.rulesEngine.management.dto.listOptionsDto.FormularioDTO;
 
 @Service
 public class queryFilters {

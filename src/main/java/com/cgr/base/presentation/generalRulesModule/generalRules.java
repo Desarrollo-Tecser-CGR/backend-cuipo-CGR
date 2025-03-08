@@ -10,15 +10,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cgr.base.application.rules.general.service.dataSourceInit;
-import com.cgr.base.application.rules.general.service.dataTransfer_EG;
-import com.cgr.base.application.rules.general.service.dataTransfer_EI;
-import com.cgr.base.application.rules.general.service.dataTransfer_PG;
-import com.cgr.base.application.rules.general.service.dataTransfer_PI;
-import com.cgr.base.application.rules.specific.service.dataParameter_Init;
-import com.cgr.base.application.rules.specific.service.dataTransfer_27;
-import com.cgr.base.application.rules.specific.service.dataTransfer_28;
-import com.cgr.base.application.rules.specific.service.dataTransfer_GF;
+import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EG;
+import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EI;
+import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_PG;
+import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_PI;
+import com.cgr.base.application.rulesEngine.initTables.dataParameter_Init;
+import com.cgr.base.application.rulesEngine.initTables.dataSourceInit;
+import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_27;
+import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_28;
+import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_GF;
 import com.cgr.base.presentation.controller.AbstractController;
 
 @RestController

@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cgr.base.application.rules.general.dto.listOptionsDto;
-import com.cgr.base.application.rules.general.service.exportService;
-import com.cgr.base.application.rules.general.service.queryFilters;
+import com.cgr.base.application.rulesEngine.management.dto.listOptionsDto;
+import com.cgr.base.application.rulesEngine.management.service.exportService;
+import com.cgr.base.application.rulesEngine.management.service.queryFilters;
 import com.cgr.base.presentation.controller.AbstractController;
 
 @RestController

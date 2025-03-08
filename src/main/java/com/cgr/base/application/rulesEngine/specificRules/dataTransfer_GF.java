@@ -1,4 +1,4 @@
-package com.cgr.base.application.rules.specific.service;
+package com.cgr.base.application.rulesEngine.specificRules;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
