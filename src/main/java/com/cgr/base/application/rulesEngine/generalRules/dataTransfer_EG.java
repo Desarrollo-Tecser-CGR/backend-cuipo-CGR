@@ -25,6 +25,18 @@ public class dataTransfer_EG {
     @Value("${TABLA_GENERAL_RULES}")
     private String tablaReglas;
 
+    @Value("${TABLA_SPECIFIC_RULES}")
+    private String tablaReglasEspecificas;
+
+    @Value("${TABLA_MEDIDAS_GF}")
+    private String tablaMedidasGF;
+
+    @Value("${TABLA_MEDIDAS_ICLD}")
+    private String tablaMedidasICLD;
+
+    @Value("${TABLA_E029}")
+    private String tablaE029;
+
     public void applyGeneralRule12() {
         // 1. Validar columnas - Usar una sola consulta batch para verificar todas las
         // columnas
@@ -80,6 +92,7 @@ public class dataTransfer_EG {
         // directamente
         String updateQuery = String.format(
                 """
+        
                         WITH Validacion12 AS (
                             SELECT
                                 FECHA,

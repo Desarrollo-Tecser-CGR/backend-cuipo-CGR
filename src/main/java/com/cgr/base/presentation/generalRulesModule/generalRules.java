@@ -125,6 +125,8 @@ public class generalRules extends AbstractController {
                 case "GF27"  -> DataGF.applySpecificRuleGF27();
                 case "27"  -> ruleS27.applySpecificRule27();
                 case "28"  -> ruleS28.applySpecificRule28();
+                
+
                 default -> throw new IllegalArgumentException("Invalid rule specified.");
             }
         } catch (IllegalArgumentException e) {
