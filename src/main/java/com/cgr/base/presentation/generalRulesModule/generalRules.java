@@ -17,6 +17,7 @@ import com.cgr.base.application.rules.general.service.dataTransfer_PG;
 import com.cgr.base.application.rules.general.service.dataTransfer_PI;
 import com.cgr.base.application.rules.specific.service.dataParameter_Init;
 import com.cgr.base.application.rules.specific.service.dataTransfer_27;
+import com.cgr.base.application.rules.specific.service.dataTransfer_28;
 import com.cgr.base.application.rules.specific.service.dataTransfer_GF;
 import com.cgr.base.presentation.controller.AbstractController;
 
@@ -48,6 +49,9 @@ public class generalRules extends AbstractController {
 
     @Autowired
     private dataTransfer_27 ruleS27;
+
+    @Autowired
+    private dataTransfer_28 ruleS28;
 
     @PostMapping("/init-tables")
     public ResponseEntity<?> processTables() {
@@ -120,6 +124,7 @@ public class generalRules extends AbstractController {
             switch (rule.toUpperCase()) {
                 case "GF27"  -> DataGF.applySpecificRuleGF27();
                 case "27"  -> ruleS27.applySpecificRule27();
+                case "28"  -> ruleS28.applySpecificRule28();
                 default -> throw new IllegalArgumentException("Invalid rule specified.");
             }
         } catch (IllegalArgumentException e) {
