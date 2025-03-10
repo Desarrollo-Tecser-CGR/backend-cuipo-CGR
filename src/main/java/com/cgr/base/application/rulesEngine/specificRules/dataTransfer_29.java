@@ -6,9 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -28,17 +26,6 @@ public class dataTransfer_29 {
 
     @PersistenceContext
     private EntityManager entityManager;
-
-    @Async
-    @Transactional
-    public void applySpecificRule29() {
-
-        createTableE029();
-        applyGeneralRule29A();
-        applyGeneralRule29B();
-        applyGeneralRule29C();
-
-    }
 
     private void createTableE029() {
         String sqlCheckTable = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'E029'";
@@ -71,7 +58,9 @@ public class dataTransfer_29 {
                 }
     }
 
-    public void applyGeneralRule29A() {
+    public void applySpecificRule29A() {
+
+        createTableE029();
         // 1. Verificar que la tabla destino tenga las columnas necesarias.
         List<String> requiredColumns = Arrays.asList(
                 "FECHA",
@@ -346,7 +335,7 @@ public class dataTransfer_29 {
         jdbcTemplate.execute(insertQuery);
     }
 
-    public void applyGeneralRule29B() {
+    public void applySpecificRule29B() {
         // Lista de columnas que se actualizarán
         List<String> requiredColumns = Arrays.asList(
                 "IBC",
@@ -424,7 +413,7 @@ public class dataTransfer_29 {
         jdbcTemplate.execute(updateQuery);
     }
 
-    public void applyGeneralRule29C() {
+    public void applySpecificRule29C() {
         // Lista de columnas a actualizar
         List<String> requiredColumns = Arrays.asList(
                 "PS_SS_VALOR_MAXIMO_AUTORIZADO",

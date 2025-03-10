@@ -1,8 +1,6 @@
 package com.cgr.base.application.rulesEngine.specificRules;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -16,8 +14,6 @@ public class dataTransfer_30 {
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Async
-    @Transactional
     public void applySpecificRule30() {
 
         createTableE030();

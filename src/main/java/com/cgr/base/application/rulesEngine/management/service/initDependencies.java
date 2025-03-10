@@ -1,6 +1,7 @@
 package com.cgr.base.application.rulesEngine.management.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EG;
@@ -19,8 +20,7 @@ import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_28;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_29;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_30;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_31;
-
-import jakarta.transaction.Transactional;
+import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_GF;
 
 @Service
 public class initDependencies {
@@ -73,7 +73,10 @@ public class initDependencies {
     @Autowired
     private dataTransfer_31 Rules31;
 
-    
+    @Autowired
+    private dataTransfer_GF RulesGF;
+
+    @Async
     public void initializeDependencies() {
 
         Parametria.processTablesSource();
@@ -82,27 +85,54 @@ public class initDependencies {
 
     }
 
-    @Transactional
-    public void transferGeneralRules() {
-
-        RulesPI.applyGeneralRulesPI();
-        RulesEI.applyGeneralRulesEI();
-        RulesEG.applyGeneralRulesEG();
-        RulesPG.applyGeneralRulesPG();
-        
+    public void transferGeneralRules(String rule) {
+        switch (rule.toUpperCase()) {
+            case "1" -> RulesPI.applyGeneralRule1();
+            case "2" -> RulesPI.applyGeneralRule2();
+            case "3" -> RulesPI.applyGeneralRule3();
+            case "4" -> RulesPI.applyGeneralRule4();
+            case "5" -> RulesEI.applyGeneralRule5();
+            case "6" -> RulesEI.applyGeneralRule6();
+            case "7" -> RulesPG.applyGeneralRule7();
+            case "8" -> RulesPG.applyGeneralRule8();
+            case "9A" -> RulesPG.applyGeneralRule9A();
+            case "9B" -> RulesPG.applyGeneralRule9B();
+            case "10" -> RulesPG.applyGeneralRule10();
+            case "11" -> RulesPG.applyGeneralRule11();
+            case "12" -> RulesEG.applyGeneralRule12();
+            case "13A" -> RulesEG.applyGeneralRule13A();
+            case "13B" -> RulesEG.applyGeneralRule13B();
+            case "14A" -> RulesEG.applyGeneralRule14A();
+            case "14B" -> RulesEG.applyGeneralRule14B();
+            case "15" -> RulesEG.applyGeneralRule15();
+            case "16A" -> RulesEG.applyGeneralRule16A();
+            case "16B" -> RulesEG.applyGeneralRule16B();
+            default -> throw new IllegalArgumentException("Invalid Rule.");
+        }
     }
 
-    @Transactional
-    public void transferSpecificRules() {
-        Rules22.applySpecificRule22();
-        Rules24.applySpecificRule24();
-        Rules25.applySpecificRule25();
-        Rules26.applySpecificRule26();
-        Rules27.applySpecificRule27();
-        Rules28.applySpecificRule28();
-        Rules29.applySpecificRule29();
-        Rules30.applySpecificRule30();
-        Rules31.applySpecificRule31();
+    public void transferSpecificRules(String rule) {
+        switch (rule.toUpperCase()) {
+            case "GF" -> RulesGF.applySpecificRuleGF27();
+            case "22A" -> Rules22.applyGeneralRule22A();
+            case "22B" -> Rules22.applyGeneralRule22B();
+            case "22C" -> Rules22.applyGeneralRule22C();
+            case "22D" -> Rules22.applyGeneralRule22D();
+            case "22E" -> Rules22.applyGeneralRule22E();
+            case "24" -> Rules24.applySpecificRule24();
+            case "25A" -> Rules25.applySpecificRule25A();
+            case "25B" -> Rules25.applySpecificRule25B();
+            case "26" -> Rules26.applySpecificRule26();
+            case "27" -> Rules27.applySpecificRule27();
+            case "28" -> Rules28.applySpecificRule28();
+            case "29A" -> Rules29.applySpecificRule29A();
+            case "29B" -> Rules29.applySpecificRule29B();
+            case "29C" -> Rules29.applySpecificRule29C();
+            case "30" -> Rules30.applySpecificRule30();
+            case "31" -> Rules31.applySpecificRule31();
+            default -> throw new IllegalArgumentException("Invalid Rule.");
+        }
     }
 
 }
+

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class dataTransfer_EG {
@@ -25,20 +24,6 @@ public class dataTransfer_EG {
 
     @Value("${TABLA_GENERAL_RULES}")
     private String tablaReglas;
-
-    @Transactional
-    public void applyGeneralRulesEG() {
-
-        applyGeneralRule12();
-        applyGeneralRule15();
-        applyGeneralRule14A();
-        applyGeneralRule14B();
-        applyGeneralRule13B();
-        applyGeneralRule13A();
-        applyGeneralRule16A();
-        applyGeneralRule16B();
-
-    }
 
     public void applyGeneralRule12() {
         // 1. Validar columnas - Usar una sola consulta batch para verificar todas las

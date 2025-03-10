@@ -21,18 +21,6 @@ public class dataTransfer_PG {
     @Value("${TABLA_PROG_GASTOS}")
     private String progGastos;
 
-    @Transactional
-    public void applyGeneralRulesPG() {
-
-        applyGeneralRule7();
-        applyGeneralRule8();
-        applyGeneralRule9A();
-        applyGeneralRule9B();
-        applyGeneralRule10();
-        applyGeneralRule11();
-
-    }
-
     public void applyGeneralRule7() {
         List<String> requiredColumns = Arrays.asList(
                 "CUMPLE_STATUS_7", "ALERTA_7", "AMBITO_CODIGOS_NO_CUMPLE_7", "COD_SECCION_PRESUPUESTAL_NO_CUMPLE_7");
