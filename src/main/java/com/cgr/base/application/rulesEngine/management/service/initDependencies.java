@@ -113,7 +113,6 @@ public class initDependencies {
 
     public void transferSpecificRules(String rule) {
         switch (rule.toUpperCase()) {
-            case "GF" -> RulesGF.applySpecificRuleGF27();
             case "22A" -> Rules22.applyGeneralRule22A();
             case "22B" -> Rules22.applyGeneralRule22B();
             case "22C" -> Rules22.applyGeneralRule22C();
@@ -122,6 +121,7 @@ public class initDependencies {
             case "24" -> Rules24.applySpecificRule24();
             case "25A" -> Rules25.applySpecificRule25A();
             case "25B" -> Rules25.applySpecificRule25B();
+            case "GF" -> RulesGF.applySpecificRuleGF27();
             case "26" -> Rules26.applySpecificRule26();
             case "27" -> Rules27.applySpecificRule27();
             case "28" -> Rules28.applySpecificRule28();

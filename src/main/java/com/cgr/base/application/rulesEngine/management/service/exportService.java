@@ -14,17 +14,17 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.QuoteMode;
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.application.rulesEngine.management.dto.listOptionsDto;
+import com.cgr.base.application.rulesEngine.management.dto.listOptionsRG;
 
 @Service
 public class exportService {
 
     private final queryFilters queryFilters;
-    private final listOptionsDto listOptions;
+    private final listOptionsRG listOptions;
 
     public exportService(queryFilters queryFilters) {
         this.queryFilters = queryFilters;
-        this.listOptions = queryFilters.getListOptions();
+        this.listOptions = queryFilters.getListOptionsGenerals();
     }
 
     public ByteArrayOutputStream generateCsvStream(Map<String, String> filters) throws IOException {
@@ -34,23 +34,23 @@ public class exportService {
         String entidadCodigo = filters.get("entidad");
         String formularioCodigo = filters.get("formulario");
 
-        List<Map<String, Object>> filteredData = queryFilters.getFilteredRecords(fecha, trimestre, ambitoCodigo, entidadCodigo, formularioCodigo);
+        List<Map<String, Object>> filteredData = queryFilters.getFilteredRecordsGR(fecha, trimestre, ambitoCodigo, entidadCodigo, formularioCodigo);
 
         String ambitoNombre = listOptions.getAmbitos().stream()
                 .filter(a -> a.getCodigo().equals(ambitoCodigo))
-                .map(listOptionsDto.AmbitoDTO::getNombre)
+                .map(listOptionsRG.AmbitoDTO::getNombre)
                 .findFirst()
                 .orElse(null);
         
         String entidadNombre = listOptions.getEntidades().stream()
                 .filter(e -> e.getCodigo().equals(entidadCodigo))
-                .map(listOptionsDto.EntidadDTO::getNombre)
+                .map(listOptionsRG.EntidadDTO::getNombre)
                 .findFirst()
                 .orElse(null);
 
         String formularioNombre = listOptions.getFormularios().stream()
                 .filter(f -> f.getCodigo().equals(formularioCodigo))
-                .map(listOptionsDto.FormularioDTO::getNombre)
+                .map(listOptionsRG.FormularioDTO::getNombre)
                 .findFirst()
                 .orElse(null);
 

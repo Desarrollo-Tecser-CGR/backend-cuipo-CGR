@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -27,7 +28,9 @@ public class dataTransfer_29 {
     @PersistenceContext
     private EntityManager entityManager;
 
-    private void createTableE029() {
+    @Transactional
+    public void applySpecificRule29A() {
+
         String sqlCheckTable = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'E029'";
         String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'TABLA_E029')"
                 +
@@ -51,17 +54,12 @@ public class dataTransfer_29 {
                 "CUENTAS VARCHAR(MAX)" +
                 "); " +
                 "END";
-                Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
+        Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
 
-                if (count == 0) {
-                    entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
-                }
-    }
+        if (count == 0) {
+            entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
+        }
 
-    public void applySpecificRule29A() {
-
-        createTableE029();
-        // 1. Verificar que la tabla destino tenga las columnas necesarias.
         List<String> requiredColumns = Arrays.asList(
                 "FECHA",
                 "TRIMESTRE",
@@ -335,6 +333,7 @@ public class dataTransfer_29 {
         jdbcTemplate.execute(insertQuery);
     }
 
+    @Transactional
     public void applySpecificRule29B() {
         // Lista de columnas que se actualizarán
         List<String> requiredColumns = Arrays.asList(
@@ -413,6 +412,7 @@ public class dataTransfer_29 {
         jdbcTemplate.execute(updateQuery);
     }
 
+    @Transactional
     public void applySpecificRule29C() {
         // Lista de columnas a actualizar
         List<String> requiredColumns = Arrays.asList(
