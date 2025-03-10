@@ -25,15 +25,20 @@ public interface IUserRepositoryJpa extends JpaRepository<UserEntity, Long>, Jpa
         @Query("SELECT u FROM UserEntity u LEFT JOIN FETCH u.roles WHERE u.sAMAccountName = :sAMAccountName")
         Optional<UserEntity> findBySAMAccountNameWithRoles(@Param("sAMAccountName") String sAMAccountName);
 
-        @Query("SELECT DISTINCT m " +
-                        "FROM Menu m " +
-                        "JOIN FETCH m.children c " +
-                        "JOIN c.roles r " +
-                        "WHERE r.name IN :roleNames")
-        List<Menu> findMenusByRoleNames(@Param("roleNames") List<String> roleNames);
-
+        @Query("""
+                SELECT DISTINCT m
+                FROM Menu m
+                     LEFT JOIN FETCH m.roles mr
+                     LEFT JOIN FETCH m.children c
+                     LEFT JOIN FETCH c.roles cr
+                WHERE mr.name IN :roleNames
+                   OR cr.name IN :roleNames
+            """)
+            List<Menu> findMenusByRoleNames(@Param("roleNames") List<String> roleNames);
+            
         @Query("SELECT DISTINCT sm FROM RoleEntity r " +
                         "JOIN r.subMenus sm " +
                         "WHERE r.name IN :roleNames")
         List<SubMenuEntity> findDistinctSubMenusByRoleNames(@Param("roleNames") List<String> roleNames);
 }
+
