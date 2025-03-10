@@ -1,4 +1,4 @@
-package com.cgr.base.application.rules.general.service;
+package com.cgr.base.application.rulesEngine.generalRules;
 
 import java.util.Arrays;
 import java.util.List;
@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class dataTransfer_PI {
@@ -22,6 +23,16 @@ public class dataTransfer_PI {
 
     @Value("${TABLA_PROG_GASTOS}")
     private String progGastos;
+
+    @Transactional
+    public void applyGeneralRulesPI() {
+
+        applyGeneralRule1();
+        applyGeneralRule2() ;
+        applyGeneralRule3();
+        applyGeneralRule4();
+
+    }
 
     // Regla1: Presupuesto Definitivo validando Liquidación.
     public void applyGeneralRule1() {

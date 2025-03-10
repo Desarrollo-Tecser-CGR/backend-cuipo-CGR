@@ -1,4 +1,4 @@
-package com.cgr.base.application.rules.general.service;
+package com.cgr.base.application.rulesEngine.generalRules;
 
 import java.util.Arrays;
 import java.util.List;
@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class dataTransfer_PG {
@@ -19,6 +20,18 @@ public class dataTransfer_PG {
 
     @Value("${TABLA_PROG_GASTOS}")
     private String progGastos;
+
+    @Transactional
+    public void applyGeneralRulesPG() {
+
+        applyGeneralRule7();
+        applyGeneralRule8();
+        applyGeneralRule9A();
+        applyGeneralRule9B();
+        applyGeneralRule10();
+        applyGeneralRule11();
+
+    }
 
     public void applyGeneralRule7() {
         List<String> requiredColumns = Arrays.asList(
@@ -603,7 +616,6 @@ public class dataTransfer_PG {
         jdbcTemplate.execute(updateQuery);
     }
 
-
     public void applyGeneralRule11() {
 
         List<String> requiredColumns = Arrays.asList(
@@ -612,114 +624,113 @@ public class dataTransfer_PG {
                 "APROPIACION_VIG4_11",
                 "APROPIACION_VIG4_T3_11",
                 "ALERTA_11",
-                "REGLA_GENERAL_11"
-        );
-    
+                "REGLA_GENERAL_11");
+
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
                 tablaReglas,
-                "'" + String.join("','", requiredColumns) + "'"
-        );
-    
+                "'" + String.join("','", requiredColumns) + "'");
+
         List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
-    
+
         for (String column : requiredColumns) {
             if (!existingColumns.contains(column)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglas, column
-                );
+                        tablaReglas, column);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
-    
-        String updateQuery = String.format("""
-                WITH base AS (
-                    SELECT
-                        FECHA,
-                        TRIMESTRE,
-                        CODIGO_ENTIDAD,
-                        AMBITO_CODIGO,
-                        COD_VIGENCIA_DEL_GASTO,
-                        SUM(CAST(APROPIACION_INICIAL AS DECIMAL(18,2))) AS APROPIACION_INICIAL_TOTAL
-                    FROM %s
-                    WHERE COD_VIGENCIA_DEL_GASTO IN (1, 4)
-                    GROUP BY FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO, COD_VIGENCIA_DEL_GASTO
-                ),
-                pivoted AS (
-                    SELECT
-                        FECHA,
-                        TRIMESTRE,
-                        CODIGO_ENTIDAD,
-                        AMBITO_CODIGO,
-                        ISNULL([1], 0) AS APROPIACION_VIG1_11,
-                        ISNULL([4], 0) AS APROPIACION_VIG4_11
-                    FROM base
-                    PIVOT (
-                        MAX(APROPIACION_INICIAL_TOTAL)
-                        FOR COD_VIGENCIA_DEL_GASTO IN ([1],[4])
-                    ) AS p
-                ),
-                pvt_t1 AS (
-                    SELECT
-                        FECHA,
-                        CODIGO_ENTIDAD,
-                        AMBITO_CODIGO,
-                        APROPIACION_VIG1_11 AS APROPIACION_VIG1_T3_11,
-                        APROPIACION_VIG4_11 AS APROPIACION_VIG4_T3_11
-                    FROM pivoted
-                    WHERE TRIMESTRE = 3
-                ),
-                result AS (
-                    SELECT
-                        grd.FECHA,
-                        grd.TRIMESTRE,
-                        grd.CODIGO_ENTIDAD,
-                        grd.AMBITO_CODIGO AS AMBITO,
-                        p.APROPIACION_VIG1_11,
-                        pvt_t1.APROPIACION_VIG1_T3_11,
-                        p.APROPIACION_VIG4_11,
-                        pvt_t1.APROPIACION_VIG4_T3_11,
-                        CASE
-                            WHEN grd.TRIMESTRE = 3 THEN 'La entidad no debe ser comparada contra el mismo trimestre'
-                            WHEN p.APROPIACION_VIG1_11 IS NULL AND p.APROPIACION_VIG4_11 IS NULL THEN 'La entidad no registra programación de gastos'
-                            WHEN pvt_t1.APROPIACION_VIG1_T3_11 IS NULL OR pvt_t1.APROPIACION_VIG4_T3_11 IS NULL THEN 'La entidad no registra apropiación inicial para el trimestre 1'
-                            WHEN p.APROPIACION_VIG1_11 = pvt_t1.APROPIACION_VIG1_T3_11 AND p.APROPIACION_VIG4_11 = pvt_t1.APROPIACION_VIG4_T3_11 THEN 'La entidad satisface los criterios de validación'
-                            ELSE 'La entidad NO satisface los criterios de validación'
-                        END AS ALERTA_11
-                    FROM %s grd
-                    LEFT JOIN pivoted p
-                        ON grd.FECHA = p.FECHA
-                        AND grd.TRIMESTRE = p.TRIMESTRE
-                        AND grd.CODIGO_ENTIDAD = p.CODIGO_ENTIDAD
-                        AND grd.AMBITO_CODIGO = p.AMBITO_CODIGO
-                    LEFT JOIN pvt_t1
-                        ON grd.FECHA = pvt_t1.FECHA
-                        AND grd.CODIGO_ENTIDAD = pvt_t1.CODIGO_ENTIDAD
-                        AND grd.AMBITO_CODIGO = pvt_t1.AMBITO_CODIGO
-                    WHERE grd.TRIMESTRE IN (3, 6, 9, 12)
-                )
-                UPDATE r
-                SET 
-                    r.APROPIACION_VIG1_11 = v.APROPIACION_VIG1_11,
-                    r.APROPIACION_VIG1_T3_11 = v.APROPIACION_VIG1_T3_11,
-                    r.APROPIACION_VIG4_11 = v.APROPIACION_VIG4_11,
-                    r.APROPIACION_VIG4_T3_11 = v.APROPIACION_VIG4_T3_11,
-                    r.ALERTA_11 = v.ALERTA_11,
-                    r.REGLA_GENERAL_11 = CASE
-                        WHEN v.ALERTA_11 = 'La entidad satisface los criterios de validación' THEN 'CUMPLE'
-                        WHEN v.ALERTA_11 = 'La entidad no debe ser comparada contra el mismo trimestre' THEN 'NO APLICA'
-                        WHEN v.ALERTA_11 = 'La entidad no registra programación de gastos' THEN 'NO DATA'
-                        ELSE 'NO CUMPLE'
-                    END
-                FROM %s r
-                INNER JOIN result v
-                    ON r.FECHA = v.FECHA
-                    AND r.TRIMESTRE = v.TRIMESTRE
-                    AND r.CODIGO_ENTIDAD = v.CODIGO_ENTIDAD
-                    AND r.AMBITO_CODIGO = v.AMBITO;
-                """, progGastos, tablaReglas, tablaReglas);
-    
+
+        String updateQuery = String.format(
+                """
+                        WITH base AS (
+                            SELECT
+                                FECHA,
+                                TRIMESTRE,
+                                CODIGO_ENTIDAD,
+                                AMBITO_CODIGO,
+                                COD_VIGENCIA_DEL_GASTO,
+                                SUM(CAST(APROPIACION_INICIAL AS DECIMAL(18,2))) AS APROPIACION_INICIAL_TOTAL
+                            FROM %s
+                            WHERE COD_VIGENCIA_DEL_GASTO IN (1, 4)
+                            GROUP BY FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO, COD_VIGENCIA_DEL_GASTO
+                        ),
+                        pivoted AS (
+                            SELECT
+                                FECHA,
+                                TRIMESTRE,
+                                CODIGO_ENTIDAD,
+                                AMBITO_CODIGO,
+                                ISNULL([1], 0) AS APROPIACION_VIG1_11,
+                                ISNULL([4], 0) AS APROPIACION_VIG4_11
+                            FROM base
+                            PIVOT (
+                                MAX(APROPIACION_INICIAL_TOTAL)
+                                FOR COD_VIGENCIA_DEL_GASTO IN ([1],[4])
+                            ) AS p
+                        ),
+                        pvt_t1 AS (
+                            SELECT
+                                FECHA,
+                                CODIGO_ENTIDAD,
+                                AMBITO_CODIGO,
+                                APROPIACION_VIG1_11 AS APROPIACION_VIG1_T3_11,
+                                APROPIACION_VIG4_11 AS APROPIACION_VIG4_T3_11
+                            FROM pivoted
+                            WHERE TRIMESTRE = 3
+                        ),
+                        result AS (
+                            SELECT
+                                grd.FECHA,
+                                grd.TRIMESTRE,
+                                grd.CODIGO_ENTIDAD,
+                                grd.AMBITO_CODIGO AS AMBITO,
+                                p.APROPIACION_VIG1_11,
+                                pvt_t1.APROPIACION_VIG1_T3_11,
+                                p.APROPIACION_VIG4_11,
+                                pvt_t1.APROPIACION_VIG4_T3_11,
+                                CASE
+                                    WHEN grd.TRIMESTRE = 3 THEN 'La entidad no debe ser comparada contra el mismo trimestre'
+                                    WHEN p.APROPIACION_VIG1_11 IS NULL AND p.APROPIACION_VIG4_11 IS NULL THEN 'La entidad no registra programación de gastos'
+                                    WHEN pvt_t1.APROPIACION_VIG1_T3_11 IS NULL OR pvt_t1.APROPIACION_VIG4_T3_11 IS NULL THEN 'La entidad no registra apropiación inicial para el trimestre 1'
+                                    WHEN p.APROPIACION_VIG1_11 = pvt_t1.APROPIACION_VIG1_T3_11 AND p.APROPIACION_VIG4_11 = pvt_t1.APROPIACION_VIG4_T3_11 THEN 'La entidad satisface los criterios de validación'
+                                    ELSE 'La entidad NO satisface los criterios de validación'
+                                END AS ALERTA_11
+                            FROM %s grd
+                            LEFT JOIN pivoted p
+                                ON grd.FECHA = p.FECHA
+                                AND grd.TRIMESTRE = p.TRIMESTRE
+                                AND grd.CODIGO_ENTIDAD = p.CODIGO_ENTIDAD
+                                AND grd.AMBITO_CODIGO = p.AMBITO_CODIGO
+                            LEFT JOIN pvt_t1
+                                ON grd.FECHA = pvt_t1.FECHA
+                                AND grd.CODIGO_ENTIDAD = pvt_t1.CODIGO_ENTIDAD
+                                AND grd.AMBITO_CODIGO = pvt_t1.AMBITO_CODIGO
+                            WHERE grd.TRIMESTRE IN (3, 6, 9, 12)
+                        )
+                        UPDATE r
+                        SET
+                            r.APROPIACION_VIG1_11 = v.APROPIACION_VIG1_11,
+                            r.APROPIACION_VIG1_T3_11 = v.APROPIACION_VIG1_T3_11,
+                            r.APROPIACION_VIG4_11 = v.APROPIACION_VIG4_11,
+                            r.APROPIACION_VIG4_T3_11 = v.APROPIACION_VIG4_T3_11,
+                            r.ALERTA_11 = v.ALERTA_11,
+                            r.REGLA_GENERAL_11 = CASE
+                                WHEN v.ALERTA_11 = 'La entidad satisface los criterios de validación' THEN 'CUMPLE'
+                                WHEN v.ALERTA_11 = 'La entidad no debe ser comparada contra el mismo trimestre' THEN 'NO APLICA'
+                                WHEN v.ALERTA_11 = 'La entidad no registra programación de gastos' THEN 'NO DATA'
+                                ELSE 'NO CUMPLE'
+                            END
+                        FROM %s r
+                        INNER JOIN result v
+                            ON r.FECHA = v.FECHA
+                            AND r.TRIMESTRE = v.TRIMESTRE
+                            AND r.CODIGO_ENTIDAD = v.CODIGO_ENTIDAD
+                            AND r.AMBITO_CODIGO = v.AMBITO;
+                        """,
+                progGastos, tablaReglas, tablaReglas);
+
         jdbcTemplate.execute(updateQuery);
     }
 

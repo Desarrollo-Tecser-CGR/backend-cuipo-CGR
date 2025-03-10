@@ -1,4 +1,4 @@
-package com.cgr.base.application.rules.general.dto;
+package com.cgr.base.application.rulesEngine.management.dto;
 
 import java.util.List;
 
