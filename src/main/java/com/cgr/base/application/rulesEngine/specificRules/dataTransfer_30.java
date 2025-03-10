@@ -52,15 +52,11 @@ public class dataTransfer_30 {
                 "[ALERTA_CAS0150] VARCHAR(50)" +
                 " ) " +
                 " END";
-        try {
-            Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
+                Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
 
-            if (count == 0) {
-                entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
-            }
-        } catch (Exception e) {
-            System.out.println("Error al verificar o crear la tabla: " + e.getMessage());
-        }
+                if (count == 0) {
+                    entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
+                }
     }
 
     public void agregateDataInitE030() {

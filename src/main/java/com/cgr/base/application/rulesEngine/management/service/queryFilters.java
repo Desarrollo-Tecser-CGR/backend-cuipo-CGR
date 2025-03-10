@@ -138,17 +138,24 @@ public class queryFilters {
     public List<Map<String, Object>> getFilteredRecordsSR(String fecha, String trimestre, String ambitoCodigo,
             String entidadCodigo, String reporteCodigo) {
 
-                String tablaConsulta = (reporteCodigo != null && reporteCodigo.matches("E0\\d{2}")) 
-                ? reporteCodigo 
+        // Determinar la tabla a consultar
+        String tablaConsulta = (reporteCodigo != null && reporteCodigo.matches("E0\\d{2}"))
+                ? reporteCodigo
                 : tablaEspecificas;
 
-        if (!tablaExiste(tablaConsulta))
-            return List.of();
 
+        if (!tablaExiste(tablaConsulta)) {
+            return List.of();
+        }
+
+        // Obtener columnas válidas
         List<String> columnasValidas = obtenerColumnasValidas(tablaConsulta);
-        if (columnasValidas.isEmpty())
-            return List.of();
 
+        if (columnasValidas.isEmpty()) {
+            return List.of();
+        }
+
+        // Construcción de la consulta SQL
         StringBuilder sql = new StringBuilder("SELECT ");
         sql.append(String.join(", ", columnasValidas)).append(" FROM ").append(tablaConsulta).append(" WHERE 1=1");
 

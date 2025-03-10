@@ -64,15 +64,11 @@ public class dataParameterInit {
                                 "ALERTA_26_CA0110 VARCHAR(100) " +
                                 " ) " +
                                 " END";
-                try {
-                        Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
+                                Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
 
-                        if (count == 0) {
-                                entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
-                        }
-                } catch (Exception e) {
-                        System.out.println("Error al verificar o crear la tabla: " + e.getMessage());
-                }
+                                if (count == 0) {
+                                        entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
+                                }
         }
 
         private void tableMedidasICLD() {
@@ -109,15 +105,11 @@ public class dataParameterInit {
                                 "ALERTA_24_CA0096 VARCHAR(100) " +
                                 " ) " +
                                 " END";
-                try {
-                        Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
+                                Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
 
-                        if (count == 0) {
-                                entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
-                        }
-                } catch (Exception e) {
-                        System.out.println("Error al verificar o crear la tabla: " + e.getMessage());
-                }
+                                if (count == 0) {
+                                        entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
+                                }
         }
 
         @Async

@@ -52,17 +52,18 @@ public class managementRules extends AbstractController {
     @PostMapping("/specific/data")
     public ResponseEntity<?> getSpecificRules(
             @RequestBody(required = false) Map<String, String> filters) {
-
+    
         String fecha = filters != null ? filters.get("fecha") : null;
         String trimestre = filters != null ? filters.get("trimestre") : null;
         String ambito = filters != null ? filters.get("ambito") : null;
         String entidad = filters != null ? filters.get("entidad") : null;
         String reporte = filters != null ? filters.get("reporte") : null;
-
-        List<Map<String, Object>> result = Filter.getFilteredRecordsSR(fecha, trimestre, ambito, entidad,
-        reporte);
-        return requestResponse(result, "General Rules successfully retrieved.", HttpStatus.OK, true);
+    
+        List<Map<String, Object>> result = Filter.getFilteredRecordsSR(fecha, trimestre, ambito, entidad, reporte);
+    
+        return requestResponse(result, "Specific Rules successfully retrieved.", HttpStatus.OK, true);
     }
+    
 
     @GetMapping("/general/options")
     public ResponseEntity<?> getListOptionsG() {
