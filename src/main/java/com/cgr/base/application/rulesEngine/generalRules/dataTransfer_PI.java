@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +24,6 @@ public class dataTransfer_PI {
     @Value("${TABLA_PROG_GASTOS}")
     private String progGastos;
 
-    @Async
     @Transactional
     public void applyGeneralRulesPI() {
 

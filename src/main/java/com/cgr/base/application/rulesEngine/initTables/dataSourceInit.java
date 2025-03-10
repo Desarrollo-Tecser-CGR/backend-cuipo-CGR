@@ -1,7 +1,5 @@
 package com.cgr.base.application.rulesEngine.initTables;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -41,14 +39,14 @@ public class dataSourceInit {
                 this.tablas = new String[] { progIngresos, ejecIngresos, progGastos, ejecGastos };
 
                 // Paso 1: Agregar columnas TRIMESTRE y FECHA
-                addComputedColumns();
-                generatePeriod();
+                //addComputedColumns();
+                //generatePeriod();
 
                 // Paso 3: Consolidar Datos Unicos en la Tabla de Destino.
-                transferUniqueData();
+                //transferUniqueData();
 
                 // Paso 2: Crear Indices en las Tablas de Origen.
-                createIndexes();
+                //createIndexes();
 
                 createSpecificDataTable();
                 aggregatedDataSpecificTable();
@@ -83,10 +81,12 @@ public class dataSourceInit {
 
         private boolean existColumn(String tabla, String columna) {
                 String sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS " +
-                                "WHERE TABLE_NAME = '" + tabla + "' " +
-                                "AND COLUMN_NAME = '" + columna + "'";
-                Number count = (Number) entityManager.createNativeQuery(sql).getSingleResult();
-                return count != null && count.intValue() > 0;
+                                "WHERE TABLE_NAME = ? AND COLUMN_NAME = ?";
+                Integer count = (Integer) entityManager.createNativeQuery(sql)
+                                .setParameter(1, tabla)
+                                .setParameter(2, columna)
+                                .getSingleResult();
+                return count != null && count > 0;
         }
 
         private void generatePeriod() {
@@ -129,9 +129,11 @@ public class dataSourceInit {
         }
 
         private boolean tableExists(String tableName) {
-                String sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '" + tableName + "'";
-                Number count = (Number) entityManager.createNativeQuery(sql).getSingleResult();
-                return count != null && count.intValue() > 0;
+                String sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?";
+                Integer count = (Integer) entityManager.createNativeQuery(sql)
+                                .setParameter(1, tableName)
+                                .getSingleResult();
+                return count != null && count > 0;
         }
 
         private void createGeneralRulesTable() {
@@ -162,15 +164,13 @@ public class dataSourceInit {
         }
 
         private boolean indexExists(String tableName, String indexName) {
-                String sql = "SELECT COUNT(*) FROM sys.indexes WHERE name = '" + indexName + "' " +
-                             "AND object_id = OBJECT_ID('" + tableName + "')";
-                List results = entityManager.createNativeQuery(sql).getResultList();
-                if (results.isEmpty()) {
-                    return false;
-                }
-                Number count = (Number) results.get(0);
-                return count != null && count.intValue() > 0;
-            }
+                String sql = "SELECT COUNT(*) FROM sys.indexes WHERE name = ? AND object_id = OBJECT_ID(?)";
+                Integer count = (Integer) entityManager.createNativeQuery(sql)
+                                .setParameter(1, indexName)
+                                .setParameter(2, tableName)
+                                .getSingleResult();
+                return count != null && count > 0;
+        }
 
         private void dropIndex(String tableName, String indexName) {
                 String sqlDrop = "DROP INDEX [" + indexName + "] ON [" + tableName + "]";
@@ -178,7 +178,7 @@ public class dataSourceInit {
         }
 
         private void createSpecificDataTable() {
-                String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'TABLA_SPECIFIC_RULES')"
+                String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'SPECIFIC_RULES_DATA')"
                                 +
                                 " BEGIN " +
                                 " CREATE TABLE [" + tablaSpecific + "] (" +

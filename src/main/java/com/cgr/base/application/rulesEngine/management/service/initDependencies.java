@@ -76,9 +76,9 @@ public class initDependencies {
     
     public void initializeDependencies() {
 
-        //Parametria.processTablesSource();
+        Parametria.processTablesSource();
         Categorias.initCategoryTable();
-        //MotorReglas.processTablesRules();
+        MotorReglas.processTablesRules();
 
     }
 
