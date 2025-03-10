@@ -1,11 +1,13 @@
+
 package com.cgr.base.infrastructure.persistence.entity.role;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
 import com.cgr.base.infrastructure.persistence.entity.Menu.SubMenuEntity;
 import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -57,15 +59,27 @@ public class RoleEntity {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "America/Bogota")
     private Date dateModify;
 
-    @JsonIgnoreProperties({ "roles", "handler", "hibernateLazyInitializer" })
     @ManyToMany(mappedBy = "roles")
-    private List<UserEntity> users;
+    @JsonIgnore  // Evitas recursión o lazy initialization
+    private Set<UserEntity> users;
 
+    // Relación con SubMenu (tabla roles_submenu)
     @ManyToMany
-    @JsonIgnoreProperties({ "roles", "handler", "hibernateLazyInitializer" })
-    @JsonIgnore
-    @JoinTable(name = "roles_submenu", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "submenu_id"), uniqueConstraints = {
-            @UniqueConstraint(columnNames = { "role_id", "submenu_id" }) })
-    private List<SubMenuEntity> subMenus;
+    @JoinTable(
+        name = "roles_submenu",
+        joinColumns = @JoinColumn(name = "role_id"),
+        inverseJoinColumns = @JoinColumn(name = "submenu_id"),
+        uniqueConstraints = { 
+            @UniqueConstraint(columnNames = { "role_id", "submenu_id" })
+        }
+    )
+    @JsonIgnore // Si no quieres que en el JSON aparezcan los submenús
+    private Set<SubMenuEntity> subMenus;
+
+    // Relación inversa con Menu (tabla menu_roles)
+    @ManyToMany(mappedBy = "roles")
+    @JsonIgnoreProperties({"roles", "children"})
+    private Set<Menu> menus;
 
 }
+
