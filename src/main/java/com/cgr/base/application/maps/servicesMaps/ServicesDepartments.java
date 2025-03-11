@@ -1,10 +1,9 @@
 package com.cgr.base.application.maps.servicesMaps;
 
-
 import com.cgr.base.application.maps.entity.departments.EntityDepartments;
-import com.cgr.base.application.maps.entity.dtoMaps.deparment.DepartmentsDto;
-import com.cgr.base.application.maps.entity.dtoMaps.deparment.DepartmentsDtoDp;
-import com.cgr.base.application.maps.entity.dtoMaps.municipality.MunicipalityDto;
+import com.cgr.base.domain.dto.dtoMaps.deparment.DepartmentsDto;
+import com.cgr.base.domain.dto.dtoMaps.deparment.DepartmentsDtoDp;
+import com.cgr.base.domain.dto.dtoMaps.municipality.MunicipalityDto;
 import com.cgr.base.application.maps.repositoryMaps.RepositoryDepartment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+/*
 @Service
 public class ServicesDepartments {
     @Autowired
@@ -24,7 +23,7 @@ public class ServicesDepartments {
     @Autowired
      private ServiceImage serviceImage;
 
-    public ResponseEntity<Map<String, Object>> searchDepartment(long id) {
+    public ResponseEntity<Map<String, Object>> searchDepartment(Integer id) {
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -148,4 +147,4 @@ public class ServicesDepartments {
     }
 
 }
-
+*/

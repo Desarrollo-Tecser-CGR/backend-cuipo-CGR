@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.Authentication;
 
-import com.cgr.base.application.auth.dto.AuthResponseDto;
+import com.cgr.base.application.auth.dtoAuth.AuthResponseDto;
 import com.cgr.base.application.exception.customException.InvalidVerificationTokenException;
 import com.cgr.base.domain.models.entity.Logs.RoleEntity;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;

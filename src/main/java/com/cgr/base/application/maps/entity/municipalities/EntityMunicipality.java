@@ -1,6 +1,5 @@
 package com.cgr.base.application.maps.entity.municipalities;
 
-
 import com.cgr.base.application.maps.entity.departments.EntityDepartments;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -16,7 +15,7 @@ public class EntityMunicipality {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long municipality_id;;
+    private Integer municipality_id;;
     private String id;
     private Integer gid;
     private String dpto_ccdgo;
@@ -36,7 +35,5 @@ public class EntityMunicipality {
     @ManyToOne
     @JoinColumn(name = "dpto_ccdgo", referencedColumnName = "dpto_ccdgo", insertable = false, updatable = false)
     private EntityDepartments department;
-
-
 
 }

@@ -1,7 +1,7 @@
 package com.cgr.base.application.maps.servicesMaps;
 
-import com.cgr.base.application.maps.entity.dtoMaps.municipality.MunicipalityDto;
-import com.cgr.base.application.maps.entity.dtoMaps.municipality.MunicipalityDtoDp;
+import com.cgr.base.domain.dto.dtoMaps.municipality.MunicipalityDto;
+import com.cgr.base.domain.dto.dtoMaps.municipality.MunicipalityDtoDp;
 import com.cgr.base.application.maps.entity.municipalities.EntityMunicipality;
 import com.cgr.base.application.maps.repositoryMaps.RepositoryMunicipality;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
+/*
 @Service
 public class ServicesMunicipalitie {
 
@@ -90,3 +90,5 @@ public class ServicesMunicipalitie {
         }
     }
 }
+
+ */
