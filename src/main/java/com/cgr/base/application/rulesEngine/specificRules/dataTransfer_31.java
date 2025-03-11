@@ -1,7 +1,6 @@
 package com.cgr.base.application.rulesEngine.specificRules;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +19,6 @@ public class dataTransfer_31 {
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Async
     @Transactional
     public void applySpecificRule31() {
 
@@ -54,15 +52,11 @@ public class dataTransfer_31 {
                 "[CA0159] VARCHAR(50)," +
                 " ) " +
                 " END";
-        try {
-            Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
+                Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
 
-            if (count == 0) {
-                entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
-            }
-        } catch (Exception e) {
-            System.out.println("Error al verificar o crear la tabla: " + e.getMessage());
-        }
+                if (count == 0) {
+                    entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
+                }
     }
 
     public void agregateDataInitE031() {
@@ -189,6 +183,4 @@ public class dataTransfer_31 {
         entityManager.createNativeQuery(sql).executeUpdate();
     }
 
-    
-    
 }

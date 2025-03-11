@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,18 +24,7 @@ public class dataTransfer_22 {
     @Value("${TABLA_EJEC_INGRESOS}")
     private String ejecIngresos;
 
-    @Async
     @Transactional
-    public void applySpecificRule22() {
-
-        applyGeneralRule22A();
-        applyGeneralRule22B();
-        applyGeneralRule22C();
-        applyGeneralRule22D();
-        applyGeneralRule22E();
-
-    }
-
     public void applyGeneralRule22A() {
 
         List<String> requiredColumns = Arrays.asList("ICLD");
@@ -119,6 +107,7 @@ public class dataTransfer_22 {
      * ALERTA_22_ICLD_NO_EN_INGRESOS_CA078
      * - Actualiza cada columna con la lista de cuentas que falten.
      */
+    @Transactional
     public void applyGeneralRule22B() {
 
         // 1) Define las columnas a verificar
@@ -248,6 +237,7 @@ public class dataTransfer_22 {
         jdbcTemplate.execute(updateQuery);
     }
 
+    @Transactional
     public void applyGeneralRule22C() {
 
         // 1) Verifica/crea la columna ALERTA_22_CA0080
@@ -344,6 +334,7 @@ public class dataTransfer_22 {
      * - Cuando NOM_TIPO_NORMA = 'NO APLICA', revisa que NUMERO_FECHA_NORMA
      * no contenga ciertos patrones: "0%", "%NA%", "%NO APLICA%", etc.
      */
+    @Transactional
     public void applyGeneralRule22D() {
 
         // 1) Verifica/crea la columna ALERTA_22_CA0082
@@ -436,6 +427,7 @@ public class dataTransfer_22 {
         jdbcTemplate.execute(updateQuery);
     }
 
+    @Transactional
     public void applyGeneralRule22E() {
 
         // --------------------------------------------------------------------

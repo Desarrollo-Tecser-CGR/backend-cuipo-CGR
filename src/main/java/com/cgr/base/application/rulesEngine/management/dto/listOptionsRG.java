@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class listOptionsDto {
+public class listOptionsRG {
     private List<String> fechas;
     private List<String> trimestres;
     private List<EntidadDTO> entidades;

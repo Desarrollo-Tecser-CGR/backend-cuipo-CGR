@@ -1,3 +1,4 @@
+
 package com.cgr.base.infrastructure.persistence.repository.user;
 
 import java.util.List;

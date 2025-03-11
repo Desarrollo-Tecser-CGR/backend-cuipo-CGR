@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class dataTransfer_EI {
@@ -23,15 +22,7 @@ public class dataTransfer_EI {
 
     @Value("${TABLA_PROG_INGRESOS}")
     private String progIngresos;
-
-    @Transactional
-    public void applyGeneralRulesEI() {
-
-        applyGeneralRule5();
-        applyGeneralRule6();
-
-    }
-
+    
     // Regla 5: Recaudo total por periodos.
     public void applyGeneralRule5() {
         List<String> requiredColumns = Arrays.asList(
