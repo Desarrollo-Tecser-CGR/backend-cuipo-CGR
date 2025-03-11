@@ -6,6 +6,6 @@ import com.cgr.base.domain.dto.dtoEntityProvitionalPlan.EntityProvitionalPlanDto
 
 public interface IEntityProvitionalPlanUseCase {
 
-    public abstract List<EntityProvitionalPlanDto> findAllEntitysProvitionalPlan();
+    public List<EntityProvitionalPlanDto> findAllEntitysProvitionalPlan();
 
 }

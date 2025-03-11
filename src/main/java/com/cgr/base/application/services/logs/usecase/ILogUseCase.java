@@ -7,7 +7,9 @@ import com.cgr.base.domain.dto.dtoLogs.LogDto;
 import com.cgr.base.domain.models.entity.Logs.LogEntity;
 
 public interface ILogUseCase {
-    public abstract List<LogDto> logFindAll();
 
-    public abstract LogEntity createLog(AuthRequestDto userRequest);
+    public List<LogDto> logFindAll();
+
+    public LogEntity createLog(AuthRequestDto userRequest);
+
 }
