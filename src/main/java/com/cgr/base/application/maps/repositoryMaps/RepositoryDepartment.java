@@ -9,9 +9,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface RepositoryDepartment extends JpaRepository<EntityDepartments, Long> {
+public interface RepositoryDepartment extends JpaRepository<EntityDepartments, Integer> {
 
-    Optional<EntityDepartments> findById(Long id);
+
 
     @Query("SELECT e FROM EntityDepartments e WHERE e.dpto_ccdgo = :dpto_ccdgo")
     Optional<EntityDepartments> findByDpto_ccdgo(@Param("dpto_ccdgo") String dpto_ccdgo);

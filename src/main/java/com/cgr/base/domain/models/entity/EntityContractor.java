@@ -9,7 +9,7 @@ import lombok.Data;
 
 public class EntityContractor {
 
-    private Long contractor_id;
+    private Integer contractor_id;
     private String contractor_nit;
     private String contractor_name;
 
