@@ -20,7 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.rulesEngine.management.dto.listOptionsEG;
 import com.cgr.base.application.rulesEngine.management.dto.listOptionsRG;
-import com.cgr.base.application.rulesEngine.management.service.exportService;
+import com.cgr.base.application.rulesEngine.management.service.exportCSVgeneral;
+import com.cgr.base.application.rulesEngine.management.service.exportCSVspecific;
 import com.cgr.base.application.rulesEngine.management.service.queryFilters;
 import com.cgr.base.presentation.controller.AbstractController;
 
@@ -32,7 +33,10 @@ public class managementRules extends AbstractController {
     private queryFilters Filter;
 
     @Autowired
-    private exportService Export;
+    private exportCSVgeneral GeneralCSV;
+
+    @Autowired
+    private exportCSVspecific SpecificCSV;
 
     @PostMapping("/general/data")
     public ResponseEntity<?> getGeneralRules(
@@ -78,9 +82,29 @@ public class managementRules extends AbstractController {
     }
 
     @PostMapping("/general/export-csv")
-    public ResponseEntity<byte[]> exportFilteredDataToCsv(@RequestBody(required = false) Map<String, String> filters) {
+    public ResponseEntity<byte[]> exportFilteredDataToCsvGR(@RequestBody(required = false) Map<String, String> filters) {
         try {
-            ByteArrayOutputStream csvStream = Export.generateCsvStream(filters);
+            ByteArrayOutputStream csvStream = GeneralCSV.generateCsvStream(filters);
+            byte[] csvBytes = csvStream.toByteArray();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.TEXT_PLAIN);
+            headers.setContentDisposition(ContentDisposition.attachment()
+                    .filename("filtered_data.csv")
+                    .build());
+
+            return new ResponseEntity<>(csvBytes, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error generating CSV file.".getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    @PostMapping("/specific/export-csv")
+    public ResponseEntity<byte[]> exportFilteredDataToCsvSR(@RequestBody(required = false) Map<String, String> filters) {
+        try {
+            ByteArrayOutputStream csvStream = SpecificCSV.generateCsvStream(filters);
             byte[] csvBytes = csvStream.toByteArray();
 
             HttpHeaders headers = new HttpHeaders();
