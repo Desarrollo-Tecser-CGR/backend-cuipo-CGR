@@ -1,4 +1,4 @@
-package com.cgr.base.application.notifications;
+package com.cgr.base.infrastructure.config.configWebSocket;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;

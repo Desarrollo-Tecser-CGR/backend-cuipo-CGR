@@ -1,4 +1,4 @@
-package com.cgr.base.application.notificaction.entity;
+package com.cgr.base.domain.models.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,7 +13,9 @@ import lombok.NoArgsConstructor;
 public class EntityNotification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
+    private String entity;
+    private Integer numbercontract;
     private  String subject;
     private String notification;
 

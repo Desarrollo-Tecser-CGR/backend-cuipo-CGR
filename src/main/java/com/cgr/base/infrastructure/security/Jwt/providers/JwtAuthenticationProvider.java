@@ -14,6 +14,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.Authentication;
+import com.cgr.base.domain.dto.dtoAuth.AuthResponseDto;
 
 import com.cgr.base.domain.dto.dtoAuth.AuthResponseDto;
 import com.cgr.base.application.exception.customException.InvalidVerificationTokenException;
@@ -39,7 +40,6 @@ public class JwtAuthenticationProvider {
     private HashMap<String, AuthResponseDto> listToken = new HashMap<>();
     private static final Set<String> blacklistedTokens = new HashSet<>();
 
-
     /**
      * Crea un nuevo jwt en base al cliente recibido por parametro y lo agrega a la
      * lista blanca
@@ -48,7 +48,8 @@ public class JwtAuthenticationProvider {
      * @return Jwt creado
      * @throws JsonProcessingException
      */
-    public String createToken(AuthResponseDto customerJwt, List<RoleEntity> roles, int time ) throws JsonProcessingException {
+    public String createToken(AuthResponseDto customerJwt, List<RoleEntity> roles, int time)
+            throws JsonProcessingException {
 
         String tokenCreated = jwtService.createToken(customerJwt, roles, time);
 
@@ -104,7 +105,7 @@ public class JwtAuthenticationProvider {
 
     }
 
-    //Metodo para matar el token
+    // Metodo para matar el token
     public static void revokeToken(String token) {
         blacklistedTokens.add(token);
     }
@@ -149,7 +150,7 @@ public class JwtAuthenticationProvider {
 
             if (deleteToken(token).equals(" sesion cerrada")) {
                 List<RoleEntity> roles = new ArrayList<>();
-                return createToken(userDto, roles,3600000);
+                return createToken(userDto, roles, 3600000);
             }
             return "";
 
