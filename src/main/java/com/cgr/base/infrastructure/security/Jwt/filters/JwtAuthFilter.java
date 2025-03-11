@@ -68,7 +68,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         System.out.println("headers:" + request);
         System.out.println("headers:" + request.getHeaders(HttpHeaders.AUTHORIZATION).toString());
         String requestUri = request.getRequestURI();
-        return urlsToSkip.stream().anyMatch(uri -> requestUri.startsWith(uri));
+        return requestUri.equals("/ws/info") || requestUri.startsWith("/ws/") || urlsToSkip.stream().anyMatch(uri -> requestUri.startsWith(uri));
+
     }
 
     /**
