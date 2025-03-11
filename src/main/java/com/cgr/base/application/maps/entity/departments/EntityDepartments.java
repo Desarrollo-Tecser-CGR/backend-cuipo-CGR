@@ -17,7 +17,7 @@ public class EntityDepartments {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long department_id;
+    private Integer department_id;
     private String id;
     private Integer gid;
     private String dpto_ccdgo;

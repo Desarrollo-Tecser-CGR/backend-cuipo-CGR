@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+/*
 @Service
 public class ServicesDepartments {
     @Autowired
@@ -23,7 +23,7 @@ public class ServicesDepartments {
     @Autowired
      private ServiceImage serviceImage;
 
-    public ResponseEntity<Map<String, Object>> searchDepartment(long id) {
+    public ResponseEntity<Map<String, Object>> searchDepartment(Integer id) {
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -147,4 +147,4 @@ public class ServicesDepartments {
     }
 
 }
-
+*/

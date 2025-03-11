@@ -15,7 +15,7 @@ public class EntityMunicipality {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long municipality_id;;
+    private Integer municipality_id;;
     private String id;
     private Integer gid;
     private String dpto_ccdgo;
