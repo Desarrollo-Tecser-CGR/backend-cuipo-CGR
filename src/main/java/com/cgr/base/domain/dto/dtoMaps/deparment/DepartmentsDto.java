@@ -5,7 +5,6 @@ import lombok.Data;
 
 import java.util.List;
 
-@Data
 public class DepartmentsDto {
 
     private Integer department_id;

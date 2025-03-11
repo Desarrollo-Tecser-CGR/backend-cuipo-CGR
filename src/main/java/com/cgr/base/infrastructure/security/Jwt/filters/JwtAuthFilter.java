@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.cgr.base.domain.dto.dtoAuth.AuthResponseDto;
+
 import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -49,8 +50,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/api/v1/auth/**",
             "/auth",
             "/auth/",
-            "/api/v1/departments",
-            "/api/v1/municipality");
+            "/swagger-ui",
+            "/ws/**",
+            "/app/**",
+            "/topic/**");
 
     /**
      * Verifica si a la URI no se le debe aplicar el filtro
@@ -96,12 +99,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String requestUri = request.getRequestURI();
 
-
-        if (requestUri.startsWith("/v3/api-docs/") || requestUri.equals("/v3/api-docs") || requestUri.startsWith("/swagger-ui/")) {
+        if (requestUri.startsWith("/v3/api-docs/") || requestUri.equals("/v3/api-docs")
+                || requestUri.startsWith("/swagger-ui/")) {
             filterChain.doFilter(request, response);
             return;
         }
-
 
         if (header == null) {
             responseHandler(response, "Token requerido", HttpServletResponse.SC_FORBIDDEN);

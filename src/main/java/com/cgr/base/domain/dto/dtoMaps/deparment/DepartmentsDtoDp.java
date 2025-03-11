@@ -2,7 +2,6 @@ package com.cgr.base.domain.dto.dtoMaps.deparment;
 
 import lombok.Data;
 
-@Data
 public class DepartmentsDtoDp
 
 {

@@ -3,7 +3,9 @@ package com.cgr.base.application.services.auth.service;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.stereotype.Service;
+
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,12 +32,11 @@ public class ValidateService {
                 response.put("statusCode", 498);
                 response.put("status", "Error");
                 return response;
-            }
-
-            else {
+            } else {
                 response.put("message", "Token valid");
                 response.put("statusCode", 200);
                 response.put("status", "success");
+
                 return response;
             }
 

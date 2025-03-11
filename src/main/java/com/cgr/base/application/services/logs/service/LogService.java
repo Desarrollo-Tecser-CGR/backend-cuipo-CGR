@@ -10,6 +10,7 @@ import com.cgr.base.domain.dto.dtoAuth.AuthRequestDto;
 import com.cgr.base.domain.dto.dtoLogs.LogDto;
 import com.cgr.base.application.services.logs.usecase.ILogUseCase;
 import com.cgr.base.infrastructure.repositories.repositories.repositoryActiveDirectory.ILogRepository;
+
 import com.cgr.base.domain.models.entity.Logs.LogEntity;
 import com.cgr.base.infrastructure.utilities.DtoMapper;
 
