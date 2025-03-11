@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cgr.base.application.auth.dto.AuthRequestDto;
+import com.cgr.base.application.auth.dtoAuth.AuthRequestDto;
 import com.cgr.base.application.logs.dto.LogDto;
 import com.cgr.base.application.logs.usecase.ILogUseCase;
 import com.cgr.base.domain.repository.ILogRepository;
