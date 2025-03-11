@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 public class EntityRight {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long right_id;
+    private Integer right_id;
     private String right_name;
 }
