@@ -1,4 +1,4 @@
-package com.cgr.base.application.notifications.controller;
+package com.cgr.base.application.notificationsWs.configWebSocket;
 
 public enum WsChatMessageType {
 

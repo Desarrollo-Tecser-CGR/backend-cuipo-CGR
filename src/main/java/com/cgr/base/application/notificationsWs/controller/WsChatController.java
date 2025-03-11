@@ -1,5 +1,6 @@
-package com.cgr.base.application.notifications.controller;
+package com.cgr.base.application.notificationsWs.controller;
 
+import com.cgr.base.application.notificationsWs.config.WsChatMessage;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;

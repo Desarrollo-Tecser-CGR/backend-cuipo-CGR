@@ -1,4 +1,4 @@
-package com.cgr.base.application.notifications.controller;
+package com.cgr.base.application.notificationsWs.configWebSocket;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

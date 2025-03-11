@@ -1,0 +1,16 @@
+[33mce13a33[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mUnitTest[m[33m)[m HEAD@{0}: reset: moving to HEAD~1
+[33m38fcc48[m HEAD@{1}: commit: Update controller
+[33mce13a33[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mUnitTest[m[33m)[m HEAD@{2}: revert: Revert "interface refactoring"
+[33m28e6a03[m HEAD@{3}: reset: moving to 28e6a03c76e7f95fb46de1f7d44f43d50cd5b1ff
+[33md8450e1[m[33m ([m[1;31morigin/Dev-Jhon[m[33m, [m[1;32mDev-Jhon[m[33m)[m HEAD@{4}: checkout: moving from Dev-Jhon to UnitTest
+[33md8450e1[m[33m ([m[1;31morigin/Dev-Jhon[m[33m, [m[1;32mDev-Jhon[m[33m)[m HEAD@{5}: checkout: moving from UnitTest to Dev-Jhon
+[33md8450e1[m[33m ([m[1;31morigin/Dev-Jhon[m[33m, [m[1;32mDev-Jhon[m[33m)[m HEAD@{6}: checkout: moving from Dev-Jhon to UnitTest
+[33md8450e1[m[33m ([m[1;31morigin/Dev-Jhon[m[33m, [m[1;32mDev-Jhon[m[33m)[m HEAD@{7}: commit: update changes
+[33m28e6a03[m HEAD@{8}: commit: interface refactoring
+[33m1933d30[m[33m ([m[1;31morigin/dev-santiago[m[33m)[m HEAD@{9}: commit: Alter deparments
+[33mc39274b[m HEAD@{10}: commit: Alter deparments
+[33m7c4d5cf[m HEAD@{11}: commit: The service is added to consume the images of the municipalities, which are stored in the backend, the images and contracts folder was eliminated
+[33m55c495f[m HEAD@{12}: commit: feat: the integration of the map service is carried out, the contracts folder is deleted and a folder is created in resources with the images of the municipalities to be consumed
+[33m298a9a6[m HEAD@{13}: commit: feat:Se crean las entidades para los mapas y sus respectivos servicios y controladores para consumir el servicio hacia los mapas de la lading
+[33m823d200[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/Qa[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{14}: checkout: moving from main to Dev-Jhon
+[33m823d200[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/Qa[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{15}: clone: from https://github.com/Desarrollo-Tecser-CGR/backend-T302-CGR.git
