@@ -1,15 +1,10 @@
 package com.cgr.base.domain.models.entity.Menu;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.NoArgsConstructor;
-
 
 @Entity
 @Data

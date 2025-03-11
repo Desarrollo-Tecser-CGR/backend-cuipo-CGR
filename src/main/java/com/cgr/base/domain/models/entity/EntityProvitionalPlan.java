@@ -1,5 +1,7 @@
 package com.cgr.base.domain.models.entity;
 
+import java.util.Set;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,9 +13,16 @@ import lombok.NoArgsConstructor;
 @Data
 @Table(name = "entities_provisional_plan")
 public class EntityProvitionalPlan {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer entity_id;
+
     private String entity_nit;
+
     private String entity_name;
+
+    @ManyToMany
+    @JoinTable(name = "entities_indicators", joinColumns = @JoinColumn(name = "entity_id"), inverseJoinColumns = @JoinColumn(name = "indicator_id"))
+    private Set<EntityIndicator> indicators;
 }
