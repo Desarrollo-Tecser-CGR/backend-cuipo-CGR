@@ -1,8 +1,7 @@
-package com.cgr.base.application.notifications.controller;
+package com.cgr.base.application.notificationsWs.config;
 
 import lombok.*;
 
-import java.security.PrivilegedAction;
 @Getter
 @Setter
 @AllArgsConstructor

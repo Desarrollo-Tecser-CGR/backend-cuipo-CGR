@@ -13,6 +13,9 @@ import lombok.NoArgsConstructor;
 public class EntityNotification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+    private String entity;
+    private Integer numbercontract;
     private  String subject;
     private String notification;
 

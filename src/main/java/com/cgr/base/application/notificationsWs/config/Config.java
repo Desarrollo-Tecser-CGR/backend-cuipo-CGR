@@ -1,4 +1,4 @@
-package com.cgr.base.application.notifications.config;
+package com.cgr.base.application.notificationsWs.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
