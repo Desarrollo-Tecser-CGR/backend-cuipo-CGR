@@ -21,9 +21,9 @@ public class ServicesDepartments {
     private RepositoryDepartment repositoryDepartment;
 
     @Autowired
-     private ServiceImage serviceImage;
+    private ServiceImage serviceImage;
 
-    public ResponseEntity<Map<String, Object>> searchDepartment(long id) {
+    public ResponseEntity<Map<String, Object>> searchDepartment(Integer id) {
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -40,8 +40,7 @@ public class ServicesDepartments {
                 String imageUrl = serviceImage.getImageUrlForDepartment(
                         entity.getDepartment_id(),
                         entity.getDpto_cnmbr(),
-                        dto.getDpto_ccdgo() != null ? dto.getDpto_ccdgo() : "default"
-                );
+                        dto.getDpto_ccdgo() != null ? dto.getDpto_ccdgo() : "default");
 
                 response.put("message", "Departamento encontrado.");
                 response.put("data", dto);
@@ -93,7 +92,7 @@ public class ServicesDepartments {
         }
     }
 
-      public ResponseEntity<Map<String, Object>> searchDepartmenDpAll(Long id) {
+    public ResponseEntity<Map<String, Object>> searchDepartmenDpAll(Integer id) {
         try {
             Optional<EntityDepartments> searchDepar = repositoryDepartment.findById(id);
 
@@ -115,9 +114,9 @@ public class ServicesDepartments {
                                 municipalityDto.setMpio_ccnct(m.getMpio_ccdgo() != null ? m.getMpio_ccdgo() : "");
                                 // Opcional: asignar image por municipio
                                 // municipalityDto.setImage(serviceImage.getImageUrlForDepartment(
-                                //     m.getMunicipality_id(),
-                                //     m.getMpio_cnmbr(),
-                                //     m.getMpio_ccdgo() != null ? m.getMpio_ccdgo() : "default"
+                                // m.getMunicipality_id(),
+                                // m.getMpio_cnmbr(),
+                                // m.getMpio_ccdgo() != null ? m.getMpio_ccdgo() : "default"
                                 // ));
                                 return municipalityDto;
                             })
@@ -127,8 +126,7 @@ public class ServicesDepartments {
                 String imageUrl = serviceImage.getImageUrlForDepartment(
                         entity.getDepartment_id(),
                         entity.getDpto_cnmbr(),
-                        dto.getDpto_ccdgo() != null ? dto.getDpto_ccdgo() : "default"
-                );
+                        dto.getDpto_ccdgo() != null ? dto.getDpto_ccdgo() : "default");
                 Map<String, Object> response = new HashMap<>();
                 response.put("message", "Departamento encontrado con sus municipios.");
                 response.put("data", dto);
@@ -147,4 +145,3 @@ public class ServicesDepartments {
     }
 
 }
-
