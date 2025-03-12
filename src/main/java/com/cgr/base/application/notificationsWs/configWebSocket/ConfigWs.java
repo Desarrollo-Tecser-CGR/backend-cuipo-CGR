@@ -8,7 +8,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker //ANOTACION PARA HABILITAR EN TIEMPO REAL LOS MENSAJES
-public class Config implements WebSocketMessageBrokerConfigurer {
+public class ConfigWs implements WebSocketMessageBrokerConfigurer {
 
 
     //definicion de los end pont donde se va conectar la aplicacion
