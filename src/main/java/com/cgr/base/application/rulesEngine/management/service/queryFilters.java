@@ -1,5 +1,6 @@
 package com.cgr.base.application.rulesEngine.management.service;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -132,7 +133,13 @@ public class queryFilters {
             sql.append(" AND CODIGO_ENTIDAD = '").append(entidadCodigo).append("'");
         }
 
-        return jdbcTemplate.queryForList(sql.toString());
+        List<Map<String, Object>> resultados = jdbcTemplate.queryForList(sql.toString());
+
+        Map<String, String> mapaColumnas = obtenerNombresRG(columnasReglaGeneral);
+
+        return resultados.stream()
+                .map(row -> cambiarNombresRG(row, mapaColumnas))
+                .toList();
     }
 
     public List<Map<String, Object>> getFilteredRecordsSR(String fecha, String trimestre, String ambitoCodigo,
@@ -142,7 +149,6 @@ public class queryFilters {
         String tablaConsulta = (reporteCodigo != null && reporteCodigo.matches("E0\\d{2}"))
                 ? reporteCodigo
                 : tablaEspecificas;
-
 
         if (!tablaExiste(tablaConsulta)) {
             return List.of();
@@ -204,4 +210,34 @@ public class queryFilters {
                 condition);
         return jdbcTemplate.queryForList(sql, String.class, tablaGenerales);
     }
+
+    private Map<String, String> obtenerNombresRG(List<String> codigosRegla) {
+        if (codigosRegla.isEmpty()) {
+            return Map.of();
+        }
+
+        String sql = "SELECT CODIGO_REGLA, NOMBRE_REGLA FROM GENERAL_RULES_NAMES WHERE CODIGO_REGLA IN ("
+                + codigosRegla.stream().map(c -> "'" + c + "'").collect(Collectors.joining(", ")) + ")";
+
+        List<Map<String, Object>> resultados = jdbcTemplate.queryForList(sql);
+
+        return resultados.stream()
+                .collect(Collectors.toMap(
+                        r -> (String) r.get("CODIGO_REGLA"),
+                        r -> (String) r.get("NOMBRE_REGLA")));
+    }
+
+    private Map<String, Object> cambiarNombresRG(Map<String, Object> row, Map<String, String> mapaColumnas) {
+        Map<String, Object> nuevaFila = new LinkedHashMap<>();
+
+        for (Map.Entry<String, Object> entry : row.entrySet()) {
+            String nombreColumna = entry.getKey();
+
+            String nuevoNombre = mapaColumnas.getOrDefault(nombreColumna, nombreColumna);
+            nuevaFila.put(nuevoNombre, entry.getValue());
+        }
+
+        return nuevaFila;
+    }
+
 }
