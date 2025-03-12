@@ -6,6 +6,7 @@ import com.cgr.base.domain.dto.dtoRole.RoleRequestDto;
 import com.cgr.base.domain.models.entity.Logs.RoleEntity;
 
 public interface IRoleService {
+
     public abstract List<RoleRequestDto> findAll();
 
     public abstract RoleRequestDto findById(Long idRole);
