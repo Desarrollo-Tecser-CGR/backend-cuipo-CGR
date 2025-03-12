@@ -2,7 +2,10 @@ package com.cgr.base.domain.models.entity.Logs;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
+import com.cgr.base.application.services.role.service.permission.Permission;
+import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -66,5 +69,10 @@ public class RoleEntity {
     @JoinTable(name = "roles_submenu", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "submenu_id"), uniqueConstraints = {
             @UniqueConstraint(columnNames = { "role_id", "submenu_id" }) })
     private List<SubMenuEntity> subMenus;
+
+
+      // asignacion de permisos
+
+    private final Set<Permission> permissions;
 
 }
