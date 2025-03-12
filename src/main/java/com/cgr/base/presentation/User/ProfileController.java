@@ -107,4 +107,25 @@ public class ProfileController {
         }
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<Object> getUserInfo(HttpServletRequest request) {
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (header == null || !header.startsWith("Bearer ")) {
+            return new ResponseEntity<>("Token is Required.", HttpStatus.FORBIDDEN);
+        }
+
+        String token = header.split(" ")[1];
+        Long userId = jwtService.extractUserIdFromToken(token);
+        if (userId == null) {
+            return new ResponseEntity<>("User ID not Found.", HttpStatus.FORBIDDEN);
+        }
+
+        try {
+            Object userData = ProfileService.getUserById(userId);
+            return new ResponseEntity<>(userData, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

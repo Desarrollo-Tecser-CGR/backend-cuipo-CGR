@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cgr.base.application.rulesEngine.generalParameter;
 import com.cgr.base.application.rulesEngine.management.service.initDependencies;
 import com.cgr.base.presentation.controller.AbstractController;
 
@@ -19,10 +20,14 @@ public class initRulesEngine extends AbstractController {
 
     @Autowired
     private initDependencies tablesInit;
+    
+    @Autowired
+    private generalParameter Parameter;
 
     @PostMapping("/init-tables")
     public ResponseEntity<?> processTables() {
-        tablesInit.initializeDependencies();
+        Parameter.tableGeneralRulesName();
+        //tablesInit.initializeDependencies();
         return requestResponse(
                 null,
                 "Tables Processing Completed.",

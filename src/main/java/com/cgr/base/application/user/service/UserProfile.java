@@ -2,6 +2,8 @@ package com.cgr.base.application.user.service;
 
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -103,6 +105,19 @@ public class UserProfile {
 
         user.setDateModify(new Date());
         return userRepo.save(user);
+    }
+
+    public Map<String, Object> getUserById(Long userId) {
+        UserEntity user = userRepo.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("usuario",user.getSAMAccountName());
+        userData.put("cargo", user.getCargo());
+        userData.put("email", user.getEmail());
+        userData.put("nombre", user.getFullName());
+        userData.put("telefono", user.getPhone());
+        return userData;
     }
 
 }
