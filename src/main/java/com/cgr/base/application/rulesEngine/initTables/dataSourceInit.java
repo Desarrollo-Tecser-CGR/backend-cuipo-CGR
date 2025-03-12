@@ -39,14 +39,14 @@ public class dataSourceInit {
                 this.tablas = new String[] { progIngresos, ejecIngresos, progGastos, ejecGastos };
 
                 // Paso 1: Agregar columnas TRIMESTRE y FECHA
-                //addComputedColumns();
-                //generatePeriod();
+                addComputedColumns();
+                generatePeriod();
 
                 // Paso 3: Consolidar Datos Unicos en la Tabla de Destino.
-                //transferUniqueData();
+                transferUniqueData();
 
                 // Paso 2: Crear Indices en las Tablas de Origen.
-                //createIndexes();
+                createIndexes();
 
                 createSpecificDataTable();
                 aggregatedDataSpecificTable();

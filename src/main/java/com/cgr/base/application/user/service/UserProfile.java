@@ -25,7 +25,7 @@ public class UserProfile {
     @Autowired
     private IUserRepositoryJpa userRepo;
 
-    private static final int MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+    private static final int MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
     private static final String[] ALLOWED_FORMATS = { "image/png", "image/jpeg", "image/svg+xml" };
 
