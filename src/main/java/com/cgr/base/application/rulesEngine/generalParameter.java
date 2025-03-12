@@ -81,6 +81,64 @@ public class generalParameter {
                     """;
             entityManager.createNativeQuery(insertDataSQL).executeUpdate();
         }
+
+        if (tableExists.intValue() == 0) {
+            String createTableSQL = """
+                    CREATE TABLE GENERAL_RULES_TABLES (
+                        CODIGO_TABLA VARCHAR(10) NOT NULL,
+                        NOMBRE_TABLA VARCHAR(255) NOT NULL,
+                        CODIGO_REGLA VARCHAR(10) NOT NULL,
+                        NOMBRE_REGLA VARCHAR(50) NOT NULL
+                    );
+                    """;
+            entityManager.createNativeQuery(createTableSQL).executeUpdate();
+        
+            String insertDataSQL = """
+                    MERGE INTO GENERAL_RULES_TABLES AS target
+                    USING (VALUES
+                        ('PI', 'VW_OPENDATA_A_PROGRAMACION_INGRESOS', '1', 'REGLA_GENERAL_1'),
+                        ('PI', 'VW_OPENDATA_A_PROGRAMACION_INGRESOS', '2', 'REGLA_GENERAL_2'),
+                        ('PI', 'VW_OPENDATA_A_PROGRAMACION_INGRESOS', '3', 'REGLA_GENERAL_3'),
+                        ('PI', 'VW_OPENDATA_A_PROGRAMACION_INGRESOS', '4A', 'REGLA_GENERAL_4A'),
+                        ('PI', 'VW_OPENDATA_A_PROGRAMACION_INGRESOS', '4B', 'REGLA_GENERAL_4B'),
+                        ('PI', 'VW_OPENDATA_A_PROGRAMACION_INGRESOS', '6', 'REGLA_GENERAL_6'),
+                        ('EI', 'VW_OPENDATA_B_EJECUCION_INGRESOS', '5', 'REGLA_GENERAL_5'),
+                        ('EI', 'VW_OPENDATA_B_EJECUCION_INGRESOS', '6', 'REGLA_GENERAL_6'),
+                        ('PG', 'VW_OPENDATA_C_PROGRAMACION_GASTOS', '4A', 'REGLA_GENERAL_4A'),
+                        ('PG', 'VW_OPENDATA_C_PROGRAMACION_GASTOS', '4B', 'REGLA_GENERAL_4B'),
+                        ('PG', 'VW_OPENDATA_C_PROGRAMACION_GASTOS', '7', 'REGLA_GENERAL_7'),
+                        ('PG', 'VW_OPENDATA_C_PROGRAMACION_GASTOS', '8', 'REGLA_GENERAL_8'),
+                        ('PG', 'VW_OPENDATA_C_PROGRAMACION_GASTOS', '9A', 'REGLA_GENERAL_9A'),
+                        ('PG', 'VW_OPENDATA_C_PROGRAMACION_GASTOS', '9B', 'REGLA_GENERAL_9B'),
+                        ('PG', 'VW_OPENDATA_C_PROGRAMACION_GASTOS', '10A', 'REGLA_GENERAL_10A'),
+                        ('PG', 'VW_OPENDATA_C_PROGRAMACION_GASTOS', '10B', 'REGLA_GENERAL_10B'),
+                        ('PG', 'VW_OPENDATA_C_PROGRAMACION_GASTOS', '10C', 'REGLA_GENERAL_10C'),
+                        ('PG', 'VW_OPENDATA_C_PROGRAMACION_GASTOS', '11', 'REGLA_GENERAL_11'),
+                        ('PG', 'VW_OPENDATA_C_PROGRAMACION_GASTOS', '14A', 'REGLA_GENERAL_14A'),
+                        ('PG', 'VW_OPENDATA_C_PROGRAMACION_GASTOS', '14B', 'REGLA_GENERAL_14B'),
+                        ('PG', 'VW_OPENDATA_C_PROGRAMACION_GASTOS', '17A', 'REGLA_GENERAL_17A'),
+                        ('PG', 'VW_OPENDATA_C_PROGRAMACION_GASTOS', '17B', 'REGLA_GENERAL_17B'),
+                        ('EG', 'VW_OPENDATA_D_EJECUCION_GASTOS', '12A', 'REGLA_GENERAL_12A'),
+                        ('EG', 'VW_OPENDATA_D_EJECUCION_GASTOS', '12B', 'REGLA_GENERAL_12B'),
+                        ('EG', 'VW_OPENDATA_D_EJECUCION_GASTOS', '13B', 'REGLA_GENERAL_13B'),
+                        ('EG', 'VW_OPENDATA_D_EJECUCION_GASTOS', '14A', 'REGLA_GENERAL_14A'),
+                        ('EG', 'VW_OPENDATA_D_EJECUCION_GASTOS', '14B', 'REGLA_GENERAL_14B'),
+                        ('EG', 'VW_OPENDATA_D_EJECUCION_GASTOS', '15', 'REGLA_GENERAL_15'),
+                        ('EG', 'VW_OPENDATA_D_EJECUCION_GASTOS', '16A', 'REGLA_GENERAL_16A'),
+                        ('EG', 'VW_OPENDATA_D_EJECUCION_GASTOS', '16B', 'REGLA_GENERAL_16B')
+                    ) AS source (CODIGO_TABLA, NOMBRE_TABLA, CODIGO_REGLA, NOMBRE_REGLA)
+        
+                    ON target.CODIGO_TABLA = source.CODIGO_TABLA
+                    AND target.NOMBRE_TABLA = source.NOMBRE_TABLA
+                    AND target.CODIGO_REGLA = source.CODIGO_REGLA
+        
+                    WHEN NOT MATCHED THEN
+                    INSERT (CODIGO_TABLA, NOMBRE_TABLA, CODIGO_REGLA, NOMBRE_REGLA)
+                    VALUES (source.CODIGO_TABLA, source.NOMBRE_TABLA, source.CODIGO_REGLA, source.NOMBRE_REGLA);
+                    """;
+            entityManager.createNativeQuery(insertDataSQL).executeUpdate();
+        }
+        
     }
 
     public List<GeneralRulesNames> getAllRules() {

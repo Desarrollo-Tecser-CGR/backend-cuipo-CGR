@@ -1,5 +1,8 @@
 package com.cgr.base.infrastructure.persistence.entity.rulesEngine;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -10,6 +13,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @Data
+@DynamicInsert
+@DynamicUpdate
 @Table(name = "GENERAL_RULES_NAMES")
 public class GeneralRulesNames {
 

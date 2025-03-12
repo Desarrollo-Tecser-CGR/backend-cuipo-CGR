@@ -68,7 +68,10 @@ public class queryFilters {
     }
 
     private List<FormularioDTO> getFormTables() {
-        String sql = "SELECT DISTINCT [CODIGO_TABLA], [NOMBRE_TABLA] FROM general_rules_tables ORDER BY [CODIGO_TABLA]";
+        if (!tablaExiste("GENERAL_RULES_TABLES")) {
+            return List.of();
+        }
+        String sql = "SELECT DISTINCT [CODIGO_TABLA], [NOMBRE_TABLA] FROM GENERAL_RULES_TABLES ORDER BY [CODIGO_TABLA]";
         return jdbcTemplate.query(sql,
                 (rs, rowNum) -> new FormularioDTO(rs.getString("CODIGO_TABLA"), rs.getString("NOMBRE_TABLA")));
     }
@@ -187,15 +190,20 @@ public class queryFilters {
     }
 
     private List<String> obtenerColumnasReglaGeneral(String codigoFormulario) {
-        if (!tablaExiste(tablaGenerales))
+        if (!tablaExiste(tablaGenerales)) {
             return List.of();
+        }
 
         if (codigoFormulario == null || codigoFormulario.isEmpty()) {
             String sql = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME LIKE 'REGLA_GENERAL_%'";
             return jdbcTemplate.queryForList(sql, String.class, tablaGenerales);
         }
 
-        String sqlRegla = "SELECT DISTINCT NOMBRE_REGLA FROM general_rules_tables WHERE CODIGO_TABLA = ?";
+        if (!tablaExiste("GENERAL_RULES_TABLES")) {
+            return List.of();
+        }
+
+        String sqlRegla = "SELECT DISTINCT NOMBRE_REGLA FROM GENERAL_RULES_TABLES WHERE CODIGO_TABLA = ?";
         List<String> nombresRegla = jdbcTemplate.queryForList(sqlRegla, String.class, codigoFormulario);
 
         if (nombresRegla.isEmpty()) {

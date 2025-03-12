@@ -27,7 +27,7 @@ public class initRulesEngine extends AbstractController {
     @PostMapping("/init-tables")
     public ResponseEntity<?> processTables() {
         Parameter.tableGeneralRulesName();
-        //tablesInit.initializeDependencies();
+        tablesInit.initializeDependencies();
         return requestResponse(
                 null,
                 "Tables Processing Completed.",
