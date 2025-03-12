@@ -1,9 +1,16 @@
 package com.cgr.base.application.rulesEngine;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.cgr.base.infrastructure.persistence.entity.rulesEngine.GeneralRulesNames;
+import com.cgr.base.infrastructure.persistence.repository.rulesEngine.generalRulesRepo;
+
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
@@ -12,6 +19,9 @@ public class generalParameter {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Autowired
+    generalRulesRepo GeneralRepo;
 
     @Async
     @Transactional
@@ -71,6 +81,17 @@ public class generalParameter {
                     """;
             entityManager.createNativeQuery(insertDataSQL).executeUpdate();
         }
+    }
+
+    public List<GeneralRulesNames> getAllRules() {
+        return GeneralRepo.findAll();
+    }
+
+    public GeneralRulesNames updateRuleName(String codigoRegla, String nuevoNombre) {
+        return GeneralRepo.findById(codigoRegla).map(regla -> {
+            regla.setNombreRegla(nuevoNombre);
+            return GeneralRepo.save(regla);
+        }).orElseThrow(() -> new EntityNotFoundException("Regla no encontrada"));
     }
 
 }
