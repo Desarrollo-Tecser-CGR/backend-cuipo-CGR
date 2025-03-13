@@ -248,4 +248,26 @@ public class queryFilters {
         return nuevaFila;
     }
 
+    public String getLastUpdateDateGR(Integer fecha, Integer trimestre) {
+        if (!tablaExiste(tablaGenerales) || fecha == null || trimestre == null) {
+            return null;
+        }
+
+        String sql = "SELECT MAX(FECHA_CARGUE) FROM " + tablaGenerales +
+                " WHERE FECHA = ? AND TRIMESTRE = ?";
+
+        return jdbcTemplate.queryForObject(sql, String.class, fecha, trimestre);
+    }
+
+    public String getLastUpdateDateSR(Integer fecha, Integer trimestre) {
+        if (!tablaExiste(tablaEspecificas) || fecha == null || trimestre == null) {
+            return null;
+        }
+
+        String sql = "SELECT MAX(FECHA_CARGUE) FROM " + tablaEspecificas +
+                " WHERE FECHA = ? AND TRIMESTRE = ?";
+
+        return jdbcTemplate.queryForObject(sql, String.class, fecha, trimestre);
+    }
+
 }

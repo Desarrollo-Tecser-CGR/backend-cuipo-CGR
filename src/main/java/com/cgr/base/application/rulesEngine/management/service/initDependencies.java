@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.cgr.base.application.rulesEngine.generalParameter;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EG;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EI;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_PG;
@@ -76,15 +77,20 @@ public class initDependencies {
     @Autowired
     private dataTransfer_GF RulesGF;
 
+    @Autowired
+    private generalParameter Parameter;
+
     @Async
     public void initializeDependencies() {
 
+        MotorReglas.processTablesRules();
         Parametria.processTablesSource();
         Categorias.initCategoryTable();
-        MotorReglas.processTablesRules();
+        Parameter.tableGeneralRulesName();
 
     }
 
+    @Async
     public void transferGeneralRules(String rule) {
         switch (rule.toUpperCase()) {
             case "1" -> RulesPI.applyGeneralRule1();
@@ -111,6 +117,7 @@ public class initDependencies {
         }
     }
 
+    @Async
     public void transferSpecificRules(String rule) {
         switch (rule.toUpperCase()) {
             case "22A" -> Rules22.applyGeneralRule22A();
@@ -135,4 +142,3 @@ public class initDependencies {
     }
 
 }
-

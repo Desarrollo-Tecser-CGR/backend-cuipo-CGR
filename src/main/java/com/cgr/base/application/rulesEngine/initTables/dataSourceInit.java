@@ -44,12 +44,10 @@ public class dataSourceInit {
 
                 // Paso 3: Consolidar Datos Unicos en la Tabla de Destino.
                 transferUniqueData();
+                aggregatedDataSpecificTable();
 
                 // Paso 2: Crear Indices en las Tablas de Origen.
                 createIndexes();
-
-                createSpecificDataTable();
-                aggregatedDataSpecificTable();
 
         }
 
@@ -144,6 +142,7 @@ public class dataSourceInit {
                                 "[AMBITO_CODIGO] NVARCHAR(50), " +
                                 "[NOMBRE_ENTIDAD] NVARCHAR(255), " +
                                 "[AMBITO_NOMBRE] NVARCHAR(255), " +
+                                "[FECHA_CARGUE] DATETIME NOT NULL DEFAULT (GETUTCDATE() AT TIME ZONE 'UTC' AT TIME ZONE 'SA Pacific Standard Time'), " +
                                 "CONSTRAINT PK_GeneralRules PRIMARY KEY ([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO]))";
                 entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
         }
@@ -177,7 +176,8 @@ public class dataSourceInit {
                 entityManager.createNativeQuery(sqlDrop).executeUpdate();
         }
 
-        private void createSpecificDataTable() {
+        private void aggregatedDataSpecificTable() {
+
                 String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'SPECIFIC_RULES_DATA')"
                                 +
                                 " BEGIN " +
@@ -188,14 +188,13 @@ public class dataSourceInit {
                                 "[AMBITO_CODIGO] NVARCHAR(50), " +
                                 "[NOMBRE_ENTIDAD] VARCHAR(255), " +
                                 "[AMBITO_NOMBRE] VARCHAR(50), " +
+                                "[FECHA_CARGUE] DATETIME NOT NULL DEFAULT (GETUTCDATE() AT TIME ZONE 'UTC' AT TIME ZONE 'SA Pacific Standard Time'), " +
                                 "CONSTRAINT PK_AggregatedData PRIMARY KEY ([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO], [NOMBRE_ENTIDAD], [AMBITO_NOMBRE])"
                                 +
                                 " ) " +
                                 " END";
                 entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
-        }
 
-        private void aggregatedDataSpecificTable() {
                 String sqlInsertData = "INSERT INTO [" + tablaSpecific + "] " +
                                 "([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO], [NOMBRE_ENTIDAD], [AMBITO_NOMBRE]) "
                                 +
