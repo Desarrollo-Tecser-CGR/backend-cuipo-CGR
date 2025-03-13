@@ -304,4 +304,43 @@ public class dataTransfer_25 {
         jdbcTemplate.execute(updateQuery);
     }
 
+public void applySpecificRule25_B() {
+    // 1) Verificar/crear la columna ALERTA_25_CA0105 en la tabla detalle (ejecGastos2)
+    List<String> requiredColumns = Arrays.asList("ALERTA_25_CA0105");
+
+    String checkColumnsQuery = String.format(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
+        "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+        ejecGastos2, // Asegúrate de que esta variable contenga el nombre real de la tabla detalle
+        "'" + String.join("','", requiredColumns) + "'"
+    );
+
+    List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+    for (String col : requiredColumns) {
+        if (!existingCols.contains(col)) {
+            String addColumnQuery = String.format(
+                "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
+                ejecGastos2, col
+            );
+            jdbcTemplate.execute(addColumnQuery);
+        }
+    }
+
+    // 2) Actualizar la columna ALERTA_25_CA0105:
+    // Se asigna '1' si en esa fila CUENTA es '2.1.3.05.04.001.13.01', de lo contrario se asigna '0'
+    String updateQuery = String.format(
+        """
+        UPDATE %s
+        SET ALERTA_25_CA0105 = CASE
+            WHEN CUENTA = '2.1.3.05.04.001.13.01' THEN '1'
+            ELSE '0'
+        END;
+        """,
+        ejecGastos2
+    );
+
+    jdbcTemplate.execute(updateQuery);
+}
+
+
 }
