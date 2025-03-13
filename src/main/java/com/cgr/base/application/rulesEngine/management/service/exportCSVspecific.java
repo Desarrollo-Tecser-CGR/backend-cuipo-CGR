@@ -34,55 +34,71 @@ public class exportCSVspecific {
         String entidadCodigo = filters.get("entidad");
         String reporteCodigo = filters.get("reporte");
 
-        List<Map<String, Object>> filteredData = queryFilters.getFilteredRecordsSR(fecha, trimestre, ambitoCodigo, entidadCodigo, reporteCodigo);
+        String trimestreBD = (trimestre != null) ? convertirTrimestreParaBD(trimestre) : null;
+
+        List<Map<String, Object>> filteredData = queryFilters.getFilteredRecordsSR(fecha, trimestreBD, ambitoCodigo,
+                entidadCodigo, reporteCodigo);
+
+        List<Map<String, Object>> filteredDataFormatted = filteredData.stream()
+                .map(row -> {
+                    row.put("TRIMESTRE", convertirTrimestreParaFront(row.get("TRIMESTRE")));
+                    return row;
+                })
+                .toList();
 
         String ambitoNombre = listOptions.getAmbitos().stream()
                 .filter(a -> a.getCodigo().equals(ambitoCodigo))
                 .map(a -> a.getNombre())
                 .findFirst()
                 .orElse(null);
-        
-                String entidadNombre = listOptions.getEntidades().stream()
+
+        String entidadNombre = listOptions.getEntidades().stream()
                 .filter(e -> e.getCodigo().equals(entidadCodigo))
                 .map(e -> e.getNombre())
                 .findFirst()
                 .orElse(null);
 
-                String reporteNombre = listOptions.getReportes().stream()
+        String reporteNombre = listOptions.getReportes().stream()
                 .filter(r -> r.getCodigo().equals(reporteCodigo))
                 .map(r -> r.getNombre())
                 .findFirst()
                 .orElse(null);
 
         ZoneId colombiaZone = ZoneId.of("America/Bogota");
-        String fechaHoraGeneracion = ZonedDateTime.now(colombiaZone).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String fechaHoraGeneracion = ZonedDateTime.now(colombiaZone)
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
-            .setQuoteMode(QuoteMode.ALL_NON_NULL)
-            .setDelimiter(',')
-            .setQuote('"')
-            .setEscape('\\')
-            .setNullString("")
-            .build();
+                .setQuoteMode(QuoteMode.ALL_NON_NULL)
+                .setDelimiter(',')
+                .setQuote('"')
+                .setEscape('\\')
+                .setNullString("")
+                .build();
 
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-             OutputStreamWriter writer = new OutputStreamWriter(byteArrayOutputStream);
-             CSVPrinter csvPrinter = new CSVPrinter(writer, csvFormat)) {
+                OutputStreamWriter writer = new OutputStreamWriter(byteArrayOutputStream);
+                CSVPrinter csvPrinter = new CSVPrinter(writer, csvFormat)) {
 
             csvPrinter.printRecord("Reporte generado el:", fechaHoraGeneracion);
             csvPrinter.printRecord("Filtros Aplicados:");
-            if (fecha != null) csvPrinter.printRecord("Fecha", fecha);
-            if (trimestre != null) csvPrinter.printRecord("Trimestre", trimestre);
-            if (ambitoCodigo != null && ambitoNombre != null) csvPrinter.printRecord("Ámbito", ambitoCodigo + " - " + ambitoNombre);
-            if (entidadCodigo != null && entidadNombre != null) csvPrinter.printRecord("Entidad", entidadCodigo + " - " + entidadNombre);
-            if (reporteCodigo != null && reporteNombre != null) csvPrinter.printRecord("Reporte", reporteCodigo + " - " + reporteNombre);
+            if (fecha != null)
+                csvPrinter.printRecord("Fecha", fecha);
+            if (trimestre != null)
+                csvPrinter.printRecord("Trimestre", convertirTrimestreParaFront(trimestre));
+            if (ambitoCodigo != null && ambitoNombre != null)
+                csvPrinter.printRecord("Ámbito", ambitoCodigo + " - " + ambitoNombre);
+            if (entidadCodigo != null && entidadNombre != null)
+                csvPrinter.printRecord("Entidad", entidadCodigo + " - " + entidadNombre);
+            if (reporteCodigo != null && reporteNombre != null)
+                csvPrinter.printRecord("Reporte", reporteCodigo + " - " + reporteNombre);
             csvPrinter.println();
 
-            if (!filteredData.isEmpty()) {
-                csvPrinter.printRecord(filteredData.get(0).keySet());
+            if (!filteredDataFormatted.isEmpty()) {
+                csvPrinter.printRecord(filteredDataFormatted.get(0).keySet());
             }
 
-            for (Map<String, Object> record : filteredData) {
+            for (Map<String, Object> record : filteredDataFormatted) {
                 csvPrinter.printRecord(record.values());
             }
 
@@ -91,5 +107,28 @@ public class exportCSVspecific {
             return byteArrayOutputStream;
         }
     }
-    
+
+    private String convertirTrimestreParaBD(String trimestre) {
+        return switch (trimestre) {
+            case "1" -> "3";
+            case "2" -> "6";
+            case "3" -> "9";
+            case "4" -> "12";
+            default -> trimestre;
+        };
+    }
+
+    private String convertirTrimestreParaFront(Object trimestreBD) {
+        if (trimestreBD == null)
+            return null;
+
+        return switch (trimestreBD.toString()) {
+            case "3" -> "1";
+            case "6" -> "2";
+            case "9" -> "3";
+            case "12" -> "4";
+            default -> trimestreBD.toString();
+        };
+    }
+
 }

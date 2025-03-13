@@ -49,8 +49,16 @@ public class managementRules extends AbstractController {
         String entidad = filters != null ? filters.get("entidad") : null;
         String formulario = filters != null ? filters.get("formulario") : null;
 
-        List<Map<String, Object>> result = Filter.getFilteredRecordsGR(fecha, trimestre, ambito, entidad,
-                formulario);
+        String trimestreBD = (trimestre != null) ? String.valueOf(Integer.parseInt(trimestre) * 3) : null;
+
+        List<Map<String, Object>> result = Filter.getFilteredRecordsGR(fecha, trimestreBD, ambito, entidad, formulario);
+
+        for (Map<String, Object> record : result) {
+            if (record.containsKey("TRIMESTRE")) {
+                record.put("TRIMESTRE", Integer.parseInt(record.get("TRIMESTRE").toString()) / 3);
+            }
+        }
+
         return requestResponse(result, "General Rules successfully retrieved.", HttpStatus.OK, true);
     }
 
@@ -64,7 +72,15 @@ public class managementRules extends AbstractController {
         String entidad = filters != null ? filters.get("entidad") : null;
         String reporte = filters != null ? filters.get("reporte") : null;
 
-        List<Map<String, Object>> result = Filter.getFilteredRecordsSR(fecha, trimestre, ambito, entidad, reporte);
+        String trimestreBD = (trimestre != null) ? String.valueOf(Integer.parseInt(trimestre) * 3) : null;
+
+        List<Map<String, Object>> result = Filter.getFilteredRecordsSR(fecha, trimestreBD, ambito, entidad, reporte);
+
+        for (Map<String, Object> record : result) {
+            if (record.containsKey("TRIMESTRE")) {
+                record.put("TRIMESTRE", Integer.parseInt(record.get("TRIMESTRE").toString()) / 3);
+            }
+        }
 
         return requestResponse(result, "Specific Rules successfully retrieved.", HttpStatus.OK, true);
     }
@@ -135,7 +151,20 @@ public class managementRules extends AbstractController {
                         HttpStatus.BAD_REQUEST, false);
             }
 
-            String lastUpdate = Filter.getLastUpdateDateGR(fecha, trimestre);
+            Integer trimestreConvertido = switch (trimestre) {
+                case 1 -> 3;
+                case 2 -> 6;
+                case 3 -> 9;
+                case 4 -> 12;
+                default -> null;
+            };
+
+            if (trimestreConvertido == null) {
+                return requestResponse(null, "Invalid trimestre value. Must be one of: 1, 2, 3, 4.",
+                        HttpStatus.BAD_REQUEST, false);
+            }
+
+            String lastUpdate = Filter.getLastUpdateDateGR(fecha, trimestreConvertido);
             Map<String, String> data = new HashMap<>();
             data.put("GENERAL_RULES_DATA", lastUpdate != null ? lastUpdate : "NO DATA");
 
@@ -158,7 +187,20 @@ public class managementRules extends AbstractController {
                         HttpStatus.BAD_REQUEST, false);
             }
 
-            String lastUpdate = Filter.getLastUpdateDateSR(fecha, trimestre);
+            Integer trimestreConvertido = switch (trimestre) {
+                case 1 -> 3;
+                case 2 -> 6;
+                case 3 -> 9;
+                case 4 -> 12;
+                default -> null;
+            };
+
+            if (trimestreConvertido == null) {
+                return requestResponse(null, "Invalid trimestre value. Must be one of: 1, 2, 3, 4.",
+                        HttpStatus.BAD_REQUEST, false);
+            }
+
+            String lastUpdate = Filter.getLastUpdateDateSR(fecha, trimestreConvertido);
             Map<String, String> data = new HashMap<>();
             data.put("SPECIFIC_RULES_DATA", lastUpdate != null ? lastUpdate : "NO DATA");
 

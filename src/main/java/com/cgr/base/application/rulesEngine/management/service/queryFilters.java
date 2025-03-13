@@ -40,7 +40,7 @@ public class queryFilters {
         }
         return listOptionsRG.builder()
                 .fechas(getFechas(tablaGenerales))
-                .trimestres(getTrimestres(tablaGenerales))
+                .trimestres(convertirTrimestres(getTrimestres(tablaGenerales)))
                 .entidades(getEntidades(tablaGenerales))
                 .ambitos(getAmbitos(tablaGenerales))
                 .formularios(getFormTables())
@@ -53,11 +53,22 @@ public class queryFilters {
         }
         return listOptionsEG.builder()
                 .fechas(getFechas(tablaEspecificas))
-                .trimestres(getTrimestres(tablaEspecificas))
+                .trimestres(convertirTrimestres(getTrimestres(tablaEspecificas)))
                 .entidades(getEntidades(tablaEspecificas))
                 .ambitos(getAmbitos(tablaEspecificas))
                 .reportes(getFormReports())
                 .build();
+    }
+
+    private List<String> convertirTrimestres(List<String> trimestresBD) {
+        if (trimestresBD == null || trimestresBD.isEmpty()) {
+            return List.of();
+        }
+        return trimestresBD.stream()
+                .map(Integer::parseInt)
+                .map(t -> t / 3)
+                .map(String::valueOf)
+                .collect(Collectors.toList());
     }
 
     private List<String> getFechas(String tablaReglas) {

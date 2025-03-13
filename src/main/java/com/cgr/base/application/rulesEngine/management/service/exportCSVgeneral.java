@@ -34,8 +34,17 @@ public class exportCSVgeneral {
         String entidadCodigo = filters.get("entidad");
         String formularioCodigo = filters.get("formulario");
 
-        List<Map<String, Object>> filteredData = queryFilters.getFilteredRecordsGR(fecha, trimestre, ambitoCodigo,
+        String trimestreBD = (trimestre != null) ? convertirTrimestreParaBD(trimestre) : null;
+
+        List<Map<String, Object>> filteredData = queryFilters.getFilteredRecordsGR(fecha, trimestreBD, ambitoCodigo,
                 entidadCodigo, formularioCodigo);
+
+        List<Map<String, Object>> filteredDataFormatted = filteredData.stream()
+                .map(row -> {
+                    row.put("TRIMESTRE", convertirTrimestreParaFront(row.get("TRIMESTRE")));
+                    return row;
+                })
+                .toList();
 
         String ambitoNombre = listOptions.getAmbitos().stream()
                 .filter(a -> a.getCodigo().equals(ambitoCodigo))
@@ -76,7 +85,7 @@ public class exportCSVgeneral {
             if (fecha != null)
                 csvPrinter.printRecord("Fecha", fecha);
             if (trimestre != null)
-                csvPrinter.printRecord("Trimestre", trimestre);
+                csvPrinter.printRecord("Trimestre", convertirTrimestreParaFront(trimestre));
             if (ambitoCodigo != null && ambitoNombre != null)
                 csvPrinter.printRecord("Ámbito", ambitoCodigo + " - " + ambitoNombre);
             if (entidadCodigo != null && entidadNombre != null)
@@ -85,11 +94,11 @@ public class exportCSVgeneral {
                 csvPrinter.printRecord("Formulario", formularioCodigo + " - " + formularioNombre);
             csvPrinter.println();
 
-            if (!filteredData.isEmpty()) {
-                csvPrinter.printRecord(filteredData.get(0).keySet());
+            if (!filteredDataFormatted.isEmpty()) {
+                csvPrinter.printRecord(filteredDataFormatted.get(0).keySet());
             }
 
-            for (Map<String, Object> record : filteredData) {
+            for (Map<String, Object> record : filteredDataFormatted) {
                 csvPrinter.printRecord(record.values());
             }
 
@@ -97,6 +106,29 @@ public class exportCSVgeneral {
             csvPrinter.flush();
             return byteArrayOutputStream;
         }
+    }
+
+    private String convertirTrimestreParaBD(String trimestre) {
+        return switch (trimestre) {
+            case "1" -> "3";
+            case "2" -> "6";
+            case "3" -> "9";
+            case "4" -> "12";
+            default -> trimestre;
+        };
+    }
+
+    private String convertirTrimestreParaFront(Object trimestreBD) {
+        if (trimestreBD == null)
+            return null;
+
+        return switch (trimestreBD.toString()) {
+            case "3" -> "1";
+            case "6" -> "2";
+            case "9" -> "3";
+            case "12" -> "4";
+            default -> trimestreBD.toString();
+        };
     }
 
 }
