@@ -82,7 +82,13 @@ public class generalParameter {
             entityManager.createNativeQuery(insertDataSQL).executeUpdate();
         }
 
-        if (tableExists.intValue() == 0) {
+        String checkTableQuery2 = """
+                IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'GENERAL_RULES_TABLES')
+                SELECT 1 ELSE SELECT 0;
+                """;
+        Number tableExists2 = (Number) entityManager.createNativeQuery(checkTableQuery2).getSingleResult();
+
+        if (tableExists2.intValue() == 0) {
             String createTableSQL = """
                     CREATE TABLE GENERAL_RULES_TABLES (
                         CODIGO_TABLA VARCHAR(10) NOT NULL,
@@ -92,7 +98,7 @@ public class generalParameter {
                     );
                     """;
             entityManager.createNativeQuery(createTableSQL).executeUpdate();
-        
+
             String insertDataSQL = """
                     MERGE INTO GENERAL_RULES_TABLES AS target
                     USING (VALUES
@@ -127,18 +133,18 @@ public class generalParameter {
                         ('EG', 'VW_OPENDATA_D_EJECUCION_GASTOS', '16A', 'REGLA_GENERAL_16A'),
                         ('EG', 'VW_OPENDATA_D_EJECUCION_GASTOS', '16B', 'REGLA_GENERAL_16B')
                     ) AS source (CODIGO_TABLA, NOMBRE_TABLA, CODIGO_REGLA, NOMBRE_REGLA)
-        
+
                     ON target.CODIGO_TABLA = source.CODIGO_TABLA
                     AND target.NOMBRE_TABLA = source.NOMBRE_TABLA
                     AND target.CODIGO_REGLA = source.CODIGO_REGLA
-        
+
                     WHEN NOT MATCHED THEN
                     INSERT (CODIGO_TABLA, NOMBRE_TABLA, CODIGO_REGLA, NOMBRE_REGLA)
                     VALUES (source.CODIGO_TABLA, source.NOMBRE_TABLA, source.CODIGO_REGLA, source.NOMBRE_REGLA);
                     """;
             entityManager.createNativeQuery(insertDataSQL).executeUpdate();
         }
-        
+
     }
 
     public List<GeneralRulesNames> getAllRules() {

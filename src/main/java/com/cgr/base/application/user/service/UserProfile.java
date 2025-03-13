@@ -1,5 +1,6 @@
 package com.cgr.base.application.user.service;
 
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,6 +19,9 @@ import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.persistence.repository.user.ProfileRepo;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
 @Service
 public class UserProfile {
 
@@ -27,11 +31,16 @@ public class UserProfile {
     @Autowired
     private IUserRepositoryJpa userRepo;
 
-    private static final int MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    private static final int MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 
     private static final String[] ALLOWED_FORMATS = { "image/png", "image/jpeg", "image/svg+xml" };
 
-    public ProfileEntity uploadProfileImage(Long userId, String base64Image) {
+    @Transactional
+    public void uploadProfileImage(Long userId, String base64Image) {
+        createTableIfNotExists();
 
         byte[] decodedBytes = Base64.getDecoder().decode(base64Image.split(",")[1]);
         if (decodedBytes.length > MAX_IMAGE_SIZE) {
@@ -39,24 +48,45 @@ public class UserProfile {
         }
 
         String imageType = extractImageType(base64Image);
-
-        boolean isValidFormat = false;
-        for (String format : ALLOWED_FORMATS) {
-            if (imageType.equals(format)) {
-                isValidFormat = true;
-                break;
-            }
-        }
-        if (!isValidFormat) {
+        if (!Arrays.asList(ALLOWED_FORMATS).contains(imageType)) {
             throw new IllegalArgumentException("Invalid image format. Only PNG, JPG, and SVG are allowed.");
         }
 
-        Optional<ProfileEntity> existingProfile = userProfileRepo.findById(userId);
-        ProfileEntity profile = existingProfile.orElse(new ProfileEntity());
-        profile.setUserId(userId);
-        profile.setImageProfile(base64Image);
+        String sql = """
+                    MERGE INTO user_profile AS target
+                    USING (SELECT ? AS user_id, ? AS image_profile) AS source
+                    ON target.user_id = source.user_id
+                    WHEN MATCHED THEN
+                        UPDATE SET image_profile = source.image_profile
+                    WHEN NOT MATCHED THEN
+                        INSERT (user_id, image_profile)
+                        VALUES (source.user_id, source.image_profile);
+                """;
 
-        return userProfileRepo.save(profile);
+        entityManager.createNativeQuery(sql)
+                .setParameter(1, userId)
+                .setParameter(2, base64Image)
+                .executeUpdate();
+    }
+
+    @Transactional
+    public void createTableIfNotExists() {
+        String checkTableQuery = """
+                    IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE UPPER(TABLE_NAME) = 'USER_PROFILE')
+                    SELECT 1 ELSE SELECT 0;
+                """;
+
+        Number tableExists = (Number) entityManager.createNativeQuery(checkTableQuery).getSingleResult();
+
+        if (tableExists.intValue() == 0) {
+            String createTableSQL = """
+                        CREATE TABLE user_profile (
+                            user_id BIGINT PRIMARY KEY,
+                            image_profile NVARCHAR(MAX) NULL
+                        );
+                    """;
+            entityManager.createNativeQuery(createTableSQL).executeUpdate();
+        }
     }
 
     // Método para obtener la imagen de perfil en base64
@@ -112,7 +142,7 @@ public class UserProfile {
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
 
         Map<String, Object> userData = new HashMap<>();
-        userData.put("usuario",user.getSAMAccountName());
+        userData.put("usuario", user.getSAMAccountName());
         userData.put("cargo", user.getCargo());
         userData.put("email", user.getEmail());
         userData.put("nombre", user.getFullName());
