@@ -50,7 +50,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/auth",
             "/auth/",
             "/api/v1/departments",
-            "/api/v1/municipality");
+            "/api/v1/municipality",
+            "/api/v1/user/synchronize");
 
     /**
      * Verifica si a la URI no se le debe aplicar el filtro
@@ -98,7 +99,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String requestUri = request.getRequestURI();
 
 
-        if (requestUri.startsWith("/v3/api-docs/") || requestUri.equals("/v3/api-docs") || requestUri.startsWith("/swagger-ui/")) {
+        if (requestUri.startsWith("/v3/api-docs/") || requestUri.equals("/v3/api-docs") || requestUri.startsWith("/swagger-ui/")||requestUri.startsWith("/synchronize") || requestUri.equals("/synchronize")) {
             filterChain.doFilter(request, response);
             return;
         }
