@@ -1,5 +1,6 @@
 package com.cgr.base.domain.models.entity.Logs;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,6 +19,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
@@ -52,6 +54,15 @@ public class UserEntity {
 
     @Column(name = "user_type")
     private String userType;
+
+    //jhon
+    @Column(name = "failed_attempts")
+    private Integer failedAttempts = 0;
+
+    @Column(name = "lock_time")
+    private LocalDateTime lockTime;
+
+
 
     @OneToMany(mappedBy = "user")
     private List<LogEntity> logs = new ArrayList<>();
