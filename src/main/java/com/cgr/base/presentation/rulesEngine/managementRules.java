@@ -25,6 +25,7 @@ import com.cgr.base.application.rulesEngine.management.dto.listOptionsRG;
 import com.cgr.base.application.rulesEngine.management.service.exportCSVgeneral;
 import com.cgr.base.application.rulesEngine.management.service.exportCSVspecific;
 import com.cgr.base.application.rulesEngine.management.service.queryFilters;
+import com.cgr.base.application.rulesEngine.specificRules.detailsInfo;
 import com.cgr.base.presentation.controller.AbstractController;
 
 @RestController
@@ -39,6 +40,9 @@ public class managementRules extends AbstractController {
 
     @Autowired
     private exportCSVspecific SpecificCSV;
+
+    @Autowired
+    private detailsInfo FilterDetail;
 
     @PostMapping("/general/data")
     public ResponseEntity<?> getGeneralRules(
@@ -223,6 +227,52 @@ public class managementRules extends AbstractController {
             return requestResponse(null, "Invalid request: 'fecha' and 'trimestre' must be numeric strings.",
                     HttpStatus.BAD_REQUEST, false);
         }
+    }
+
+    @PostMapping("/specific/data/icld")
+    public ResponseEntity<?> getSpecificDetailsICLD(@RequestBody Map<String, String> filters) {
+        if (!validateFilters(filters)) {
+            return requestResponse(null, "All fields (fecha, trimestre, ambito, entidad) are required.",
+                    HttpStatus.BAD_REQUEST, false);
+        }
+
+        String fecha = filters.get("fecha");
+        String trimestre = filters.get("trimestre");
+        String ambito = filters.get("ambito");
+        String entidad = filters.get("entidad");
+
+        String trimestreBD = String.valueOf(Integer.parseInt(trimestre) * 3);
+
+        List<Map<String, Object>> result = FilterDetail.getFilteredRecordsICLD(fecha, trimestreBD, ambito, entidad);
+
+        return requestResponse(result, "ICLD data successfully retrieved.", HttpStatus.OK, true);
+    }
+
+    @PostMapping("/specific/data/gf")
+    public ResponseEntity<?> getSpecificDetailsGF(@RequestBody Map<String, String> filters) {
+        if (!validateFilters(filters)) {
+            return requestResponse(null, "All fields (fecha, trimestre, ambito, entidad) are required.",
+                    HttpStatus.BAD_REQUEST, false);
+        }
+
+        String fecha = filters.get("fecha");
+        String trimestre = filters.get("trimestre");
+        String ambito = filters.get("ambito");
+        String entidad = filters.get("entidad");
+
+        String trimestreBD = String.valueOf(Integer.parseInt(trimestre) * 3);
+
+        List<Map<String, Object>> result = FilterDetail.getFilteredRecordsGF(fecha, trimestreBD, ambito, entidad);
+
+        return requestResponse(result, "GF data successfully retrieved.", HttpStatus.OK, true);
+    }
+
+    private boolean validateFilters(Map<String, String> filters) {
+        return filters != null &&
+                filters.containsKey("fecha") && filters.get("fecha") != null &&
+                filters.containsKey("trimestre") && filters.get("trimestre") != null &&
+                filters.containsKey("ambito") && filters.get("ambito") != null &&
+                filters.containsKey("entidad") && filters.get("entidad") != null;
     }
 
 }
