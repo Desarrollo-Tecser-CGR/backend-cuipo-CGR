@@ -17,6 +17,9 @@ public class dataTransfer_25 {
     @Value("${TABLA_EJEC_GASTOS}")
     private String ejecGastos;
 
+    @Value("${TABLA_EJEC_GASTOS2}")
+    private String ejecGastos2;
+
     @Value("${TABLA_SPECIFIC_RULES}")
     private String tablaReglasEspecificas;
 
@@ -139,6 +142,109 @@ public class dataTransfer_25 {
         jdbcTemplate.execute(updateQuery);
     }
 
+    public void applySpecificRule25_A() {
+        // 1) Definir y verificar la columna requerida en la tabla detalle (ejecGastos2)
+        List<String> requiredColumns = Arrays.asList("REGLA_25_A");
+
+        String checkColumnsQuery = String.format(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
+                        "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+                ejecGastos2,
+                "'" + String.join("','", requiredColumns) + "'");
+
+        List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+        for (String col : requiredColumns) {
+            if (!existingCols.contains(col)) {
+                String addColumnQuery = String.format(
+                        "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
+                        ejecGastos2, col);
+                jdbcTemplate.execute(addColumnQuery);
+            }
+        }
+
+        // 2) Actualizar la columna GASTOS_FUNCIONAMIENTO:
+        // Se asigna '1' si se cumplen las siguientes condiciones en la fila, de lo
+        // contrario se asigna '0':
+        // - AMBITO_CODIGO es 'A438' y COD_SECCION_PRESUPUESTAL no es '17' ni '19'
+        // OR
+        // AMBITO_CODIGO es 'A439' y COD_SECCION_PRESUPUESTAL no es '18', '20' ni '17'
+        // y CUENTA no está en ('2.1.1.01.03.125','2.1.1.01.02.020.02')
+        // OR
+        // AMBITO_CODIGO es 'A440' y COD_SECCION_PRESUPUESTAL no es '18' ni '17'
+        // OR
+        // AMBITO_CODIGO es 'A441' y COD_SECCION_PRESUPUESTAL no es '17' ni '19'
+        // - Y además se debe cumplir:
+        // * COD_VIGENCIA_DEL_GASTO es '1' o '4'
+        // * CUENTA inicia con '2.1'
+        // * NOM_FUENTES_FINANCIACION no comienza con 'R.B' y además cumple que:
+        // - NOM_FUENTES_FINANCIACION contiene 'INGRESOS CORRIENTES DE LIBRE
+        // DESTINACION'
+        // OR
+        // - NOM_FUENTES_FINANCIACION contiene 'SGP-PROPOSITO GENERAL-LIBRE DESTINACION
+        // MUNICIPIOS CATEGORIAS 4, 5 Y 6'
+        // * CUENTA no es '2.1.3.07.02.002'
+        // * Y, finalmente, se debe validar que:
+        // - Si CODIGO_ENTIDAD está en un conjunto específico, entonces CUENTA no debe
+        // ser '2.1.3.05.09.060'
+        // OR
+        // - Si CODIGO_ENTIDAD NO está en ese conjunto, se considera válido.
+        //
+        // (Ajusta o elimina condiciones según corresponda en tu lógica; aquí se
+        // trasladan directamente las condiciones del código original).
+        String updateQuery = String.format(
+                """
+                        UPDATE %s
+                        SET REGLA_25_A = CASE
+                            WHEN (
+                                (
+                                    (AMBITO_CODIGO = 'A438'
+                                        AND (COD_SECCION_PRESUPUESTAL <> '17'
+                                             AND COD_SECCION_PRESUPUESTAL <> '19')
+                                    )
+                                    OR
+                                    (AMBITO_CODIGO = 'A439'
+                                        AND (COD_SECCION_PRESUPUESTAL <> '18'
+                                             AND COD_SECCION_PRESUPUESTAL <> '20'
+                                             AND COD_SECCION_PRESUPUESTAL <> '17')
+                                        AND CUENTA NOT IN ('2.1.1.01.03.125','2.1.1.01.02.020.02')
+                                    )
+                                    OR
+                                    (AMBITO_CODIGO = 'A440'
+                                        AND (COD_SECCION_PRESUPUESTAL <> '18'
+                                             AND COD_SECCION_PRESUPUESTAL <> '17')
+                                    )
+                                    OR
+                                    (AMBITO_CODIGO = 'A441'
+                                        AND (COD_SECCION_PRESUPUESTAL <> '17'
+                                             AND COD_SECCION_PRESUPUESTAL <> '19')
+                                    )
+                                )
+                                AND (COD_VIGENCIA_DEL_GASTO = '1' OR COD_VIGENCIA_DEL_GASTO = '4')
+                                AND (CUENTA LIKE '2.1%%')
+                                AND (NOM_FUENTES_FINANCIACION NOT LIKE 'R.B%%'
+                                     AND (NOM_FUENTES_FINANCIACION LIKE '%%INGRESOS CORRIENTES DE LIBRE DESTINACION%%'
+                                          OR NOM_FUENTES_FINANCIACION LIKE '%%SGP-PROPOSITO GENERAL-LIBRE DESTINACION MUNICIPIOS CATEGORIAS 4, 5 Y 6%%'))
+                                AND CUENTA NOT IN ('2.1.3.07.02.002')
+                                AND (
+                                    (CODIGO_ENTIDAD IN ('210105001','218168081','210108001','210976109',
+                                                         '210113001','216813468','210144001','210147001',
+                                                         '213705837','213552835','210176001')
+                                     AND CUENTA NOT IN ('2.1.3.05.09.060'))
+                                    OR
+                                    (CODIGO_ENTIDAD NOT IN ('210105001','218168081','210108001','210976109',
+                                                             '210113001','216813468','210144001','210147001',
+                                                             '213705837','213552835','210176001'))
+                                )
+                            )
+                            THEN '1'
+                            ELSE '0'
+                        END;
+                        """,
+                ejecGastos2);
+
+        jdbcTemplate.execute(updateQuery);
+    }
+
     public void applySpecificRule25B() {
 
         List<String> requiredColumns = Arrays.asList("ALERTA_25_CA0105");
@@ -197,5 +303,44 @@ public class dataTransfer_25 {
 
         jdbcTemplate.execute(updateQuery);
     }
+
+public void applySpecificRule25_B() {
+    // 1) Verificar/crear la columna ALERTA_25_CA0105 en la tabla detalle (ejecGastos2)
+    List<String> requiredColumns = Arrays.asList("ALERTA_25_CA0105");
+
+    String checkColumnsQuery = String.format(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
+        "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+        ejecGastos2, // Asegúrate de que esta variable contenga el nombre real de la tabla detalle
+        "'" + String.join("','", requiredColumns) + "'"
+    );
+
+    List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+    for (String col : requiredColumns) {
+        if (!existingCols.contains(col)) {
+            String addColumnQuery = String.format(
+                "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
+                ejecGastos2, col
+            );
+            jdbcTemplate.execute(addColumnQuery);
+        }
+    }
+
+    // 2) Actualizar la columna ALERTA_25_CA0105:
+    // Se asigna '1' si en esa fila CUENTA es '2.1.3.05.04.001.13.01', de lo contrario se asigna '0'
+    String updateQuery = String.format(
+        """
+        UPDATE %s
+        SET ALERTA_25_CA0105 = CASE
+            WHEN CUENTA = '2.1.3.05.04.001.13.01' THEN '1'
+            ELSE '0'
+        END;
+        """,
+        ejecGastos2
+    );
+
+    jdbcTemplate.execute(updateQuery);
+}
+
 
 }

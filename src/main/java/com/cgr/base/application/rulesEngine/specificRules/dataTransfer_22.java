@@ -24,6 +24,9 @@ public class dataTransfer_22 {
     @Value("${TABLA_EJEC_INGRESOS}")
     private String ejecIngresos;
 
+    @Value("${TABLA_EJEC_INGRESOS2}")
+    private String ejecIngresos2;
+
     @Transactional
     public void applyGeneralRule22A() {
 
@@ -93,6 +96,68 @@ public class dataTransfer_22 {
                 tablaICLD, // c
                 // Para el UPDATE final
                 tablaReglasEspecificas);
+
+        jdbcTemplate.execute(updateQuery);
+    }
+
+    @Transactional
+    public void applyGeneralRule22_A() {
+        // ----------------------------------------------------------------------
+        // REGLA 22A (versión alternativa)
+        // ----------------------------------------------------------------------
+        // Esta versión se encarga de asignar 1 a las cuentas que sí son tomadas en
+        // cuenta para el cálculo del ICLD.
+        // Agregando una columna llamada REGLA_22_A a la tabla de ejecución de ingresos
+        // copia.
+
+        // 1) Definimos la(s) columna(s) requeridas (en este caso, REGLA_22_A)
+        List<String> requiredColumns = Arrays.asList("REGLA_22_A");
+
+        // 2) Verificamos si la columna ya existe en la tabla ejecIngresos
+        String checkColumnsQuery = String.format(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
+                        "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+                ejecIngresos2, // nombre de la tabla de ejecución de ingresos
+                "'" + String.join("','", requiredColumns) + "'");
+
+        List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+
+        // 3) Creamos la(s) columna(s) faltante(s) en la tabla, en caso de que no
+        // existan.
+        // En este ejemplo se usa VARCHAR(MAX) para mantener la consistencia, pero
+        // podrías usar BIT o TINYINT si solo necesitas 0 y 1.
+        for (String col : requiredColumns) {
+            if (!existingCols.contains(col)) {
+                String addColumnQuery = String.format(
+                        "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
+                        ejecIngresos2, col);
+                jdbcTemplate.execute(addColumnQuery);
+            }
+        }
+
+        // 4) Construimos y ejecutamos el UPDATE directo.
+        // Se asigna '1' a REGLA_22_A si:
+        // - La cuenta existe en CUENTAS_ICLD (c.CUENTA IS NOT NULL)
+        // - La cuenta inicia por '1'
+        // - La fuente de financiación es '1.2.1.0.00' o '1.2.4.3.04'
+        // En caso contrario se asigna '0'
+        String updateQuery = String.format("""
+                UPDATE e
+                SET e.REGLA_22_A = CASE
+                    WHEN c.CUENTA IS NOT NULL
+                         AND e.CUENTA LIKE '1%%'
+                         AND e.COD_FUENTES_FINANCIACION IN ('1.2.1.0.00','1.2.4.3.04')
+                    THEN '1'
+                    ELSE '0'
+                END
+                FROM %s e
+                LEFT JOIN %s c
+                   ON e.AMBITO_CODIGO = c.AMBITO_CODIGO
+                  AND e.CUENTA        = c.CUENTA;
+                """,
+                ejecIngresos2, // tabla de ingresos (alias e)
+                tablaICLD // tabla de CUENTAS_ICLD (alias c)
+        );
 
         jdbcTemplate.execute(updateQuery);
     }
@@ -239,31 +304,21 @@ public class dataTransfer_22 {
 
     @Transactional
     public void applyGeneralRule22C() {
-
-        // 1) Verifica/crea la columna ALERTA_22_CA0080
-        List<String> requiredColumns = Arrays.asList("ALERTA_22_CA0080");
-
+        // 1) Verificar/crear la columna ALERTA_22_CA0080 de forma más eficiente
         String checkColumnsQuery = String.format(
-                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
-                        + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaReglasEspecificas,
-                "'" + String.join("','", requiredColumns) + "'");
+                "SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('%s') AND name = 'ALERTA_22_CA0080'",
+                tablaReglasEspecificas);
 
-        List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+        Boolean columnExists = Boolean.TRUE.equals(jdbcTemplate.queryForObject(checkColumnsQuery, Boolean.class));
 
-        for (String col : requiredColumns) {
-            if (!existingCols.contains(col)) {
-                String addColumnQuery = String.format(
-                        "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglasEspecificas, col);
-                jdbcTemplate.execute(addColumnQuery);
-            }
+        if (!columnExists) {
+            String addColumnQuery = String.format(
+                    "ALTER TABLE %s ADD ALERTA_22_CA0080 VARCHAR(255) NULL",
+                    tablaReglasEspecificas);
+            jdbcTemplate.execute(addColumnQuery);
         }
 
-        // 2) Construye el WITH + UPDATE final:
-        // T0: Distintas combinaciones (FECHA,TRIM,ENT,AMB) en la tabla de ingresos
-        // Validaciones_22C: Para cada combo, revisa si hay al menos 1 fila con
-        // NOM_TIPO_NORMA <> 'NO APLICA'
+        // 2) Optimización de la consulta principal
         String updateQuery = String.format("""
                 WITH T0 AS (
                     SELECT DISTINCT
@@ -273,10 +328,7 @@ public class dataTransfer_22 {
                         e.AMBITO_CODIGO
                     FROM %s e
                     WHERE e.CUENTA LIKE '1%%'
-                      AND (
-                           e.COD_FUENTES_FINANCIACION = '1.2.1.0.00'
-                        OR e.COD_FUENTES_FINANCIACION = '1.2.4.3.04'
-                      )
+                      AND e.COD_FUENTES_FINANCIACION IN ('1.2.1.0.00')
                 ),
                 Validaciones_22C AS (
                     SELECT
@@ -285,42 +337,88 @@ public class dataTransfer_22 {
                         T0.CODIGO_ENTIDAD,
                         T0.AMBITO_CODIGO,
                         CASE
-                           WHEN (
-                             SELECT COUNT(*)
-                             FROM %s e2
-                             WHERE e2.FECHA           = T0.FECHA
-                               AND e2.TRIMESTRE       = T0.TRIMESTRE
-                               AND e2.CODIGO_ENTIDAD  = T0.CODIGO_ENTIDAD
-                               AND e2.AMBITO_CODIGO   = T0.AMBITO_CODIGO
-                               AND e2.CUENTA LIKE '1%%'
-                               AND (
-                                    e2.COD_FUENTES_FINANCIACION = '1.2.1.0.00'
-                                 OR e2.COD_FUENTES_FINANCIACION = '1.2.4.3.04'
-                               )
-                               AND e2.NOM_TIPO_NORMA <> 'NO APLICA'
-                           ) > 0
-                           THEN 'LA ENTIDAD PRESENTA PRESUNTAS INCONSISTENCIAS EN EL TIPO DE NORMA'
-                           ELSE 'LA ENTIDAD SATISFACE LOS CRITERIOS DE VALIDACIÓN'
+                            WHEN COUNT(e2.NOM_TIPO_NORMA) > 0
+                            THEN 'LA ENTIDAD PRESENTA PRESUNTAS INCONSISTENCIAS EN EL TIPO DE NORMA'
+                            ELSE 'LA ENTIDAD SATISFACE LOS CRITERIOS DE VALIDACIÓN'
                         END AS ALERTA_22_CA0080
                     FROM T0
+                    LEFT JOIN %s e2
+                        ON e2.FECHA = T0.FECHA
+                        AND e2.TRIMESTRE = T0.TRIMESTRE
+                        AND e2.CODIGO_ENTIDAD = T0.CODIGO_ENTIDAD
+                        AND e2.AMBITO_CODIGO = T0.AMBITO_CODIGO
+                        AND e2.CUENTA LIKE '1%%'
+                        AND e2.COD_FUENTES_FINANCIACION IN ('1.2.1.0.00')
+                        AND e2.NOM_TIPO_NORMA <> 'NO APLICA'
+                    GROUP BY T0.FECHA, T0.TRIMESTRE, T0.CODIGO_ENTIDAD, T0.AMBITO_CODIGO
                 )
                 UPDATE r
-                SET
-                    r.ALERTA_22_CA0080 = v.ALERTA_22_CA0080
+                SET r.ALERTA_22_CA0080 = v.ALERTA_22_CA0080
                 FROM %s r
                 JOIN Validaciones_22C v
-                   ON  r.FECHA          = v.FECHA
-                   AND r.TRIMESTRE      = v.TRIMESTRE
+                   ON r.FECHA = v.FECHA
+                   AND r.TRIMESTRE = v.TRIMESTRE
                    AND r.CODIGO_ENTIDAD = v.CODIGO_ENTIDAD
-                   AND r.AMBITO_CODIGO  = v.AMBITO_CODIGO
-                ;
+                   AND r.AMBITO_CODIGO = v.AMBITO_CODIGO;
                 """,
-                // T0: (tablaIngresos)
                 ejecIngresos,
-                // subconsulta e2: (tablaIngresos)
                 ejecIngresos,
-                // UPDATE final: (tablaReglas)
                 tablaReglasEspecificas);
+
+        jdbcTemplate.execute(updateQuery);
+    }
+
+    @Transactional
+    public void applyGeneralRule22_C() {
+
+        // ----------------------------------------------------------------------
+        // REGLA 22C (versión alternativa)
+        // ----------------------------------------------------------------------
+        // Esta versión se encarga de asignar 1 a las cuentas que sí son INGRESOS
+        // CORRIENTES DE LIBRE DESTINACIÓN
+        // y el tipo de normal es igual a NO APLICA.
+        // Agregando una columna llamada REGLA_22_A a la tabla de ejecución de ingresos
+        // copia.
+
+        // 1) Verificar/crear la columna ALERTA_22_CA0080 en la tabla de ejecución de
+        // ingresos2
+        List<String> requiredColumns = Arrays.asList("ALERTA_22_CA0080");
+
+        // 2) Verificamos si la columna ya existe en la tabla ejecIngresos
+        String checkColumnsQuery = String.format(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
+                        "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+                ejecIngresos2, // nombre de la tabla de ejecución de ingresos
+                "'" + String.join("','", requiredColumns) + "'");
+
+        List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+
+        // 3) Creamos la(s) columna(s) faltante(s) en la tabla, en caso de que no
+        // existan.
+        // En este ejemplo se usa VARCHAR(MAX) para mantener la consistencia, pero
+        // podrías usar BIT o TINYINT si solo necesitas 0 y 1.
+        for (String col : requiredColumns) {
+            if (!existingCols.contains(col)) {
+                String addColumnQuery = String.format(
+                        "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
+                        ejecIngresos2, col);
+                jdbcTemplate.execute(addColumnQuery);
+            }
+        }
+
+        // 2) Actualizar ALERTA_22_CA0080 según las condiciones:
+        // Si CUENTA es '1.2.1.0.00' y NOM_TIPO_NORMA es distinto de 'NO APLICA' se
+        // asigna '1', de lo contrario '0'
+        String updateQuery = String.format("""
+                UPDATE e
+                SET e.ALERTA_22_CA0080 = CASE
+                    WHEN e.COD_FUENTES_FINANCIACION = '1.2.1.0.00' AND e.NOM_TIPO_NORMA = 'NO APLICA'
+                    THEN '1'
+                    ELSE '0'
+                END
+                FROM %s e;
+                """,
+                ejecIngresos2);
 
         jdbcTemplate.execute(updateQuery);
     }
@@ -428,6 +526,51 @@ public class dataTransfer_22 {
     }
 
     @Transactional
+    public void applyGeneralRule22_D() {
+        // 1) Verifica/crea la columna ALERTA_22_CA0082
+        List<String> requiredColumns = Arrays.asList("ALERTA_22_CA0082");
+
+        String checkColumnsQuery = String.format(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+                        + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+                ejecIngresos2,
+                "'" + String.join("','", requiredColumns) + "'");
+
+        List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+
+        for (String col : requiredColumns) {
+            if (!existingCols.contains(col)) {
+                String addColumnQuery = String.format(
+                        "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
+                        ejecIngresos2, col);
+                jdbcTemplate.execute(addColumnQuery);
+            }
+        }
+
+        // 2) Actualiza ALERTA_22_CA0082 sin agrupar, evaluando cada fila
+        // individualmente.
+        // Se asigna '1' si se cumplen todas las condiciones, '0' en caso contrario.
+        String updateQuery = String.format("""
+                UPDATE e
+                SET e.ALERTA_22_CA0082 = CASE
+                    WHEN e.COD_FUENTES_FINANCIACION = '1.2.1.0.00'
+                         AND e.NOM_TIPO_NORMA <> 'NO APLICA'
+                         AND e.NUMERO_FECHA_NORMA NOT LIKE '0%%'
+                         AND e.NUMERO_FECHA_NORMA NOT LIKE '%%NO APLICA%%'
+                         AND e.NUMERO_FECHA_NORMA NOT LIKE '%%NOAPLICA%%'
+                         AND e.NUMERO_FECHA_NORMA NOT LIKE '%%NA%%'
+                         AND e.NUMERO_FECHA_NORMA NOT LIKE '%%N/A%%'
+                         AND e.NUMERO_FECHA_NORMA NOT LIKE '%%N.A%%'
+                    THEN '1'
+                    ELSE '0'
+                END
+                FROM %s e;
+                """, ejecIngresos2);
+
+        jdbcTemplate.execute(updateQuery);
+    }
+
+    @Transactional
     public void applyGeneralRule22E() {
 
         // --------------------------------------------------------------------
@@ -515,5 +658,41 @@ public class dataTransfer_22 {
 
         jdbcTemplate.execute(updateQuery);
     }
+
+    @Transactional
+public void applyGeneralRule22_E() {
+           // 1) Verifica/crea la columna ALERTA_22_CA0082
+           List<String> requiredColumns = Arrays.asList("ALERTA_22_CA0079");
+
+           String checkColumnsQuery = String.format(
+                   "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+                           + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+                   ejecIngresos2,
+                   "'" + String.join("','", requiredColumns) + "'");
+   
+           List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+   
+           for (String col : requiredColumns) {
+               if (!existingCols.contains(col)) {
+                   String addColumnQuery = String.format(
+                           "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
+                           ejecIngresos2, col);
+                   jdbcTemplate.execute(addColumnQuery);
+               }
+           }
+    
+    // 2) Actualizar ALERTA_22_CA0079:
+    // Se asigna '1' si COD_FUENTES_FINANCIACION es '1.2.4.3.04', de lo contrario '0'
+    String updateQuery = String.format("""
+        UPDATE %s
+        SET ALERTA_22_CA0079 = CASE
+            WHEN COD_FUENTES_FINANCIACION = '1.2.4.3.04' THEN '1'
+            ELSE '0'
+        END;
+        """, ejecIngresos2);
+    
+    jdbcTemplate.execute(updateQuery);
+}
+
 
 }
