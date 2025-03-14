@@ -12,6 +12,7 @@ import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_PI;
 import com.cgr.base.application.rulesEngine.initTables.dataCategoryInit;
 import com.cgr.base.application.rulesEngine.initTables.dataParameterInit;
 import com.cgr.base.application.rulesEngine.initTables.dataSourceInit;
+import com.cgr.base.application.rulesEngine.specificParameter;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_22;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_24;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_25;
@@ -78,15 +79,19 @@ public class initDependencies {
     private dataTransfer_GF RulesGF;
 
     @Autowired
-    private generalParameter Parameter;
+    private generalParameter ParameterRG;
+
+    @Autowired
+    private specificParameter ParameterRE;
 
     @Async
     public void initializeDependencies() {
 
-        MotorReglas.processTablesRules();
-        Parametria.processTablesSource();
-        Categorias.initCategoryTable();
-        Parameter.tableGeneralRulesName();
+        //MotorReglas.processTablesRules();
+        //Parametria.processTablesSource();
+        //Categorias.initCategoryTable();
+        ParameterRG.tableGeneralRulesName();
+        ParameterRE.tableSpecificRulesName();
 
     }
 

@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,8 +42,24 @@ public class exportCSVspecific {
 
         List<Map<String, Object>> filteredDataFormatted = filteredData.stream()
                 .map(row -> {
-                    row.put("TRIMESTRE", convertirTrimestreParaFront(row.get("TRIMESTRE")));
-                    return row;
+                    Map<String, Object> updatedRow = new LinkedHashMap<>();
+
+                    for (Map.Entry<String, Object> entry : row.entrySet()) {
+                        String columnName = entry.getKey();
+                        Object value = entry.getValue();
+
+                        if (columnName.matches("^CA0\\d{3,}$") || columnName.startsWith("REGLA_ESPECIFICA_")) {
+                            updatedRow.put("RESULTADO_REPORTE", value);
+                        } else {
+                            updatedRow.put(columnName, value);
+                        }
+                    }
+
+                    if (updatedRow.containsKey("TRIMESTRE")) {
+                        updatedRow.put("TRIMESTRE", convertirTrimestreParaFront(updatedRow.get("TRIMESTRE")));
+                    }
+
+                    return updatedRow;
                 })
                 .toList();
 

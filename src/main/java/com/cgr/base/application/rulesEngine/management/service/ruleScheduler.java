@@ -5,6 +5,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.cgr.base.application.rulesEngine.generalParameter;
+import com.cgr.base.application.rulesEngine.specificParameter;
 
 @Service
 public class ruleScheduler {
@@ -13,12 +14,16 @@ public class ruleScheduler {
     private initDependencies ApplyRules;
 
     @Autowired
-    private generalParameter Parameter;
+    private generalParameter ParameterRG;
+
+    @Autowired
+    private specificParameter ParameterRE;
 
     @Async
     @Scheduled(cron = "0 0 0 15 * ?")
     public void scheduleRulesExecution() {
-        Parameter.tableGeneralRulesName();
+        ParameterRG.tableGeneralRulesName();
+        ParameterRE.tableSpecificRulesName();
         ApplyRules.initializeDependencies();
 
         try {

@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -80,6 +81,19 @@ public class managementRules extends AbstractController {
             if (record.containsKey("TRIMESTRE")) {
                 record.put("TRIMESTRE", Integer.parseInt(record.get("TRIMESTRE").toString()) / 3);
             }
+            Map<String, Object> updatedRecord = new LinkedHashMap<>();
+            for (Map.Entry<String, Object> entry : record.entrySet()) {
+                String columnName = entry.getKey();
+                Object value = entry.getValue();
+
+                if (columnName.matches("^CA0\\d{3,}$") || columnName.startsWith("REGLA_ESPECIFICA_")) {
+                    updatedRecord.put("RESULTADO_REPORTE", value);
+                } else {
+                    updatedRecord.put(columnName, value);
+                }
+            }
+            record.clear();
+            record.putAll(updatedRecord);
         }
 
         return requestResponse(result, "Specific Rules successfully retrieved.", HttpStatus.OK, true);
@@ -112,7 +126,7 @@ public class managementRules extends AbstractController {
 
             return new ResponseEntity<>(csvBytes, headers, HttpStatus.OK);
         } catch (IOException e) {
-            e.printStackTrace();
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error generating CSV file.".getBytes(StandardCharsets.UTF_8));
         }
@@ -133,7 +147,7 @@ public class managementRules extends AbstractController {
 
             return new ResponseEntity<>(csvBytes, headers, HttpStatus.OK);
         } catch (IOException e) {
-            e.printStackTrace();
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error generating CSV file.".getBytes(StandardCharsets.UTF_8));
         }

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -88,9 +89,12 @@ public class queryFilters {
     }
 
     private List<FormularioDTO> getFormReports() {
-        String sql = "SELECT DISTINCT [CODIGO_TABLA], [NOMBRE_TABLA] FROM specific_rules_tables ORDER BY [CODIGO_TABLA]";
+        if (!tablaExiste("SPECIFIC_RULES_TABLES")) {
+            return List.of();
+        }
+        String sql = "SELECT DISTINCT [CODIGO_REPORTE], [NOMBRE_REPORTE] FROM SPECIFIC_RULES_TABLES ORDER BY [CODIGO_REPORTE]";
         return jdbcTemplate.query(sql,
-                (rs, rowNum) -> new FormularioDTO(rs.getString("CODIGO_TABLA"), rs.getString("NOMBRE_TABLA")));
+                (rs, rowNum) -> new FormularioDTO(rs.getString("CODIGO_REPORTE"), rs.getString("NOMBRE_REPORTE")));
     }
 
     private List<String> getTrimestres(String tablaReglas) {
@@ -159,12 +163,9 @@ public class queryFilters {
     public List<Map<String, Object>> getFilteredRecordsSR(String fecha, String trimestre, String ambitoCodigo,
             String entidadCodigo, String reporteCodigo) {
 
-        // Determinar la tabla a consultar
-        String tablaConsulta = (reporteCodigo != null && reporteCodigo.matches("E0\\d{2}"))
-                ? reporteCodigo
-                : tablaEspecificas;
+        String tablaConsulta = obtenerTablaDesdeCodigo(reporteCodigo);
 
-        if (!tablaExiste(tablaConsulta)) {
+        if (tablaConsulta == null || !tablaExiste(tablaConsulta)) {
             return List.of();
         }
 
@@ -195,8 +196,28 @@ public class queryFilters {
         return jdbcTemplate.queryForList(sql.toString());
     }
 
+    private String obtenerTablaDesdeCodigo(String reporteCodigo) {
+        if (reporteCodigo == null) {
+            return null;
+        }
+
+        String sql = "SELECT NOMBRE_TABLA FROM SPECIFIC_RULES_TABLES WHERE CODIGO_REPORTE = ?";
+        try {
+            return jdbcTemplate.queryForObject(sql, String.class, reporteCodigo);
+
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
     private List<String> obtenerColumnasValidas(String tabla) {
-        String sql = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME NOT LIKE 'ALERTA_%'";
+        String sql = """
+                    SELECT COLUMN_NAME
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = ?
+                    AND COLUMN_NAME NOT LIKE 'ALERTA_%'
+                    AND COLUMN_NAME <> 'FECHA_CARGUE'
+                """;
         return jdbcTemplate.queryForList(sql, String.class, tabla);
     }
 
