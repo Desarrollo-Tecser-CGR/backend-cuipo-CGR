@@ -4,16 +4,26 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.cgr.base.application.rulesEngine.generalParameter;
+import com.cgr.base.application.rulesEngine.specificParameter;
+
 @Service
 public class ruleScheduler {
 
     @Autowired
     private initDependencies ApplyRules;
 
+    @Autowired
+    private generalParameter ParameterRG;
+
+    @Autowired
+    private specificParameter ParameterRE;
+
     @Async
-    @Scheduled(cron = "0 0 0 1 * ?") // Se ejecuta el primer día de cada mes a medianoche
+    @Scheduled(cron = "0 0 0 15 * ?")
     public void scheduleRulesExecution() {
-        // 1. Ejecutar primero initializeDependencies()
+        ParameterRG.tableGeneralRulesName();
+        ParameterRE.tableSpecificRulesName();
         ApplyRules.initializeDependencies();
 
         try {

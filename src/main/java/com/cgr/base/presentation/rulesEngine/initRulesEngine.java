@@ -19,7 +19,7 @@ public class initRulesEngine extends AbstractController {
 
     @Autowired
     private initDependencies tablesInit;
-
+    
     @PostMapping("/init-tables")
     public ResponseEntity<?> processTables() {
         tablesInit.initializeDependencies();
