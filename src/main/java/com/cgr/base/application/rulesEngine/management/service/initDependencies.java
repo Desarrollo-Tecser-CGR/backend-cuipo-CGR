@@ -87,9 +87,9 @@ public class initDependencies {
     @Async
     public void initializeDependencies() {
 
-        //MotorReglas.processTablesRules();
-        //Parametria.processTablesSource();
-        //Categorias.initCategoryTable();
+        // MotorReglas.processTablesRules();
+        // Parametria.processTablesSource();
+        // Categorias.initCategoryTable();
         ParameterRG.tableGeneralRulesName();
         ParameterRE.tableSpecificRulesName();
 
