@@ -4,8 +4,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.application.rulesEngine.generalParameter;
-import com.cgr.base.application.rulesEngine.specificParameter;
+import com.cgr.base.application.rulesEngine.parameterization.generalParameter;
+import com.cgr.base.application.rulesEngine.parameterization.specificParameter;
 
 @Service
 public class ruleScheduler {

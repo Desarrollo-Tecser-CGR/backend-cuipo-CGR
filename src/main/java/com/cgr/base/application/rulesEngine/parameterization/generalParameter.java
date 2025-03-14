@@ -1,4 +1,4 @@
-package com.cgr.base.application.rulesEngine;
+package com.cgr.base.application.rulesEngine.parameterization;
 
 import java.util.List;
 

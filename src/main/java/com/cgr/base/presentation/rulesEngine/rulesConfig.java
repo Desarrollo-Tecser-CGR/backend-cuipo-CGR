@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cgr.base.application.rulesEngine.generalParameter;
-import com.cgr.base.application.rulesEngine.specificParameter;
+import com.cgr.base.application.rulesEngine.parameterization.generalParameter;
+import com.cgr.base.application.rulesEngine.parameterization.specificParameter;
 import com.cgr.base.infrastructure.persistence.entity.rulesEngine.GeneralRulesNames;
 import com.cgr.base.infrastructure.persistence.entity.rulesEngine.SpecificRulesTables;
 import com.cgr.base.presentation.controller.AbstractController;

@@ -1,20 +1,19 @@
-# Configuración del servidor 
+# Configuración del servidor
 server:
-  port: 8001
-  address: 0.0.0.0
+  port: ${SERVER_PORT}
+  address: ${SERVER_ADDRESS}
 
-# Configuración de la aplicación 
+# Configuración de la aplicación
 spring:
   application:
     name: baseapp
   profiles:
-    active: dev
-    # Entorno activo: dev, qa, prod
+    active: ${SPRING_PROFILES_ACTIVE}
   datasource:
-    username: sa
-    password: Tecs2024*
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://192.168.2.62:1433;databaseName=cuipo_dev;encrypt=false;trustServerCertificate=true;
+    url: ${DATASOURCE_URL}
   jpa:
     database-platform: org.hibernate.dialect.SQLServer2012Dialect
     show-sql: false
@@ -25,16 +24,16 @@ spring:
     ansi:
       enabled: always
   # Configuración Seguridad de la aplicación
-  security:
-    enable: false
-    user:
-      name: user
-      password: $2a$12$od1exy/dPLCsL3yxbJeFcO/AxDCKyYVBjl/bGB.7GgM3aGOWeWc.q
+security:
+  enable: false
+  user:
+    name: ${SECURITY_USERNAME}
+    password: ${SECURITY_PASSWORD}
 
 # Clave secreta para JWT
 jwt:
   secret:
-    key: "U6w3yjuQRNWNRG3IaajKZY8nyMPiu+wFLpj/7evdNEc="
+    key: ${JWT_SECRET_KEY}
 
 # Configuración del logging
 logging:
