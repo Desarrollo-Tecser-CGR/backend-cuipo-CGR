@@ -15,8 +15,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@AllArgsConstructor
 @Data
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -36,6 +39,10 @@ public class LogEntity {
     @Column(name = "email", nullable = false, length = 100)
     private String correo;
 
+
+    @Column(name = "tipe_of_income")
+    private String tipe_of_income;
+
     @NotNull
     @Column(name = "date_session_start", updatable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "America/Bogota")
@@ -51,11 +58,12 @@ public class LogEntity {
     public LogEntity() {
     }
 
-    public LogEntity(String correo, Date data_session_start, boolean enable, String name_user) {
+    public LogEntity(String correo, Date data_session_start, boolean enable, String name_user, String tipe_of_income) {
         this.correo = correo;
         this.data_session_start = data_session_start;
         this.enable = enable;
         this.name_user = name_user;
+        this.tipe_of_income = tipe_of_income;
     }
 
 }
