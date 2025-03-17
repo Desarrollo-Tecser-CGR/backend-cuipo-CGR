@@ -1,7 +1,7 @@
 # Configuración del servidor
 server:
-  port: ${SERVER_PORT}
-  address: ${SERVER_ADDRESS}
+  port: 8001
+  address: "0.0.0.0"
 
 # Configuración de la aplicación
 spring:
