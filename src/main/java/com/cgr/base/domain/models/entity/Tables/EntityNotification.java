@@ -3,7 +3,7 @@ package com.cgr.base.domain.models.entity.Tables;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
+/*
 import java.util.Date;
 @Table(name = "notification")
 public class EntityNotification {
@@ -22,3 +22,5 @@ public class EntityNotification {
     private Integer user_id;
 
 }
+*/
+
