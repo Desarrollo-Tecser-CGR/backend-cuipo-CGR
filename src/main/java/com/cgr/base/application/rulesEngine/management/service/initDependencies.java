@@ -11,6 +11,8 @@ import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_PI;
 import com.cgr.base.application.rulesEngine.initTables.dataCategoryInit;
 import com.cgr.base.application.rulesEngine.initTables.dataParameterInit;
 import com.cgr.base.application.rulesEngine.initTables.dataSourceInit;
+import com.cgr.base.application.rulesEngine.parameterization.generalParameter;
+import com.cgr.base.application.rulesEngine.parameterization.specificParameter;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_22;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_24;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_25;
@@ -76,15 +78,24 @@ public class initDependencies {
     @Autowired
     private dataTransfer_GF RulesGF;
 
+    @Autowired
+    private generalParameter ParameterRG;
+
+    @Autowired
+    private specificParameter ParameterRE;
+
     @Async
     public void initializeDependencies() {
 
-        Parametria.processTablesSource();
-        Categorias.initCategoryTable();
-        MotorReglas.processTablesRules();
+        // MotorReglas.processTablesRules();
+        // Parametria.processTablesSource();
+        // Categorias.initCategoryTable();
+        ParameterRG.tableGeneralRulesName();
+        ParameterRE.tableSpecificRulesName();
 
     }
 
+    @Async
     public void transferGeneralRules(String rule) {
         switch (rule.toUpperCase()) {
             case "1" -> RulesPI.applyGeneralRule1();
@@ -111,16 +122,23 @@ public class initDependencies {
         }
     }
 
+    @Async
     public void transferSpecificRules(String rule) {
         switch (rule.toUpperCase()) {
             case "22A" -> Rules22.applyGeneralRule22A();
+            case "22_A" -> Rules22.applyGeneralRule22_A(); // nueva lógica para la regla 22 ICLD
             case "22B" -> Rules22.applyGeneralRule22B();
             case "22C" -> Rules22.applyGeneralRule22C();
+            case "22_C" -> Rules22.applyGeneralRule22_C(); // nueva lógica para la regla 22 ICLD
             case "22D" -> Rules22.applyGeneralRule22D();
+            case "22_D" -> Rules22.applyGeneralRule22_D(); // nueva lógica para la regla 22 ICLD
             case "22E" -> Rules22.applyGeneralRule22E();
+            case "22_E" -> Rules22.applyGeneralRule22_E(); // nueva lógica para la regla 22 ICLD
             case "24" -> Rules24.applySpecificRule24();
             case "25A" -> Rules25.applySpecificRule25A();
+            case "25_A" -> Rules25.applySpecificRule25_A(); // nueva lógica para la regla 25 GF
             case "25B" -> Rules25.applySpecificRule25B();
+            case "25_B" -> Rules25.applySpecificRule25_B(); // nueva lógica para la regla 25 GF
             case "GF" -> RulesGF.applySpecificRuleGF27();
             case "26" -> Rules26.applySpecificRule26();
             case "27" -> Rules27.applySpecificRule27();
@@ -135,4 +153,3 @@ public class initDependencies {
     }
 
 }
-

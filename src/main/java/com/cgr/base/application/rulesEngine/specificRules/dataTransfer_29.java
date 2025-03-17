@@ -366,50 +366,22 @@ public class dataTransfer_29 {
         }
 
         // Construir la consulta UPDATE usando una CTE para realizar los cálculos
-        String updateQuery = String.format("""
-                WITH Calculos AS (
-                    SELECT
-                        FECHA,
-                        TRIMESTRE,
-                        CODIGO_ENTIDAD,
-                        AMBITO_CODIGO,
-                        CAST((REMUNERACION_DIPUTADOS / 12) AS DECIMAL(18,2)) AS IBC,
-                        CAST((REMUNERACION_DIPUTADOS / 8) AS DECIMAL(18,2)) AS CESANTIAS,
-                        CAST(((REMUNERACION_DIPUTADOS / 12) * 0.09) AS DECIMAL(18,2)) AS APORTES_PARAFISCALES,
-                        CAST(((REMUNERACION_DIPUTADOS / 12) * 0.085) AS DECIMAL(18,2)) AS SALUD,
-                        CAST(((REMUNERACION_DIPUTADOS / 12) * 0.12) AS DECIMAL(18,2)) AS PENSION,
-                        CAST(((REMUNERACION_DIPUTADOS / 12) * 0.00522) AS DECIMAL(18,2)) AS RIESGOS_PROFESIONALES,
-                        CAST(((REMUNERACION_DIPUTADOS / 8) * 0.12) AS DECIMAL(18,2)) AS INGRESOS_CESANTIAS,
-                        CAST(((REMUNERACION_DIPUTADOS / 30) * 15) AS DECIMAL(18,2)) AS VACACIONES,
-                        CAST(((REMUNERACION_DIPUTADOS / 30) * 15) AS DECIMAL(18,2)) AS PRIMA_VACACIONES,
-                        CAST(
-                            REMUNERACION_DIPUTADOS
-                            + ((1.0/12) * ((REMUNERACION_DIPUTADOS / 30) * 15))
-                            AS DECIMAL(18,2)
-                        ) AS PRIMA_NAVIDAD
-                    FROM %s
-                )
-                UPDATE e
-                SET
-                    e.IBC                   = c.IBC,
-                    e.CESANTIAS             = c.CESANTIAS,
-                    e.APORTES_PARAFISCALES   = c.APORTES_PARAFISCALES,
-                    e.SALUD                 = c.SALUD,
-                    e.PENSION               = c.PENSION,
-                    e.RIESGOS_PROFESIONALES = c.RIESGOS_PROFESIONALES,
-                    e.INGRESOS_CESANTIAS    = c.INGRESOS_CESANTIAS,
-                    e.VACACIONES            = c.VACACIONES,
-                    e.PRIMA_VACACIONES      = c.PRIMA_VACACIONES,
-                    e.PRIMA_NAVIDAD         = c.PRIMA_NAVIDAD
-                FROM %s e
-                INNER JOIN Calculos c
-                    ON e.FECHA = c.FECHA
-                   AND e.TRIMESTRE = c.TRIMESTRE
-                   AND e.CODIGO_ENTIDAD = c.CODIGO_ENTIDAD
-                   AND e.AMBITO_CODIGO = c.AMBITO_CODIGO;
-                """, tablaE029, tablaE029);
-
-        jdbcTemplate.execute(updateQuery);
+        String query = "UPDATE E029 " +
+                "SET PRESTACIONES_SOCIALES = " +
+                "(REMUNERACION_DIPUTADOS * pa.APORTES_PARAFISCALES) + " +
+                "(REMUNERACION_DIPUTADOS * pa.SALUD) + " +
+                "(REMUNERACION_DIPUTADOS * pa.PENSION) + " +
+                "(REMUNERACION_DIPUTADOS * pa.RIESGOS_PROFESIONALES) + " +
+                "(GASTOS_FUNCIONAMIENTO_ASAM / pa.CESANTIAS) + " +
+                "((GASTOS_FUNCIONAMIENTO_ASAM / pa.CESANTIAS) * pa.INTERESES_CESANTIAS) + " +
+                "((GASTOS_FUNCIONAMIENTO_ASAM / 30) * pa.VACAIONES) + " +
+                "((GASTOS_FUNCIONAMIENTO_ASAM / 30) * pa.PRIMA_VACACIONES) + " +
+                "(GASTOS_FUNCIONAMIENTO_ASAM + (((GASTOS_FUNCIONAMIENTO_ASAM / 30) * pa.PRIMA_VACACIONES) * pa.PRIMA_NAVIDAD)) "
+                +
+                "FROM E029 e " +
+                "JOIN PARAMETRIZACION_ANUAL pa " +
+                "ON e.FECHA = pa.FECHA";
+        jdbcTemplate.execute(query);
     }
 
     @Transactional
