@@ -125,17 +125,12 @@ public class AuthService implements IAuthUseCase {
                 return response;
             }
 
-
-
             if (isAccountValid) {
                 if (user.getEnabled()) {
-                    // Restablecer intentos fallidos
+                    // Restablecer intentos fallidos si el inicio de sesión es exitoso
                     resetFailedAttempts(user);
 
-                    //Verificar el ingreso
                     userRequest.setTipe_of_income("Éxito");
-                    System.out.println("Valor en userRequest antes de llamar a createLog: " + userRequest.getTipe_of_income());
-
 
                     AuthResponseDto userRequestDto = new AuthResponseDto();
                     UserDto userDto = this.dtoMapper.convertToDto(user, UserDto.class);
@@ -151,7 +146,6 @@ public class AuthService implements IAuthUseCase {
                     userRequestDto.setToken(token);
 
                     userRequest.setEmail(user.getEmail());
-
                     this.logService.createLog(userRequest);
 
                     response.put("user", userRequestDto);
@@ -161,27 +155,26 @@ public class AuthService implements IAuthUseCase {
                     return response;
 
                 } else {
-
-                    // guradar el fracaso
+                    response.put("message", "User not enabled");
+                    response.put("statusCode", 403);
+                    response.put("status", "error");
                     return response;
-
                 }
             } else {
+                // Incrementar intentos fallidos si la contraseña es incorrecta
+                increaseFailedAttempts(user);
 
                 userRequest.setTipe_of_income("Fracaso");
 
-                // Buscar el email en la base de datos si no está presente
                 Optional<UserEntity> userOptional = this.userRepositoryFull.findBySAMAccountName(userRequest.getSAMAccountName());
                 String email = userOptional.map(UserEntity::getEmail).orElse("desconocido@dominio.com");
                 userRequest.setEmail(email);
 
-                System.out.println("Email Fallido): " + userRequest.getEmail());
-
                 this.logService.createLog(userRequest);
 
-                response.put("message", "User not enabled");
-                response.put("statusCode", 403);
-                response.put("status", "Password Incorrect");
+                response.put("message", "Invalid username or password");
+                response.put("statusCode", 401);
+                response.put("status", "error");
                 return response;
             }
 
@@ -192,13 +185,15 @@ public class AuthService implements IAuthUseCase {
         response.put("message", "User not authenticated");
         return response;
     }
+
     // jhon
     private void increaseFailedAttempts(UserEntity user) {
         int failedAttempts = Objects.requireNonNullElse(user.getFailedAttempts(), 0);
         failedAttempts++;
 
         if (failedAttempts >= MAX_FAILED_ATTEMPTS) {
-            user.setLockTime(LocalDateTime.now()); // Bloquea la cuenta
+            user.setLockTime(LocalDateTime.now()); // Bloquear cuenta
+            System.out.println("Usuario bloqueado por intentos fallidos: " + user.getSAMAccountName());
         }
 
         user.setFailedAttempts(failedAttempts);

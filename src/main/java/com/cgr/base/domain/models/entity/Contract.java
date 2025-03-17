@@ -42,6 +42,8 @@ public class Contract {
     @Column(name = "contractor_id", nullable = false)
     private Long contractorId;
 
+
+
     @ManyToMany
     @JoinTable(name = "indicators_contracts", joinColumns = @JoinColumn(name = "contract_id"), inverseJoinColumns = @JoinColumn(name = "indicator_id"))
     private Set<EntityIndicator> indicators;

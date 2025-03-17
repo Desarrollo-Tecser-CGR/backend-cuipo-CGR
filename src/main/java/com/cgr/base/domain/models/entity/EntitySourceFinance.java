@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -12,6 +14,11 @@ public class EntitySourceFinance {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     private Integer source_financing_id;
-     private String source_financing_name;
+    @Column(name = "source_financing_id") // Mantiene el nombre en la base de datos
+    private Integer id;
+
+    private String source_financing_name;
+
+    @OneToMany(mappedBy = "sourceFinance", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contract> contracts;
 }
