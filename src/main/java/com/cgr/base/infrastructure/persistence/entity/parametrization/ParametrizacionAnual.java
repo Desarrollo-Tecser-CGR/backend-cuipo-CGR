@@ -3,11 +3,15 @@ package com.cgr.base.infrastructure.persistence.entity.parametrization;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import jakarta.persistence.Column;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "PARAMETRIZACION_ANUAL")
+@NoArgsConstructor
+@AllArgsConstructor
 public class ParametrizacionAnual {
 
     @Id

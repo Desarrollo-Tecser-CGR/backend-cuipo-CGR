@@ -20,12 +20,12 @@ public class ParametrizacionAnualRepository {
     }
 
     public ParametrizacionAnual save(ParametrizacionAnual parametrizacionAnual) {
-        if (parametrizacionAnual.getFecha() == 0) {
-            entityManager.persist(parametrizacionAnual);
-            return parametrizacionAnual;
-        } else {
-            return entityManager.merge(parametrizacionAnual);
-        }
+        entityManager.persist(parametrizacionAnual);
+        return parametrizacionAnual;
+    }
+
+    public ParametrizacionAnual update(ParametrizacionAnual parametrizacionAnual) {
+        return entityManager.merge(parametrizacionAnual);
     }
 
     public void deleteByFecha(int fecha) {

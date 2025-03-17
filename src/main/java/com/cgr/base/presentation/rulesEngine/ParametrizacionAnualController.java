@@ -1,13 +1,14 @@
 package com.cgr.base.presentation.rulesEngine;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,17 +29,25 @@ public class ParametrizacionAnualController {
     }
 
     @GetMapping("/{fecha}")
-    public Optional<ParametrizacionAnual> getByFecha(@PathVariable int fecha) {
-        return parametrizacionAnualService.getByFecha(fecha);
+    public ResponseEntity<ParametrizacionAnual> getByFecha(@PathVariable int fecha) {
+        return parametrizacionAnualService.getByFecha(fecha)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ParametrizacionAnual createOrUpdate(@RequestBody ParametrizacionAnual parametrizacionAnual) {
-        return parametrizacionAnualService.saveOrUpdate(parametrizacionAnual);
+    public ResponseEntity<ParametrizacionAnual> create(@RequestBody ParametrizacionAnual parametrizacionAnual) {
+        return ResponseEntity.ok(parametrizacionAnualService.save(parametrizacionAnual));
+    }
+
+    @PutMapping
+    public ResponseEntity<ParametrizacionAnual> update(@RequestBody ParametrizacionAnual parametrizacionAnual) {
+        return ResponseEntity.ok(parametrizacionAnualService.update(parametrizacionAnual));
     }
 
     @DeleteMapping("/{fecha}")
     public void deleteByFecha(@PathVariable int fecha) {
         parametrizacionAnualService.deleteByFecha(fecha);
     }
+
 }
