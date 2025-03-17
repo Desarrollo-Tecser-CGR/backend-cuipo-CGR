@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.cgr.base.application.certifications.service.initTablaCertifications;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EG;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EI;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_PG;
@@ -84,14 +85,18 @@ public class initDependencies {
     @Autowired
     private specificParameter ParameterRE;
 
+    @Autowired
+    private initTablaCertifications Certificator;
+
     @Async
     public void initializeDependencies() {
 
         // MotorReglas.processTablesRules();
         // Parametria.processTablesSource();
         // Categorias.initCategoryTable();
-        ParameterRG.tableGeneralRulesName();
-        ParameterRE.tableSpecificRulesName();
+        //ParameterRG.tableGeneralRulesName();
+        //ParameterRE.tableSpecificRulesName();
+        Certificator.generateControlTable();
 
     }
 
