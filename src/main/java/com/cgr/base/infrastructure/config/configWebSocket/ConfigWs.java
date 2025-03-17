@@ -1,4 +1,5 @@
-package com.cgr.base.application.notificationsWs.configWebSocket;
+package com.cgr.base.infrastructure.config.configWebSocket;
+
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -8,7 +9,11 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker //ANOTACION PARA HABILITAR EN TIEMPO REAL LOS MENSAJES
+
 public class ConfigWs implements WebSocketMessageBrokerConfigurer {
+
+
+
 
 
     //definicion de los end pont donde se va conectar la aplicacion

@@ -1,19 +1,10 @@
 package com.cgr.base.application.services.auth.service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.domain.dto.dtoAuth.AuthResponseDto;
-import com.cgr.base.domain.dto.dtoUser.UserDto;
-import com.cgr.base.domain.models.entity.Logs.RoleEntity;
-import com.cgr.base.domain.models.entity.Logs.UserEntity;
-import com.cgr.base.domain.models.entity.Menu.Menu;
-import com.cgr.base.infrastructure.repositories.repositories.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
-import com.cgr.base.infrastructure.utilities.DtoMapper;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,13 +16,8 @@ public class ValidateService {
 
     private final JwtService jwtService;
 
-    private final IUserRepositoryJpa userRepositoryFull;
-
-    private final DtoMapper dtoMapper;
-
     public Map<String, Object> validationToken(String token) {
         Map<String, Object> response = new HashMap<>();
-        AuthResponseDto userResponseDto = new AuthResponseDto();
 
         try {
             if (jwtService.validateFirma(token) != null) {
@@ -46,42 +32,11 @@ public class ValidateService {
                 response.put("statusCode", 498);
                 response.put("status", "Error");
                 return response;
-            }
-
-            UserEntity user = this.userRepositoryFull
-                    .findBySAMAccountNameWithRoles(jwtService.getClaimUserName(token)).get();
-
-            if (user.getEnabled()==true) {
-    
-                UserDto userDto = this.dtoMapper.convertToDto(user, UserDto.class);
-
-                userResponseDto.setUser(userDto);
-
-                userResponseDto.setIsEnable(true);
-
-                userResponseDto.setRoles(user.getRoles().stream().map(RoleEntity::getName).toList());
-
-                String newToken = jwtService.createToken(userResponseDto, user.getRoles(),3600000);
-
-                List<Menu> menus = this.userRepositoryFull
-                                    .findMenusByRoleNames(user.getRoles().stream().map(RoleEntity::getName).toList());
-
-                userResponseDto.setMenus(menus);
-
-                userResponseDto.setToken(newToken);
-                userResponseDto.setIsEnable(true);
-
-                response.put("user", userResponseDto);
-                response.put("message", "Valid token ");
+            } else {
+                response.put("message", "Token valid");
                 response.put("statusCode", 200);
-                response.put("status", "Succes");
+                response.put("status", "success");
 
-                return response;
-            }
-            else{
-                response.put("message", "User not enabled");
-                response.put("statusCode", 403);
-                response.put("status", "disabled");
                 return response;
             }
 

@@ -1,4 +1,4 @@
-package com.cgr.base.application.services.logs.usecase;
+package com.cgr.base.application.logs.usecase;
 
 import java.util.List;
 
@@ -7,9 +7,7 @@ import com.cgr.base.domain.dto.dtoLogs.LogDto;
 import com.cgr.base.domain.models.entity.Logs.LogEntity;
 
 public interface ILogUseCase {
+    public abstract List<LogDto> logFindAll();
 
-    public List<LogDto> logFindAll();
-
-    public LogEntity createLog(AuthRequestDto userRequest);
-
+    public abstract LogEntity createLog(AuthRequestDto userRequest);
 }
