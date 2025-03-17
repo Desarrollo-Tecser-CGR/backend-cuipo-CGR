@@ -41,10 +41,11 @@ public class SecurityConfig {
                     auth.requestMatchers("/v3/api-docs/","/v3/api-docs/**").permitAll();
                     auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**", "/swagger-ui/**", "/api/v1/user/synchronize",
                             "/swagger-ui.html/","/ws/**").permitAll();
-                    auth.requestMatchers("/api/v1/role/**").hasAnyAuthority("administrador");
+                    auth.requestMatchers("/api/v1/role/**").hasAnyAuthority("analista","administrador");
                     auth.requestMatchers("/api/v1/log/**").hasAnyAuthority("administrador");
                     auth.requestMatchers("/api/v1/menu/**").hasAnyAuthority("administrador");
                     auth.requestMatchers("/api/v1/user/**").hasAnyAuthority("administrador");
+                    auth.requestMatchers("/api/v1/export/**").hasAnyAuthority("auditor","administrador");
                     auth.anyRequest().authenticated();
                 });
 

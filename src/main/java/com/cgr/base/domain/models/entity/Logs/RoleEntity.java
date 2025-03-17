@@ -3,6 +3,7 @@ package com.cgr.base.domain.models.entity.Logs;
 import java.util.Date;
 import java.util.List;
 
+import com.cgr.base.application.services.role.service.permission.EntityPermission;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -11,16 +12,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -63,8 +55,22 @@ public class RoleEntity {
     @ManyToMany
     @JsonIgnoreProperties({ "roles", "handler", "hibernateLazyInitializer" })
     @JsonIgnore
-    @JoinTable(name = "roles_submenu", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "submenu_id"), uniqueConstraints = {
-            @UniqueConstraint(columnNames = { "role_id", "submenu_id" }) })
+    @JoinTable(
+            name = "roles_submenu",
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "submenu_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = { "role_id", "submenu_id" })
+    )
     private List<SubMenuEntity> subMenus;
 
+    // Relación entre roles y permisos
+    @ManyToMany
+    @JsonIgnore
+    @JoinTable(
+            name = "roles_permisos",
+            joinColumns = @JoinColumn(name = "id_role"), // Debe coincidir con el nombre en la BD
+            inverseJoinColumns = @JoinColumn(name = "permiso_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = { "id_role", "permiso_id" })
+    )
+    private List<EntityPermission> permisos;
 }
