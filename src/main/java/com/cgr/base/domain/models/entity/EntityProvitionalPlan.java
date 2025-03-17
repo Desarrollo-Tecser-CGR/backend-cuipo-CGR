@@ -7,11 +7,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "entities_provisional_plan")
+@Table(name = "entities")
 public class EntityProvitionalPlan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer entity_id;
+    @Column(name = "entity_nit")
     private String entity_nit;
+    @Column(name = "entity_name")
     private String entity_name;
 }
