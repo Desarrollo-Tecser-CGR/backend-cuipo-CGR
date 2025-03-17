@@ -32,6 +32,6 @@ public class ContractController extends AbstractController {
         }
 
         return requestResponse(contracts,
-                "Contratos encontrados", HttpStatus.FOUND, true);
+                "Contratos encontrados", HttpStatus.OK, true);
     }
 }

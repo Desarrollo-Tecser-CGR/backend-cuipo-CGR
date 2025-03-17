@@ -47,6 +47,8 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/v1/menu/**").hasAnyAuthority("administrador");
                     auth.requestMatchers("/api/v1/user/**").hasAnyAuthority("administrador");
                     auth.requestMatchers("/api/v1/contract/**").hasAnyAuthority("administrador");
+                    auth.requestMatchers("/api/v1/notification/**").hasAnyAuthority("administrador", "analista",
+                            "auditor");
                     auth.anyRequest().authenticated();
                 });
 
