@@ -37,8 +37,10 @@ public class ParametrizacionAnualController {
         return parametrizacionAnualService.saveOrUpdate(parametrizacionAnual);
     }
 
-    @DeleteMapping("/{fecha}")
-    public void deleteByFecha(@PathVariable int fecha) {
-        parametrizacionAnualService.deleteByFecha(fecha);
-    }
+    /*
+     * @DeleteMapping("/{fecha}")
+     * public void deleteByFecha(@PathVariable int fecha) {
+     * parametrizacionAnualService.deleteByFecha(fecha);
+     * }
+     */
 }
