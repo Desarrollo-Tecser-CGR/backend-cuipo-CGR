@@ -38,17 +38,14 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**", "/ws/**", "/app/**", "/topic/**")
+                    auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**", "/ws/**", "/app/**", "/topic/**",
+                            "/v3/api-docs/", "/v3/api-docs/**")
                             .permitAll();
 
                     auth.requestMatchers("/api/v1/role/**").hasAnyAuthority("administrador");
-                    auth.requestMatchers("/api/v1/token/**").hasAnyAuthority("administrador", "analista", "auditor");
                     auth.requestMatchers("/api/v1/log/**").hasAnyAuthority("administrador");
                     auth.requestMatchers("/api/v1/menu/**").hasAnyAuthority("administrador");
                     auth.requestMatchers("/api/v1/user/**").hasAnyAuthority("administrador");
-                    auth.requestMatchers("/api/v1/contract/**").hasAnyAuthority("administrador");
-                    auth.requestMatchers("/api/v1/notification/**").hasAnyAuthority("administrador", "analista",
-                            "auditor");
                     auth.anyRequest().authenticated();
                 });
 
