@@ -117,7 +117,7 @@ public class dataTransfer_22 {
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
                         "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                ejecIngresos2, // nombre de la tabla de ejecución de ingresos
+                ejecIngresos, // nombre de la tabla de ejecución de ingresos
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -130,7 +130,7 @@ public class dataTransfer_22 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        ejecIngresos2, col);
+                        ejecIngresos, col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -155,7 +155,7 @@ public class dataTransfer_22 {
                    ON e.AMBITO_CODIGO = c.AMBITO_CODIGO
                   AND e.CUENTA        = c.CUENTA;
                 """,
-                ejecIngresos2, // tabla de ingresos (alias e)
+                ejecIngresos, // tabla de ingresos (alias e)
                 tablaICLD // tabla de CUENTAS_ICLD (alias c)
         );
 
@@ -305,17 +305,25 @@ public class dataTransfer_22 {
     @Transactional
     public void applyGeneralRule22C() {
         // 1) Verificar/crear la columna ALERTA_22_CA0080 de forma más eficiente
+        List<String> requiredColumns = Arrays.asList("ALERTA_22_CA0080");
+
+        // 2) Verificamos si la columna ya existe en la tabla ejecIngresos
         String checkColumnsQuery = String.format(
-                "SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('%s') AND name = 'ALERTA_22_CA0080'",
-                tablaReglasEspecificas);
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
+                        "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+                tablaReglasEspecificas, // nombre de la tabla de ejecución de ingresos
+                "'" + String.join("','", requiredColumns) + "'");
 
-        Boolean columnExists = Boolean.TRUE.equals(jdbcTemplate.queryForObject(checkColumnsQuery, Boolean.class));
+        List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
 
-        if (!columnExists) {
-            String addColumnQuery = String.format(
-                    "ALTER TABLE %s ADD ALERTA_22_CA0080 VARCHAR(255) NULL",
-                    tablaReglasEspecificas);
-            jdbcTemplate.execute(addColumnQuery);
+        // 3) Creamos la(s) columna(s) faltante(s) en la tabla, en caso de que no
+        for (String col : requiredColumns) {
+            if (!existingCols.contains(col)) {
+                String addColumnQuery = String.format(
+                        "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
+                        tablaReglasEspecificas, col);
+                jdbcTemplate.execute(addColumnQuery);
+            }
         }
 
         // 2) Optimización de la consulta principal
@@ -388,7 +396,7 @@ public class dataTransfer_22 {
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
                         "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                ejecIngresos2, // nombre de la tabla de ejecución de ingresos
+                ejecIngresos, // nombre de la tabla de ejecución de ingresos
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -401,7 +409,7 @@ public class dataTransfer_22 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        ejecIngresos2, col);
+                        ejecIngresos, col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -418,7 +426,7 @@ public class dataTransfer_22 {
                 END
                 FROM %s e;
                 """,
-                ejecIngresos2);
+                ejecIngresos);
 
         jdbcTemplate.execute(updateQuery);
     }
@@ -434,18 +442,18 @@ public class dataTransfer_22 {
      */
     @Transactional
     public void applyGeneralRule22D() {
-
+    
         // 1) Verifica/crea la columna ALERTA_22_CA0082
         List<String> requiredColumns = Arrays.asList("ALERTA_22_CA0082");
-
+    
         String checkColumnsQuery = String.format(
-                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
-                        + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
+                "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
                 tablaReglasEspecificas,
                 "'" + String.join("','", requiredColumns) + "'");
-
+    
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
-
+    
         for (String col : requiredColumns) {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
@@ -454,12 +462,11 @@ public class dataTransfer_22 {
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
-
-        // 2) Construye el WITH + UPDATE
-        // T0: combos FECHA/TRIM/ENT/AMB
-        // Validaciones_22D: revisa si hay al menos 1 fila con:
-        // NOM_TIPO_NORMA = 'NO APLICA'
-        // Y e2.NUMERO_FECHA_NORMA NOT LIKE '0%', '%NA%', etc.
+    
+        // 2) Construye el WITH + UPDATE optimizado
+        // T0: combos FECHA/TRIM/ENT/AMB obtenidos de ejecIngresos.
+        // FlagValidaciones: agrupa las filas de ejecIngresos que cumplen las condiciones de validación.
+        // Validaciones_22D: combina T0 con FlagValidaciones para asignar el mensaje correspondiente.
         String updateQuery = String.format("""
                 WITH T0 AS (
                     SELECT DISTINCT
@@ -470,8 +477,29 @@ public class dataTransfer_22 {
                     FROM %s e
                     WHERE e.CUENTA LIKE '1%%'
                       AND e.COD_FUENTES_FINANCIACION = '1.2.1.0.00'
-                      -- Si también quieres la fuente '1.2.4.3.04', agréga en el OR.
-                      -- Depende de la lógica real.
+                ),
+                FlagValidaciones AS (
+                    SELECT
+                        e2.FECHA,
+                        e2.TRIMESTRE,
+                        e2.CODIGO_ENTIDAD,
+                        e2.AMBITO_CODIGO,
+                        1 AS Flag
+                    FROM %s e2
+                    WHERE e2.CUENTA LIKE '1%%'
+                      AND e2.COD_FUENTES_FINANCIACION = '1.2.1.0.00'
+                      AND e2.NOM_TIPO_NORMA = 'NO APLICA'
+                      AND e2.NUMERO_FECHA_NORMA NOT LIKE '0%%'
+                      AND e2.NUMERO_FECHA_NORMA NOT LIKE '%%NO APLICA%%'
+                      AND e2.NUMERO_FECHA_NORMA NOT LIKE '%%NOAPLICA%%'
+                      AND e2.NUMERO_FECHA_NORMA NOT LIKE '%%NA%%'
+                      AND e2.NUMERO_FECHA_NORMA NOT LIKE '%%N/A%%'
+                      AND e2.NUMERO_FECHA_NORMA NOT LIKE '%%N.A%%'
+                    GROUP BY
+                        e2.FECHA,
+                        e2.TRIMESTRE,
+                        e2.CODIGO_ENTIDAD,
+                        e2.AMBITO_CODIGO
                 ),
                 Validaciones_22D AS (
                     SELECT
@@ -480,50 +508,35 @@ public class dataTransfer_22 {
                         T0.CODIGO_ENTIDAD,
                         T0.AMBITO_CODIGO,
                         CASE
-                           WHEN (
-                             SELECT COUNT(*)
-                             FROM %s e2
-                             WHERE e2.FECHA           = T0.FECHA
-                               AND e2.TRIMESTRE       = T0.TRIMESTRE
-                               AND e2.CODIGO_ENTIDAD  = T0.CODIGO_ENTIDAD
-                               AND e2.AMBITO_CODIGO   = T0.AMBITO_CODIGO
-                               AND e2.CUENTA LIKE '1%%'
-                               AND e2.COD_FUENTES_FINANCIACION = '1.2.1.0.00'
-                               AND e2.NOM_TIPO_NORMA  = 'NO APLICA'
-                               AND (
-                                    e2.NUMERO_FECHA_NORMA NOT LIKE '0%%'
-                                 AND e2.NUMERO_FECHA_NORMA NOT LIKE '%%NO APLICA%%'
-                                 AND e2.NUMERO_FECHA_NORMA NOT LIKE '%%NOAPLICA%%'
-                                 AND e2.NUMERO_FECHA_NORMA NOT LIKE '%%NA%%'
-                                 AND e2.NUMERO_FECHA_NORMA NOT LIKE '%%N/A%%'
-                                 AND e2.NUMERO_FECHA_NORMA NOT LIKE '%%N.A%%'
-                               )
-                           ) > 0
-                           THEN 'LA ENTIDAD PRESENTA PRESUNTAS INCONSISTENCIAS EN EL NUMERO Y FECHA DE LA NORMA'
-                           ELSE 'LA ENTIDAD SATISFACE LOS CRITERIOS DE VALIDACION'
+                            WHEN f.Flag = 1 THEN 'LA ENTIDAD PRESENTA PRESUNTAS INCONSISTENCIAS EN EL NUMERO Y FECHA DE LA NORMA'
+                            ELSE 'LA ENTIDAD SATISFACE LOS CRITERIOS DE VALIDACION'
                         END AS ALERTA_22_CA0082
                     FROM T0
+                    LEFT JOIN FlagValidaciones f
+                        ON T0.FECHA = f.FECHA
+                        AND T0.TRIMESTRE = f.TRIMESTRE
+                        AND T0.CODIGO_ENTIDAD = f.CODIGO_ENTIDAD
+                        AND T0.AMBITO_CODIGO = f.AMBITO_CODIGO
                 )
                 UPDATE r
-                SET
-                    r.ALERTA_22_CA0082 = v.ALERTA_22_CA0082
+                SET r.ALERTA_22_CA0082 = v.ALERTA_22_CA0082
                 FROM %s r
                 JOIN Validaciones_22D v
-                   ON  r.FECHA          = v.FECHA
-                   AND r.TRIMESTRE      = v.TRIMESTRE
+                   ON r.FECHA = v.FECHA
+                   AND r.TRIMESTRE = v.TRIMESTRE
                    AND r.CODIGO_ENTIDAD = v.CODIGO_ENTIDAD
-                   AND r.AMBITO_CODIGO  = v.AMBITO_CODIGO
-                ;
+                   AND r.AMBITO_CODIGO = v.AMBITO_CODIGO;
                 """,
                 // T0 usa (tablaIngresos)
                 ejecIngresos,
-                // subconsulta e2 (tablaIngresos)
+                // FlagValidaciones usa (tablaIngresos)
                 ejecIngresos,
-                // UPDATE final -> (tablaReglas)
+                // UPDATE final -> (tablaReglasEspecificas)
                 tablaReglasEspecificas);
-
+    
         jdbcTemplate.execute(updateQuery);
     }
+    
 
     @Transactional
     public void applyGeneralRule22_D() {
@@ -533,7 +546,7 @@ public class dataTransfer_22 {
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
                         + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                ejecIngresos2,
+                ejecIngresos,
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -542,7 +555,7 @@ public class dataTransfer_22 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        ejecIngresos2, col);
+                        ejecIngresos, col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -565,28 +578,27 @@ public class dataTransfer_22 {
                     ELSE '0'
                 END
                 FROM %s e;
-                """, ejecIngresos2);
+                """, ejecIngresos);
 
         jdbcTemplate.execute(updateQuery);
     }
 
     @Transactional
     public void applyGeneralRule22E() {
-
+    
         // --------------------------------------------------------------------
         // 1) Verifica/crea la columna, por ejemplo: ALERTA_22_CA0079
-        // (o el nombre que manejes para esta alerta).
         // --------------------------------------------------------------------
         List<String> requiredColumns = Arrays.asList("ALERTA_22_CA0079");
-
+    
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
                         + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
                 tablaReglasEspecificas,
                 "'" + String.join("','", requiredColumns) + "'");
-
+    
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
-
+    
         for (String col : requiredColumns) {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
@@ -595,12 +607,13 @@ public class dataTransfer_22 {
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
-
+    
         // --------------------------------------------------------------------
         // 2) Construye el WITH + UPDATE
-        // - T0: combos FECHA/TRIM/ENT/AMB en la tabla de ingresos (opcional).
-        // - Validaciones_22E: revisa si hay al menos 1 fila con
-        // COD_FUENTES_FINANCIACION = '1.2.4.3.04'.
+        //    - T0: Selecciona los combos FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO 
+        //      donde exista la cuenta '1.1.02.06.001.03.04'
+        //    - Validaciones_22E: Para cada grupo, se valida si existe al menos una cuenta 
+        //      con COD_FUENTES_FINANCIACION = '1.2.4.3.04'
         // --------------------------------------------------------------------
         String updateQuery = String.format("""
                 WITH T0 AS (
@@ -609,34 +622,29 @@ public class dataTransfer_22 {
                         e.TRIMESTRE,
                         e.CODIGO_ENTIDAD,
                         e.AMBITO_CODIGO
-                    FROM %s e
-                    WHERE e.CUENTA LIKE '1%%'
-                      AND (
-                           e.COD_FUENTES_FINANCIACION = '1.2.1.0.00'
-                        OR e.COD_FUENTES_FINANCIACION = '1.2.4.3.04'
-                      )
+                    FROM %s e WITH (NOLOCK)
+                    WHERE e.CUENTA = '1.1.02.06.001.03.04'
                 ),
                 Validaciones_22E AS (
                     SELECT
-                        T0.FECHA,
-                        T0.TRIMESTRE,
-                        T0.CODIGO_ENTIDAD,
-                        T0.AMBITO_CODIGO,
+                        t.FECHA,
+                        t.TRIMESTRE,
+                        t.CODIGO_ENTIDAD,
+                        t.AMBITO_CODIGO,
                         CASE
-                          WHEN (
-                            SELECT COUNT(*)
+                          WHEN EXISTS (
+                            SELECT 1
                             FROM %s e2
-                            WHERE e2.FECHA           = T0.FECHA
-                              AND e2.TRIMESTRE       = T0.TRIMESTRE
-                              AND e2.CODIGO_ENTIDAD  = T0.CODIGO_ENTIDAD
-                              AND e2.AMBITO_CODIGO   = T0.AMBITO_CODIGO
-                              AND e2.CUENTA LIKE '1%%'
+                            WHERE e2.FECHA           = t.FECHA
+                              AND e2.TRIMESTRE       = t.TRIMESTRE
+                              AND e2.CODIGO_ENTIDAD  = t.CODIGO_ENTIDAD
+                              AND e2.AMBITO_CODIGO   = t.AMBITO_CODIGO
                               AND e2.COD_FUENTES_FINANCIACION = '1.2.4.3.04'
-                          ) > 0
+                          )
                           THEN 'OK: LA ENTIDAD TIENE AL MENOS UNA CUENTA CON FUENTE 1.2.4.3.04'
                           ELSE 'ALERTA: NO SE ENCONTRÓ NINGUNA CUENTA CON FUENTE 1.2.4.3.04'
                         END AS ALERTA_22_CA0079
-                    FROM T0
+                    FROM T0 t
                 )
                 UPDATE r
                 SET
@@ -646,53 +654,54 @@ public class dataTransfer_22 {
                    ON  r.FECHA          = v.FECHA
                    AND r.TRIMESTRE      = v.TRIMESTRE
                    AND r.CODIGO_ENTIDAD = v.CODIGO_ENTIDAD
-                   AND r.AMBITO_CODIGO  = v.AMBITO_CODIGO
-                ;
+                   AND r.AMBITO_CODIGO  = v.AMBITO_CODIGO;
                 """,
-                // T0 usa (tablaIngresos)
+                // T0 utiliza (tablaIngresos)
                 ejecIngresos,
                 // subconsulta e2 -> (tablaIngresos)
                 ejecIngresos,
-                // UPDATE final a (tablaReglas)
+                // UPDATE final a (tablaReglasEspecificas)
                 tablaReglasEspecificas);
+    
+        jdbcTemplate.execute(updateQuery);
+    }
+    
+    @Transactional
+    public void applyGeneralRule22_E() {
+        // 1) Verifica/crea la columna ALERTA_22_CA0082
+        List<String> requiredColumns = Arrays.asList("ALERTA_22_CA0079");
+
+        String checkColumnsQuery = String.format(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+                        + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+                ejecIngresos,
+                "'" + String.join("','", requiredColumns) + "'");
+
+        List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+
+        for (String col : requiredColumns) {
+            if (!existingCols.contains(col)) {
+                String addColumnQuery = String.format(
+                        "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
+                        ejecIngresos, col);
+                jdbcTemplate.execute(addColumnQuery);
+            }
+        }
+
+        // 2) Actualizar ALERTA_22_CA0079:
+        // Se asigna '1' si COD_FUENTES_FINANCIACION es '1.2.4.3.04', de lo contrario
+        // '0'
+        String updateQuery = String.format("""
+                UPDATE %s
+                SET ALERTA_22_CA0079 = CASE
+                    WHEN
+                    CUENTA = '1.1.02.06.001.03.04' AND
+                    COD_FUENTES_FINANCIACION = '1.2.4.3.04' THEN '1'
+                    ELSE '0'
+                END;
+                """, ejecIngresos);
 
         jdbcTemplate.execute(updateQuery);
     }
-
-    @Transactional
-public void applyGeneralRule22_E() {
-           // 1) Verifica/crea la columna ALERTA_22_CA0082
-           List<String> requiredColumns = Arrays.asList("ALERTA_22_CA0079");
-
-           String checkColumnsQuery = String.format(
-                   "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
-                           + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                   ejecIngresos2,
-                   "'" + String.join("','", requiredColumns) + "'");
-   
-           List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
-   
-           for (String col : requiredColumns) {
-               if (!existingCols.contains(col)) {
-                   String addColumnQuery = String.format(
-                           "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                           ejecIngresos2, col);
-                   jdbcTemplate.execute(addColumnQuery);
-               }
-           }
-    
-    // 2) Actualizar ALERTA_22_CA0079:
-    // Se asigna '1' si COD_FUENTES_FINANCIACION es '1.2.4.3.04', de lo contrario '0'
-    String updateQuery = String.format("""
-        UPDATE %s
-        SET ALERTA_22_CA0079 = CASE
-            WHEN COD_FUENTES_FINANCIACION = '1.2.4.3.04' THEN '1'
-            ELSE '0'
-        END;
-        """, ejecIngresos2);
-    
-    jdbcTemplate.execute(updateQuery);
-}
-
 
 }
