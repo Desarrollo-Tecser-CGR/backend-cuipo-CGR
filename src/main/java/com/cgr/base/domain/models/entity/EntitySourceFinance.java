@@ -16,7 +16,7 @@ public class EntitySourceFinance {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long source_financing_id;
+    private Integer source_financing_id;
     private String source_financing_name;
 
     @OneToMany(mappedBy = "sourceFinance", cascade = CascadeType.ALL, orphanRemoval = true)
