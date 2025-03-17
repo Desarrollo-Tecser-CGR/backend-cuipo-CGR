@@ -51,4 +51,6 @@ public class RoleServiceImpl implements IRoleService {
         return this.dtoMapper.convertToDto(this.roleRepository.activateOrDeactivate(idRole), RoleRequestDto.class);
     }
 
+
+
 }

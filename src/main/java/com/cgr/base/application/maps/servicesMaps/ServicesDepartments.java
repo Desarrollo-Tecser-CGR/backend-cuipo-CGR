@@ -42,7 +42,8 @@ import java.util.stream.Collectors;
  * String imageUrl = serviceImage.getImageUrlForDepartment(
  * entity.getDepartment_id(),
  * entity.getDpto_cnmbr(),
- * dto.getDpto_ccdgo() != null ? dto.getDpto_ccdgo() : "default");
+ * dto.getDpto_ccdgo() != null ? dto.getDpto_ccdgo() : "default"
+ * );
  * 
  * response.put("message", "Departamento encontrado.");
  * response.put("data", dto);
@@ -97,7 +98,7 @@ import java.util.stream.Collectors;
  * }
  * }
  * 
- * public ResponseEntity<Map<String, Object>> searchDepartmenDpAll(Integer id) {
+ * public ResponseEntity<Map<String, Object>> searchDepartmenDpAll(Long id) {
  * try {
  * Optional<EntityDepartments> searchDepar = repositoryDepartment.findById(id);
  * 
@@ -134,7 +135,8 @@ import java.util.stream.Collectors;
  * String imageUrl = serviceImage.getImageUrlForDepartment(
  * entity.getDepartment_id(),
  * entity.getDpto_cnmbr(),
- * dto.getDpto_ccdgo() != null ? dto.getDpto_ccdgo() : "default");
+ * dto.getDpto_ccdgo() != null ? dto.getDpto_ccdgo() : "default"
+ * );
  * Map<String, Object> response = new HashMap<>();
  * response.put("message", "Departamento encontrado con sus municipios.");
  * response.put("data", dto);
