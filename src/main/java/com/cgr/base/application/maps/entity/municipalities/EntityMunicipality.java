@@ -28,7 +28,10 @@ public class EntityMunicipality {
     private String dpto_cnmbr;
     private Float shape_leng;
     private Float shape_area;
+
+    @Column(name = "geometry", columnDefinition = "VARCHAR(MAX)")
     private String geometry;
+
     private String image;
     private Integer department_id;
 
