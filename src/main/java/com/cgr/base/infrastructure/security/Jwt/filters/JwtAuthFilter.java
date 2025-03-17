@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.cgr.base.domain.dto.dtoAuth.AuthResponseDto;
-
 import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -52,6 +51,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/auth/",
             "/swagger-ui",
             "/ws/**",
+            "/api/v1/departments",
+            "/api/v1/municipality",
             "/app/**",
             "/topic/**");
 
