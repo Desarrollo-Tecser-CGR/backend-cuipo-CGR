@@ -1,78 +1,55 @@
 package com.cgr.base.application.services.role.service.permission.exportation;
-/*
-import com.cgr.base.application.services.role.service.permission.servicesPemission.Contractor.RepositoryContractor;
-import com.cgr.base.domain.models.entity.EntityContractor;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+
+
+
+import com.cgr.base.application.notificaction.repository.RepositoryNotification;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.List;
-
+/*
 @Service
 public class ContractExcelExporter {
 
     @Autowired
-    RepositoryContractor repositoryContractor;
+    RepositoryNotification repositoryNotification;
 
-    public byte[] downloadContractsExcel() throws IOException {
-        List<EntityContractor> contracts = repositoryContractor.findAll();
-        return generateExcel(contracts);
-    }
+    public byte[] generatePdf() {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            PdfWriter writer = new PdfWriter(out);
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf);
 
-    public byte[] generateExcel(List<EntityContractor> contracts) throws IOException {
-        try (HSSFWorkbook workbook = new HSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            Sheet sheet = workbook.createSheet("Contratos");
-            int rowNum = 0;
+            document.add(new Paragraph("Lista de Usuarios"));
 
-            // Cabecera
-            Row headerRow = sheet.createRow(rowNum++);
-            Cell headerCell1 = headerRow.createCell(0);
-            headerCell1.setCellValue("Número de Contrato");
-            Cell headerCell2 = headerRow.createCell(1);
-            headerCell2.setCellValue("Valor Inicial del Contrato");
-            Cell headerCell3 = headerRow.createCell(2);
-            headerCell3.setCellValue("Fecha de Suscripción");
-            Cell headerCell4 = headerRow.createCell(3);
-            headerCell4.setCellValue("Fecha de Inicio de Registro");
-            Cell headerCell5 = headerRow.createCell(4);
-            headerCell5.setCellValue("Término Inicial del Contrato");
-            Cell headerCell6 = headerRow.createCell(5);
-            headerCell6.setCellValue("Fecha de Fin del Contrato");
+            List<EntityNotification> usuarios = repositoryNotification.findAll();
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Table table = new Table(3); // 3 columnas
+            table.addCell("ID");
+            table.addCell("Nombre");
+            table.addCell("Correo");
 
-            for (EntityContractor contract : contracts) {
-                Row row = sheet.createRow(rowNum++);
-                Cell cell1 = row.createCell(0);
-                cell1.setCellValue(contract.getContractor_number());
-                Cell cell2 = row.createCell(1);
-                cell2.setCellValue(contract.getInitial_contract_value());
-                Cell cell3 = row.createCell(2);
-                if (contract.getSuscription_date() != null) {
-                    cell3.setCellValue(dateFormat.format(contract.getSuscription_date()));
-                }
-                Cell cell4 = row.createCell(3);
-                if (contract.getStart_record_date() != null) {
-                    cell4.setCellValue(dateFormat.format(contract.getStart_record_date()));
-                }
-                Cell cell5 = row.createCell(4);
-                cell5.setCellValue(contract.getInitial_contract_term());
-                Cell cell6 = row.createCell(5);
-                if (contract.getContract_end_date() != null) {
-                    cell6.setCellValue(dateFormat.format(contract.getContract_end_date()));
-                }
+            for (Usuario usuario : usuarios) {
+                table.addCell(usuario.getId().toString());
+                table.addCell(usuario.getNombre());
+                table.addCell(usuario.getCorreo());
             }
 
-            workbook.write(outputStream);
-            return outputStream.toByteArray();
+            document.add(table);
+            document.close();
+
+            return out.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("Error al generar el PDF", e);
         }
     }
 
 
-}    */
+}*/
+
