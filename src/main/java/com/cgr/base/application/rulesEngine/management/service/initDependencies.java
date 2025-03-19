@@ -123,6 +123,7 @@ public class initDependencies {
             case "15" -> RulesEG.applyGeneralRule15();
             case "16A" -> RulesEG.applyGeneralRule16A();
             case "16B" -> RulesEG.applyGeneralRule16B();
+            case "17" -> RulesEI.applyGeneralRule17();
             default -> throw new IllegalArgumentException("Invalid Rule.");
         }
     }
