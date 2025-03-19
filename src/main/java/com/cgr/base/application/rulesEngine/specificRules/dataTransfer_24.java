@@ -21,9 +21,6 @@ public class dataTransfer_24 {
     private String tablaMedidasICLD;
 
     public void applySpecificRule24() {
-        // Nombre de la tabla destino para insertar las medidas calculadas.
-        // Se asume que 'tablaMedidasGF' y 'tablaReglasEspecificas' están definidas en
-        // tu clase.
         List<String> requiredColumns = Arrays.asList(
                 "FECHA",
                 "TRIMESTRE",
