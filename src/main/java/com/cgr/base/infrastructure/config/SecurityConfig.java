@@ -42,7 +42,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**").permitAll();
                     auth.requestMatchers("/api/v1/role/**").hasAnyAuthority("administrador", "Analista", "Coordinador");
                     auth.requestMatchers("/api/v1/log/**").hasAnyAuthority("administrador", "Analista", "Coordinador");
-                    auth.requestMatchers("/api/v1/menu/**").hasAnyAuthority("administrador", "Analista", "Coordinador");
+                    auth.requestMatchers("/api/v1/menu/**", "/api/v1/access/**").hasAnyAuthority("administrador", "Analista", "Coordinador");
                     auth.requestMatchers("/api/v1/user/**").hasAnyAuthority("administrador", "Analista", "Coordinador");
                     auth.requestMatchers("/api/v1/rules/**").hasAnyAuthority("administrador", "Coordinador",
                             "Analista");
