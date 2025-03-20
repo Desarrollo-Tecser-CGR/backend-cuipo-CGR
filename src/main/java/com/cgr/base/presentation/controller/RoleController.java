@@ -1,5 +1,8 @@
 package com.cgr.base.presentation.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -44,8 +47,19 @@ public class RoleController extends AbstractController {
     }
 
     @PutMapping
-    public ResponseEntity<?> update(@Valid @RequestBody RoleEntity role, BindingResult result) {
-        return requestResponse(result, () -> this.roleService.update(role), "Role Updated.", HttpStatus.OK, true);
+    public ResponseEntity<Map<String, Object>> updateRole(@RequestBody Map<String, Object> roleData) {
+        Long id = Long.valueOf(roleData.get("id").toString());
+        String name = (String) roleData.get("name");
+        String description = (String) roleData.get("description");
+
+        RoleEntity updatedRole = roleService.update(id, name, description);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", updatedRole.getId());
+        response.put("name", updatedRole.getName());
+        response.put("description", updatedRole.getDescription());
+
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")

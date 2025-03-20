@@ -8,9 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cgr.base.application.role.dto.RoleRequestDto;
 import com.cgr.base.application.role.usecase.IRoleService;
 import com.cgr.base.domain.repository.IRoleRepository;
+import com.cgr.base.infrastructure.exception.customException.ResourceNotFoundException;
 import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 import com.cgr.base.infrastructure.utilities.DtoMapper;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -19,6 +22,9 @@ public class RoleServiceImpl implements IRoleService {
 
     private final IRoleRepository roleRepository;
     private final DtoMapper dtoMapper;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     // Obtener todos los roles disponibles.
     @Transactional(readOnly = true)
@@ -41,11 +47,21 @@ public class RoleServiceImpl implements IRoleService {
         return this.dtoMapper.convertToDto(this.roleRepository.create(roleEntity), RoleRequestDto.class);
     }
 
-    // Actualizar la información de un rol existente.
     @Transactional
     @Override
-    public RoleRequestDto update(RoleEntity roleEntity) {
-        return this.dtoMapper.convertToDto(this.roleRepository.update(roleEntity), RoleRequestDto.class);
+    public RoleEntity update(Long idRole, String name, String description) {
+        RoleEntity existingRole = entityManager.find(RoleEntity.class, idRole);
+
+        if (existingRole == null) {
+            throw new ResourceNotFoundException("The role with id=" + idRole + " does not exist");
+        }
+
+        // Solo actualiza nombre y descripción
+        existingRole.setName(name);
+        existingRole.setDescription(description);
+
+        // Guarda los cambios en la base de datos
+        return entityManager.merge(existingRole);
     }
 
     // Activar o desactivar un rol por ID.

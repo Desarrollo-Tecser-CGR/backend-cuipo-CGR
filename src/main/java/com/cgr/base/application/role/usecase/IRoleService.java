@@ -10,7 +10,7 @@ public interface IRoleService {
     public abstract List<RoleRequestDto> findAll();
     public abstract RoleRequestDto findById(Long idRole);
     public abstract RoleRequestDto create(RoleEntity roleEntity);
-    public abstract RoleRequestDto update(RoleEntity roleEntity);
+    public abstract RoleEntity update(Long idRole, String name, String description);
     public abstract RoleRequestDto activateOrDeactivate(Long idRole);
     
 }
