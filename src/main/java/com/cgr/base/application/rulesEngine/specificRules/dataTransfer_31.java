@@ -235,8 +235,8 @@ public class dataTransfer_31 {
         String sql = """
             UPDATE E031
             SET REGLA_ESPECIFICA_31 = CASE
-                WHEN ALERTA_CA0159 = 'EXCEDE' THEN 'NO CUMPLE'
-                ELSE 'CUMPLE'
+                WHEN ALERTA_CA0159 = 'EXCEDE' THEN 'EXCEDE'
+                ELSE 'NO EXCEDE'
             END;
             """;
         

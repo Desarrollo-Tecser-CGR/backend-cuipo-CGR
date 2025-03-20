@@ -32,68 +32,102 @@ public class dataTransfer_29 {
     public void applySpecificRule29A() {
 
         String sqlCheckTable = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'E029'";
-        String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'TABLA_E029')"
-                +
-                " BEGIN " +
-                " CREATE TABLE [" + tablaE029 + "] (" +
-                "FECHA varchar(50)," +
-                "TRIMESTRE varchar(50)," +
-                "CODIGO_ENTIDAD VARCHAR(50), " +
-                "AMBITO_CODIGO VARCHAR(50), " +
-                "GASTOS_FUNCIONAMIENTO_ASAM DECIMAL(18,2), " +
-                "CATEGORIA VARCHAR(50), " +
-                "NO_DIPUTADOS INT, " +
-                "LIM_GASTO_ASAMBLEA DECIMAL(18,2), " +
-                "MAX_SESIONES_ASAM INT, " +
-                "REMU_DIPUTADOS_SMMLV DECIMAL(18,2), " +
-                "SMMLV DECIMAL(18,2), " +
-                "GASTOS_ASAMBLEA DECIMAL(18,2), " +
-                "REMUNERACION_DIPUTADOS DECIMAL(18,2), " +
-                "PRESTACIONES_SOCIALES DECIMAL(18,2), " +
-                "ALERTA VARCHAR(200), " +
-                "CUENTAS VARCHAR(MAX)" +
-                "REGLA_ESPECIFICA_29A VARCHAR(20)" +
-                "); " +
-                "END";
-        Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
+    Integer count = ((Number) entityManager.createNativeQuery(sqlCheckTable).getSingleResult()).intValue();
 
-        if (count == 0) {
-            entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
-        }
+    // 2) Si no existe, crearla
+    if (count == 0) {
 
-        List<String> requiredColumns = Arrays.asList(
-                "FECHA",
-                "TRIMESTRE",
-                "CODIGO_ENTIDAD",
-                "AMBITO_CODIGO",
-                "GASTOS_FUNCIONAMIENTO_ASAM",
-                "CATEGORIA",
-                "NO_DIPUTADOS",
-                "LIM_GASTO_ASAMBLEA",
-                "MAX_SESIONES_ASAM",
-                "REMU_DIPUTADOS_SMMLV",
-                "SMMLV",
-                "GASTOS_ASAMBLEA",
-                "REMUNERACION_DIPUTADOS",
-                "PRESTACIONES_SOCIALES",
-                "ALERTA_29A",
-                "CUENTAS",
-                "REGLA_ESPECIFICA_29A");
+        String sqlCreateTable =
+            "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'E029') " +
+            "BEGIN " +
+            "  CREATE TABLE [" + tablaE029 + "] ( " +
+            "    FECHA                    VARCHAR(50), " +
+            "    TRIMESTRE                VARCHAR(50), " +
+            "    CODIGO_ENTIDAD           VARCHAR(50), " +
+            "    AMBITO_CODIGO            VARCHAR(50), " +
+            "    GASTOS_FUNCIONAMIENTO_ASAM DECIMAL(18,2), " +
+            "    CATEGORIA                VARCHAR(50), " +
+            "    NO_DIPUTADOS             INT, " +
+            "    LIM_GASTO_ASAMBLEA       DECIMAL(18,2), " +
+            "    MAX_SESIONES_ASAM        INT, " +
+            "    REMU_DIPUTADOS_SMMLV     DECIMAL(18,2), " +
+            "    SMMLV                    DECIMAL(18,2), " +
+            "    GASTOS_ASAMBLEA          DECIMAL(18,2), " +
+            "    REMUNERACION_DIPUTADOS   DECIMAL(18,2), " +
+            "    PRESTACIONES_SOCIALES    DECIMAL(18,2), " +
+            "    ALERTA_29A               VARCHAR(200), " +  
+            "    CUENTAS                  VARCHAR(MAX) " +  
+            "  ); " +
+            "END";
+        
+        entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
+    }
 
-        String checkColumnsQuery = String.format(
-                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
-                        "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaE029,
-                "'" + String.join("','", requiredColumns) + "'");
-        List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
-        for (String col : requiredColumns) {
-            if (!existingCols.contains(col)) {
-                String addColumnQuery = String.format(
-                        "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaE029, col);
-                jdbcTemplate.execute(addColumnQuery);
+    // 3) Revisar las columnas requeridas y crearlas si faltan
+    List<String> requiredColumns = Arrays.asList(
+        "FECHA",
+        "TRIMESTRE",
+        "CODIGO_ENTIDAD",
+        "AMBITO_CODIGO",
+        "GASTOS_FUNCIONAMIENTO_ASAM",
+        "CATEGORIA",
+        "NO_DIPUTADOS",
+        "LIM_GASTO_ASAMBLEA",
+        "MAX_SESIONES_ASAM",
+        "REMU_DIPUTADOS_SMMLV",
+        "SMMLV",
+        "GASTOS_ASAMBLEA",
+        "REMUNERACION_DIPUTADOS",
+        "PRESTACIONES_SOCIALES",
+        "ALERTA_29A",           // <-- Asegurar que coincida con la tabla
+        "CUENTAS"
+    );
+
+    String checkColumnsQuery = String.format(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+      + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+        tablaE029,
+        "'" + String.join("','", requiredColumns) + "'"
+    );
+
+    List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+
+    for (String col : requiredColumns) {
+        if (!existingCols.contains(col)) {
+            // Dado que la mayoría son VARCHAR o DECIMAL/INT,
+            // puedes decidir el tipo según la columna:
+            String columnType;
+            switch (col) {
+                case "GASTOS_FUNCIONAMIENTO_ASAM":
+                case "LIM_GASTO_ASAMBLEA":
+                case "REMU_DIPUTADOS_SMMLV":
+                case "SMMLV":
+                case "GASTOS_ASAMBLEA":
+                case "REMUNERACION_DIPUTADOS":
+                case "PRESTACIONES_SOCIALES":
+                    columnType = "DECIMAL(18,2)";
+                    break;
+                case "NO_DIPUTADOS":
+                case "MAX_SESIONES_ASAM":
+                    columnType = "INT";
+                    break;
+                case "ALERTA_29A":
+                    columnType = "VARCHAR(200)";
+                    break;
+                case "CUENTAS":
+                    columnType = "VARCHAR(MAX)";
+                    break;
+                default:
+                    columnType = "VARCHAR(50)"; // Por omisión
             }
+
+            String addColumnQuery = String.format(
+                "ALTER TABLE [%s] ADD [%s] %s NULL",
+                tablaE029, col, columnType
+            );
+            jdbcTemplate.execute(addColumnQuery);
         }
+    }
 
         // 2. Construir la consulta INSERT utilizando WITH.
         // Se inyecta la tabla de ejecución de gastos (ejecGastos) en todas las
@@ -272,8 +306,7 @@ public class dataTransfer_29 {
                     REMUNERACION_DIPUTADOS,
                     PRESTACIONES_SOCIALES,
                     ALERTA_29A,
-                    CUENTAS,
-                    REGLA_ESPECIFICA_29A
+                    CUENTAS
                 )
                 SELECT
                     m.FECHA,
@@ -295,12 +328,7 @@ public class dataTransfer_29 {
                             THEN 'LA ENTIDAD NO REPORTÓ GASTOS DE SEGURIDAD SOCIAL'
                         ELSE p.ALERTA_29A
                     END AS ALERTA_29A,
-                    p.CUENTAS,
-                    CASE
-                        WHEN p.CUENTAS IS NULL THEN 'NO DATA'
-                        WHEN p.CUENTAS = '' THEN 'CUMPLE'
-                        ELSE 'NO CUMPLE'
-                    END AS REGLA_ESPECIFICA_29A
+                    p.CUENTAS
                 FROM Main m
                 LEFT JOIN Asamblea a
                     ON m.FECHA = a.FECHA
@@ -506,9 +534,9 @@ public class dataTransfer_29 {
                         WHEN ((((GASTOS_ASAMBLEA - REMUNERACION_DIPUTADOS - PRESTACIONES_SOCIALES)
                               / REMUNERACION_DIPUTADOS) * 100) 
                               <= LIM_GASTO_ASAMBLEA)
-                        THEN 'NO CUMPLE'
+                        THEN 'EXCEDE'
                         
-                        ELSE 'CUMPLE'
+                        ELSE 'NO EXCEDE'
                     END AS REGLA_ESPECIFICA_29C
     
                 FROM %s

@@ -287,8 +287,8 @@ private void createTableE030() {
             UPDATE E030
             SET REGLA_ESPECIFICA_30 = CASE
                 WHEN ALERTA_CA0150 IS NOT NULL THEN 'NO DATA'
-                WHEN CA0153 = 'NO EXCEDE' THEN 'CUMPLE'
-                ELSE 'NO CUMPLE'
+                WHEN CA0153 = 'NO EXCEDE' THEN 'NO EXCEDE'
+                ELSE 'EXCEDE'
             END;
             """;
         
