@@ -22,6 +22,7 @@ import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_28;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_29;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_30;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_31;
+import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_32;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_GF;
 
 @Service
@@ -76,6 +77,9 @@ public class initDependencies {
     private dataTransfer_31 Rules31;
 
     @Autowired
+    private dataTransfer_32 Rules32;
+
+    @Autowired
     private dataTransfer_GF RulesGF;
 
     @Autowired
@@ -88,7 +92,7 @@ public class initDependencies {
     public void initializeDependencies() {
 
         // MotorReglas.processTablesRules();
-        // Parametria.processTablesSource();
+        //Parametria.processTablesSource();
         // Categorias.initCategoryTable();
         ParameterRG.tableGeneralRulesName();
         ParameterRE.tableSpecificRulesName();
@@ -148,6 +152,7 @@ public class initDependencies {
             case "29C" -> Rules29.applySpecificRule29C();
             case "30" -> Rules30.applySpecificRule30();
             case "31" -> Rules31.applySpecificRule31();
+            case "32" -> Rules32.applySpecificRule32();
             default -> throw new IllegalArgumentException("Invalid Rule.");
         }
     }
