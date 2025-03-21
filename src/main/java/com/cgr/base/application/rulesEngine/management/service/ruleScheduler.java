@@ -32,7 +32,7 @@ public class ruleScheduler {
             Thread.currentThread().interrupt();
         }
 
-        String[] generalRules = {"1", "2", "3", "4", "5", "6", "7", "8", "9A", "9B", "10", "11", "12", "13A", "13B", "14A", "14B", "15", "16A", "16B"};
+        String[] generalRules = {"1", "2", "3", "4", "5", "6", "7", "8", "9A", "9B", "10", "11", "12", "13A", "13B", "14A", "14B", "15", "16A", "16B", "17"};
         executeRulesWithDelay(generalRules, true);
 
 
@@ -56,7 +56,7 @@ public class ruleScheduler {
                     Thread.currentThread().interrupt();
                 }
             }).start();
-            delay += 30;
+            delay += 35;
         }
     }
 

@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.cgr.base.application.certifications.service.initTablaCertifications;
+import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_17;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EG;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EI;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_PG;
@@ -51,6 +53,9 @@ public class initDependencies {
     private dataTransfer_PG RulesPG;
 
     @Autowired
+    private dataTransfer_17 Rule17;
+
+    @Autowired
     private dataTransfer_22 Rules22;
 
     @Autowired
@@ -92,14 +97,18 @@ public class initDependencies {
     @Autowired
     private specificParameter ParameterRE;
 
+    @Autowired
+    private initTablaCertifications Certificator;
+
     @Async
     public void initializeDependencies() {
 
         // MotorReglas.processTablesRules();
         //Parametria.processTablesSource();
         // Categorias.initCategoryTable();
-        ParameterRG.tableGeneralRulesName();
-        ParameterRE.tableSpecificRulesName();
+        //ParameterRG.tableGeneralRulesName();
+        //ParameterRE.tableSpecificRulesName();
+        Certificator.generateControlTable();
 
     }
 
@@ -126,6 +135,7 @@ public class initDependencies {
             case "15" -> RulesEG.applyGeneralRule15();
             case "16A" -> RulesEG.applyGeneralRule16A();
             case "16B" -> RulesEG.applyGeneralRule16B();
+            case "17" -> Rule17.applyGeneralRule17();
             default -> throw new IllegalArgumentException("Invalid Rule.");
         }
     }
