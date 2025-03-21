@@ -13,7 +13,6 @@ import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 import com.cgr.base.infrastructure.utilities.DtoMapper;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -23,8 +22,7 @@ public class RoleServiceImpl implements IRoleService {
     private final IRoleRepository roleRepository;
     private final DtoMapper dtoMapper;
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
     // Obtener todos los roles disponibles.
     @Transactional(readOnly = true)
@@ -43,8 +41,28 @@ public class RoleServiceImpl implements IRoleService {
     // Crear un nuevo rol en el sistema.
     @Transactional
     @Override
-    public RoleRequestDto create(RoleEntity roleEntity) {
-        return this.dtoMapper.convertToDto(this.roleRepository.create(roleEntity), RoleRequestDto.class);
+    public RoleEntity create(RoleEntity roleEntity) {
+        Long count = entityManager.createQuery(
+                "SELECT COUNT(r) FROM RoleEntity r WHERE r.name = :name", Long.class)
+                .setParameter("name", roleEntity.getName())
+                .getSingleResult();
+
+        if (count > 0) {
+            throw new IllegalArgumentException("A role with the name '" + roleEntity.getName() + "' already exists.");
+        }
+
+        if (!roleEntity.isEnable()) {
+            roleEntity.setEnable(true);
+        }
+
+        entityManager.persist(roleEntity);
+        entityManager.flush();
+
+        return entityManager.createQuery(
+                "SELECT r FROM RoleEntity r WHERE r.id = :id", RoleEntity.class)
+                .setParameter("id", roleEntity.getId())
+                .getSingleResult();
+
     }
 
     @Transactional
@@ -56,19 +74,53 @@ public class RoleServiceImpl implements IRoleService {
             throw new ResourceNotFoundException("The role with id=" + idRole + " does not exist");
         }
 
-        // Solo actualiza nombre y descripción
+        Long count = entityManager.createQuery(
+                "SELECT COUNT(r) FROM RoleEntity r WHERE r.name = :name AND r.id <> :idRole", Long.class)
+                .setParameter("name", name)
+                .setParameter("idRole", idRole)
+                .getSingleResult();
+
+        if (count > 0) {
+            throw new IllegalArgumentException("A role with the name '" + name + "' already exists.");
+        }
+
         existingRole.setName(name);
         existingRole.setDescription(description);
 
-        // Guarda los cambios en la base de datos
         return entityManager.merge(existingRole);
     }
 
     // Activar o desactivar un rol por ID.
     @Transactional
     @Override
-    public RoleRequestDto activateOrDeactivate(Long idRole) {
-        return this.dtoMapper.convertToDto(this.roleRepository.activateOrDeactivate(idRole), RoleRequestDto.class);
+    public boolean toggleStatus(Long idRole) {
+        RoleEntity role = entityManager.find(RoleEntity.class, idRole);
+
+        if (role == null) {
+            throw new ResourceNotFoundException("The role with id=" + idRole + " does not exist");
+        }
+
+        role.setEnable(!role.isEnable());
+        entityManager.merge(role);
+
+        return role.isEnable();
+    }
+
+    @Transactional
+    @Override
+    public boolean delete(Long idRole) {
+        if (idRole == 1) {
+            throw new IllegalArgumentException("El rol Administrador no puede ser eliminado.");
+        }
+
+        RoleEntity role = entityManager.find(RoleEntity.class, idRole);
+
+        if (role == null) {
+            throw new ResourceNotFoundException("El rol con id=" + idRole + " no existe.");
+        }
+
+        entityManager.remove(role);
+        return true;
     }
 
 }
