@@ -1,6 +1,6 @@
 package com.cgr.base.infrastructure.config;
 
-import java.util.Arrays;
+import java.util.*;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +14,9 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.cgr.base.infrastructure.exception.component.AccessDeniedHandlerException;
 import com.cgr.base.infrastructure.security.Jwt.filters.JwtAuthFilter;
+import com.cgr.base.infrastructure.security.endpoints.endpointEntity;
+import com.cgr.base.infrastructure.security.endpoints.endpointRepo;
+import com.cgr.base.infrastructure.security.endpoints.endpointsSecurity;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
@@ -26,8 +29,9 @@ public class SecurityConfig {
 
     private final AccessDeniedHandlerException accessDeniedHandlerException;
     private final JwtAuthFilter jwtAuthFilter;
+    private final endpointRepo endpointRepo;
+    private final endpointsSecurity endpointSegurity;
 
-    // Configuración de la cadena de filtros de seguridad.
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -37,18 +41,27 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .exceptionHandling(t -> t.accessDeniedHandler(accessDeniedHandlerException))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**").permitAll();
-                    auth.requestMatchers("/api/v1/role/**").hasAnyAuthority("administrador", "Analista", "Coordinador");
-                    auth.requestMatchers("/api/v1/log/**").hasAnyAuthority("administrador", "Analista", "Coordinador");
-                    auth.requestMatchers("/api/v1/menu/**", "/api/v1/access/**").hasAnyAuthority("administrador",
-                            "Analista", "Coordinador");
-                    auth.requestMatchers("/api/v1/user/**").hasAnyAuthority("administrador", "Analista", "Coordinador");
-                    auth.requestMatchers("/api/v1/rules/**").hasAnyAuthority("administrador", "Coordinador",
-                            "Analista");
-                    auth.requestMatchers("/api/v1/certifications/**").hasAnyAuthority("administrador", "Coordinador",
-                            "Analista");
+                    List<endpointEntity> endpoints = endpointRepo.findAll();
+                    Map<String, Set<String>> restrictedEndpoints = endpointSegurity.getEndpointsWithRoles();
+
+                    for (endpointEntity endpoint : endpoints) {
+                        switch (endpoint.getType()) {
+                            case "PUBLICO" -> auth.requestMatchers(endpoint.getUrl()).permitAll();
+                            case "GENERAL" -> auth.requestMatchers(endpoint.getUrl()).authenticated();
+                            case "RESTRINGIDO" -> {
+                                Set<String> roles = restrictedEndpoints.getOrDefault(endpoint.getUrl(), Set.of());
+                                if (roles.isEmpty()) {
+                                    auth.requestMatchers(endpoint.getUrl()).authenticated();
+                                } else {
+                                    auth.requestMatchers(endpoint.getUrl())
+                                            .hasAnyAuthority(roles.toArray(String[]::new));
+
+                                }
+                            }
+                        }
+                    }
+
                     auth.anyRequest().authenticated();
                 });
 
