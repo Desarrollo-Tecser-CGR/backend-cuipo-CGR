@@ -86,7 +86,7 @@ public class RoleController extends AbstractController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Object>> deleteRole(@PathVariable Long id) {
-        roleService.delete(id); // Llamamos el método sin almacenar el resultado
+        roleService.delete(id);
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Rol eliminado exitosamente.");

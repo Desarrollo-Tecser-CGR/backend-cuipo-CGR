@@ -2,6 +2,7 @@ package com.cgr.base.application.role.service;
 
 import java.util.List;
 
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class RoleServiceImpl implements IRoleService {
     private final DtoMapper dtoMapper;
 
     private final EntityManager entityManager;
+    private final JdbcTemplate jdbcTemplate;
 
     // Obtener todos los roles disponibles.
     @Transactional(readOnly = true)
@@ -114,12 +116,21 @@ public class RoleServiceImpl implements IRoleService {
         }
 
         RoleEntity role = entityManager.find(RoleEntity.class, idRole);
-
         if (role == null) {
             throw new ResourceNotFoundException("El rol con id=" + idRole + " no existe.");
         }
 
+        String deleteUsersRoles = "DELETE FROM users_roles WHERE role_id = ?";
+        jdbcTemplate.update(deleteUsersRoles, idRole);
+
+        String deleteRolesSubmenu = "DELETE FROM roles_submenu WHERE role_id = ?";
+        jdbcTemplate.update(deleteRolesSubmenu, idRole);
+
+        String deleteMenuRoles = "DELETE FROM menu_roles WHERE role_id = ?";
+        jdbcTemplate.update(deleteMenuRoles, idRole);
+
         entityManager.remove(role);
+
         return true;
     }
 
