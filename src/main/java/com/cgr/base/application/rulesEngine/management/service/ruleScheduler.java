@@ -36,7 +36,7 @@ public class ruleScheduler {
         executeRulesWithDelay(generalRules, true);
 
 
-        String[] specificRules = {"22A", "22B", "22C", "22D", "22E", "24", "25A", "25B", "GF", "26", "27", "28", "29A", "29B", "29C", "30", "31", "32"};
+        String[] specificRules = {"22A", "22B", "22C", "22D", "22E", "24", "25A", "25B", "GF", "26", "27", "28", "29A", "29B", "29C", "30", "31", "32", "ER"};
         executeRulesWithDelay(specificRules, false);
     }
 

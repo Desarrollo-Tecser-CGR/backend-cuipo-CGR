@@ -13,6 +13,7 @@ import com.cgr.base.application.rulesEngine.initTables.dataParameterInit;
 import com.cgr.base.application.rulesEngine.initTables.dataSourceInit;
 import com.cgr.base.application.rulesEngine.parameterization.generalParameter;
 import com.cgr.base.application.rulesEngine.parameterization.specificParameter;
+import com.cgr.base.application.rulesEngine.specificRules.columnsER;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_22;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_24;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_25;
@@ -78,6 +79,9 @@ public class initDependencies {
 
     @Autowired
     private dataTransfer_32 Rules32;
+
+    @Autowired
+    private columnsER ER;
 
     @Autowired
     private dataTransfer_GF RulesGF;
@@ -153,6 +157,7 @@ public class initDependencies {
             case "30" -> Rules30.applySpecificRule30();
             case "31" -> Rules31.applySpecificRule31();
             case "32" -> Rules32.applySpecificRule32();
+            case "ER" -> ER.actualizarSpecificRulesData();
             default -> throw new IllegalArgumentException("Invalid Rule.");
         }
     }
