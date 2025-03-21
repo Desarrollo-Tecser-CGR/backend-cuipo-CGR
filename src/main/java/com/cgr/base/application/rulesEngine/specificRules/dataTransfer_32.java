@@ -30,8 +30,14 @@ public class dataTransfer_32 {
     @PersistenceContext
     private EntityManager entityManager;
 
+    
     @Transactional
     public void applySpecificRule32() {
+        applySpecificRule32A();
+        applySpecificRule32B();
+    }
+
+    public void applySpecificRule32A() {
         // 1. Verificar si la tabla E032 existe
         String sqlCheckTable = """
             SELECT COUNT(*) 
@@ -43,7 +49,6 @@ public class dataTransfer_32 {
             .getSingleResult())
             .intValue();
     
-        // 2. Si no existe, crearla con las columnas base
         if (count == 0) {
             String sqlCreateTable = """
                 IF NOT EXISTS (
@@ -58,7 +63,7 @@ public class dataTransfer_32 {
                       CODIGO_ENTIDAD       VARCHAR(50),
                       AMBITO_CODIGO        VARCHAR(50),
                       NOMBRE_CUENTA        VARCHAR(100),
-                      IPC                  DECIMAL(18,2),
+                      INFLACION                  DECIMAL(18,2),
                       INFL_PROY_BANC_REPU  DECIMAL(18,2),
                       GASTOS_COMPROMETIDOS DECIMAL(18,2),
                       PRESUPUESTO_DEFINITIVO DECIMAL(18,2),
@@ -72,7 +77,7 @@ public class dataTransfer_32 {
         // 3. Revisar que existan las columnas requeridas
         List<String> requiredColumns = Arrays.asList(
             "FECHA", "TRIMESTRE", "CODIGO_ENTIDAD", "AMBITO_CODIGO", 
-            "NOMBRE_CUENTA", "IPC", "INFL_PROY_BANC_REPU",
+            "NOMBRE_CUENTA", "INFLACION", "INFL_PROY_BANC_REPU",
             "GASTOS_COMPROMETIDOS", "PRESUPUESTO_DEFINITIVO", "LIM_MAX_PPT_CONTR"
         );
     
@@ -92,7 +97,7 @@ public class dataTransfer_32 {
             if (!existingCols.contains(col)) {
                 String columnType;
                 switch (col) {
-                    case "IPC":
+                    case "INFLACION":
                     case "INFL_PROY_BANC_REPU":
                     case "GASTOS_COMPROMETIDOS":
                     case "PRESUPUESTO_DEFINITIVO":
@@ -111,7 +116,6 @@ public class dataTransfer_32 {
             }
         }
     
-        // 4. Construir la consulta INSERT, agregando el WHERE NOT EXISTS
         String insertQuery = String.format("""
             ;WITH 
             Gastos AS (
@@ -162,8 +166,8 @@ public class dataTransfer_32 {
             indices AS (
               SELECT 
                 FECHA, 
-                IPC, 
-                INFL_PROY_BANC_REPU 
+                INFLACION/100 AS INFLACION,
+                INFL_PROY_BANC_REPU/100 AS INFL_PROY_BANC_REPU 
               FROM PARAMETRIZACION_ANUAL
             ),
             Calculos AS (
@@ -173,13 +177,13 @@ public class dataTransfer_32 {
                 g.CODIGO_ENTIDAD,
                 g.AMBITO_CODIGO,
                 g.NOMBRE_CUENTA,
-                i.IPC,
+                i.INFLACION,
                 i.INFL_PROY_BANC_REPU,
                 g.GASTOS_COMPROMETIDOS,
                 p.PRESUPUESTO_DEFINITIVO_LAG AS PRESUPUESTO_DEFINITIVO,
                 CASE 
-                  WHEN i.IPC >= i.INFL_PROY_BANC_REPU 
-                    THEN i.IPC * p.PRESUPUESTO_DEFINITIVO_LAG + p.PRESUPUESTO_DEFINITIVO_LAG
+                  WHEN i.INFLACION >= i.INFL_PROY_BANC_REPU 
+                    THEN i.INFLACION * p.PRESUPUESTO_DEFINITIVO_LAG + p.PRESUPUESTO_DEFINITIVO_LAG
                   ELSE i.INFL_PROY_BANC_REPU * p.PRESUPUESTO_DEFINITIVO_LAG + p.PRESUPUESTO_DEFINITIVO_LAG
                 END AS LIM_MAX_PPT_CONTR
               FROM Gastos g
@@ -197,7 +201,7 @@ public class dataTransfer_32 {
                CODIGO_ENTIDAD,
                AMBITO_CODIGO,
                NOMBRE_CUENTA,
-               IPC,
+               INFLACION,
                INFL_PROY_BANC_REPU,
                GASTOS_COMPROMETIDOS,
                PRESUPUESTO_DEFINITIVO,
@@ -209,7 +213,7 @@ public class dataTransfer_32 {
                CODIGO_ENTIDAD,
                AMBITO_CODIGO,
                NOMBRE_CUENTA,
-               IPC,
+               INFLACION,
                INFL_PROY_BANC_REPU,
                GASTOS_COMPROMETIDOS,
                PRESUPUESTO_DEFINITIVO,
@@ -225,16 +229,82 @@ public class dataTransfer_32 {
                   AND e.NOMBRE_CUENTA = Calculos.NOMBRE_CUENTA
             );
             """,
-            // variables con las vistas/tablas correctas
             ejecGastos,      
             progGastos,      
             tablaE032,
             tablaE032
         );
-    
-        // 5. Ejecutar la consulta
+
         jdbcTemplate.execute(insertQuery);
     }
     
-
+    public void applySpecificRule32B() {
+    
+        // 3) Revisar que existan las columnas requeridas (incluyendo DIFERENCIA, EXCEDE_FLAG)
+        List<String> requiredColumns = Arrays.asList(
+            "FECHA",
+            "TRIMESTRE",
+            "CODIGO_ENTIDAD",
+            "AMBITO_CODIGO",
+            "NOMBRE_CUENTA",
+            "INFLACION",
+            "INFL_PROY_BANC_REPU",
+            "GASTOS_COMPROMETIDOS",
+            "PRESUPUESTO_DEFINITIVO",
+            "LIM_MAX_PPT_CONTR",
+            "DIFERENCIA",       
+            "REGLA_ESPECIFICA_32"       
+        );
+    
+        String checkColumnsQuery = String.format(
+            """
+            SELECT COLUMN_NAME 
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_NAME = 'E032' 
+              AND COLUMN_NAME IN ('%s')
+            """,
+            String.join("','", requiredColumns)
+        );
+    
+        List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+    
+        // 4) Crear columnas que falten
+        for (String col : requiredColumns) {
+            if (!existingCols.contains(col)) {
+                String columnType;
+                switch (col) {
+                    case "INFLACION":
+                    case "INFL_PROY_BANC_REPU":
+                    case "GASTOS_COMPROMETIDOS":
+                    case "PRESUPUESTO_DEFINITIVO":
+                    case "LIM_MAX_PPT_CONTR":
+                    case "DIFERENCIA":
+                        columnType = "DECIMAL(18,2)";
+                        break;
+                    default:
+                        columnType = "VARCHAR(50)";
+                }
+    
+                String addColumnQuery = String.format(
+                    "ALTER TABLE [E032] ADD [%s] %s NULL",
+                    col, columnType
+                );
+                jdbcTemplate.execute(addColumnQuery);
+            }
+        }
+    
+        String updateQuery = String.format("""
+            UPDATE %s
+            SET
+                DIFERENCIA = (LIM_MAX_PPT_CONTR - GASTOS_COMPROMETIDOS),
+                REGLA_ESPECIFICA_32 = CASE
+                    WHEN (LIM_MAX_PPT_CONTR - GASTOS_COMPROMETIDOS) < 0
+                        THEN 'EXCEDE'
+                    ELSE 'NO EXCEDE'
+                END
+        """, tablaE032);
+    
+        jdbcTemplate.execute(updateQuery);
+    }
+    
 }
