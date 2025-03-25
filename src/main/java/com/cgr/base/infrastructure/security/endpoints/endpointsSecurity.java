@@ -34,9 +34,11 @@ public class endpointsSecurity {
             String url = (String) row.get("url");
             String role = (String) row.get("name");
 
-            endpointRolesMap
-                    .computeIfAbsent(url, k -> new HashSet<>())
-                    .add(role);
+            if (role != null && !role.isBlank()) {
+                endpointRolesMap
+                        .computeIfAbsent(url, k -> new HashSet<>())
+                        .add(role);
+            }
         }
 
         return endpointRolesMap;

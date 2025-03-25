@@ -50,19 +50,18 @@ public class SecurityConfig {
                             case "PUBLICO" -> auth.requestMatchers(endpoint.getUrl()).permitAll();
                             case "GENERAL" -> auth.requestMatchers(endpoint.getUrl()).authenticated();
                             case "RESTRINGIDO" -> {
-                                Set<String> roles = restrictedEndpoints.getOrDefault(endpoint.getUrl(), Set.of());
-                                if (roles.isEmpty()) {
-                                    auth.requestMatchers(endpoint.getUrl()).authenticated();
+                                Set<String> roles = restrictedEndpoints.get(endpoint.getUrl());
+                                if (roles == null || roles.isEmpty()) {
+                                    auth.requestMatchers(endpoint.getUrl()).denyAll();
                                 } else {
                                     auth.requestMatchers(endpoint.getUrl())
                                             .hasAnyAuthority(roles.toArray(String[]::new));
-
                                 }
+
                             }
                         }
                     }
-
-                    auth.anyRequest().authenticated();
+                    auth.anyRequest().denyAll();
                 });
 
         http.headers(headers -> headers
