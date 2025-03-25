@@ -1,4 +1,4 @@
-package com.cgr.base.presentation.rulesEngine;
+package com.cgr.base.presentation.parametrization;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +19,7 @@ import com.cgr.base.infrastructure.persistence.entity.rulesEngine.SpecificRulesT
 import com.cgr.base.presentation.controller.AbstractController;
 
 @RestController
-@RequestMapping("/api/v1/rules")
+@RequestMapping("/api/v1/parametrization/rules")
 public class rulesConfig extends AbstractController {
 
     @Autowired

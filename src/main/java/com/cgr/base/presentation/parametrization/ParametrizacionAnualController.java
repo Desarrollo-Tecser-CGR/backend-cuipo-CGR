@@ -1,4 +1,4 @@
-package com.cgr.base.presentation.rulesEngine;
+package com.cgr.base.presentation.parametrization;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import com.cgr.base.application.rulesEngine.parameterization.ParametrizacionAnua
 import com.cgr.base.infrastructure.persistence.entity.parametrization.ParametrizacionAnual;
 
 @RestController
-@RequestMapping("/api/v1/parametrizacion")
+@RequestMapping("/api/v1/parametrization/annual")
 public class ParametrizacionAnualController {
 
     @Autowired
