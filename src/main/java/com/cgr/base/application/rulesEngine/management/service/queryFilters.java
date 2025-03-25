@@ -163,7 +163,13 @@ public class queryFilters {
     public List<Map<String, Object>> getFilteredRecordsSR(String fecha, String trimestre, String ambitoCodigo,
             String entidadCodigo, String reporteCodigo) {
 
-        String tablaConsulta = obtenerTablaDesdeCodigo(reporteCodigo);
+        String tablaConsulta;
+        
+        if (reporteCodigo == null || reporteCodigo.trim().isEmpty()) {
+            tablaConsulta = tablaEspecificas;
+        } else {
+            tablaConsulta = obtenerTablaDesdeCodigo(reporteCodigo);
+        }
 
         if (tablaConsulta == null || !tablaExiste(tablaConsulta)) {
             return List.of();
@@ -192,6 +198,7 @@ public class queryFilters {
         if (entidadCodigo != null) {
             sql.append(" AND CODIGO_ENTIDAD = '").append(entidadCodigo).append("'");
         }
+
 
         return jdbcTemplate.queryForList(sql.toString());
     }
