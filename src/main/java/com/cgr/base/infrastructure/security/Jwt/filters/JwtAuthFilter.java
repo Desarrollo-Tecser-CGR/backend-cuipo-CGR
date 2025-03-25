@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Component
+@Order(2)
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
@@ -48,12 +50,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-
         String requestUri = request.getRequestURI();
         return urlsToSkip.stream().anyMatch(uri -> requestUri.startsWith(uri));
     }
 
-    @SuppressWarnings("null")
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -79,9 +79,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         if (isTokenExpiredException != null) {
-
             responseHandler(response, isTokenExpiredException, HttpServletResponse.SC_FORBIDDEN);
-
             return;
         }
 
@@ -95,15 +93,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         boolean isEnableEmail = validateIsEnableEmail(header.split(" ")[1]);
 
         if (!isEnableEmail) {
-
             responseHandler(response, "User is not Enabled.", HttpServletResponse.SC_FORBIDDEN);
-
             return;
         }
 
         String validatetokeninlist = jwtAuthenticationProvider.validatetokenInlistToken(header.split(" ")[1]);
         if (validatetokeninlist != null) {
-
             responseHandler(response, validatetokeninlist, HttpServletResponse.SC_FORBIDDEN);
             return;
         }
@@ -115,12 +110,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 .collect(Collectors.toList());
 
         try {
-
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                     this.jwtService.getClaimUserName(header.split(" ")[1]), null, authorities);
 
             SecurityContextHolder.getContext().setAuthentication(auth);
-
         } catch (RuntimeException e) {
             SecurityContextHolder.clearContext();
             throw new RuntimeException(e);
@@ -129,9 +122,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-
     private void responseHandler(HttpServletResponse response, String exceptionHandler, int status) throws IOException {
-
         String message = getResponseJson(exceptionHandler);
 
         response.setContentType("application/json");
@@ -140,29 +131,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         response.getWriter().flush();
     }
 
-    private String getResponseJson(String isTokenExpired)
-            throws JsonProcessingException {
-
+    private String getResponseJson(String isTokenExpired) throws JsonProcessingException {
         Map<String, Object> jsonresponse = new HashMap<>();
-
         jsonresponse.put("message", isTokenExpired);
         jsonresponse.put("statusCode", HttpServletResponse.SC_FORBIDDEN);
         jsonresponse.put("error", "Invalid Token.");
 
-        String responseJson = getObjectMapper.writeValueAsString(jsonresponse);
-
-        return responseJson;
+        return getObjectMapper.writeValueAsString(jsonresponse);
     }
 
     private boolean validateIsEnableEmail(String token) throws JsonProcessingException {
-
         AuthResponseDto userDto = jwtService.getUserDto(token);
-
-        if (userDto.getIsEnable()) {
-            return true;
-        }
-
-        return false;
+        return userDto.getIsEnable();
     }
-
 }

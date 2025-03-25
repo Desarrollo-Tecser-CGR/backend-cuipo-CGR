@@ -1,6 +1,6 @@
 # Configuración del servidor
 server:
-  port: 8001
+  port: 3056
   address: "0.0.0.0"
 
 # Configuración de la aplicación
@@ -39,3 +39,5 @@ jwt:
 logging:
   level:
     "[org.hibernate.SQL]": debug
+
+external.auth.url: https://serviciosint.contraloria.gov.co/directorio/usuarios/autenticar

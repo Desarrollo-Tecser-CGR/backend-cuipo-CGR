@@ -31,7 +31,8 @@ public class LogService implements ILogUseCase {
     // Crear un nuevo registro.
     @Override
     public LogEntity createLog(AuthRequestDto userRequest) {
-        LogEntity logEntity = new LogEntity(userRequest.getEmail(), new Date(), true, userRequest.getSAMAccountName());
+        LogEntity logEntity = new LogEntity(userRequest.getSAMAccountName(), new Date(), true,
+                userRequest.getSAMAccountName());
         return this.adapterLogRepository.createLog(logEntity, userRequest.getSAMAccountName());
     }
 

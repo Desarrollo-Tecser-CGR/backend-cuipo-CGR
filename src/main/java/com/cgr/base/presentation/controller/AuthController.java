@@ -40,6 +40,8 @@ public class AuthController {
     public ResponseEntity<?> loginActiveDirectory(@RequestBody AuthRequestDto request,
             final HttpServletRequest servletRequest) throws JsonProcessingException {
 
+        System.out.println(request.getSAMAccountName());
+
         return ResponseEntity.ok(authUseCase.authWithLDAPActiveDirectory(request, servletRequest));
 
     }

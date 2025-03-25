@@ -12,11 +12,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthRequestDto {
-    
+
     @JsonProperty("sAMAccountName")
     private String sAMAccountName;
-    private String password; 
-    private String email;  
-  
+    private String password;
 
 }
