@@ -61,7 +61,8 @@ public class SecurityConfig {
                             }
                         }
                     }
-                    auth.anyRequest().denyAll();
+                    // auth.anyRequest().denyAll();
+                    auth.anyRequest().authenticated();
                 });
 
         http.headers(headers -> headers
