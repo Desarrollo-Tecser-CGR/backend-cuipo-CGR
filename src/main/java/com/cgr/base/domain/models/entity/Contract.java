@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.Set;
 
 @Data
@@ -24,10 +25,10 @@ public class Contract {
     private Integer contractYearAcceptance;
 
     @Column(name = "contract_start_date", nullable = false)
-    private LocalDate contractStartDate;
+    private Date contractStartDate;
 
     @Column(name = "contract_end_date")
-    private LocalDate contractEndDate;
+    private Date contractEndDate;
 
     @Column(name = "contract_total_value", precision = 15, scale = 2, nullable = false)
     private BigDecimal contractTotalValue;
