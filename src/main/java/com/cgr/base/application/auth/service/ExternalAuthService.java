@@ -57,18 +57,12 @@ public class ExternalAuthService {
 
             System.out.println("Valor de 'respuesta': " + respuesta);
 
-            // Prueba con true queamdo;
-            return true;
-
-            // return respuesta;
+            return respuesta;
         } catch (Exception e) {
 
             e.printStackTrace();
 
-            // Prueba con true queamdo;
-            return true;
-
-            // return false;
+            return false;
         }
     }
 }

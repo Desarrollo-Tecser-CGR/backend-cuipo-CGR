@@ -1,138 +1,90 @@
 package com.cgr.base.infrastructure.externar.repository;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpHeaders;
+//import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
+
+import com.cgr.base.application.auth.service.ExternalAuthService;
 import com.cgr.base.domain.repository.IActiveDirectoryUserRepository;
 import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
-import com.unboundid.ldap.sdk.LDAPBindException;
-import com.unboundid.ldap.sdk.LDAPConnection;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.SearchRequest;
-import com.unboundid.ldap.sdk.SearchResult;
-import com.unboundid.ldap.sdk.SearchResultEntry;
-import com.unboundid.ldap.sdk.SearchScope;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
 
-    private String ldapHost = "192.168.2.62";
-    private int ldapPort = 389;
-    private String baseDN = "OU=Cuipo,OU=Usuarios,DC=tecser,DC=local";
-    private String domain = "tecser.local";
-    private String serviceUser = "cuipo.cgr@tecser.local";
-    private String servicePassword = "Colombia2024*";
+    @Autowired
+    private ExternalAuthService externalAuthService; // Inyección del servicio de autenticación externo
 
-    // Verificar credenciales en Active Directory
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    private String externalUserInfoUrl = "https://serviciosint.contraloria.gov.co/directorio/usuarios/consultar/";
+
     @Override
     public Boolean checkAccount(String samAccountName, String password) {
+        try {
+            // Usar el servicio ExternalAuthService para autenticar al usuario
+            boolean isAuthenticated = externalAuthService.authenticateWithExternalService(samAccountName, password);
+            if (!isAuthenticated) {
+                throw new Exception("Invalid credentials for user: " + samAccountName);
+            }
 
-        try (LDAPConnection connection = new LDAPConnection(ldapHost, ldapPort)) {
-            String userPrincipalName = samAccountName + "@" + domain;
-            connection.bind(userPrincipalName, password);
-
-            SearchResultEntry usuario = buscarUsuarioPorSAMAccountName(connection, samAccountName, baseDN);
-            if (usuario == null) {
-                throw new IllegalArgumentException("User not found in Active Directory: " + samAccountName);
+            // Obtener información adicional del usuario desde el endpoint externo
+            UserEntity userEntity = obtenerInformacionUsuarioExterna(samAccountName);
+            if (userEntity != null) {
+                System.out.println("Información del usuario obtenida del endpoint externo: " + userEntity);
             }
 
             return true;
-
-        } catch (LDAPBindException e) {
-            throw new IllegalArgumentException("Invalid credentials for user: " + samAccountName, e);
-        } catch (LDAPException e) {
-            throw new IllegalStateException("Error connecting to LDAP server.", e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
-    // Buscar usuario por SAMAccountName en el directorio LDAP.
-    private SearchResultEntry buscarUsuarioPorSAMAccountName(
-            LDAPConnection connection, String samAccountName, String baseDN) throws LDAPException {
+    private UserEntity obtenerInformacionUsuarioExterna(String samAccountName) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("usuario", samAccountName);
 
-        String searchFilter = String.format("(sAMAccountName=%s)", samAccountName);
-        SearchRequest searchRequest = new SearchRequest(baseDN, SearchScope.SUB, searchFilter);
+            // HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
-        SearchResult searchResult = connection.search(searchRequest);
+            // Realizar la solicitud GET al endpoint externo
+            ResponseEntity<String> response = restTemplate.getForEntity(externalUserInfoUrl + samAccountName,
+                    String.class);
 
-        if (searchResult.getEntryCount() == 0) {
+            if (response.getStatusCode().is2xxSuccessful()) {
+                // Parsear la respuesta JSON
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonNode = objectMapper.readTree(response.getBody());
+
+                // Mapear la información al objeto UserEntity
+                UserEntity userEntity = new UserEntity();
+                userEntity.setSAMAccountName(jsonNode.get("usuario").asText());
+                userEntity.setFullName(jsonNode.get("nombreMostrar").asText());
+                userEntity.setEmail(jsonNode.get("usuario").asText() + "@contraloria.gov.co");
+                userEntity.setPhone(jsonNode.get("numeroTelefono").asText());
+                userEntity.setCargo(jsonNode.get("descripcionCargo").asText());
+                userEntity.setEnabled(true);
+
+                return userEntity;
+            } else {
+                System.err.println("Error al obtener información del usuario desde el endpoint externo.");
+                return null;
+            }
+        } catch (Exception e) {
             return null;
         }
-        return searchResult.getSearchEntries().get(0);
     }
 
-    // Obtener todos los usuarios del Active Directory
     @Override
     public List<UserEntity> getAllUsers() {
-        List<UserEntity> users = new ArrayList<>();
-
-        try (LDAPConnection connection = new LDAPConnection(ldapHost, ldapPort)) {
-            connection.bind(serviceUser, servicePassword);
-
-            String searchFilter = "(objectClass=user)";
-            SearchRequest searchRequest = new SearchRequest(baseDN, SearchScope.SUB, searchFilter);
-
-            SearchResult searchResult = connection.search(searchRequest);
-
-            for (SearchResultEntry entry : searchResult.getSearchEntries()) {
-                UserEntity userEntity = new UserEntity();
-
-                userEntity.setSAMAccountName(entry.getAttributeValue("sAMAccountName"));
-                userEntity.setFullName(entry.getAttributeValue("displayName"));
-                userEntity.setEmail(entry.getAttributeValue("userPrincipalName"));
-                userEntity.setEnabled(this.isEnabledUser(entry.getAttributeValue("userAccountControl")));
-                userEntity.setPhone(entry.getAttributeValue("mobile"));
-                userEntity.setCargo(entry.getAttributeValue("Title"));
-
-                String whenChanged = entry.getAttributeValue("whenChanged");
-                if (whenChanged != null) {
-                    Date formattedDate = formatWhenChanged(whenChanged);
-                    userEntity.setDateModify(formattedDate);
-                }
-
-                users.add(userEntity);
-            }
-
-        } catch (LDAPException e) {
-            throw new IllegalStateException("Error retrieving users from Active Directory.", e);
-        }
-
-        if (users.isEmpty()) {
-            throw new IllegalStateException("No users found in Active Directory.");
-        }
-
-        return users;
-    }
-
-    private Boolean isEnabledUser(String userAccountControl) {
-        if (userAccountControl != null) {
-            try {
-                int uacValue = Integer.parseInt(userAccountControl);
-                boolean isDisabled = (uacValue & 0x2) != 0;
-                return !isDisabled;
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Invalid userAccountControl value: " + userAccountControl, e);
-            }
-        } else {
-            throw new IllegalArgumentException("Missing userAccountControl attribute.");
-        }
-    }
-
-    private Date formatWhenChanged(String whenChanged) {
-        try {
-            SimpleDateFormat adFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-            if (whenChanged.contains(".")) {
-                whenChanged = whenChanged.split("\\.")[0];
-            }
-            return adFormat.parse(whenChanged);
-
-        } catch (ParseException e) {
-            throw new IllegalArgumentException("Error parsing 'whenChanged' attribute: " + whenChanged, e);
-        }
+        throw new UnsupportedOperationException("Operación no soportada en este repositorio.");
     }
 }
