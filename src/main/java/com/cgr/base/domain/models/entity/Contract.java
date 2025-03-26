@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.Set;
 
 @Data
@@ -20,8 +21,14 @@ public class Contract {
     @Column(name = "contract_no", nullable = false, unique = true)
     private String contractNo;
 
+    @Column(name = "contract_year_acceptance", nullable = false)
+    private Integer contractYearAcceptance;
+
+    @Column(name = "contract_start_date", nullable = false)
+    private Date contractStartDate;
+
     @Column(name = "contract_end_date")
-    private LocalDate contractEndDate;
+    private Date contractEndDate;
 
     @ManyToMany
     @JoinTable(name = "contracts_sources_financing", joinColumns = @JoinColumn(name = "contract_id"), inverseJoinColumns = @JoinColumn(name = "source_financing_id"))

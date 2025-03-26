@@ -67,8 +67,8 @@ public class RoleEntity {
     @ManyToMany
     @JsonIgnore
     @JoinTable(
-            name = "roles_permisos",
-            joinColumns = @JoinColumn(name = "id_role"), // Debe coincidir con el nombre en la BD
+            name = "roles_permissions",
+            joinColumns = @JoinColumn (name = "id_role"), // Debe coincidir con el nombre en la BD
             inverseJoinColumns = @JoinColumn(name = "permiso_id"),
             uniqueConstraints = @UniqueConstraint(columnNames = { "id_role", "permiso_id" })
     )

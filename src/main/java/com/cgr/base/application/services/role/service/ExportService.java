@@ -2,15 +2,16 @@ package com.cgr.base.application.services.role.service;
 
 import com.cgr.base.domain.models.entity.EntityNotification;
 import com.cgr.base.infrastructure.repositories.repositories.repositoryNotification.RepositoryNotification;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Cell;
-import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.element.Table;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Service
@@ -19,45 +20,47 @@ public class ExportService {
     @Autowired
     private RepositoryNotification repositoryNotification;
 
-    public String generatePdfWithDialog() {
-        try {
-            // 📌 Definir ruta fija sin JFileChooser
-            String filePath = System.getProperty("user.home") + "/C:\\Users\\jhonn.baracaldo\\OneDrive - AIRES Y TECNOLOGIA SAS\\Documentos\\Prueba_Tec_Full_Stack\\Prueba";
-            System.out.println("📂 Guardando PDF en: " + filePath);
+    public Path generateExcel() throws IOException {
+        Path filePath = Paths.get(System.getProperty("user.home"), "notifications.xlsx");
+        Files.createDirectories(filePath.getParent());
 
-            try (FileOutputStream fos = new FileOutputStream(filePath)) {
-                PdfWriter writer = new PdfWriter(fos);
-                PdfDocument pdf = new PdfDocument(writer);
-                Document document = new Document(pdf);
-                document.add(new Paragraph("Notificación"));
+        try (FileOutputStream fos = new FileOutputStream(filePath.toString());
+             Workbook workbook = new XSSFWorkbook()) {
 
-                List<EntityNotification> usuarios = repositoryNotification.findAll();
-                Table table = new Table(5);
-                table.addCell(new Cell().add(new Paragraph("ID")));
-                table.addCell(new Cell().add(new Paragraph("Notificación")));
-                table.addCell(new Cell().add(new Paragraph("Sujeto")));
-                table.addCell(new Cell().add(new Paragraph("Fecha")));
-                table.addCell(new Cell().add(new Paragraph("Número de contrato")));
+            Sheet sheet = workbook.createSheet("Notificaciones");
 
-                for (EntityNotification usuario : usuarios) {
-                    table.addCell(new Cell().add(new Paragraph(String.valueOf(usuario.getId()))));
-                    table.addCell(new Cell().add(new Paragraph(usuario.getNotification() != null ? usuario.getNotification() : "N/A")));
-                    table.addCell(new Cell().add(new Paragraph(usuario.getSubject() != null ? usuario.getSubject() : "N/A")));
-                    table.addCell(new Cell().add(new Paragraph(usuario.getDate() != null ? usuario.getDate().toString() : "N/A")));
-                    table.addCell(new Cell().add(new Paragraph(usuario.getNumbercontract() != null ? usuario.getNumbercontract() : "N/A")));
-                }
-
-                document.add(table);
-                document.close();
-
-                System.out.println("✅ PDF guardado correctamente en: " + filePath);
-                return filePath;
-
+            // Crear encabezados
+            Row headerRow = sheet.createRow(0);
+            String[] headers = {"ID", "Notificación", "Sujeto", "Fecha", "Número de contrato", "Usuario", "Cargo"};
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
             }
-        } catch (Exception e) {
-            System.err.println("❌ Error al generar el PDF: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Error al generar el PDF", e);
+
+            // Obtener datos y llenar las filas
+            List<EntityNotification> notifications = repositoryNotification.findAll();
+            int rowNum = 1;
+            for (EntityNotification notification : notifications) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(notification.getId());
+                row.createCell(1).setCellValue(notification.getNotification() != null ? notification.getNotification() : "N/A");
+                row.createCell(2).setCellValue(notification.getSubject() != null ? notification.getSubject() : "N/A");
+                row.createCell(3).setCellValue(notification.getDate() != null ? notification.getDate().toString() : "N/A");
+                row.createCell(4).setCellValue(notification.getNumbercontract() != null ? notification.getNumbercontract() : "N/A");
+                row.createCell(5).setCellValue(notification.getUser() != null ? notification.getUser().getFullName() : "N/A");
+                row.createCell(6).setCellValue(notification.getUser() != null ? notification.getUser().getCargo() : "N/A");
+            }
+
+            // Ajustar el ancho de las columnas automáticamente
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            workbook.write(fos);
+
+            System.out.println("✅ Excel guardado correctamente en: " + filePath);
+            return filePath;
+
         }
     }
 }
