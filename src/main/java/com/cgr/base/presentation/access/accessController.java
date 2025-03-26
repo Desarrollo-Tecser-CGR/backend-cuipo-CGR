@@ -23,20 +23,20 @@ public class accessController extends AbstractController {
     @Autowired
     accessManagement Access;
 
-    @GetMapping("/available")
+    @GetMapping("/module/list")
     public ResponseEntity<?> getAvailableMenus() {
         List<Map<String, Object>> menus = Access.getAvailableMenus();
         return requestResponse(menus, "Available menus successfully retrieved.", HttpStatus.OK, true);
     }
 
-    @GetMapping("/roles-modules")
+    @GetMapping("/module/roles")
     public ResponseEntity<?> getRolesWithMenus() {
         List<Map<String, Object>> rolesWithMenus = Access.getRolesWithMenus();
         return requestResponse(rolesWithMenus, "Roles and assigned modules successfully retrieved.", HttpStatus.OK,
                 true);
     }
 
-    @PutMapping("/roles-modules")
+    @PutMapping("/config")
     public ResponseEntity<?> updateRoleModules(@RequestBody Map<String, Object> request) {
 
         if (!request.containsKey("roleId") || !request.containsKey("moduleIds")) {

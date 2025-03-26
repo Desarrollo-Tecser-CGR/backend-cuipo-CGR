@@ -31,25 +31,25 @@ public class UserController extends AbstractController {
         this.synchronizerUsers = synchronizerUsers;
     }
 
-    @GetMapping
+    @GetMapping("/info/list")
     public ResponseEntity<?> getAll() {
         return requestResponse(this.userService.findAll(), "System Users.", HttpStatus.OK, true);
     }
 
-    @PostMapping
+    @PostMapping("/config/role")
     public ResponseEntity<?> assignRole(@Valid @RequestBody UserWithRolesRequestDto rolesRequestDto,
             BindingResult result) {
         return requestResponse(result, () -> this.userService.assignRolesToUser(rolesRequestDto), "Roles Updated.",
                 HttpStatus.CREATED, true);
     }
 
-    @GetMapping("/synchronize")
+    @GetMapping("/config/synchronize")
     public ResponseEntity<?> synchronizeAD() {
         return requestResponse(this.synchronizerUsers.synchronizeUsers(),
                 "System Synchronized with Active Directory.", HttpStatus.OK, true);
     }
 
-    @GetMapping("/filter")
+    @GetMapping("/info/filter")
     public ResponseEntity<?> findWithFilters(@Valid @RequestBody UserFilterRequestDto userFilter,
             BindingResult result, Pageable pageable) {
         return requestResponse(result, () -> this.userService.findWithFilters(userFilter, pageable),

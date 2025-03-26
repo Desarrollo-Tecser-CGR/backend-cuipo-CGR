@@ -40,7 +40,7 @@ public class AuthService implements IAuthUseCase {
 
     private final ILogUseCase logService;
 
-    //Autenticación utilizando SAMAccountName y contraseña.
+    // Autenticación utilizando SAMAccountName y contraseña.
     @Transactional
     @Override
     public Map<String, Object> signIn(AuthRequestDto userRequest, HttpServletRequest servletRequest)
@@ -82,7 +82,7 @@ public class AuthService implements IAuthUseCase {
 
     }
 
-    //Autenticación en el Active Directory mediante LDAP
+    // Autenticación en el Active Directory mediante LDAP
     @Transactional
     @Override
     public Map<String, Object> authWithLDAPActiveDirectory(AuthRequestDto userRequest,
@@ -103,7 +103,12 @@ public class AuthService implements IAuthUseCase {
                         .findBySAMAccountNameWithRoles(userRequest.getSAMAccountName()).get();
                 AuthResponseDto userRequestDto = AuthMapper.INSTANCE.toAuthResponDto(userRequest);
 
-                userRequestDto.setRoles(user.getRoles().stream().map(RoleEntity::getName).toList());
+                List<AuthResponseDto.RoleDto> rolesDto = user.getRoles().stream()
+                        .map(role -> new AuthResponseDto.RoleDto(role.getId(), role.getName()))
+                        .toList();
+
+                userRequestDto.setRoles(rolesDto);
+                System.out.println("Roles asignados al usuario: " + rolesDto);
 
                 String token = jwtAuthenticationProvider.createToken(userRequestDto, user.getRoles());
 

@@ -22,7 +22,7 @@ import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/api/v1/user")
+@RequestMapping("/api/v1/user/profile")
 public class ProfileController {
 
     @Autowired
@@ -61,7 +61,7 @@ public class ProfileController {
         }
     }
 
-    @GetMapping("/profile_image")
+    @GetMapping("/image")
     public ResponseEntity<String> getProfileImage(HttpServletRequest request) {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (header == null || !header.startsWith("Bearer ")) {
@@ -82,7 +82,7 @@ public class ProfileController {
         }
     }
 
-    @PostMapping("/update_profile")
+    @PostMapping("/update")
     public ResponseEntity<String> updateUserProfile(
             @RequestBody UserProfileDto userDto,
             HttpServletRequest request) {

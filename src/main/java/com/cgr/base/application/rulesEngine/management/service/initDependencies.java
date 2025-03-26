@@ -17,6 +17,7 @@ import com.cgr.base.application.rulesEngine.parameterization.generalParameter;
 import com.cgr.base.application.rulesEngine.parameterization.specificParameter;
 import com.cgr.base.application.rulesEngine.specificRules.columnsER;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_22;
+import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_23;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_24;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_25;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_26;
@@ -57,6 +58,9 @@ public class initDependencies {
 
     @Autowired
     private dataTransfer_22 Rules22;
+
+    @Autowired
+    private dataTransfer_23 Rules23;
 
     @Autowired
     private dataTransfer_24 Rules24;
@@ -152,6 +156,7 @@ public class initDependencies {
             case "22_D" -> Rules22.applyGeneralRule22_D(); // nueva lógica para la regla 22 ICLD
             case "22E" -> Rules22.applyGeneralRule22E();
             case "22_E" -> Rules22.applyGeneralRule22_E(); // nueva lógica para la regla 22 ICLD
+            case "23" -> Rules23.applySpecificRule23();
             case "24" -> Rules24.applySpecificRule24();
             case "25A" -> Rules25.applySpecificRule25A();
             case "25_A" -> Rules25.applySpecificRule25_A(); // nueva lógica para la regla 25 GF
