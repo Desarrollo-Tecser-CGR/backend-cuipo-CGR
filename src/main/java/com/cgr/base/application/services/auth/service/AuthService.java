@@ -142,6 +142,9 @@ public class AuthService implements IAuthUseCase {
                     List<Menu> menus = this.userRepositoryFull
                             .findMenusByRoleNames(user.getRoles().stream().map(RoleEntity::getName).toList());
 
+                    // Depuración: Imprimir los menús obtenidos
+                    System.out.println("Menús obtenidos: " + menus);
+
                     userRequestDto.setMenus(menus);
                     userRequestDto.setToken(token);
 
@@ -152,6 +155,10 @@ public class AuthService implements IAuthUseCase {
                     response.put("message", "User authenticated successfully");
                     response.put("statusCode", 200);
                     response.put("status", "success");
+
+                    // Depuración: Imprimir la respuesta JSON antes de enviarla
+                    System.out.println("Respuesta JSON antes de enviar: " + response);
+
                     return response;
 
                 } else {

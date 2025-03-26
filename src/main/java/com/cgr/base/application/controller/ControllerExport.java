@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/v1/export")
 public class ControllerExport {
@@ -16,10 +18,10 @@ public class ControllerExport {
     private ExportService exportService;
 
     @PreAuthorize("hasAuthority('auditor:readAndExport')")
-    @GetMapping("/pdf")
-    public ResponseEntity<String> generatePdf() {
-        exportService.generatePdfWithDialog();
-        return ResponseEntity.ok("PDF generado y guardado correctamente.");
+    @GetMapping("/xlsx")
+    public ResponseEntity<String> generatePdf() throws IOException {
+        exportService.generateExcel();
+        return ResponseEntity.ok("Excel generado y guardado correctamente.");
     }
 }
 
