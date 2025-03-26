@@ -35,11 +35,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
-    @Autowired
-    private JwtService jwtService;
+    private final JwtService jwtService;
 
-    @Autowired
-    private ObjectMapper getObjectMapper;
+    private final ObjectMapper getObjectMapper;
 
     /**
      * Lista blanca de URIs

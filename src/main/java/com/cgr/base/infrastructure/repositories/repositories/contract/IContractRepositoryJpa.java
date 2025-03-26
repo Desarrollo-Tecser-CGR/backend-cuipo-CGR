@@ -13,7 +13,7 @@ public interface IContractRepositoryJpa extends JpaRepository<Contract, Long> {
     @Query("SELECT DISTINCT c FROM Contract c " +
             "JOIN c.indicators i " +
             "JOIN i.entityProvisionalPlans ep " +
-            "WHERE ep.entity_id = :entityId")
+            "WHERE ep.id = :entityId")
     List<Contract> findContractsByEntityProvisionalPlan(@Param("entityId") Integer entityId);
 
 }

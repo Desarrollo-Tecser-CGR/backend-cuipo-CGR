@@ -3,6 +3,7 @@ package com.cgr.base.infrastructure.repositories.database.adapter;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.xmlbeans.impl.xb.xsdschema.Attribute.Use;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,21 +77,23 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
     @Override
     public UserDto updateUser(Long id, UserDto userDto) {
         UserEntity userEntity = this.userRepositoryJpa.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("El usuario con id=" + id + " no existe"));
-            if (userEntity != null ){
+                .orElseThrow(() -> new ResourceNotFoundException("El usuario con id=" + id + " no existe"));
+        if (userEntity != null) {
 
-                userEntity = this.dtoMapper.convertToDto(userDto, UserEntity.class);
+            userEntity = this.dtoMapper.convertToDto(userDto, UserEntity.class);
 
-                userEntity.setId(id);
-                
-                List<RoleEntity> roles = this.roleRepositoryJpa.findByIdIn(userDto.getRoleIds());
-                userEntity.setRoles(roles);
-                
-                UserEntity updatedUser = this.userRepositoryJpa.save(userEntity);
+            userEntity.setId(id);
 
-                return this.dtoMapper.convertToDto(updatedUser, UserDto.class);
-            }
-       return null;
-        
+            List<RoleEntity> roles = this.roleRepositoryJpa.findByIdIn(userDto.getRoleIds());
+            userEntity.setRoles(roles);
+
+            UserEntity updatedUser = this.userRepositoryJpa.save(userEntity);
+
+            UserDto user = this.dtoMapper.convertToDto(updatedUser, UserDto.class);
+
+            return user;
+        }
+        return null;
+
     }
 }

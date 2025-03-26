@@ -20,29 +20,15 @@ public class Contract {
     @Column(name = "contract_no", nullable = false, unique = true)
     private String contractNo;
 
-    @Column(name = "contract_year_acceptance", nullable = false)
-    private Integer contractYearAcceptance;
-
-    @Column(name = "contract_start_date", nullable = false)
-    private LocalDate contractStartDate;
-
     @Column(name = "contract_end_date")
     private LocalDate contractEndDate;
 
-    @Column(name = "contract_total_value", precision = 15, scale = 2, nullable = false)
-    private BigDecimal contractTotalValue;
-
-    @Column(name = "contract_object", columnDefinition = "TEXT", nullable = false)
-    private String contractObject;
-
-    @ManyToOne
-    @JoinColumn(name = "source_financing_id", nullable = false)
-    private EntitySourceFinance sourceFinance;
+    @ManyToMany
+    @JoinTable(name = "contracts_sources_financing", joinColumns = @JoinColumn(name = "contract_id"), inverseJoinColumns = @JoinColumn(name = "source_financing_id"))
+    private Set<EntitySourceFinance> sourcesFinance;
 
     @Column(name = "contractor_id", nullable = false)
     private Long contractorId;
-
-
 
     @ManyToMany
     @JoinTable(name = "indicators_contracts", joinColumns = @JoinColumn(name = "contract_id"), inverseJoinColumns = @JoinColumn(name = "indicator_id"))
