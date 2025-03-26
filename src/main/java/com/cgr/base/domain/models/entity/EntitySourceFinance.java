@@ -2,13 +2,16 @@ package com.cgr.base.domain.models.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Data
 @Table(name = "sources_financing")
 public class EntitySourceFinance {
 
@@ -19,6 +22,6 @@ public class EntitySourceFinance {
 
     private String source_financing_name;
 
-    @OneToMany(mappedBy = "sourceFinance", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Contract> contracts;
+    @ManyToMany(mappedBy = "sourcesFinance")
+    private Set<Contract> contracts;
 }
