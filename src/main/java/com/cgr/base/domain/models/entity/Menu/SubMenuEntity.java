@@ -1,3 +1,4 @@
+
 package com.cgr.base.domain.models.entity.Menu;
 
 import java.util.List;
