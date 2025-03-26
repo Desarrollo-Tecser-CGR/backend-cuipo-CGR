@@ -73,6 +73,32 @@ public class SecurityConfig {
         return http.build();
     }
 
+    public void reloadSecurityConfiguration(HttpSecurity http) throws Exception {
+        // Obtener endpoints actualizados
+        List<endpointEntity> endpoints = endpointRepo.findAll();
+        Map<String, Set<String>> restrictedEndpoints = endpointSegurity.getEndpointsWithRoles();
+
+        // Reconfigurar las solicitudes HTTP
+        http.authorizeHttpRequests(auth -> {
+            for (endpointEntity endpoint : endpoints) {
+                switch (endpoint.getType()) {
+                    case "PUBLICO" -> auth.requestMatchers(endpoint.getUrl()).permitAll();
+                    case "GENERAL" -> auth.requestMatchers(endpoint.getUrl()).authenticated();
+                    case "RESTRINGIDO" -> {
+                        Set<String> roles = restrictedEndpoints.get(endpoint.getUrl());
+                        if (roles == null || roles.isEmpty()) {
+                            auth.requestMatchers(endpoint.getUrl()).denyAll();
+                        } else {
+                            auth.requestMatchers(endpoint.getUrl())
+                                    .hasAnyAuthority(roles.toArray(String[]::new));
+                        }
+                    }
+                }
+            }
+            auth.anyRequest().denyAll();
+        });
+    }
+
     // Configuración de CORS
     private CorsConfigurationSource corsConfigurationSource() {
         return new CorsConfigurationSource() {
