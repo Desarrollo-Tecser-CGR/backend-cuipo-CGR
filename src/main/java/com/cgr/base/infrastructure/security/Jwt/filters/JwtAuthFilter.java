@@ -113,7 +113,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        List<String> roles = this.jwtService.getRolesToken(header.split(" ")[1]);
+        String username = this.jwtService.getClaimUserName(header.split(" ")[1]);
+
+        // Fetch roles from the database
+        List<String> roles = userRepositoryJpa.findBySAMAccountNameWithRoles(username)
+                .map(user -> user.getRoles().stream().map(role -> role.getName()).collect(Collectors.toList()))
+                .orElseThrow(() -> new RuntimeException("User not found or roles not assigned."));
 
         // Obtener menús asociados a los roles
         List<Menu> menus = userRepositoryJpa.findMenusByRoleNames(roles);
@@ -128,7 +133,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
 
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    this.jwtService.getClaimUserName(header.split(" ")[1]), null, authorities);
+                    username, null, authorities);
 
             SecurityContextHolder.getContext().setAuthentication(auth);
 

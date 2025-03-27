@@ -25,10 +25,10 @@ public class accessController extends AbstractController {
     @Autowired
     accessManagement Access;
 
+    //Editar ejemplo de PreAuthorize
     @PreAuthorize("hasAuthority('MENU_7') or hasAuthority('MENU_8')")
     @GetMapping("/module/list")
-    public ResponseEntity<?> getAvailableMenus() {
-        
+    public ResponseEntity<?> getAvailableMenus() {        
         List<Map<String, Object>> menus = Access.getAvailableMenus();
         return requestResponse(menus, "Available menus successfully retrieved.", HttpStatus.OK, true);
     }
