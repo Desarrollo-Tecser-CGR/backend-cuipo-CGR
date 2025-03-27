@@ -124,11 +124,17 @@ public class queryFilters {
                 (rs, rowNum) -> new AmbitoDTO(rs.getString("AMBITO_CODIGO"), rs.getString("AMBITO_NOMBRE")));
     }
 
-    public List<Map<String, Object>> getFilteredRecordsGR(String fecha, String trimestre, String ambitoCodigo,
-            String entidadCodigo, String formularioCodigo) {
-
+    public List<Map<String, Object>> getFilteredRecordsGR(Map<String, String> filters) {
         if (!tablaExiste(tablaGenerales))
             return List.of();
+
+        String fecha = filters != null ? filters.get("fecha") : null;
+        String trimestre = filters != null ? filters.get("trimestre") : null;
+        String ambitoCodigo = filters != null ? filters.get("ambito") : null;
+        String entidadCodigo = filters != null ? filters.get("entidad") : null;
+        String formularioCodigo = filters != null ? filters.get("formulario") : null;
+
+        String trimestreBD = (trimestre != null) ? String.valueOf(Integer.parseInt(trimestre) * 3) : null;
 
         StringBuilder sql = new StringBuilder("SELECT FECHA, TRIMESTRE, NOMBRE_ENTIDAD, AMBITO_NOMBRE");
         List<String> columnasReglaGeneral = obtenerColumnasReglaGeneral(formularioCodigo);
@@ -142,8 +148,8 @@ public class queryFilters {
         if (fecha != null) {
             sql.append(" AND FECHA = ").append(Integer.parseInt(fecha));
         }
-        if (trimestre != null) {
-            sql.append(" AND TRIMESTRE = ").append(Integer.parseInt(trimestre));
+        if (trimestreBD != null) {
+            sql.append(" AND TRIMESTRE = ").append(Integer.parseInt(trimestreBD));
         }
         if (ambitoCodigo != null) {
             sql.append(" AND AMBITO_CODIGO = '").append(ambitoCodigo).append("'");
@@ -157,7 +163,12 @@ public class queryFilters {
         Map<String, String> mapaColumnas = obtenerNombresRG(columnasReglaGeneral);
 
         return resultados.stream()
-                .map(row -> cambiarNombresRG(row, mapaColumnas))
+                .map(row -> {
+                    if (row.containsKey("TRIMESTRE")) {
+                        row.put("TRIMESTRE", Integer.parseInt(row.get("TRIMESTRE").toString()) / 3);
+                    }
+                    return cambiarNombresRG(row, mapaColumnas);
+                })
                 .toList();
     }
 
@@ -335,6 +346,64 @@ public class queryFilters {
         }
 
         return nuevaFila;
+    }
+
+    public Map<String, String> processLastUpdateRequestG(Map<String, String> request) {
+        Integer fecha = parseInteger(request.get("fecha"));
+        Integer trimestre = parseInteger(request.get("trimestre"));
+
+        if (fecha == null || trimestre == null) {
+            return null;
+        }
+
+        Integer trimestreConvertido = convertirTrimestre(trimestre);
+        if (trimestreConvertido == null) {
+            return null;
+        }
+
+        String lastUpdate = getLastUpdateDateGR(fecha, trimestreConvertido);
+        Map<String, String> data = new HashMap<>();
+        data.put("GENERAL_RULES_DATA", lastUpdate != null ? lastUpdate : "NO DATA");
+
+        return data;
+    }
+
+    public Map<String, String> processLastUpdateRequestE(Map<String, String> request) {
+        Integer fecha = parseInteger(request.get("fecha"));
+        Integer trimestre = parseInteger(request.get("trimestre"));
+
+        if (fecha == null || trimestre == null) {
+            return null;
+        }
+
+        Integer trimestreConvertido = convertirTrimestre(trimestre);
+        if (trimestreConvertido == null) {
+            return null;
+        }
+
+        String lastUpdate = getLastUpdateDateSR(fecha, trimestreConvertido);
+        Map<String, String> data = new HashMap<>();
+        data.put("SPECIFIC_RULES_DATA", lastUpdate != null ? lastUpdate : "NO DATA");
+
+        return data;
+    }
+
+    private Integer parseInteger(String value) {
+        try {
+            return value != null ? Integer.valueOf(value) : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private Integer convertirTrimestre(Integer trimestre) {
+        return switch (trimestre) {
+            case 1 -> 3;
+            case 2 -> 6;
+            case 3 -> 9;
+            case 4 -> 12;
+            default -> null;
+        };
     }
 
     public String getLastUpdateDateGR(Integer fecha, Integer trimestre) {

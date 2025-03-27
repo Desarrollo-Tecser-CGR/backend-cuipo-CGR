@@ -13,6 +13,21 @@ public class detailsInfo {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    public List<Map<String, Object>> processGFRequest(Map<String, String> filters) {
+        if (!validateFilters(filters)) {
+            return null;
+        }
+    
+        String fecha = filters.get("fecha");
+        String trimestre = filters.get("trimestre");
+        String ambito = filters.get("ambito");
+        String entidad = filters.get("entidad");
+    
+        String trimestreBD = String.valueOf(Integer.parseInt(trimestre) * 3);
+    
+        return getFilteredRecordsGF(fecha, trimestreBD, ambito, entidad);
+    }
+
     public List<Map<String, Object>> getFilteredRecordsGF(String fecha, String trimestre, String ambitoCodigo,
             String entidadCodigo) {
         String tablaConsulta = "[cuipo_dev].[dbo].[VW_OPENDATA_D_EJECUCION_GASTOS]";
@@ -43,6 +58,29 @@ public class detailsInfo {
         }
 
         return jdbcTemplate.queryForList(sql.toString());
+    }
+
+    public List<Map<String, Object>> processICLDRequest(Map<String, String> filters) {
+        if (!validateFilters(filters)) {
+            return null;
+        }
+
+        String fecha = filters.get("fecha");
+        String trimestre = filters.get("trimestre");
+        String ambito = filters.get("ambito");
+        String entidad = filters.get("entidad");
+
+        String trimestreBD = String.valueOf(Integer.parseInt(trimestre) * 3);
+
+        return getFilteredRecordsICLD(fecha, trimestreBD, ambito, entidad);
+    }
+
+    private boolean validateFilters(Map<String, String> filters) {
+        return filters != null &&
+                filters.containsKey("fecha") &&
+                filters.containsKey("trimestre") &&
+                filters.containsKey("ambito") &&
+                filters.containsKey("entidad");
     }
 
     public List<Map<String, Object>> getFilteredRecordsICLD(String fecha, String trimestre, String ambitoCodigo,
