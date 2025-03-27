@@ -1,4 +1,4 @@
-package com.cgr.base.application.rulesEngine.parameterization;
+package com.cgr.base.application.parameterization;
 
 import java.util.List;
 
@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.infrastructure.persistence.entity.rulesEngine.GeneralRulesNames;
-import com.cgr.base.infrastructure.persistence.repository.rulesEngine.generalRulesRepo;
+import com.cgr.base.infrastructure.persistence.entity.parametrization.GeneralRulesNames;
+import com.cgr.base.infrastructure.persistence.repository.parametrization.generalRulesRepo;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;

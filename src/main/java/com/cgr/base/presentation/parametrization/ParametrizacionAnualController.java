@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cgr.base.application.rulesEngine.parameterization.ParametrizacionAnualService;
+import com.cgr.base.application.parameterization.ParametrizacionAnualService;
 import com.cgr.base.infrastructure.persistence.entity.parametrization.ParametrizacionAnual;
 
 @RestController
