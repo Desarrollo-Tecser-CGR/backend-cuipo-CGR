@@ -17,6 +17,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
+import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
+import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -37,6 +39,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Autowired
     private ObjectMapper getObjectMapper;
+
+    @Autowired
+    private IUserRepositoryJpa userRepositoryJpa;
 
     private List<String> urlsToSkip = List.of(
             "/api/v1/auth",
@@ -110,9 +115,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         List<String> roles = this.jwtService.getRolesToken(header.split(" ")[1]);
 
+        // Obtener menús asociados a los roles
+        List<Menu> menus = userRepositoryJpa.findMenusByRoleNames(roles);
+
         List<SimpleGrantedAuthority> authorities = roles.stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
+
+        // Agregar menús como authorities
+        menus.forEach(menu -> authorities.add(new SimpleGrantedAuthority("MENU_" + menu.getId())));
 
         try {
 
