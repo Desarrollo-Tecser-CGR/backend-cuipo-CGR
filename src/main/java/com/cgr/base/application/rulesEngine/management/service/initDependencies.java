@@ -111,8 +111,8 @@ public class initDependencies {
         //Parametria.processTablesSource();
         // Categorias.initCategoryTable();
         //ParameterRG.tableGeneralRulesName();
-        ParameterRE.tableSpecificRulesName();
-        //Certificator.generateControlTable();
+        //ParameterRE.tableSpecificRulesName();
+        Certificator.generateControlTable();
 
     }
 
