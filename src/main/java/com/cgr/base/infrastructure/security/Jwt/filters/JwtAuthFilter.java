@@ -48,8 +48,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/api/v1/auth/**",
             "/auth",
             "/auth/",
-            "/swagger-ui.html",
-            "/swagger-ui");
+            "/swagger-ui",
+            "/v3/api-docs",
+            "/api/v1/access/module/",
+            "/api/v1/access/module");
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
@@ -144,7 +146,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
-
 
     private void responseHandler(HttpServletResponse response, String exceptionHandler, int status) throws IOException {
 

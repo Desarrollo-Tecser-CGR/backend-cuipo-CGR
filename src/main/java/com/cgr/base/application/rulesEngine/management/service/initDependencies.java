@@ -107,12 +107,13 @@ public class initDependencies {
     @Async
     public void initializeDependencies() {
 
-        // MotorReglas.processTablesRules();
-        //Parametria.processTablesSource();
-        // Categorias.initCategoryTable();
-        //ParameterRG.tableGeneralRulesName();
+        MotorReglas.processTablesRules();
+        Parametria.processTablesSource();
+        Categorias.initCategoryTable();
+        ParameterRG.tableGeneralRulesName();
         ParameterRE.tableSpecificRulesName();
-        //Certificator.generateControlTable();
+        ER.actualizarSpecificRulesData();
+        Certificator.generateControlTable();
 
     }
 
@@ -172,7 +173,6 @@ public class initDependencies {
             case "30" -> Rules30.applySpecificRule30();
             case "31" -> Rules31.applySpecificRule31();
             case "32" -> Rules32.applySpecificRule32();
-            case "ER" -> ER.actualizarSpecificRulesData();
             default -> throw new IllegalArgumentException("Invalid Rule.");
         }
     }
