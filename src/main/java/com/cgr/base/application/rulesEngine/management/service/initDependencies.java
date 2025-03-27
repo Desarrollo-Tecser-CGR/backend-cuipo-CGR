@@ -108,10 +108,10 @@ public class initDependencies {
     public void initializeDependencies() {
 
         // MotorReglas.processTablesRules();
-        //Parametria.processTablesSource();
+        Parametria.processTablesSource();
         // Categorias.initCategoryTable();
-        //ParameterRG.tableGeneralRulesName();
-        //ParameterRE.tableSpecificRulesName();
+        // ParameterRG.tableGeneralRulesName();
+        // ParameterRE.tableSpecificRulesName();
         Certificator.generateControlTable();
 
     }

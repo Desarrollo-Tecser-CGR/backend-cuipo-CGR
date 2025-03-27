@@ -8,6 +8,8 @@ import com.cgr.base.infrastructure.persistence.repository.parametrization.Parame
 
 import jakarta.transaction.Transactional;
 
+import java.math.BigDecimal;
+import java.time.Year;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,12 +21,21 @@ public class ParametrizacionAnualService {
 
     @Transactional
     public ParametrizacionAnual save(ParametrizacionAnual parametrizacionAnual) {
+        calcularLimIcld(parametrizacionAnual);
+        validarFecha(parametrizacionAnual.getFecha());
         return parametrizacionAnualRepository.save(parametrizacionAnual);
     }
 
     @Transactional
     public ParametrizacionAnual update(ParametrizacionAnual parametrizacionAnual) {
-        return parametrizacionAnualRepository.update(parametrizacionAnual);
+        calcularLimIcld(parametrizacionAnual);
+        System.out.println("Limite ICLD calculado PRINCIPAL: " + parametrizacionAnual.getLimIcld());
+        if (validarFecha(parametrizacionAnual.getFecha())) {
+            return parametrizacionAnualRepository.save(parametrizacionAnual);
+        } else {
+            return null;
+        }
+
     }
 
     public Optional<ParametrizacionAnual> getByFecha(int fecha) {
@@ -38,5 +49,30 @@ public class ParametrizacionAnualService {
 
     public List<ParametrizacionAnual> getAll() {
         return parametrizacionAnualRepository.findAll();
+    }
+
+    private void calcularLimIcld(ParametrizacionAnual parametrizacionAnual) {
+        int anioActual = parametrizacionAnual.getFecha();
+        Optional<ParametrizacionAnual> anioAnterior = parametrizacionAnualRepository.findByFecha(anioActual - 1);
+
+        if (anioAnterior.isPresent()) {
+            double limIclDAnterior = anioAnterior.get().getLimIcld().doubleValue();
+            double ipcAnioAnterior = anioAnterior.get().getIpc().doubleValue();
+            double nuevoLimIclD = limIclDAnterior + (limIclDAnterior * ipcAnioAnterior);
+            parametrizacionAnual.setLimIcld(BigDecimal.valueOf(nuevoLimIclD));
+        } else {
+            parametrizacionAnual.setLimIcld(BigDecimal.valueOf(0.0));
+        }
+
+        System.out.println("Limite ICLD calculado: " + parametrizacionAnual.getLimIcld());
+    }
+
+    private boolean validarFecha(int fecha) {
+        int anioActual = Year.now().getValue();
+        if (fecha != anioActual && fecha != anioActual - 1) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

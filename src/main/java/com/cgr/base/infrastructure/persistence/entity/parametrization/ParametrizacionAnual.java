@@ -258,9 +258,7 @@ public class ParametrizacionAnual {
         return limIcld;
     }
 
-    /*
-     * public void setLimIcld(BigDecimal limIcld) {
-     * this.limIcld = limIcld;
-     * }
-     */
+    public void setLimIcld(BigDecimal limIcld) {
+        this.limIcld = limIcld;
+    }
 }
