@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,38 +67,8 @@ public class managementRules extends AbstractController {
     }
 
     @PostMapping("/specific/data")
-    public ResponseEntity<?> getSpecificRules(
-            @RequestBody(required = false) Map<String, String> filters) {
-
-        String fecha = filters != null ? filters.get("fecha") : null;
-        String trimestre = filters != null ? filters.get("trimestre") : null;
-        String ambito = filters != null ? filters.get("ambito") : null;
-        String entidad = filters != null ? filters.get("entidad") : null;
-        String reporte = filters != null ? filters.get("reporte") : null;
-
-        String trimestreBD = (trimestre != null) ? String.valueOf(Integer.parseInt(trimestre) * 3) : null;
-
-        List<Map<String, Object>> result = Filter.getFilteredRecordsSR(fecha, trimestreBD, ambito, entidad, reporte);
-
-        for (Map<String, Object> record : result) {
-            if (record.containsKey("TRIMESTRE")) {
-                record.put("TRIMESTRE", Integer.parseInt(record.get("TRIMESTRE").toString()) / 3);
-            }
-            Map<String, Object> updatedRecord = new LinkedHashMap<>();
-            for (Map.Entry<String, Object> entry : record.entrySet()) {
-                String columnName = entry.getKey();
-                Object value = entry.getValue();
-
-                if (columnName.matches("^CA0\\d{3,}$") || columnName.startsWith("REGLA_ESPECIFICA_")) {
-                    updatedRecord.put("RESULTADO_REPORTE", value);
-                } else {
-                    updatedRecord.put(columnName, value);
-                }
-            }
-            record.clear();
-            record.putAll(updatedRecord);
-        }
-
+    public ResponseEntity<?> getSpecificRules(@RequestBody(required = false) Map<String, String> filters) {
+        List<Map<String, Object>> result = Filter.getFilteredRecordsSR(filters);
         return requestResponse(result, "Specific Rules successfully retrieved.", HttpStatus.OK, true);
     }
 
@@ -136,26 +105,26 @@ public class managementRules extends AbstractController {
         }
     }
 
-    @PostMapping("/specific/export-csv")
-    public ResponseEntity<byte[]> exportFilteredDataToCsvSR(
-            @RequestBody(required = false) Map<String, String> filters) {
-        try {
-            ByteArrayOutputStream csvStream = SpecificCSV.generateCsvStream(filters);
-            byte[] csvBytes = csvStream.toByteArray();
+    // @PostMapping("/specific/export-csv")
+    // public ResponseEntity<byte[]> exportFilteredDataToCsvSR(
+    //         @RequestBody(required = false) Map<String, String> filters) {
+    //     try {
+    //         ByteArrayOutputStream csvStream = SpecificCSV.generateCsvStream(filters);
+    //         byte[] csvBytes = csvStream.toByteArray();
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.TEXT_PLAIN);
-            headers.setContentDisposition(ContentDisposition.attachment()
-                    .filename("filtered_data.csv")
-                    .build());
+    //         HttpHeaders headers = new HttpHeaders();
+    //         headers.setContentType(MediaType.TEXT_PLAIN);
+    //         headers.setContentDisposition(ContentDisposition.attachment()
+    //                 .filename("filtered_data.csv")
+    //                 .build());
 
-            return new ResponseEntity<>(csvBytes, headers, HttpStatus.OK);
-        } catch (IOException e) {
+    //         return new ResponseEntity<>(csvBytes, headers, HttpStatus.OK);
+    //     } catch (IOException e) {
 
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error generating CSV file.".getBytes(StandardCharsets.UTF_8));
-        }
-    }
+    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+    //                 .body("Error generating CSV file.".getBytes(StandardCharsets.UTF_8));
+    //     }
+    // }
 
     @PostMapping("/general/lastUpdate")
     public ResponseEntity<?> getLastUpdateGeneralRules(@RequestBody Map<String, String> request) {
