@@ -1,6 +1,6 @@
 package com.cgr.base.infrastructure.config;
 
-import java.util.Arrays;
+import java.util.*;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +14,9 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.cgr.base.infrastructure.exception.component.AccessDeniedHandlerException;
 import com.cgr.base.infrastructure.security.Jwt.filters.JwtAuthFilter;
+import com.cgr.base.infrastructure.security.endpoints.endpointEntity;
+import com.cgr.base.infrastructure.security.endpoints.endpointRepo;
+import com.cgr.base.infrastructure.security.endpoints.endpointsSecurity;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
@@ -26,8 +29,9 @@ public class SecurityConfig {
 
     private final AccessDeniedHandlerException accessDeniedHandlerException;
     private final JwtAuthFilter jwtAuthFilter;
+    private final endpointRepo endpointRepo;
+    private final endpointsSecurity endpointSegurity;
 
-    // Configuración de la cadena de filtros de seguridad.
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -37,15 +41,28 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .exceptionHandling(t -> t.accessDeniedHandler(accessDeniedHandlerException))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**").permitAll();
-                    auth.requestMatchers("/api/v1/role/**").hasAnyAuthority("administrador", "Analista", "Coordinador");
-                    auth.requestMatchers("/api/v1/log/**").hasAnyAuthority("administrador", "Analista", "Coordinador");
-                    auth.requestMatchers("/api/v1/menu/**").hasAnyAuthority("administrador", "Analista", "Coordinador");
-                    auth.requestMatchers("/api/v1/user/**").hasAnyAuthority("administrador", "Analista", "Coordinador");
-                    auth.requestMatchers("/api/v1/rules/**").hasAnyAuthority("administrador", "Coordinador", "Analista");
-                    auth.anyRequest().authenticated();
+                    List<endpointEntity> endpoints = endpointRepo.findAll();
+                    Map<String, Set<String>> restrictedEndpoints = endpointSegurity.getEndpointsWithRoles();
+
+                    for (endpointEntity endpoint : endpoints) {
+                        switch (endpoint.getType()) {
+                            case "PUBLICO" -> auth.requestMatchers(endpoint.getUrl()).permitAll();
+                            case "GENERAL" -> auth.requestMatchers(endpoint.getUrl()).authenticated();
+                            case "RESTRINGIDO" -> {
+                                Set<String> roles = restrictedEndpoints.get(endpoint.getUrl());
+                                if (roles == null || roles.isEmpty()) {
+                                    auth.requestMatchers(endpoint.getUrl()).denyAll();
+                                } else {
+                                    auth.requestMatchers(endpoint.getUrl())
+                                            .hasAnyAuthority(roles.toArray(String[]::new));
+                                }
+
+                            }
+                        }
+                    }
+                    auth.anyRequest().denyAll();
+                    // auth.anyRequest().authenticated();
                 });
 
         http.headers(headers -> headers
@@ -56,6 +73,32 @@ public class SecurityConfig {
         return http.build();
     }
 
+    public void reloadSecurityConfiguration(HttpSecurity http) throws Exception {
+        // Obtener endpoints actualizados
+        List<endpointEntity> endpoints = endpointRepo.findAll();
+        Map<String, Set<String>> restrictedEndpoints = endpointSegurity.getEndpointsWithRoles();
+
+        // Reconfigurar las solicitudes HTTP
+        http.authorizeHttpRequests(auth -> {
+            for (endpointEntity endpoint : endpoints) {
+                switch (endpoint.getType()) {
+                    case "PUBLICO" -> auth.requestMatchers(endpoint.getUrl()).permitAll();
+                    case "GENERAL" -> auth.requestMatchers(endpoint.getUrl()).authenticated();
+                    case "RESTRINGIDO" -> {
+                        Set<String> roles = restrictedEndpoints.get(endpoint.getUrl());
+                        if (roles == null || roles.isEmpty()) {
+                            auth.requestMatchers(endpoint.getUrl()).denyAll();
+                        } else {
+                            auth.requestMatchers(endpoint.getUrl())
+                                    .hasAnyAuthority(roles.toArray(String[]::new));
+                        }
+                    }
+                }
+            }
+            auth.anyRequest().denyAll();
+        });
+    }
+
     // Configuración de CORS
     private CorsConfigurationSource corsConfigurationSource() {
         return new CorsConfigurationSource() {
@@ -63,13 +106,14 @@ public class SecurityConfig {
             public CorsConfiguration getCorsConfiguration(@NonNull HttpServletRequest request) {
                 CorsConfiguration config = new CorsConfiguration();
                 config.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:4200",
-                        "http://localhost:5173/", "http://192.168.0.220/",
+                        "http://localhost:5173/", "http://192.168.0.220/", "http://192.168.0.220/",
                         "http://localhost:8000/", "http://localhost:8000",
                         "http://localhost:48496", "https://665922d5497f3aaadbaaf8b0--melodic-halva-c4b1b1.netlify.app/",
                         "https://665922d5497f3aaadbaaf8b0--melodic-halva-c4b1b1.netlify.app",
                         "https://bovid.site/", "https://bovid.site", "http://bovid.site/",
                         "http://bovid.site", "https://strong-toffee-1046b5.netlify.app/",
-                        "https://strong-toffee-1046b5.netlify.app"));
+                        "https://strong-toffee-1046b5.netlify.app", "http://192.168.2.63:8001/",
+                        "http://192.168.2.63:8001"));
                 config.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
                 config.setAllowedHeaders(Arrays.asList("*"));
                 config.setAllowCredentials(true);

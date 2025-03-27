@@ -17,7 +17,7 @@ public class ProfileEntity {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "image_profile", nullable = true)
+    @Column(name = "image_profile", columnDefinition = "NVARCHAR(MAX)", nullable = true)
     private String imageProfile;
     
 }

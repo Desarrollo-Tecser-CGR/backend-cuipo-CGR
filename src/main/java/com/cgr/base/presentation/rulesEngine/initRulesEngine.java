@@ -14,12 +14,12 @@ import com.cgr.base.application.rulesEngine.management.service.initDependencies;
 import com.cgr.base.presentation.controller.AbstractController;
 
 @RestController
-@RequestMapping("/api/v1/rules")
+@RequestMapping("/api/v1/init/rules")
 public class initRulesEngine extends AbstractController {
 
     @Autowired
     private initDependencies tablesInit;
-
+    
     @PostMapping("/init-tables")
     public ResponseEntity<?> processTables() {
         tablesInit.initializeDependencies();

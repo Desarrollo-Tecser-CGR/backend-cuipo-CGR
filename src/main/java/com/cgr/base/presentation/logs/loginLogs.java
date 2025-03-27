@@ -1,4 +1,4 @@
-package com.cgr.base.presentation.controller;
+package com.cgr.base.presentation.logs;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,19 +7,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.logs.usecase.ILogUseCase;
-
+import com.cgr.base.presentation.controller.AbstractController;
 
 @RestController
 @RequestMapping("/api/v1/log")
-public class LogController extends AbstractController {
+public class loginLogs extends AbstractController {
 
     private final ILogUseCase logService;
 
-    public LogController(ILogUseCase logService) {
+    public loginLogs(ILogUseCase logService) {
         this.logService = logService;
     }
 
-    @GetMapping
+    @GetMapping("/login")
     public ResponseEntity<?> getLogAll() {
         return requestResponse(this.logService.logFindAll(), "Login Logs.", HttpStatus.OK, true);
     }

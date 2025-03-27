@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class dataTransfer_PG {
@@ -86,7 +85,7 @@ public class dataTransfer_PG {
                             d.AMBITO_CODIGOS_NO_CUMPLE_7 = t.AMBITO_CODIGOS_NO_CUMPLE_7,
                             d.COD_SECCION_PRESUPUESTAL_NO_CUMPLE_7 = t.COD_SECCION_PRESUPUESTAL_NO_CUMPLE_7,
                             d.ALERTA_7 = CASE
-                                WHEN t.CUMPLE_STATUS_7 = 'CUMPLE' THEN 'La entidad satisface los criterios de evaluacion'
+                                WHEN t.CUMPLE_STATUS_7 = 'CUMPLE' THEN 'La entidad satisface los criterios de validación'
                                 WHEN t.CUMPLE_STATUS_7 = 'NO CUMPLE' THEN 'Algunas cuentas no satisfacen los criterios de validacion'
                                 WHEN t.CUMPLE_STATUS_7 = 'NO DATA' THEN 'La entidad no registra datos en programacion gastos'
                                 ELSE NULL

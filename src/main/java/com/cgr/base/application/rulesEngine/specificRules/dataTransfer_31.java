@@ -1,5 +1,8 @@
 package com.cgr.base.application.rulesEngine.specificRules;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,34 +33,80 @@ public class dataTransfer_31 {
         updateLimitMaxGastE031();
         updateRazonE031();
         updateCA0159E031();
+        updateReglaEspecifica();
 
     }
 
     private void createTableE031() {
+    String sqlCheckTable = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'E031'";
+    Integer count = ((Number) entityManager.createNativeQuery(sqlCheckTable).getSingleResult()).intValue();
 
-        String sqlCheckTable = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'E031'";
-        String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'TABLA_E031')"
-                +
-                " BEGIN " +
-                " CREATE TABLE [" + tablaE031 + "] (" +
-                "[CODIGO_ENTIDAD] VARCHAR(50), " +
-                "[AMBITO_CODIGO] VARCHAR(50)," +
-                "[TRIMESTRE] VARCHAR(50)," +
-                "[FECHA] VARCHAR(50)," +
-                "[ICLD] VARCHAR(MAX)," +
-                "[GAST_COMPROMETIDOS] DECIMAL(18,2)," +
-                "[VALOR_SMMLV] DECIMAL(20,2)," +
-                "[LIMIT_MAX_GAST] DECIMAL(18,2)," +
-                "[RAZON] DECIMAL(30,2)," +
-                "[CA0159] VARCHAR(50)," +
-                " ) " +
-                " END";
-                Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
-
-                if (count == 0) {
-                    entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
-                }
+    if (count == 0) {
+        String sqlCreateTable =
+            "CREATE TABLE [" + tablaE031 + "] ("
+          + "  [CODIGO_ENTIDAD]       VARCHAR(50), "
+          + "  [AMBITO_CODIGO]        VARCHAR(50), "
+          + "  [TRIMESTRE]            VARCHAR(50), "
+          + "  [FECHA]                VARCHAR(50), "
+          + "  [ICLD]                 VARCHAR(MAX), "
+          + "  [GAST_COMPROMETIDOS]   DECIMAL(18,2), "
+          + "  [VALOR_SMMLV]          DECIMAL(20,2), "
+          + "  [LIMIT_MAX_GAST]       DECIMAL(18,2), "
+          + "  [RAZON]                DECIMAL(30,2), "
+          + "  [ALERTA_CA0159]               VARCHAR(50)"
+          + ")";
+        entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
     }
+
+    List<String> requiredColumns = Arrays.asList(
+        "CODIGO_ENTIDAD",
+        "AMBITO_CODIGO",
+        "TRIMESTRE",
+        "FECHA",
+        "ICLD",
+        "GAST_COMPROMETIDOS",
+        "VALOR_SMMLV",
+        "LIMIT_MAX_GAST",
+        "RAZON",
+        "ALERTA_CA0159",
+        "REGLA_ESPECIFICA_31"
+    );
+
+    for (String column : requiredColumns) {
+        String sqlCheckColumn =
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS "
+          + "WHERE TABLE_NAME='E031' AND COLUMN_NAME='" + column + "'";
+
+        Integer colCount = ((Number) entityManager.createNativeQuery(sqlCheckColumn).getSingleResult()).intValue();
+
+        if (colCount == 0) {
+            String columnType;
+            switch (column) {
+                case "GAST_COMPROMETIDOS":
+                case "LIMIT_MAX_GAST":
+                    columnType = "DECIMAL(18,2)";
+                    break;
+                case "VALOR_SMMLV":
+                    columnType = "DECIMAL(20,2)";
+                    break;
+                case "RAZON":
+                    columnType = "DECIMAL(30,2)";
+                    break;
+                case "ICLD":
+                    columnType = "VARCHAR(MAX)";
+                    break;
+                default:
+                    columnType = "VARCHAR(50)";
+            }
+
+            String sqlAddColumn =
+                "ALTER TABLE [" + tablaE031 + "] ADD [" + column + "] " + columnType + " NULL";
+
+            entityManager.createNativeQuery(sqlAddColumn).executeUpdate();
+        }
+    }
+}
+
 
     public void agregateDataInitE031() {
         String sql = "INSERT INTO [" + tablaE031 + "] (CODIGO_ENTIDAD, AMBITO_CODIGO, TRIMESTRE, FECHA) " +
@@ -175,11 +224,22 @@ public class dataTransfer_31 {
 
     public void updateCA0159E031() {
         String sql = "UPDATE [" + tablaE031 + "] " +
-                "SET CA0159 = CASE " +
+                "SET ALERTA_CA0159 = CASE " +
                 "                WHEN GAST_COMPROMETIDOS > LIMIT_MAX_GAST THEN 'EXCEDE' " +
                 "                ELSE 'NO EXCEDE' " +
                 "             END;";
 
+        entityManager.createNativeQuery(sql).executeUpdate();
+    }
+    public void updateReglaEspecifica() {
+        String sql = """
+            UPDATE E031
+            SET REGLA_ESPECIFICA_31 = CASE
+                WHEN ALERTA_CA0159 = 'EXCEDE' THEN 'EXCEDE'
+                ELSE 'NO EXCEDE'
+            END;
+            """;
+        
         entityManager.createNativeQuery(sql).executeUpdate();
     }
 

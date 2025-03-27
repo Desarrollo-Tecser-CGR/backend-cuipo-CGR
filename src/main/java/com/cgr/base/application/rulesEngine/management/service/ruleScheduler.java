@@ -4,16 +4,26 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.cgr.base.application.parameterization.generalParameter;
+import com.cgr.base.application.parameterization.specificParameter;
+
 @Service
 public class ruleScheduler {
 
     @Autowired
     private initDependencies ApplyRules;
 
+    @Autowired
+    private generalParameter ParameterRG;
+
+    @Autowired
+    private specificParameter ParameterRE;
+
     @Async
-    @Scheduled(cron = "0 0 0 1 * ?") // Se ejecuta el primer día de cada mes a medianoche
+    @Scheduled(cron = "0 0 0 15 * ?")
     public void scheduleRulesExecution() {
-        // 1. Ejecutar primero initializeDependencies()
+        ParameterRG.tableGeneralRulesName();
+        ParameterRE.tableSpecificRulesName();
         ApplyRules.initializeDependencies();
 
         try {
@@ -22,11 +32,11 @@ public class ruleScheduler {
             Thread.currentThread().interrupt();
         }
 
-        String[] generalRules = {"1", "2", "3", "4", "5", "6", "7", "8", "9A", "9B", "10", "11", "12", "13A", "13B", "14A", "14B", "15", "16A", "16B"};
+        String[] generalRules = {"1", "2", "3", "4", "5", "6", "7", "8", "9A", "9B", "10", "11", "12", "13A", "13B", "14A", "14B", "15", "16A", "16B", "17"};
         executeRulesWithDelay(generalRules, true);
 
 
-        String[] specificRules = {"22A", "22B", "22C", "22D", "22E", "24", "25A", "25B", "GF", "26", "27", "28", "29A", "29B", "29C", "30", "31"};
+        String[] specificRules = {"22A", "22B", "22C", "22D", "22E", "24", "25A", "25B", "GF", "26", "27", "28", "29A", "29B", "29C", "30", "31", "32", "ER"};
         executeRulesWithDelay(specificRules, false);
     }
 
@@ -46,7 +56,7 @@ public class ruleScheduler {
                     Thread.currentThread().interrupt();
                 }
             }).start();
-            delay += 30;
+            delay += 35;
         }
     }
 

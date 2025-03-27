@@ -22,7 +22,7 @@ import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/api/v1/user")
+@RequestMapping("/api/v1/user/profile")
 public class ProfileController {
 
     @Autowired
@@ -61,7 +61,7 @@ public class ProfileController {
         }
     }
 
-    @GetMapping("/profile_image")
+    @GetMapping("/image")
     public ResponseEntity<String> getProfileImage(HttpServletRequest request) {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (header == null || !header.startsWith("Bearer ")) {
@@ -82,7 +82,7 @@ public class ProfileController {
         }
     }
 
-    @PostMapping("/update_profile")
+    @PostMapping("/update")
     public ResponseEntity<String> updateUserProfile(
             @RequestBody UserProfileDto userDto,
             HttpServletRequest request) {
@@ -104,6 +104,27 @@ public class ProfileController {
         } catch (IllegalArgumentException e) {
 
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<Object> getUserInfo(HttpServletRequest request) {
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (header == null || !header.startsWith("Bearer ")) {
+            return new ResponseEntity<>("Token is Required.", HttpStatus.FORBIDDEN);
+        }
+
+        String token = header.split(" ")[1];
+        Long userId = jwtService.extractUserIdFromToken(token);
+        if (userId == null) {
+            return new ResponseEntity<>("User ID not Found.", HttpStatus.FORBIDDEN);
+        }
+
+        try {
+            Object userData = ProfileService.getUserById(userId);
+            return new ResponseEntity<>(userData, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 
