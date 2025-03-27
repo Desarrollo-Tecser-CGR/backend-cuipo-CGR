@@ -18,6 +18,8 @@ import com.cgr.base.infrastructure.exception.customException.InvalidVerification
 import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
+import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,6 +30,9 @@ public class JwtAuthenticationProvider {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private IUserRepositoryJpa userRepositoryJpa;
 
     private HashMap<String, AuthResponseDto> listToken = new HashMap<>();
 
@@ -54,6 +59,13 @@ public class JwtAuthenticationProvider {
             }
 
             HashSet<SimpleGrantedAuthority> rolesAndAuthorities = new HashSet<>();
+
+            // Obtener roles del usuario
+            List<String> roleNames = jwtService.getRolesToken(token);
+
+            // Obtener menús asociados a los roles
+            List<Menu> menus = userRepositoryJpa.findMenusByRoleNames(roleNames);
+            menus.forEach(menu -> rolesAndAuthorities.add(new SimpleGrantedAuthority("MENU_" + menu.getId())));
 
             return new UsernamePasswordAuthenticationToken(exists, token, rolesAndAuthorities);
 

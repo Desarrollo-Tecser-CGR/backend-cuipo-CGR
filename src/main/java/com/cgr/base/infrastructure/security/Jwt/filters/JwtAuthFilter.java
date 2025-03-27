@@ -17,6 +17,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
+import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
+import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -38,13 +40,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Autowired
     private ObjectMapper getObjectMapper;
 
+    @Autowired
+    private IUserRepositoryJpa userRepositoryJpa;
+
     private List<String> urlsToSkip = List.of(
             "/api/v1/auth",
             "/api/v1/auth/**",
             "/auth",
             "/auth/",
-            "/swagger-ui.html",
-            "/swagger-ui");
+            "/swagger-ui",
+            "/v3/api-docs",
+            "/api/v1/access/module/",
+            "/api/v1/access/module");
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
@@ -108,16 +115,27 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        List<String> roles = this.jwtService.getRolesToken(header.split(" ")[1]);
+        String username = this.jwtService.getClaimUserName(header.split(" ")[1]);
+
+        // Fetch roles from the database
+        List<String> roles = userRepositoryJpa.findBySAMAccountNameWithRoles(username)
+                .map(user -> user.getRoles().stream().map(role -> role.getName()).collect(Collectors.toList()))
+                .orElseThrow(() -> new RuntimeException("User not found or roles not assigned."));
+
+        // Obtener menús asociados a los roles
+        List<Menu> menus = userRepositoryJpa.findMenusByRoleNames(roles);
 
         List<SimpleGrantedAuthority> authorities = roles.stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
+        // Agregar menús como authorities
+        menus.forEach(menu -> authorities.add(new SimpleGrantedAuthority("MENU_" + menu.getId())));
+
         try {
 
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    this.jwtService.getClaimUserName(header.split(" ")[1]), null, authorities);
+                    username, null, authorities);
 
             SecurityContextHolder.getContext().setAuthentication(auth);
 
@@ -128,7 +146,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
-
 
     private void responseHandler(HttpServletResponse response, String exceptionHandler, int status) throws IOException {
 

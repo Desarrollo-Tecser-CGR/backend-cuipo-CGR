@@ -1,4 +1,4 @@
-package com.cgr.base.infrastructure.persistence.entity.rulesEngine;
+package com.cgr.base.infrastructure.persistence.entity.parametrization;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;

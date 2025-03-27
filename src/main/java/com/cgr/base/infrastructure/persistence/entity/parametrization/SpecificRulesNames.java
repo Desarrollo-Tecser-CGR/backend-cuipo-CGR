@@ -1,5 +1,4 @@
-package com.cgr.base.infrastructure.persistence.entity.rulesEngine;
-
+package com.cgr.base.infrastructure.persistence.entity.parametrization;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -15,8 +14,8 @@ import lombok.NoArgsConstructor;
 @Data
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "GENERAL_RULES_NAMES")
-public class GeneralRulesNames {
+@Table(name = "SPECIFIC_RULES_NAMES")
+public class SpecificRulesNames {
 
     @Id
     @Column(name = "CODIGO_REGLA")

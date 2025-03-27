@@ -6,7 +6,7 @@ import java.io.OutputStreamWriter;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,39 +29,15 @@ public class exportCSVspecific {
     }
 
     public ByteArrayOutputStream generateCsvStream(Map<String, String> filters) throws IOException {
-        String fecha = filters.get("fecha");
-        String trimestre = filters.get("trimestre");
+        if (filters == null) {
+            filters = new HashMap<>();
+        }
+
+        List<Map<String, Object>> filteredData = queryFilters.getFilteredRecordsSR(filters);
+
         String ambitoCodigo = filters.get("ambito");
         String entidadCodigo = filters.get("entidad");
         String reporteCodigo = filters.get("reporte");
-
-        String trimestreBD = (trimestre != null) ? convertirTrimestreParaBD(trimestre) : null;
-
-        List<Map<String, Object>> filteredData = queryFilters.getFilteredRecordsSR(fecha, trimestreBD, ambitoCodigo,
-                entidadCodigo, reporteCodigo);
-
-        List<Map<String, Object>> filteredDataFormatted = filteredData.stream()
-                .map(row -> {
-                    Map<String, Object> updatedRow = new LinkedHashMap<>();
-
-                    for (Map.Entry<String, Object> entry : row.entrySet()) {
-                        String columnName = entry.getKey();
-                        Object value = entry.getValue();
-
-                        if (columnName.matches("^CA0\\d{3,}$") || columnName.startsWith("REGLA_ESPECIFICA_")) {
-                            updatedRow.put("RESULTADO_REPORTE", value);
-                        } else {
-                            updatedRow.put(columnName, value);
-                        }
-                    }
-
-                    if (updatedRow.containsKey("TRIMESTRE")) {
-                        updatedRow.put("TRIMESTRE", convertirTrimestreParaFront(updatedRow.get("TRIMESTRE")));
-                    }
-
-                    return updatedRow;
-                })
-                .toList();
 
         String ambitoNombre = listOptions.getAmbitos().stream()
                 .filter(a -> a.getCodigo().equals(ambitoCodigo))
@@ -99,10 +75,10 @@ public class exportCSVspecific {
 
             csvPrinter.printRecord("Reporte generado el:", fechaHoraGeneracion);
             csvPrinter.printRecord("Filtros Aplicados:");
-            if (fecha != null)
-                csvPrinter.printRecord("Fecha", fecha);
-            if (trimestre != null)
-                csvPrinter.printRecord("Trimestre", convertirTrimestreParaFront(trimestre));
+            if (filters.get("fecha") != null)
+                csvPrinter.printRecord("Fecha", filters.get("fecha"));
+            if (filters.get("trimestre") != null)
+                csvPrinter.printRecord("Trimestre", filters.get("trimestre"));
             if (ambitoCodigo != null && ambitoNombre != null)
                 csvPrinter.printRecord("Ámbito", ambitoCodigo + " - " + ambitoNombre);
             if (entidadCodigo != null && entidadNombre != null)
@@ -111,11 +87,11 @@ public class exportCSVspecific {
                 csvPrinter.printRecord("Reporte", reporteCodigo + " - " + reporteNombre);
             csvPrinter.println();
 
-            if (!filteredDataFormatted.isEmpty()) {
-                csvPrinter.printRecord(filteredDataFormatted.get(0).keySet());
+            if (!filteredData.isEmpty()) {
+                csvPrinter.printRecord(filteredData.get(0).keySet());
             }
 
-            for (Map<String, Object> record : filteredDataFormatted) {
+            for (Map<String, Object> record : filteredData) {
                 csvPrinter.printRecord(record.values());
             }
 
@@ -123,29 +99,6 @@ public class exportCSVspecific {
             csvPrinter.flush();
             return byteArrayOutputStream;
         }
-    }
-
-    private String convertirTrimestreParaBD(String trimestre) {
-        return switch (trimestre) {
-            case "1" -> "3";
-            case "2" -> "6";
-            case "3" -> "9";
-            case "4" -> "12";
-            default -> trimestre;
-        };
-    }
-
-    private String convertirTrimestreParaFront(Object trimestreBD) {
-        if (trimestreBD == null)
-            return null;
-
-        return switch (trimestreBD.toString()) {
-            case "3" -> "1";
-            case "6" -> "2";
-            case "9" -> "3";
-            case "12" -> "4";
-            default -> trimestreBD.toString();
-        };
     }
 
 }

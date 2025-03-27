@@ -1,4 +1,4 @@
-package com.cgr.base.infrastructure.security.endpoints;
+package com.cgr.base.infrastructure.persistence.entity.parametrization;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -15,17 +15,17 @@ import lombok.NoArgsConstructor;
 @Data
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "endpoints")
-public class endpointEntity {
+@Table(name = "GENERAL_RULES_NAMES")
+public class GeneralRulesNames {
 
     @Id
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "CODIGO_REGLA")
+    private String codigoRegla;
 
-    @Column(name = "url", nullable = false, length = 255)
-    private String url;
+    @Column(name = "NOMBRE_REGLA")
+    private String nombreRegla;
 
-    @Column(name = "type", nullable = false, length = 20)
-    private String type;
-
+    @Column(name = "DESCRIPCION_REGLA")
+    private String descripcionRegla;
+    
 }

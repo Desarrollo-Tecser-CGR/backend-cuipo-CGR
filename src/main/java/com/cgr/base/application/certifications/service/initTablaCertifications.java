@@ -63,80 +63,133 @@ public class initTablaCertifications {
 
         entityManager.createNativeQuery(sqlInsertData).executeUpdate();
 
-        String getColumnsQuery = """
-                    SELECT COLUMN_NAME
-                    FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE TABLE_NAME = 'GENERAL_RULES_DATA'
-                      AND COLUMN_NAME LIKE 'REGLA_GENERAL_%'
-                """;
+        String totalCalidadQuery = "SELECT COUNT(*) FROM GENERAL_RULES_NAMES";
+        int totalCalidad = ((Number) entityManager.createNativeQuery(totalCalidadQuery).getSingleResult()).intValue();
+
+        String totalL617Query = "SELECT COUNT(*) FROM SPECIFIC_RULES_NAMES";
+        int totalL617 = ((Number) entityManager.createNativeQuery(totalL617Query).getSingleResult()).intValue();
 
         @SuppressWarnings("unchecked")
-        List<String> reglaColumns = ((List<Object>) entityManager.createNativeQuery(getColumnsQuery).getResultList())
-                .stream()
-                .map(Object::toString)
-                .collect(Collectors.toList());
+        List<String> columnasGenerales = entityManager.createNativeQuery(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
+                        "WHERE TABLE_NAME = 'GENERAL_RULES_DATA' AND COLUMN_NAME LIKE 'REGLA_GENERAL_%'")
+                .getResultList();
 
-        String reglasCrossApply = reglaColumns.stream()
-                .map(col -> "(g." + col + ")")
-                .collect(Collectors.joining(", "));
+        @SuppressWarnings("unchecked")
+        List<String> columnasEspecificas = entityManager.createNativeQuery(
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
+                        "WHERE TABLE_NAME = 'SPECIFIC_RULES_DATA' AND COLUMN_NAME LIKE 'REGLA_ESPECIFICA_%'")
+                .getResultList();
 
-        String updateQuery = """
+        StringBuilder updateCalidadBuilder = new StringBuilder();
+        updateCalidadBuilder.append("UPDATE c SET c.PORCENTAJE_CALIDAD = calc.porcentaje ")
+                .append("FROM CONTROL_CERTIFICACION c ")
+                .append("CROSS APPLY (SELECT ");
+
+        updateCalidadBuilder.append("CASE ");
+
+        updateCalidadBuilder.append("WHEN (")
+                .append(columnasGenerales.stream()
+                        .map(col -> String.format("g.%s = 'NO APLICA'", col))
+                        .collect(Collectors.joining(" AND ")))
+                .append(String.format(") AND %d = %d THEN 100.0 ", columnasGenerales.size(), totalCalidad));
+
+        updateCalidadBuilder.append("ELSE CAST((")
+                .append(columnasGenerales.stream()
+                        .map(col -> String.format("CASE WHEN g.%s = 'CUMPLE' THEN 1 ELSE 0 END", col))
+                        .collect(Collectors.joining(" + ")))
+                .append(") AS FLOAT) / NULLIF((")
+                .append(totalCalidad)
+                .append(" - (")
+                .append(columnasGenerales.stream()
+                        .map(col -> String.format("CASE WHEN g.%s = 'NO APLICA' THEN 1 ELSE 0 END", col))
+                        .collect(Collectors.joining(" + ")))
+                .append(")), 0) * 100 END AS porcentaje ");
+
+        updateCalidadBuilder.append("FROM GENERAL_RULES_DATA g ")
+                .append("WHERE g.FECHA = c.FECHA AND g.CODIGO_ENTIDAD = c.CODIGO_ENTIDAD AND g.TRIMESTRE = '12') calc");
+
+        entityManager.createNativeQuery(updateCalidadBuilder.toString()).executeUpdate();
+
+        StringBuilder updateL617Builder = new StringBuilder();
+        updateL617Builder.append("UPDATE c SET c.PORCENTAJE_L617 = calc.porcentaje ")
+                .append("FROM CONTROL_CERTIFICACION c ")
+                .append("CROSS APPLY (SELECT ");
+
+        updateL617Builder.append("CASE ");
+
+        updateL617Builder.append("WHEN (")
+                .append(columnasEspecificas.stream()
+                        .map(col -> String.format("s.%s = 'NO APLICA'", col))
+                        .collect(Collectors.joining(" AND ")))
+                .append(String.format(") AND %d = %d THEN 100.0 ", columnasEspecificas.size(), totalL617));
+
+        updateL617Builder.append("ELSE CAST((")
+                .append(columnasEspecificas.stream()
+                        .map(col -> String.format("CASE WHEN s.%s IN ('CUMPLE', 'NO EXCEDE') THEN 1 ELSE 0 END", col))
+                        .collect(Collectors.joining(" + ")))
+                .append(") AS FLOAT) / NULLIF((")
+                .append(totalL617)
+                .append(" - (")
+                .append(columnasEspecificas.stream()
+                        .map(col -> String.format("CASE WHEN s.%s = 'NO APLICA' THEN 1 ELSE 0 END", col))
+                        .collect(Collectors.joining(" + ")))
+                .append(")), 0) * 100 END AS porcentaje ");
+
+        updateL617Builder.append("FROM SPECIFIC_RULES_DATA s ")
+                .append("WHERE s.FECHA = c.FECHA AND s.CODIGO_ENTIDAD = c.CODIGO_ENTIDAD AND s.TRIMESTRE = '12') calc");
+
+        entityManager.createNativeQuery(updateL617Builder.toString()).executeUpdate();
+
+        String updateEstadoCalidad = """
                     UPDATE CONTROL_CERTIFICACION
                     SET
-                        PORCENTAJE_CALIDAD = (
-                            SELECT
-                                CASE
-                                    WHEN COUNT(*) = 0 THEN 0
-                                    ELSE (COUNT(CASE WHEN regla_estado = 'CUMPLE' THEN 1 END) * 100.0) / COUNT(*)
-                                END
-                            FROM (
-                                SELECT
-                                    g.FECHA, g.CODIGO_ENTIDAD,
-                                    UNPIVOTED.regla_estado
-                                FROM GENERAL_RULES_DATA g
-                                CROSS APPLY (
-                                    VALUES %s
-                                ) AS UNPIVOTED(regla_estado)
-                                WHERE g.TRIMESTRE = '12'
-                                    AND g.FECHA = CONTROL_CERTIFICACION.FECHA
-                                    AND g.CODIGO_ENTIDAD = CONTROL_CERTIFICACION.CODIGO_ENTIDAD
-                            ) AS estados
-                        ),
-                        FECHA_ACT_CALIDAD = GETDATE()
-                    WHERE USER_ACT_CALIDAD IS NOT NULL AND USER_ACT_CALIDAD <> '0';
-
-                    UPDATE CONTROL_CERTIFICACION
-                    SET
-                        PORCENTAJE_CALIDAD = (
-                            SELECT
-                                CASE
-                                    WHEN COUNT(*) = 0 THEN 0
-                                    ELSE (COUNT(CASE WHEN regla_estado = 'CUMPLE' THEN 1 END) * 100.0) / COUNT(*)
-                                END
-                            FROM (
-                                SELECT
-                                    g.FECHA, g.CODIGO_ENTIDAD,
-                                    UNPIVOTED.regla_estado
-                                FROM GENERAL_RULES_DATA g
-                                CROSS APPLY (
-                                    VALUES %s
-                                ) AS UNPIVOTED(regla_estado)
-                                WHERE g.TRIMESTRE = '12'
-                                    AND g.FECHA = CONTROL_CERTIFICACION.FECHA
-                                    AND g.CODIGO_ENTIDAD = CONTROL_CERTIFICACION.CODIGO_ENTIDAD
-                            ) AS estados
-                        ),
                         ESTADO_CALIDAD = CASE
                             WHEN PORCENTAJE_CALIDAD = 100 THEN 'CERTIFICA'
                             ELSE 'NO CERTIFICA'
                         END,
-                        USER_ACT_CALIDAD = '0',
-                        OBSERVACION_CALIDAD = 'Asignado por Sistema',
-                        FECHA_ACT_CALIDAD = GETDATE()
-                    WHERE USER_ACT_CALIDAD IS NULL OR USER_ACT_CALIDAD = '0';
-                """.formatted(reglasCrossApply, reglasCrossApply);
+                        FECHA_ACT_CALIDAD = CASE
+                            WHEN USER_ACT_CALIDAD IS NULL OR USER_ACT_CALIDAD = '0' THEN GETDATE()
+                            ELSE FECHA_ACT_CALIDAD
+                        END,
+                        USER_ACT_CALIDAD = CASE
+                            WHEN USER_ACT_CALIDAD IS NULL OR USER_ACT_CALIDAD = '0' THEN '0'
+                            ELSE USER_ACT_CALIDAD
+                        END,
+                        OBSERVACION_CALIDAD = CASE
+                            WHEN (USER_ACT_CALIDAD IS NULL OR USER_ACT_CALIDAD = '0') THEN 'SISTEMA'
+                            ELSE OBSERVACION_CALIDAD
+                        END
+                    WHERE
+                        PORCENTAJE_CALIDAD IS NOT NULL
+                        AND (USER_ACT_CALIDAD IS NULL OR USER_ACT_CALIDAD = '0' OR ESTADO_CALIDAD IS NULL)
+                """;
+        entityManager.createNativeQuery(updateEstadoCalidad).executeUpdate();
 
-        entityManager.createNativeQuery(updateQuery).executeUpdate();
+        String updateEstadoL617 = """
+                    UPDATE CONTROL_CERTIFICACION
+                    SET
+                        ESTADO_L617 = CASE
+                            WHEN PORCENTAJE_L617 = 100 THEN 'CERTIFICA'
+                            ELSE 'NO CERTIFICA'
+                        END,
+                        FECHA_ACT_L617 = CASE
+                            WHEN USER_ACT_L617 IS NULL OR USER_ACT_L617 = '0' THEN GETDATE()
+                            ELSE FECHA_ACT_L617
+                        END,
+                        USER_ACT_L617 = CASE
+                            WHEN USER_ACT_L617 IS NULL OR USER_ACT_L617 = '0' THEN '0'
+                            ELSE USER_ACT_L617
+                        END,
+                        OBSERVACION_L617 = CASE
+                            WHEN (USER_ACT_L617 IS NULL OR USER_ACT_L617 = '0') THEN 'SISTEMA'
+                            ELSE OBSERVACION_L617
+                        END
+                    WHERE
+                        PORCENTAJE_L617 IS NOT NULL
+                        AND (USER_ACT_L617 IS NULL OR USER_ACT_L617 = '0' OR ESTADO_L617 IS NULL)
+                """;
+        entityManager.createNativeQuery(updateEstadoL617).executeUpdate();
 
     }
 }

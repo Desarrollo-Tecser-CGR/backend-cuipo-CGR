@@ -5,6 +5,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.cgr.base.application.certifications.service.initTablaCertifications;
+import com.cgr.base.application.parameterization.generalParameter;
+import com.cgr.base.application.parameterization.specificParameter;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_17;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EG;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EI;
@@ -13,8 +15,6 @@ import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_PI;
 import com.cgr.base.application.rulesEngine.initTables.dataCategoryInit;
 import com.cgr.base.application.rulesEngine.initTables.dataParameterInit;
 import com.cgr.base.application.rulesEngine.initTables.dataSourceInit;
-import com.cgr.base.application.rulesEngine.parameterization.generalParameter;
-import com.cgr.base.application.rulesEngine.parameterization.specificParameter;
 import com.cgr.base.application.rulesEngine.specificRules.columnsER;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_22;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_23;
@@ -172,7 +172,6 @@ public class initDependencies {
             case "30" -> Rules30.applySpecificRule30();
             case "31" -> Rules31.applySpecificRule31();
             case "32" -> Rules32.applySpecificRule32();
-            case "ER" -> ER.actualizarSpecificRulesData();
             default -> throw new IllegalArgumentException("Invalid Rule.");
         }
     }

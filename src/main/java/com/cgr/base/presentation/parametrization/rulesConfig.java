@@ -12,10 +12,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cgr.base.application.rulesEngine.parameterization.generalParameter;
-import com.cgr.base.application.rulesEngine.parameterization.specificParameter;
-import com.cgr.base.infrastructure.persistence.entity.rulesEngine.GeneralRulesNames;
-import com.cgr.base.infrastructure.persistence.entity.rulesEngine.SpecificRulesTables;
+import com.cgr.base.application.parameterization.generalParameter;
+import com.cgr.base.application.parameterization.specificParameter;
+import com.cgr.base.infrastructure.persistence.entity.parametrization.GeneralRulesNames;
+import com.cgr.base.infrastructure.persistence.entity.parametrization.SpecificRulesNames;
+import com.cgr.base.infrastructure.persistence.entity.parametrization.SpecificRulesTables;
 import com.cgr.base.presentation.controller.AbstractController;
 
 @RestController
@@ -29,12 +30,12 @@ public class rulesConfig extends AbstractController {
     private specificParameter serviceSR;
 
     @GetMapping("/general/details")
-    public List<GeneralRulesNames> getAllRules() {
+    public List<GeneralRulesNames> getAllRulesGeneral() {
         return serviceGR.getAllRules();
     }
 
     @PostMapping("/general/rename/{codigoRegla}")
-    public ResponseEntity<GeneralRulesNames> updateRuleName(
+    public ResponseEntity<GeneralRulesNames> updateRuleNameGeneral(
             @PathVariable String codigoRegla,
             @RequestBody Map<String, String> request) {
 
@@ -43,18 +44,33 @@ public class rulesConfig extends AbstractController {
         return ResponseEntity.ok(updatedRule);
     }
 
-    @GetMapping("/specific/details")
+    @GetMapping("/specific/reports/details")
     public List<SpecificRulesTables> getAllSpecificRules() {
         return serviceSR.getAllSpecificRules();
     }
 
-    @PostMapping("/specific/rename/{codigoReporte}")
+    @PostMapping("/specific/reports/rename/{codigoReporte}")
     public ResponseEntity<SpecificRulesTables> updateSpecificRuleName(
             @PathVariable String codigoReporte,
             @RequestBody Map<String, String> request) {
 
         String nuevoNombre = request.get("nuevoNombre");
         SpecificRulesTables updatedRule = serviceSR.updateReportName(codigoReporte, nuevoNombre);
+        return ResponseEntity.ok(updatedRule);
+    }
+
+    @GetMapping("/specific/details")
+    public List<SpecificRulesNames> getAllRulesSpecific() {
+        return serviceSR.getAllRules();
+    }
+
+    @PostMapping("/specific/rename/{codigoRegla}")
+    public ResponseEntity<SpecificRulesNames> updateRuleNameSpecific(
+            @PathVariable String codigoRegla,
+            @RequestBody Map<String, String> request) {
+
+        String nuevoNombre = request.get("nuevoNombre");
+        SpecificRulesNames updatedRule = serviceSR.updateRuleName(codigoRegla, nuevoNombre);
         return ResponseEntity.ok(updatedRule);
     }
 
