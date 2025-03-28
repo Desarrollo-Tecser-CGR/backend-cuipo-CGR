@@ -1,27 +1,31 @@
 package com.cgr.base.application.controller;
 
-import com.cgr.base.application.services.role.service.ExportService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cgr.base.application.services.export.service.ExportService;
+
 import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/export")
-public class ControllerExport {
+public class ControllerExport extends AbstractController {
 
     @Autowired
     private ExportService exportService;
 
-    @PreAuthorize("hasAuthority('auditor:readAndExport')")
-    @GetMapping("/xlsx")
-    public ResponseEntity<String> generatePdf() throws IOException {
-        exportService.generateExcel();
-        return ResponseEntity.ok("Excel generado y guardado correctamente.");
+    @GetMapping()
+    public ResponseEntity<?> generatePdf() throws IOException {
+        String csv = this.exportService.generateCSV();
+        if (csv != "") {
+            return requestResponse(csv, "Excel creado", HttpStatus.OK, true);
+        } else {
+            return requestResponse("Error a", "Error al crear el excel", HttpStatus.OK, true);
+        }
     }
 }
-

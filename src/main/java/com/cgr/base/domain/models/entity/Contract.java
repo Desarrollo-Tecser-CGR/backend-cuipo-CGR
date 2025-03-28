@@ -21,11 +21,11 @@ public class Contract {
     @Column(name = "contract_no", nullable = false, unique = true)
     private String contractNo;
 
-    @Column(name = "contract_year_acceptance", nullable = false)
-    private Integer contractYearAcceptance;
+    // @Column(name = "contract_year_acceptance", nullable = false)
+    // private Integer contractYearAcceptance;
 
-    @Column(name = "contract_start_date", nullable = false)
-    private Date contractStartDate;
+    // @Column(name = "contract_start_date", nullable = false)
+    // private Date contractStartDate;
 
     @Column(name = "contract_end_date")
     private Date contractEndDate;
@@ -34,8 +34,8 @@ public class Contract {
     @JoinTable(name = "contracts_sources_financing", joinColumns = @JoinColumn(name = "contract_id"), inverseJoinColumns = @JoinColumn(name = "source_financing_id"))
     private Set<EntitySourceFinance> sourcesFinance;
 
-    @Column(name = "contractor_id", nullable = false)
-    private Long contractorId;
+    // @Column(name = "contractor_id", nullable = false)
+    // private Long contractorId;
 
     @ManyToMany
     @JoinTable(name = "indicators_contracts", joinColumns = @JoinColumn(name = "contract_id"), inverseJoinColumns = @JoinColumn(name = "indicator_id"))

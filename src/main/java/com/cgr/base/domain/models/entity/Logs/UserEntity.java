@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.cgr.base.domain.models.entity.EntityNotification;
+import com.cgr.base.domain.models.entity.Logs.exit.LogExitEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -57,17 +58,18 @@ public class UserEntity {
     @Column(name = "user_type")
     private String userType;
 
-    //jhon
+    // jhon
     @Column(name = "failed_attempts")
     private Integer failedAttempts = 0;
 
     @Column(name = "lock_time")
     private LocalDateTime lockTime;
 
-
-
     @OneToMany(mappedBy = "user")
     private List<LogEntity> logs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<LogExitEntity> logsExit = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EntityNotification> notifications = new ArrayList<>();
