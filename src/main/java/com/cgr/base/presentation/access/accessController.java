@@ -25,7 +25,7 @@ public class accessController extends AbstractController {
     accessManagement Access;
 
     //Editar ejemplo de PreAuthorize
-    @PreAuthorize("hasAuthority('MENU_7') or hasAuthority('MENU_8')")
+    //@PreAuthorize("hasAuthority('MENU_7') or hasAuthority('MENU_8')")
     @GetMapping("/module/list")
     public ResponseEntity<?> getAvailableMenus() {        
         List<Map<String, Object>> menus = Access.getAvailableMenus();
