@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +19,7 @@ import com.cgr.base.application.role.usecase.IRoleService;
 import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 
 @RestController
+@PreAuthorize("hasAuthority('MENU_1')")
 @RequestMapping("/api/v1/role")
 public class RoleController extends AbstractController {
 
@@ -27,17 +29,17 @@ public class RoleController extends AbstractController {
         this.roleService = roleService;
     }
 
-    @GetMapping
+    @GetMapping("/info")
     public ResponseEntity<?> getAll() {
         return requestResponse(this.roleService.findAll(), "System Roles.", HttpStatus.OK, true);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/info/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
         return requestResponse(this.roleService.findById(id), "Role Found.", HttpStatus.OK, true);
     }
 
-    @PostMapping
+    @PostMapping("/config")
     public ResponseEntity<Map<String, Object>> createRole(@RequestBody Map<String, Object> roleData) {
         String name = (String) roleData.get("name");
         String description = (String) roleData.get("description");
@@ -61,7 +63,7 @@ public class RoleController extends AbstractController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping
+    @PutMapping("/config")
     public ResponseEntity<Map<String, Object>> updateRole(@RequestBody Map<String, Object> roleData) {
         Long id = Long.valueOf(roleData.get("id").toString());
         String name = (String) roleData.get("name");
@@ -77,14 +79,14 @@ public class RoleController extends AbstractController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/config/{id}")
     public ResponseEntity<?> toggleRoleStatus(@PathVariable Long id) {
         boolean isEnabled = this.roleService.toggleStatus(id);
         String message = isEnabled ? "Role Activated." : "Role Deactivated.";
         return ResponseEntity.ok().body(Map.of("message", message, "enabled", isEnabled));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/config/{id}")
     public ResponseEntity<Map<String, Object>> deleteRole(@PathVariable Long id) {
         roleService.delete(id);
 

@@ -18,10 +18,12 @@ public class totalReport {
     private EntityManager entityManager;
 
     public List<Map<String, Object>> getCertificationStats() {
-        String sql = "SELECT FECHA, " +
-                "SUM(CASE WHEN ESTADO_CALIDAD = 'CERTIFICA' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS porcentaje_calidad, "
-                +
-                "SUM(CASE WHEN ESTADO_L617 = 'CERTIFICA' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS porcentaje_l617 " +
+        String sql = "SELECT " +
+                "FECHA, " +
+                "SUM(CASE WHEN ESTADO_CALIDAD = 'CERTIFICA' THEN 1 ELSE 0 END) AS CALIDAD_CUMPLE, " +
+                "SUM(CASE WHEN ESTADO_CALIDAD = 'NO CERTIFICA' THEN 1 ELSE 0 END) AS CALIDAD_NO_CUMPLE, " +
+                "SUM(CASE WHEN ESTADO_L617 = 'CERTIFICA' THEN 1 ELSE 0 END) AS L617_CUMPLE, " +
+                "SUM(CASE WHEN ESTADO_L617 = 'NO CERTIFICA' THEN 1 ELSE 0 END) AS L617_NO_CUMPLE " +
                 "FROM cuipo_dev.dbo.CONTROL_CERTIFICACION " +
                 "GROUP BY FECHA " +
                 "ORDER BY FECHA DESC";
@@ -34,14 +36,23 @@ public class totalReport {
         List<Map<String, Object>> certificationStats = new ArrayList<>();
 
         for (Object[] row : results) {
-            Integer year = (row[0] != null) ? ((Number) row[0]).intValue() : null;
-            Double percentageQuality = (row[1] != null) ? ((Number) row[1]).doubleValue() : 0.0;
-            Double percentageL617 = (row[2] != null) ? ((Number) row[2]).doubleValue() : 0.0;
-
             Map<String, Object> yearData = new HashMap<>();
+
+            // Extract the year
+            Integer year = (row[0] != null) ? ((Number) row[0]).intValue() : null;
             yearData.put("FECHA", year);
-            yearData.put("PORCENTAJE_CALIDAD", percentageQuality);
-            yearData.put("PORCENTAJE_L617", percentageL617);
+
+            // Calidad details
+            Map<String, Object> calidadDetails = new HashMap<>();
+            calidadDetails.put("CUMPLE", row[1] != null ? ((Number) row[1]).intValue() : 0);
+            calidadDetails.put("NO_CUMPLE", row[2] != null ? ((Number) row[2]).intValue() : 0);
+            yearData.put("CALIDAD", calidadDetails);
+
+            // L617 details
+            Map<String, Object> l617Details = new HashMap<>();
+            l617Details.put("CUMPLE", row[3] != null ? ((Number) row[3]).intValue() : 0);
+            l617Details.put("NO_CUMPLE", row[4] != null ? ((Number) row[4]).intValue() : 0);
+            yearData.put("L617", l617Details);
 
             certificationStats.add(yearData);
         }

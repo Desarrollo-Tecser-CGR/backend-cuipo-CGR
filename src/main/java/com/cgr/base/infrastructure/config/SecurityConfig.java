@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final AccessDeniedHandlerException accessDeniedHandlerException;
@@ -36,21 +38,11 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .exceptionHandling(t -> t.accessDeniedHandler(accessDeniedHandlerException))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**").permitAll();
-                    auth.requestMatchers("/api/v1/role/**").hasAnyAuthority("administrador", "Analista", "Coordinador");
-                    auth.requestMatchers("/api/v1/log/**").hasAnyAuthority("administrador", "Analista", "Coordinador");
-                    auth.requestMatchers("/api/v1/menu/**", "/api/v1/access/**").hasAnyAuthority("administrador",
-                            "Analista", "Coordinador");
-                    auth.requestMatchers("/api/v1/user/**").hasAnyAuthority("administrador", "Analista", "Coordinador");
-                    auth.requestMatchers("/api/v1/rules/**").hasAnyAuthority("administrador", "Coordinador",
-                            "Analista");
-                    auth.requestMatchers("/api/v1/certifications/**").hasAnyAuthority("administrador", "Coordinador",
-                            "Analista");
+                    auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**", "/swagger-ui/**", "/v3/api-docs/**",
+                            "/api/v1/access/module/**").permitAll();
                     auth.anyRequest().authenticated();
-                });
+                }).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         http.headers(headers -> headers
                 .httpStrictTransportSecurity(hsts -> hsts
@@ -60,7 +52,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // Configuración de CORS
     private CorsConfigurationSource corsConfigurationSource() {
         return new CorsConfigurationSource() {
             @Override

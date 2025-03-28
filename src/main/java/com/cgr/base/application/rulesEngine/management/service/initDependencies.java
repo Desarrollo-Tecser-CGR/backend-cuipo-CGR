@@ -5,6 +5,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.cgr.base.application.certifications.service.initTablaCertifications;
+import com.cgr.base.application.parameterization.generalParameter;
+import com.cgr.base.application.parameterization.specificParameter;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_17;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EG;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EI;
@@ -13,10 +15,9 @@ import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_PI;
 import com.cgr.base.application.rulesEngine.initTables.dataCategoryInit;
 import com.cgr.base.application.rulesEngine.initTables.dataParameterInit;
 import com.cgr.base.application.rulesEngine.initTables.dataSourceInit;
-import com.cgr.base.application.rulesEngine.parameterization.generalParameter;
-import com.cgr.base.application.rulesEngine.parameterization.specificParameter;
 import com.cgr.base.application.rulesEngine.specificRules.columnsER;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_22;
+import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_23;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_24;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_25;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_26;
@@ -57,6 +58,9 @@ public class initDependencies {
 
     @Autowired
     private dataTransfer_22 Rules22;
+
+    @Autowired
+    private dataTransfer_23 Rules23;
 
     @Autowired
     private dataTransfer_24 Rules24;
@@ -103,13 +107,14 @@ public class initDependencies {
     @Async
     public void initializeDependencies() {
 
-        //MotorReglas.processTablesRules();
         MotorReglas.createLogsGeneralTable();
-        //Parametria.processTablesSource();
-        // Categorias.initCategoryTable();
-        //ParameterRG.tableGeneralRulesName();
-        //ParameterRE.tableSpecificRulesName();
-        //Certificator.generateControlTable();
+        MotorReglas.processTablesRules();
+        Parametria.processTablesSource();
+        Categorias.initCategoryTable();
+        ParameterRG.tableGeneralRulesName();
+        ParameterRE.tableSpecificRulesName();
+        ER.actualizarSpecificRulesData();
+        Certificator.generateControlTable();
 
     }
 
@@ -153,6 +158,7 @@ public class initDependencies {
             case "22_D" -> Rules22.applyGeneralRule22_D(); // nueva lógica para la regla 22 ICLD
             case "22E" -> Rules22.applyGeneralRule22E();
             case "22_E" -> Rules22.applyGeneralRule22_E(); // nueva lógica para la regla 22 ICLD
+            case "23" -> Rules23.applySpecificRule23();
             case "24" -> Rules24.applySpecificRule24();
             case "25A" -> Rules25.applySpecificRule25A();
             case "25_A" -> Rules25.applySpecificRule25_A(); // nueva lógica para la regla 25 GF
@@ -168,7 +174,6 @@ public class initDependencies {
             case "30" -> Rules30.applySpecificRule30();
             case "31" -> Rules31.applySpecificRule31();
             case "32" -> Rules32.applySpecificRule32();
-            case "ER" -> ER.actualizarSpecificRulesData();
             default -> throw new IllegalArgumentException("Invalid Rule.");
         }
     }

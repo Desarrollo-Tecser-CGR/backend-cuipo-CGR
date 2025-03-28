@@ -23,7 +23,7 @@ public class accessManagement {
     public List<Map<String, Object>> getAvailableMenus() {
         String sql = "SELECT id, title" +
                 " FROM cuipo_dev.dbo.menus " +
-                "WHERE title <> 'Gestor de Accesos'";
+                " WHERE id <> 1";
 
         Query query = entityManager.createNativeQuery(sql);
 
@@ -75,20 +75,16 @@ public class accessManagement {
     public boolean updateRoleModules(Long roleId, List<Integer> moduleIds) {
         try {
 
-            Long gestorId = ((Number) entityManager.createNativeQuery(
-                    "SELECT id FROM cuipo_dev.dbo.menus WHERE title = 'Gestor de Accesos'")
-                    .getSingleResult()).longValue();
+            int gestorId = 1;
 
             if (roleId == 1) {
 
-                if (!moduleIds.contains(gestorId.intValue())) {
-
-                    return false;
+                if (!moduleIds.contains(gestorId)) {
+                    moduleIds.add(gestorId);
                 }
             } else {
-
-                if (moduleIds.contains(gestorId.intValue())) {
-                    moduleIds.remove(gestorId.intValue());
+                if (moduleIds.contains(gestorId)) {
+                    moduleIds.remove(gestorId);
                 }
             }
 
@@ -135,7 +131,7 @@ public class accessManagement {
 
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+
             throw new RuntimeException("Error al actualizar módulos del rol", e);
         }
     }

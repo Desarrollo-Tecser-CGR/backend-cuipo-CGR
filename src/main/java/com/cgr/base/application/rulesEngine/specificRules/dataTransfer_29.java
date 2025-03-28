@@ -448,7 +448,7 @@ public class dataTransfer_29 {
             "OTROS_GASTOS_ASAM",
             "RELACION_GASTOS_EJECUTADOS",
             "ALERTA_29C",
-            "REGLA_ESPECIFICA_29C" // <-- NUEVA COLUMNA
+            "REGLA_ESPECIFICA_29" // <-- NUEVA COLUMNA
         );
     
         // Verificar si las columnas existen en la tabla
@@ -467,7 +467,7 @@ public class dataTransfer_29 {
                 String addColumnQuery;
                 // "ALERTA_29C" y "REGLA_GENERAL_29C" como VARCHAR(MAX), 
                 // el resto como DECIMAL(18,2)
-                if ("ALERTA_29C".equals(column) || "REGLA_ESPECIFICA_29C".equals(column)) {
+                if ("ALERTA_29C".equals(column) || "REGLA_ESPECIFICA_29".equals(column)) {
                     addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
                         tablaE029, column
@@ -537,7 +537,7 @@ public class dataTransfer_29 {
                         THEN 'EXCEDE'
                         
                         ELSE 'NO EXCEDE'
-                    END AS REGLA_ESPECIFICA_29C
+                    END AS REGLA_ESPECIFICA_29
     
                 FROM %s
             )
@@ -550,7 +550,7 @@ public class dataTransfer_29 {
                 e.OTROS_GASTOS_ASAM = c.OTROS_GASTOS_ASAM,
                 e.RELACION_GASTOS_EJECUTADOS = c.RELACION_GASTOS_EJECUTADOS,
                 e.ALERTA_29C = c.ALERTA_29C,
-                e.REGLA_ESPECIFICA_29C = c.REGLA_ESPECIFICA_29C
+                e.REGLA_ESPECIFICA_29 = c.REGLA_ESPECIFICA_29
             FROM %s e
             INNER JOIN Calculos c
                 ON e.FECHA = c.FECHA
