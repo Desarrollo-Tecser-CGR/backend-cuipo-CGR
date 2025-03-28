@@ -1,15 +1,19 @@
 package com.cgr.base.infrastructure.security.config;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
+import com.cgr.base.infrastructure.security.interceptor.HeadersInterceptor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +22,9 @@ import lombok.RequiredArgsConstructor;
 // @ComponentScan(basePackages = "com.alcadia.bovid.Component")
 @Configuration
 public class ApplicationConfig {
+
+    // @Autowired
+    // private HeadersInterceptor headerInterceptor;
 
     /**
      * Bean de Password Encoder para inyeccion
@@ -40,6 +47,11 @@ public class ApplicationConfig {
     ModelMapper modelMapper() {
         return new ModelMapper();
     }
+
+    // @Override
+    // public void addInterceptors(InterceptorRegistry registry) {
+    // registry.addInterceptor(headerInterceptor);
+    // }
 
     // @Bean
     // public JwtAuthFilter jwtAuthFilter() {
