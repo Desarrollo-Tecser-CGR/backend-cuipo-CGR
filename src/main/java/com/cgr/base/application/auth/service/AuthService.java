@@ -128,15 +128,17 @@ public class AuthService implements IAuthUseCase {
                 response.put("statusCode", 200);
                 response.put("status", "success");
                 return response;
+            } else {
+                throw new SecurityException("Invalid credentials for user: " + userRequest.getSAMAccountName());
             }
 
+        } catch (SecurityException e) {
+            throw new RuntimeException("Unauthorized: " + e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Bad Request: " + e.getMessage(), e);
         } catch (Exception e) {
-            response.put("errormsj", e.getMessage());
-            response.put("message", "Error Authenticating User with LDAP.");
-            response.put("statusCode", 500);
-            response.put("status", "error");
+            throw new RuntimeException("Internal Server Error: " + e.getMessage(), e);
         }
-        return response;
     }
 
 }
