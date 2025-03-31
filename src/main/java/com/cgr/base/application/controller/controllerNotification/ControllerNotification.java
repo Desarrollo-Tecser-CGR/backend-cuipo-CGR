@@ -5,6 +5,7 @@ import com.cgr.base.application.controller.AbstractController;
 import com.cgr.base.application.services.servicesNotification.ServicesNotification;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -47,6 +48,12 @@ public class ControllerNotification extends AbstractController {
 
         return requestResponse(notifications,
                 "Contratos encontrados", HttpStatus.OK, true);
+    }
+
+    @GetMapping("/count/{samAccountName}")
+    public ResponseEntity<?> getNotificationCount(@PathVariable String samAccountName) {
+        Map<String, Object> response = servicesNotification.getNotificationsSinceLastLogout(samAccountName);
+        return ResponseEntity.ok(response);
     }
 
     // @PostMapping ("/saveNotification")
