@@ -1,4 +1,4 @@
-package com.cgr.base.application.services.logs.service;
+package com.cgr.base.application.services.logs.ingress.service;
 
 import java.util.Date;
 import java.util.List;
@@ -6,9 +6,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cgr.base.application.services.logs.ingress.usecase.ILogUseCase;
 import com.cgr.base.domain.dto.dtoAuth.AuthRequestDto;
-import com.cgr.base.domain.dto.dtoLogs.LogDto;
-import com.cgr.base.application.services.logs.usecase.ILogUseCase;
+import com.cgr.base.domain.dto.dtoLogs.logsIngress.LogDto;
 import com.cgr.base.infrastructure.repositories.repositories.repositoryActiveDirectory.ILogRepository;
 
 import com.cgr.base.domain.models.entity.Logs.LogEntity;
@@ -34,7 +34,8 @@ public class LogService implements ILogUseCase {
 
     @Override
     public LogEntity createLog(AuthRequestDto userRequest) {
-        LogEntity logEntity = new LogEntity(userRequest.getEmail(), new Date(), true, userRequest.getSAMAccountName(),userRequest.getTipe_of_income());
+        LogEntity logEntity = new LogEntity(userRequest.getEmail(), new Date(), true, userRequest.getSAMAccountName(),
+                userRequest.getTipe_of_income());
         return this.adapterLogRepository.createLog(logEntity, userRequest.getSAMAccountName());
     }
 

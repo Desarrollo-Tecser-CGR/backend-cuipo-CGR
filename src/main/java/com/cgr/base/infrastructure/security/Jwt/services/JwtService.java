@@ -141,7 +141,7 @@ public class JwtService {
         return null;
     }
 
-    private Date extractExpiration(String token) {
+    public Date extractExpiration(String token) {
 
         System.out.println("Issu" + JWT.decode(token).getExpiresAt());
 

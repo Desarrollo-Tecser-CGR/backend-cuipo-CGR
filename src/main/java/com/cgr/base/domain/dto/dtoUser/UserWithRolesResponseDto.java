@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.cgr.base.domain.dto.dtoLogs.LogDto;
+import com.cgr.base.domain.dto.dtoLogs.logsIngress.LogDto;
 import com.cgr.base.domain.dto.dtoRole.RoleRequestDto;
 import com.cgr.base.domain.models.entity.Logs.RoleEntity;
 
