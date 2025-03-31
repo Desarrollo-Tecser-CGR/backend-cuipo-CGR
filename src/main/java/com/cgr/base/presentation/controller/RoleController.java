@@ -3,6 +3,8 @@ package com.cgr.base.presentation.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,8 +17,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cgr.base.application.logs.service.LogGeneralService;
 import com.cgr.base.application.role.usecase.IRoleService;
+import static com.cgr.base.infrastructure.persistence.entity.log.LogType.PERMISSION;
 import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
+import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @PreAuthorize("hasAuthority('MENU_1')")
@@ -24,6 +31,12 @@ import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 public class RoleController extends AbstractController {
 
     private IRoleService roleService;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private LogGeneralService logGeneralService;
 
     public RoleController(IRoleService roleService) {
         this.roleService = roleService;
@@ -40,7 +53,17 @@ public class RoleController extends AbstractController {
     }
 
     @PostMapping("/config")
-    public ResponseEntity<Map<String, Object>> createRole(@RequestBody Map<String, Object> roleData) {
+    public ResponseEntity<?> createRole(@RequestBody Map<String, Object> roleData, HttpServletRequest request) {
+
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = header.split(" ")[1];
+
+        Long userId = jwtService.extractUserIdFromToken(token);
+
+        if (userId == null) {
+            return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
+        }
+
         String name = (String) roleData.get("name");
         String description = (String) roleData.get("description");
 
@@ -60,11 +83,21 @@ public class RoleController extends AbstractController {
         response.put("description", createdRole.getDescription());
         response.put("enable", createdRole.isEnable());
 
+        try {
+
+            logGeneralService.createLog(userId, PERMISSION,
+                    "Creación de rol id : " + createdRole.getId() +" nombre: " + createdRole.getName() + "con descripción: " + createdRole.getDescription()
+                            + " y estado: " + createdRole.isEnable() + ".");
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/config")
-    public ResponseEntity<Map<String, Object>> updateRole(@RequestBody Map<String, Object> roleData) {
+    public ResponseEntity<?> updateRole(@RequestBody Map<String, Object> roleData, HttpServletRequest request) {
         Long id = Long.valueOf(roleData.get("id").toString());
         String name = (String) roleData.get("name");
         String description = (String) roleData.get("description");
@@ -76,19 +109,75 @@ public class RoleController extends AbstractController {
         response.put("name", updatedRole.getName());
         response.put("description", updatedRole.getDescription());
 
-        return ResponseEntity.ok(response);
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = header.split(" ")[1];
+
+        Long userId = jwtService.extractUserIdFromToken(token);
+
+        if (userId == null) {
+            return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
+        }
+
+        try {
+
+            logGeneralService.createLog(userId, PERMISSION,
+                    "Modificación de rol id: " + id + " a: " + updatedRole.getName() + " con descripción: "
+                            + updatedRole.getDescription() + ".");
+
+            return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
     }
 
     @PutMapping("/config/{id}")
-    public ResponseEntity<?> toggleRoleStatus(@PathVariable Long id) {
+    public ResponseEntity<?> toggleRoleStatus(@PathVariable Long id, HttpServletRequest request) {
         boolean isEnabled = this.roleService.toggleStatus(id);
         String message = isEnabled ? "Role Activated." : "Role Deactivated.";
-        return ResponseEntity.ok().body(Map.of("message", message, "enabled", isEnabled));
+
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = header.split(" ")[1];
+
+        Long userId = jwtService.extractUserIdFromToken(token);
+
+        if (userId == null) {
+            return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
+        }
+
+        try {
+
+            logGeneralService.createLog(userId, PERMISSION,
+                    "Modificación de rol id: " + id + " a: " + message + ".");
+
+            return requestResponse(Map.of("message", message, "enabled", isEnabled), "Update operation completed.",
+                    HttpStatus.OK, true);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
     }
 
     @DeleteMapping("/config/{id}")
-    public ResponseEntity<Map<String, Object>> deleteRole(@PathVariable Long id) {
+    public ResponseEntity<?> deleteRole(@PathVariable Long id, HttpServletRequest request) {
         roleService.delete(id);
+
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = header.split(" ")[1];
+
+        Long userId = jwtService.extractUserIdFromToken(token);
+
+        if (userId == null) {
+            return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
+        }
+
+        try {
+            logGeneralService.createLog(userId, PERMISSION,
+                    "Eliminación de rol id: " + id + ".");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Rol eliminado exitosamente.");
