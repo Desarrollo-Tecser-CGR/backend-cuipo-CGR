@@ -112,7 +112,7 @@ public class initDependencies {
         // Categorias.initCategoryTable();
         // ParameterRG.tableGeneralRulesName();
         // ParameterRE.tableSpecificRulesName();
-        Certificator.generateControlTable();
+        // Certificator.generateControlTable();
 
     }
 
