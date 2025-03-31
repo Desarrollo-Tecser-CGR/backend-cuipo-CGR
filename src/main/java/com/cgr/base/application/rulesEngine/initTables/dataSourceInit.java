@@ -240,4 +240,20 @@ public class dataSourceInit {
                 entityManager.createNativeQuery(sqlInsertData2).executeUpdate();
         }
 
+        @Transactional
+        public void createLogsGeneralTable() {
+                String sqlCreateTable =
+                      "IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'logs_general' AND schema_id = SCHEMA_ID('dbo')) " +
+                      "BEGIN " +
+                      "CREATE TABLE logs_general (" +
+                      "id BIGINT IDENTITY(1,1) PRIMARY KEY, " +
+                      "user_id BIGINT NOT NULL, " +
+                      "log_type VARCHAR(20), " +
+                      "detail VARCHAR(255), " +
+                      "create_date DATETIME NOT NULL DEFAULT GETDATE()" +
+                      ") " +
+                      "END";
+                entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
+            }
+            
 }

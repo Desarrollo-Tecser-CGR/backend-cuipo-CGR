@@ -40,11 +40,8 @@ public class JwtService {
         Date now = new Date();
         Date validity = new Date(now.getTime() + 3600000 * 2);
 
-        List<String> rolesClaim = roles.stream().map(RoleEntity::getName).toList();
-
         String tokenCreated = JWT.create()
-                .withClaim("userName", customerJwt.getSAMAccountName())
-                .withClaim("roles", rolesClaim)
+                .withClaim("userName", customerJwt.getSAMAccountName())      
                 .withClaim("isEnabled", customerJwt.getIsEnable())
                 .withIssuedAt(now)
                 .withExpiresAt(validity)

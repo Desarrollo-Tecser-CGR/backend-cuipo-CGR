@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,12 +15,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cgr.base.application.logs.service.LogGeneralService;
 import com.cgr.base.application.parameterization.generalParameter;
 import com.cgr.base.application.parameterization.specificParameter;
+import static com.cgr.base.infrastructure.persistence.entity.log.LogType.PARAMETER;
 import com.cgr.base.infrastructure.persistence.entity.parametrization.GeneralRulesNames;
 import com.cgr.base.infrastructure.persistence.entity.parametrization.SpecificRulesNames;
 import com.cgr.base.infrastructure.persistence.entity.parametrization.SpecificRulesTables;
+import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.cgr.base.presentation.controller.AbstractController;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @PreAuthorize("hasAuthority('MENU_3')")
 @RestController
@@ -31,19 +38,46 @@ public class rulesConfig extends AbstractController {
     @Autowired
     private specificParameter serviceSR;
 
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private LogGeneralService logGeneralService;
+
     @GetMapping("/general/details")
     public List<GeneralRulesNames> getAllRulesGeneral() {
         return serviceGR.getAllRules();
     }
 
     @PostMapping("/general/rename/{codigoRegla}")
-    public ResponseEntity<GeneralRulesNames> updateRuleNameGeneral(
-            @PathVariable String codigoRegla,
-            @RequestBody Map<String, String> request) {
+    public ResponseEntity<?> updateRuleNameGeneral(@PathVariable String codigoRegla, @RequestBody Map<String, String> request, HttpServletRequest request1) {
+        String header = request1.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = header.split(" ")[1];
 
+        Long userId = jwtService.extractUserIdFromToken(token);
+
+        if (userId == null) {
+            return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
+        }
         String nuevoNombre = request.get("nuevoNombre");
-        GeneralRulesNames updatedRule = serviceGR.updateRuleName(codigoRegla, nuevoNombre);
-        return ResponseEntity.ok(updatedRule);
+        if (nuevoNombre == null || nuevoNombre.trim().isEmpty()) {
+            return requestResponse(null, "El nuevo nombre es obligatorio.", HttpStatus.BAD_REQUEST, false);
+        }
+        if (codigoRegla == null || codigoRegla.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("El codigo de reporte es obligatorio y no puede estar vacío.");
+        }
+        try {
+
+            GeneralRulesNames updatedRule = serviceGR.updateRuleName(codigoRegla, nuevoNombre);
+
+            logGeneralService.createLog(userId, PARAMETER,
+                    "Modificación de regla general code " + codigoRegla + " to " + request.get("nuevoNombre"));
+
+            return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
     }
 
     @GetMapping("/specific/reports/details")
@@ -52,13 +86,37 @@ public class rulesConfig extends AbstractController {
     }
 
     @PostMapping("/specific/reports/rename/{codigoReporte}")
-    public ResponseEntity<SpecificRulesTables> updateSpecificRuleName(
-            @PathVariable String codigoReporte,
-            @RequestBody Map<String, String> request) {
+    public ResponseEntity<?> updateSpecificRuleName(@PathVariable String codigoReporte,
+            @RequestBody Map<String, String> request, HttpServletRequest request1) {
 
+        String header = request1.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = header.split(" ")[1];
+
+        Long userId = jwtService.extractUserIdFromToken(token);
+
+        if (userId == null) {
+            return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
+        }
         String nuevoNombre = request.get("nuevoNombre");
-        SpecificRulesTables updatedRule = serviceSR.updateReportName(codigoReporte, nuevoNombre);
-        return ResponseEntity.ok(updatedRule);
+        if (nuevoNombre == null || nuevoNombre.trim().isEmpty()) {
+            return requestResponse(null, "El nuevo nombre es obligatorio.", HttpStatus.BAD_REQUEST, false);
+        }
+        if (codigoReporte == null || codigoReporte.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("El codigo de reporte es obligatorio y no puede estar vacío.");
+        }
+        try {
+
+            SpecificRulesTables updatedRule = serviceSR.updateReportName(codigoReporte, nuevoNombre);
+
+            logGeneralService.createLog(userId, PARAMETER,
+                    "Modificación de reporte específico code " + codigoReporte + " to " + request.get("nuevoNombre"));
+
+            return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
     }
 
     @GetMapping("/specific/details")
@@ -67,13 +125,38 @@ public class rulesConfig extends AbstractController {
     }
 
     @PostMapping("/specific/rename/{codigoRegla}")
-    public ResponseEntity<SpecificRulesNames> updateRuleNameSpecific(
-            @PathVariable String codigoRegla,
-            @RequestBody Map<String, String> request) {
+    public ResponseEntity<?> updateRuleNameSpecific(@PathVariable String codigoRegla,
+            @RequestBody Map<String, String> request, HttpServletRequest request1) {
 
+        String header = request1.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = header.split(" ")[1];
+
+        Long userId = jwtService.extractUserIdFromToken(token);
+
+        if (userId == null) {
+            return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
+        }
         String nuevoNombre = request.get("nuevoNombre");
-        SpecificRulesNames updatedRule = serviceSR.updateRuleName(codigoRegla, nuevoNombre);
-        return ResponseEntity.ok(updatedRule);
+        if (nuevoNombre == null || nuevoNombre.trim().isEmpty()) {
+            return requestResponse(null, "El nuevo nombre es obligatorio.", HttpStatus.BAD_REQUEST, false);
+        }
+        if (codigoRegla == null || codigoRegla.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("El codigo de regla es obligatorio y no puede estar vacío.");
+        }
+
+        try {
+
+            SpecificRulesNames updatedRule = serviceSR.updateRuleName(codigoRegla, nuevoNombre);
+
+            logGeneralService.createLog(userId, PARAMETER,
+                    "Modificación de regla específica code " + codigoRegla + " to " + request.get("nuevoNombre"));
+
+            return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
     }
 
 }
