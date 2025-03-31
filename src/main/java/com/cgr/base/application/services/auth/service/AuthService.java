@@ -14,7 +14,7 @@ import com.cgr.base.domain.dto.dtoAuth.AuthResponseDto;
 import com.cgr.base.domain.dto.dtoAuth.UserAuthDto;
 import com.cgr.base.domain.adapters.mapperAuth.AuthMapper;
 import com.cgr.base.application.services.auth.usecase.IAuthUseCase;
-import com.cgr.base.application.services.logs.usecase.ILogUseCase;
+import com.cgr.base.application.services.logs.ingress.usecase.ILogUseCase;
 import com.cgr.base.domain.dto.dtoUser.UserDto;
 import com.cgr.base.domain.models.UserModel;
 import com.cgr.base.infrastructure.repositories.repositories.repositoryActiveDirectory.IActiveDirectoryUserRepository;

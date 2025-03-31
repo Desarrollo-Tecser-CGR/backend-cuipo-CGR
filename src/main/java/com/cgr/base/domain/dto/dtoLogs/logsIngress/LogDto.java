@@ -1,4 +1,4 @@
-package com.cgr.base.domain.dto.dtoLogs;
+package com.cgr.base.domain.dto.dtoLogs.logsIngress;
 
 import java.util.Date;
 

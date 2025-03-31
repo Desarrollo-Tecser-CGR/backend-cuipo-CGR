@@ -1,9 +1,11 @@
 package com.cgr.base.application.services.auth.service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 
+import com.cgr.base.application.services.logs.exit.LogExitService;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 
 import lombok.AllArgsConstructor;
@@ -15,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 public class ValidateService {
 
     private final JwtService jwtService;
+
+    private final LogExitService logExitService;
 
     public Map<String, Object> validationToken(String token) {
         Map<String, Object> response = new HashMap<>();
@@ -31,7 +35,14 @@ public class ValidateService {
                 response.put("message", "Token expired/invalid");
                 response.put("statusCode", 498);
                 response.put("status", "Error");
+                String user = jwtService.getClaimUserName(token);
+
+                Date expirationDate = jwtService.extractExpiration(token);
+
+                this.logExitService.saveLogExit(user, expirationDate);
+
                 return response;
+
             } else {
                 response.put("message", "Token valid");
                 response.put("statusCode", 200);

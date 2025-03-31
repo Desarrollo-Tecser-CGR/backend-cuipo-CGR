@@ -55,6 +55,8 @@ public class SecurityConfig {
                             "analista");
                     auth.requestMatchers("/api/v1/export/**").hasAnyAuthority("auditor", "administrador",
                             "analista");
+                    auth.requestMatchers("/api/v1/logsExit/**").hasAnyAuthority("auditor", "administrador",
+                            "analista");
 
                 });
 

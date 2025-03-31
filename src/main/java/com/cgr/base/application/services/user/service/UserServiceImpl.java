@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cgr.base.domain.dto.dtoLogs.LogDto;
+import com.cgr.base.domain.dto.dtoLogs.logsIngress.LogDto;
 import com.cgr.base.domain.dto.dtoUser.UserDto;
 import com.cgr.base.domain.dto.dtoUser.UserWithRolesRequestDto;
 import com.cgr.base.domain.dto.dtoUser.UserWithRolesResponseDto;

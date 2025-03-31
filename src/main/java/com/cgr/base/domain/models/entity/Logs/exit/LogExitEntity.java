@@ -35,7 +35,7 @@ public class LogExitEntity {
     @NotNull
     @Column(name = "date_session_start", updatable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "America/Bogota")
-    private Date data_session_end;
+    private Date dataSessionEnd;
 
     @Column(name = "enable", nullable = false)
     private boolean enable;
