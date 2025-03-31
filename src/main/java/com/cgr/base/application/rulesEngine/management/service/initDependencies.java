@@ -107,15 +107,12 @@ public class initDependencies {
     @Async
     public void initializeDependencies() {
 
-        MotorReglas.createLogsGeneralTable();
-        //MotorReglas.processTablesRules();
-        //Parametria.processTablesSource();
-        //Categorias.initCategoryTable();
-        //ParameterRG.tableGeneralRulesName();
-        //ParameterRE.tableSpecificRulesName();
-        //ER.actualizarSpecificRulesData();
-        //Certificator.generateControlTable();
-        
+        // MotorReglas.processTablesRules();
+        Parametria.processTablesSource();
+        // Categorias.initCategoryTable();
+        // ParameterRG.tableGeneralRulesName();
+        // ParameterRE.tableSpecificRulesName();
+        // Certificator.generateControlTable();
 
     }
 

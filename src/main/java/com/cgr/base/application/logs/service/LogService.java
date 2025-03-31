@@ -1,39 +1,28 @@
 package com.cgr.base.application.logs.service;
 
-import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.application.auth.dto.AuthRequestDto;
-import com.cgr.base.application.logs.dto.LogDto;
-import com.cgr.base.application.logs.usecase.ILogUseCase;
-import com.cgr.base.domain.repository.ILogRepository;
 import com.cgr.base.infrastructure.persistence.entity.log.LogEntity;
-import com.cgr.base.infrastructure.utilities.DtoMapper;
-
-import lombok.AllArgsConstructor;
+import com.cgr.base.infrastructure.persistence.repository.logs.ILogsRepositoryJpa;
 
 @Service
-@AllArgsConstructor
-public class LogService implements ILogUseCase {
 
-    private final ILogRepository adapterLogRepository;
+public class LogService {
 
-    private final DtoMapper dtoMapper;
+    @Autowired
+    private ILogsRepositoryJpa LogRepo;
 
-    // Obtener todos los registros.
-    @Override
-    public List<LogDto> logFindAll() {
-        return this.dtoMapper.convertToListDto(this.adapterLogRepository.logFindAll(), LogDto.class);
+    public List<LogEntity> getAllLogsDesc() {
+
+        List<LogEntity> logs = LogRepo.findAllByOrderByDateSessionStartDesc();
+        return logs;
     }
 
-    // Crear un nuevo registro.
-    @Override
-    public LogEntity createLog(AuthRequestDto userRequest) {
-        LogEntity logEntity = new LogEntity(userRequest.getEmail(), new Date(), true, userRequest.getSAMAccountName());
-        //return this.adapterLogRepository.createLog(logEntity, userRequest.getSAMAccountName());
-        return null;
+    public LogEntity saveLog(LogEntity log) {
+        return LogRepo.save(log);
     }
 
 }

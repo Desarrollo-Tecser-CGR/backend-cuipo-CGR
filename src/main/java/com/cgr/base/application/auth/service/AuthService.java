@@ -1,10 +1,14 @@
 package com.cgr.base.application.auth.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,15 +16,17 @@ import com.cgr.base.application.auth.dto.AuthRequestDto;
 import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.application.auth.mapper.AuthMapper;
 import com.cgr.base.application.auth.usecase.IAuthUseCase;
-import com.cgr.base.application.logs.usecase.ILogUseCase;
+import com.cgr.base.application.logs.service.LogService;
 import com.cgr.base.domain.models.UserModel;
 import com.cgr.base.domain.repository.IActiveDirectoryUserRepository;
 import com.cgr.base.domain.repository.IUserRepository;
 import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
+import com.cgr.base.infrastructure.persistence.entity.log.LogEntity;
 import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
+import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,15 +36,23 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class AuthService implements IAuthUseCase {
 
+    @Autowired
+    private final LogService LogService;
+
+    @Autowired
     private final IUserRepository userRepository;
 
+    @Autowired
     private final IUserRepositoryJpa userRepositoryFull;
 
+    @Autowired
     private final IActiveDirectoryUserRepository activeDirectoryUserRepository;
 
+    @Autowired
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
-    private final ILogUseCase logService;
+    @Autowired
+    private final JwtService jwtService;
 
     // Autenticación utilizando SAMAccountName y contraseña.
     @Transactional
@@ -108,7 +122,6 @@ public class AuthService implements IAuthUseCase {
                         .toList();
 
                 userRequestDto.setRoles(rolesDto);
-                System.out.println("Roles asignados al usuario: " + rolesDto);
 
                 String token = jwtAuthenticationProvider.createToken(userRequestDto, user.getRoles());
 
@@ -121,7 +134,17 @@ public class AuthService implements IAuthUseCase {
                 userRequestDto.setIsEnable(true);
 
                 userRequest.setEmail(user.getEmail());
-                this.logService.createLog(userRequest);
+
+                Long userId = jwtService.extractUserIdFromToken(token);
+
+                LogEntity log = new LogEntity();
+
+                log.setDateSessionStart(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                log.setUserId(userId);
+                log.setRoles(user.getRoles().stream()
+                        .map(RoleEntity::getName)
+                        .collect(Collectors.joining(",")));
+                LogService.saveLog(log);
 
                 response.put("user", userRequestDto);
                 response.put("message", "User Authenticated Successfully.");
