@@ -50,8 +50,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/auth/",
             "/swagger-ui",
             "/v3/api-docs",
-            "/api/v1/access/module/",
-            "/api/v1/access/module");
+            "/api/v1/access/module/list",
+            "/api/v1/access/module/roles");
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
@@ -131,6 +131,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // Agregar menús como authorities
         menus.forEach(menu -> authorities.add(new SimpleGrantedAuthority("MENU_" + menu.getId())));
+        
+        System.out.println("Authorities: " + authorities.toString());
 
         try {
 

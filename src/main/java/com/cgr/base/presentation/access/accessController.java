@@ -24,7 +24,6 @@ public class accessController extends AbstractController {
     @Autowired
     accessManagement Access;
 
-    @PreAuthorize("hasAuthority('MENU_1')")
     @GetMapping("/module/list")
     public ResponseEntity<?> getAvailableMenus() {
         List<Map<String, Object>> menus = Access.getAvailableMenus();
