@@ -3,6 +3,7 @@ package com.cgr.base.presentation.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,7 @@ import com.cgr.base.presentation.controller.AbstractController;
 
 import jakarta.validation.Valid;
 
+@PreAuthorize("hasAuthority('MENU_1')")
 @RestController
 @RequestMapping("/api/v1/user")
 public class UserController extends AbstractController {

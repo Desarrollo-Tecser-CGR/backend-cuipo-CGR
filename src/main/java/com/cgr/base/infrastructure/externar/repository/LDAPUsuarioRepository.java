@@ -22,12 +22,23 @@ import com.unboundid.ldap.sdk.SearchScope;
 @Component
 public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
 
-    private String ldapHost = "192.168.2.62";
-    private int ldapPort = 389;
-    private String baseDN = "OU=Cuipo,OU=Usuarios,DC=tecser,DC=local";
-    private String domain = "tecser.local";
-    private String serviceUser = "cuipo.cgr@tecser.local";
-    private String servicePassword = "Colombia2024*";
+    @Value("${LDAP_HOST}")
+    private String ldapHost;
+
+    @Value("${LDAP_PORT}")
+    private int ldapPort;
+
+    @Value("${LDAP_BASE_DN}")
+    private String baseDN;
+
+    @Value("${LDAP_DOMAIN}")
+    private String domain;
+
+    @Value("${LDAP_SERVICE_USER}")
+    private String serviceUser;
+
+    @Value("${LDAP_SERVICE_PASSWORD}")
+    private String servicePassword;
 
     // Verificar credenciales en Active Directory
     @Override

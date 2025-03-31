@@ -1,6 +1,7 @@
 package com.cgr.base.infrastructure.persistence.entity.certifications;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -34,13 +35,13 @@ public class certificationEntity {
     private String nombreEntidad;
 
     @Column(name = "PORCENTAJE_CALIDAD")
-    private Double porcentajeCalidad;
+    private String porcentajeCalidad;
 
     @Column(name = "ESTADO_CALIDAD")
     private String estadoCalidad;
 
     @Column(name = "FECHA_ACT_CALIDAD")
-    private String fechaActCalidad;
+    private LocalDateTime fechaActCalidad;
 
     @Column(name = "USER_ACT_CALIDAD")
     private String userActCalidad;
@@ -55,7 +56,7 @@ public class certificationEntity {
     private String estadoL617;
 
     @Column(name = "FECHA_ACT_L617")
-    private String fechaActL617;
+    private LocalDateTime fechaActL617;
 
     @Column(name = "USER_ACT_L617")
     private String userActL617;
