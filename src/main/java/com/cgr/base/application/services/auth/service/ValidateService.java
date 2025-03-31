@@ -24,13 +24,6 @@ public class ValidateService {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            if (jwtService.validateFirma(token) != null) {
-                response.put("message", "Token Invalid");
-                response.put("statusCode", 498);
-                response.put("status", "Error");
-                return response;
-            }
-
             if (jwtService.validateToken(token)) {
                 response.put("message", "Token expired/invalid");
                 response.put("statusCode", 498);
@@ -43,6 +36,12 @@ public class ValidateService {
 
                 return response;
 
+            }
+            if (jwtService.validateFirma(token) != null) {
+                response.put("message", "Token Invalid");
+                response.put("statusCode", 498);
+                response.put("status", "Error");
+                return response;
             } else {
                 response.put("message", "Token valid");
                 response.put("statusCode", 200);

@@ -24,70 +24,78 @@ import lombok.RequiredArgsConstructor;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final AccessDeniedHandlerException accessDeniedHandlerException;
-    private final JwtAuthFilter jwtAuthFilter;
+        private final AccessDeniedHandlerException accessDeniedHandlerException;
+        private final JwtAuthFilter jwtAuthFilter;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        http.csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .exceptionHandling(t -> t.accessDeniedHandler(accessDeniedHandlerException))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                http.csrf(csrf -> csrf.disable())
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                                .exceptionHandling(t -> t.accessDeniedHandler(accessDeniedHandlerException))
+                                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
-                .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/v3/api-docs/", "/v3/api-docs/**").permitAll();
-                    auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**", "/swagger-ui/**",
-                            "/api/v1/user/synchronize",
-                            "/swagger-ui.html/", "/ws/**").permitAll();
-                    auth.requestMatchers("/api/v1/role/**").hasAnyAuthority("analista", "administrador");
-                    auth.requestMatchers("/api/v1/log/**").hasAnyAuthority("administrador");
-                    auth.requestMatchers("/api/v1/menu/**").hasAnyAuthority("administrador");
-                    auth.requestMatchers("/api/v1/user/**").hasAnyAuthority("administrador");
-                    auth.requestMatchers("/api/v1/EntitysProv/**").hasAnyAuthority("auditor", "administrador",
-                            "analista");
-                    auth.requestMatchers("/api/v1/notification/**").hasAnyAuthority("auditor", "administrador",
-                            "analista");
-                    auth.requestMatchers("/api/v1/createModule/**").hasAnyAuthority("administrador");
-                    auth.requestMatchers("/api/v1/contract/**").hasAnyAuthority("auditor", "administrador",
-                            "analista");
-                    auth.requestMatchers("/api/v1/export/**").hasAnyAuthority("auditor", "administrador",
-                            "analista");
-                    auth.requestMatchers("/api/v1/logsExit/**").hasAnyAuthority("auditor", "administrador",
-                            "analista");
+                                .authorizeHttpRequests(auth -> {
+                                        auth.requestMatchers("/v3/api-docs/", "/v3/api-docs/**").permitAll();
+                                        auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**", "/swagger-ui/**",
+                                                        "/api/v1/user/synchronize",
+                                                        "/swagger-ui.html/", "/ws/**", "/api/v1/token").permitAll();
+                                        auth.requestMatchers("/api/v1/role/**").hasAnyAuthority("analista",
+                                                        "administrador");
+                                        auth.requestMatchers("/api/v1/log/**").hasAnyAuthority("administrador");
+                                        auth.requestMatchers("/api/v1/menu/**").hasAnyAuthority("administrador");
+                                        auth.requestMatchers("/api/v1/user/**").hasAnyAuthority("administrador");
+                                        auth.requestMatchers("/api/v1/EntitysProv/**").hasAnyAuthority("auditor",
+                                                        "administrador",
+                                                        "analista");
+                                        auth.requestMatchers("/api/v1/notification/**").hasAnyAuthority("auditor",
+                                                        "administrador",
+                                                        "analista");
+                                        auth.requestMatchers("/api/v1/createModule/**")
+                                                        .hasAnyAuthority("administrador");
+                                        auth.requestMatchers("/api/v1/contract/**").hasAnyAuthority("auditor",
+                                                        "administrador",
+                                                        "analista");
+                                        auth.requestMatchers("/api/v1/export/**").hasAnyAuthority("auditor",
+                                                        "administrador",
+                                                        "analista");
+                                        auth.requestMatchers("/api/v1/logsExit/**").hasAnyAuthority("auditor",
+                                                        "administrador",
+                                                        "analista");
 
-                });
+                                });
 
-        http.headers(headers -> headers
-                .httpStrictTransportSecurity(hsts -> hsts
-                        .includeSubDomains(true)
-                        .maxAgeInSeconds(31536000)));
+                http.headers(headers -> headers
+                                .httpStrictTransportSecurity(hsts -> hsts
+                                                .includeSubDomains(true)
+                                                .maxAgeInSeconds(31536000)));
 
-        return http.build();
-    }
+                return http.build();
+        }
 
-    private CorsConfigurationSource corsConfigurationSource() {
-        return new CorsConfigurationSource() {
-            @Override
-            public CorsConfiguration getCorsConfiguration(@NonNull HttpServletRequest request) {
-                CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:4200",
-                        "http://localhost:5173/", "http://192.168.0.220/",
-                        "http://localhost:8000/", "http://localhost:8000",
-                        "http://localhost:48496", "https://665922d5497f3aaadbaaf8b0--melodic-halva-c4b1b1.netlify.app/",
-                        "https://665922d5497f3aaadbaaf8b0--melodic-halva-c4b1b1.netlify.app",
-                        "https://bovid.site/", "https://bovid.site", "http://bovid.site/",
-                        "http://bovid.site", "https://strong-toffee-1046b5.netlify.app/",
-                        "https://strong-toffee-1046b5.netlify.app"));
-                config.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
-                config.setAllowedHeaders(Arrays.asList("*"));
-                config.setAllowCredentials(true);
-                config.setExposedHeaders(Arrays.asList("Authorization", "Content-Disposition"));
-                config.setMaxAge(3600L);
-                return config;
-            }
-        };
-    }
+        private CorsConfigurationSource corsConfigurationSource() {
+                return new CorsConfigurationSource() {
+                        @Override
+                        public CorsConfiguration getCorsConfiguration(@NonNull HttpServletRequest request) {
+                                CorsConfiguration config = new CorsConfiguration();
+                                config.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:4200",
+                                                "http://localhost:5173/", "http://192.168.0.220/",
+                                                "http://localhost:8000/", "http://localhost:8000",
+                                                "http://localhost:48496",
+                                                "https://665922d5497f3aaadbaaf8b0--melodic-halva-c4b1b1.netlify.app/",
+                                                "https://665922d5497f3aaadbaaf8b0--melodic-halva-c4b1b1.netlify.app",
+                                                "https://bovid.site/", "https://bovid.site", "http://bovid.site/",
+                                                "http://bovid.site", "https://strong-toffee-1046b5.netlify.app/",
+                                                "https://strong-toffee-1046b5.netlify.app"));
+                                config.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
+                                config.setAllowedHeaders(Arrays.asList("*"));
+                                config.setAllowCredentials(true);
+                                config.setExposedHeaders(Arrays.asList("Authorization", "Content-Disposition"));
+                                config.setMaxAge(3600L);
+                                return config;
+                        }
+                };
+        }
 }

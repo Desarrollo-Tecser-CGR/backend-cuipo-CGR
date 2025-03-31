@@ -18,6 +18,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -73,6 +74,10 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EntityNotification> notifications = new ArrayList<>();
+
+    @Lob
+    @Column(name = "image_profile", nullable = true)
+    private String imageProfile;
 
     @ManyToMany
     @JsonIgnoreProperties({ "users", "handler", "hibernateLazyInitializer" })
