@@ -1,8 +1,7 @@
 package com.cgr.base.infrastructure.persistence.entity.log;
 
 import java.time.LocalDateTime;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.format.DateTimeFormatter;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,8 +32,7 @@ public class LogsEntityGeneral {
 
     @NotNull
     @Column(name = "create_date", updatable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "America/Bogota")
-    private LocalDateTime createdAt;
+    private String createdAt;
 
     public LogsEntityGeneral() {
     }
@@ -43,10 +41,25 @@ public class LogsEntityGeneral {
         this.userId = userId;
         this.logType = logType;
         this.detail = detail;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
     public Long getId() {
         return id;
+    }
+    public Long getUserId() {
+        return userId;
+    }
+
+    public LogType getLogType() {
+        return logType;
+    }
+
+    public String getDetail() {
+        return detail;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
     }
 }

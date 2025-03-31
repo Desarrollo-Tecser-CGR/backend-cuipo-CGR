@@ -1,9 +1,8 @@
 package com.cgr.base.presentation.logs;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,7 +22,8 @@ import com.cgr.base.presentation.controller.AbstractController;
 @RestController
 @RequestMapping("/api/v1/logs")
 public class logsGenerals extends AbstractController {
-
+   
+    @Autowired
     private final LogGeneralService logService;
 
     public logsGenerals(LogGeneralService logService) {
@@ -35,8 +35,7 @@ public class logsGenerals extends AbstractController {
             @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam(value = "logType", required = false) String logTypeStr,
             @RequestParam(value = "detail", required = false) String detail,
-            @RequestParam(value = "createdAt", required = false)
-            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime createdAt) {
+            @RequestParam(value = "createdAt", required = false) String createdAt){
 
         // Convertir logTypeStr a enum (si se envía)
         LogType logType = null;

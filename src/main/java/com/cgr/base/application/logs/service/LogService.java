@@ -32,7 +32,8 @@ public class LogService implements ILogUseCase {
     @Override
     public LogEntity createLog(AuthRequestDto userRequest) {
         LogEntity logEntity = new LogEntity(userRequest.getEmail(), new Date(), true, userRequest.getSAMAccountName());
-        return this.adapterLogRepository.createLog(logEntity, userRequest.getSAMAccountName());
+        //return this.adapterLogRepository.createLog(logEntity, userRequest.getSAMAccountName());
+        return null;
     }
 
 }

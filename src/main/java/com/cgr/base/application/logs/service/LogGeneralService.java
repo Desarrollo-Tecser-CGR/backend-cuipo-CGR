@@ -1,6 +1,5 @@
 package com.cgr.base.application.logs.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -23,7 +22,7 @@ public class LogGeneralService {
         return logRepository.save(log);
     }
 
-        public List<LogsEntityGeneral> findLogsByFilters(Long userId, LogType logType, String detail, LocalDateTime createdAt) {
+        public List<LogsEntityGeneral> findLogsByFilters(Long userId, LogType logType, String detail, String createdAt) {
         return logRepository.findLogsByFilters(userId, logType, detail, createdAt);
     }
 }

@@ -4,6 +4,7 @@ public enum LogType {
     ACCESS,
     PERMISSION,
     CERTIFICATE,
-    PARAMETER
+    PARAMETER,
+    SPECIFIC_RULE
 , STRING
 }
