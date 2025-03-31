@@ -1,5 +1,8 @@
 package com.cgr.base.application.logs.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.cgr.base.infrastructure.persistence.entity.log.LogType;
@@ -20,5 +23,7 @@ public class LogGeneralService {
         return logRepository.save(log);
     }
 
-    // Puedes agregar otros métodos para consultar o filtrar logs
+        public List<LogsEntityGeneral> findLogsByFilters(Long userId, LogType logType, String detail, LocalDateTime createdAt) {
+        return logRepository.findLogsByFilters(userId, logType, detail, createdAt);
+    }
 }

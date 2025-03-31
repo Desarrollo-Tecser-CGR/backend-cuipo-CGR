@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.certifications.service.CertificationsService;
+import com.cgr.base.application.logs.service.LogGeneralService;
+import static com.cgr.base.infrastructure.persistence.entity.log.LogType.CERTIFICATE;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.cgr.base.presentation.controller.AbstractController;
 
@@ -31,6 +33,8 @@ public class certificationsController extends AbstractController {
 
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private LogGeneralService logGeneralService;
 
     @GetMapping("/options")
     public ResponseEntity<?> getUniqueEntities() {
@@ -53,11 +57,18 @@ public class certificationsController extends AbstractController {
         Long userId = jwtService.extractUserIdFromToken(token);
 
         if (userId == null) {
-            return new ResponseEntity<>("User ID not Found.", HttpStatus.FORBIDDEN);
+            return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
-        String response = Certification.updateCertification(requestBody, userId, "calidad");
-        return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
+        try {
+            String response = Certification.updateCertification(requestBody, userId, "calidad");
+            logGeneralService.createLog(userId, CERTIFICATE, "Modificación de certificación de calidad " + requestBody);
+            return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
     }
 
     @PutMapping("/update/l617")
@@ -69,10 +80,18 @@ public class certificationsController extends AbstractController {
         Long userId = jwtService.extractUserIdFromToken(token);
 
         if (userId == null) {
-            return new ResponseEntity<>("User ID not Found.", HttpStatus.FORBIDDEN);
+            return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
-        String response = Certification.updateCertification(requestBody, userId, "L617");
-        return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
+
+        try {
+            String response = Certification.updateCertification(requestBody, userId, "L617");
+            logGeneralService.createLog(userId, CERTIFICATE, "Modificación de certificación L617 " + requestBody);
+            return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
     }
 
 }

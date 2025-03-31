@@ -26,4 +26,6 @@ public class loginLogs extends AbstractController {
         return requestResponse(this.logService.logFindAll(), "Login Logs.", HttpStatus.OK, true);
     }
 
+
+
 }

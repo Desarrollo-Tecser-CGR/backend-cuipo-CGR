@@ -73,7 +73,7 @@ public class rulesConfig extends AbstractController {
             logGeneralService.createLog(userId, PARAMETER,
                     "Modificación de regla general code " + codigoRegla + " to " + request.get("nuevoNombre"));
 
-            return ResponseEntity.ok(updatedRule);
+            return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
@@ -111,7 +111,7 @@ public class rulesConfig extends AbstractController {
             logGeneralService.createLog(userId, PARAMETER,
                     "Modificación de reporte específico code " + codigoReporte + " to " + request.get("nuevoNombre"));
 
-            return ResponseEntity.ok(updatedRule);
+            return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
@@ -151,7 +151,7 @@ public class rulesConfig extends AbstractController {
             logGeneralService.createLog(userId, PARAMETER,
                     "Modificación de regla específica code " + codigoRegla + " to " + request.get("nuevoNombre"));
 
-            return ResponseEntity.ok(updatedRule);
+            return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);

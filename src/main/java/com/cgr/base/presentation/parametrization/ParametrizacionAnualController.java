@@ -54,7 +54,8 @@ public class ParametrizacionAnualController extends AbstractController {
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody ParametrizacionAnual parametrizacionAnual, HttpServletRequest request) {
+    public ResponseEntity<?> create(@RequestBody ParametrizacionAnual parametrizacionAnual,
+            HttpServletRequest request) {
 
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         String token = header.split(" ")[1];
@@ -68,11 +69,12 @@ public class ParametrizacionAnualController extends AbstractController {
             logGeneralService.createLog(userId, PARAMETER,
                     "Creación de parametrización anual año " + parametrizacionAnual.getFecha() + " with values "
                             + parametrizacionAnual);
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-
-        return ResponseEntity.ok(parametrizacionAnualService.save(parametrizacionAnual));
+        return requestResponse(parametrizacionAnualService.save(parametrizacionAnual), "Create operation completed.",
+                HttpStatus.OK, true);
     }
 
     @PutMapping
@@ -93,7 +95,9 @@ public class ParametrizacionAnualController extends AbstractController {
             logGeneralService.createLog(userId, PARAMETER,
                     "Modificación de parametrización anual año " + parametrizacionAnual.getFecha() + " to "
                             + parametrizacionAnual);
-            return ResponseEntity.ok(parametrizacionAnualService.update(parametrizacionAnual));
+
+            return requestResponse(parametrizacionAnualService.update(parametrizacionAnual),
+                    "Update operation completed.", HttpStatus.OK, true);
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
