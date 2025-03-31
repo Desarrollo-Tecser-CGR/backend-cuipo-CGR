@@ -27,10 +27,33 @@ public class ParametrizacionAnualService {
                                         "Solo se permite agregar o modificar el año actual o el inmediatamente anterior.");
                 }
 
-                calcularLimIcld(parametrizacionAnual);
+                // Obtener el año anterior, si existe
+                Optional<ParametrizacionAnual> anioAnteriorOpt = parametrizacionAnualRepository
+                                .findByFecha(parametrizacionAnual.getFecha() - 1);
 
+                if (anioAnteriorOpt.isPresent()) {
+                        ParametrizacionAnual anioAnterior = anioAnteriorOpt.get();
+                        BigDecimal ipcAnterior = anioAnterior.getIpc();
+
+                        if (ipcAnterior == null) {
+                                throw new IllegalArgumentException(
+                                                "El campo IPC del año anterior no puede estar vacío.");
+                        }
+
+                        // Recalcular los valores del año actual basado en el año anterior
+                        recalcularValoresAnioActual(parametrizacionAnual, anioAnterior, ipcAnterior);
+                } else {
+                        // Si no hay año anterior, inicializar valores predeterminados
+                        inicializarValoresPorDefecto(parametrizacionAnual);
+                }
+
+                // Guardar el registro
                 ParametrizacionAnual saved = parametrizacionAnualRepository.save(parametrizacionAnual);
 
+                // Calcular LimIcld para el año siguiente
+                calcularLimIcld(parametrizacionAnual);
+
+                // Actualizar el año siguiente
                 actualizarAnioSiguiente(parametrizacionAnual);
 
                 return saved;
@@ -61,6 +84,10 @@ public class ParametrizacionAnualService {
 
                         ParametrizacionAnual updated = parametrizacionAnualRepository.update(parametrizacionAnual);
 
+                        // Calcular LimIcld para el año siguiente
+                        calcularLimIcld(parametrizacionAnual);
+
+                        // Actualizar el año siguiente
                         actualizarAnioSiguiente(parametrizacionAnual);
 
                         return updated;
@@ -229,5 +256,16 @@ public class ParametrizacionAnualService {
                 BigDecimal nuevoValSesionConc6 = valSesionConc6Anterior
                                 .add(valSesionConc6Anterior.multiply(ipcAnterior.divide(BigDecimal.valueOf(100))));
                 actual.setValSesionConc6(nuevoValSesionConc6);
+        }
+
+        private void inicializarValoresPorDefecto(ParametrizacionAnual parametrizacionAnual) {
+                parametrizacionAnual.setLimIcld(BigDecimal.ONE);
+                parametrizacionAnual.setValSesionConcE(BigDecimal.ONE);
+                parametrizacionAnual.setValSesionConc1(BigDecimal.ONE);
+                parametrizacionAnual.setValSesionConc2(BigDecimal.ONE);
+                parametrizacionAnual.setValSesionConc3(BigDecimal.ONE);
+                parametrizacionAnual.setValSesionConc4(BigDecimal.ONE);
+                parametrizacionAnual.setValSesionConc5(BigDecimal.ONE);
+                parametrizacionAnual.setValSesionConc6(BigDecimal.ONE);
         }
 }
