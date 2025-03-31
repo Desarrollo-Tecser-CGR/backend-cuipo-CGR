@@ -4,6 +4,6 @@ public enum LogType {
     ACCESS,
     PERMISSION,
     CERTIFICATE,
-    ANNUAL_PARAMETER
+    PARAMETER
 , STRING
 }

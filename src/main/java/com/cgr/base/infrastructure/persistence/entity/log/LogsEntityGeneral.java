@@ -2,7 +2,6 @@ package com.cgr.base.infrastructure.persistence.entity.log;
 
 import java.time.LocalDateTime;
 
-import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Column;
@@ -13,7 +12,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
@@ -25,9 +23,8 @@ public class LogsEntityGeneral {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity userId;
+    private Long userId;
 
     @Enumerated(EnumType.STRING)
     private LogType logType;
@@ -42,7 +39,7 @@ public class LogsEntityGeneral {
     public LogsEntityGeneral() {
     }
 
-    public LogsEntityGeneral(UserEntity userId, LogType logType, String detail) {
+    public LogsEntityGeneral(Long userId, LogType logType, String detail) {
         this.userId = userId;
         this.logType = logType;
         this.detail = detail;

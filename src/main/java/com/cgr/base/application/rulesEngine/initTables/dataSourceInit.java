@@ -248,7 +248,7 @@ public class dataSourceInit {
                       "CREATE TABLE logs_general (" +
                       "id BIGINT IDENTITY(1,1) PRIMARY KEY, " +
                       "user_id BIGINT NOT NULL, " +
-                      "logType VARCHAR(20), " +
+                      "log_type VARCHAR(20), " +
                       "detail VARCHAR(255), " +
                       "create_date DATETIME NOT NULL DEFAULT GETDATE()" +
                       ") " +
