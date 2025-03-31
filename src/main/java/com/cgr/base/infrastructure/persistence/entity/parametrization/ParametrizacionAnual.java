@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.Column;
 import java.math.BigDecimal;
@@ -11,6 +12,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "PARAMETRIZACION_ANUAL")
 @NoArgsConstructor
+@Data
 @AllArgsConstructor
 public class ParametrizacionAnual {
 
@@ -79,188 +81,4 @@ public class ParametrizacionAnual {
     @Column(name = "LIM_ICLD")
     private BigDecimal limIcld;
 
-    // Getters y setters
-    public int getFecha() {
-        return fecha;
-    }
-
-    public void setFecha(int fecha) {
-        this.fecha = fecha;
-    }
-
-    public BigDecimal getSmmlv() {
-        return smmlv;
-    }
-
-    public void setSmmlv(BigDecimal smmlv) {
-        this.smmlv = smmlv;
-    }
-
-    public BigDecimal getIpc() {
-        return ipc;
-    }
-
-    public void setIpc(BigDecimal ipc) {
-        this.ipc = ipc;
-    }
-
-    public BigDecimal getInflacion() {
-        return inflacion;
-    }
-
-    public void setInflacion(BigDecimal inflacion) {
-        this.inflacion = inflacion;
-    }
-
-    public BigDecimal getAportesParafiscales() {
-        return aportesParafiscales;
-    }
-
-    public void setAportesParafiscales(BigDecimal aportesParafiscales) {
-        this.aportesParafiscales = aportesParafiscales;
-    }
-
-    public BigDecimal getSalud() {
-        return salud;
-    }
-
-    public void setSalud(BigDecimal salud) {
-        this.salud = salud;
-    }
-
-    public BigDecimal getPension() {
-        return pension;
-    }
-
-    public void setPension(BigDecimal pension) {
-        this.pension = pension;
-    }
-
-    public BigDecimal getRiesgosProfesionales() {
-        return riesgosProfesionales;
-    }
-
-    public void setRiesgosProfesionales(BigDecimal riesgosProfesionales) {
-        this.riesgosProfesionales = riesgosProfesionales;
-    }
-
-    public BigDecimal getCesantias() {
-        return cesantias;
-    }
-
-    public void setCesantias(BigDecimal cesantias) {
-        this.cesantias = cesantias;
-    }
-
-    public BigDecimal getInteresesCesantias() {
-        return interesesCesantias;
-    }
-
-    public void setInteresesCesantias(BigDecimal interesesCesantias) {
-        this.interesesCesantias = interesesCesantias;
-    }
-
-    public BigDecimal getVacaciones() {
-        return vacaciones;
-    }
-
-    public void setVacaciones(BigDecimal vacaciones) {
-        this.vacaciones = vacaciones;
-    }
-
-    public BigDecimal getPrimaVacaciones() {
-        return primaVacaciones;
-    }
-
-    public void setPrimaVacaciones(BigDecimal primaVacaciones) {
-        this.primaVacaciones = primaVacaciones;
-    }
-
-    public BigDecimal getPrimaNavidad() {
-        return primaNavidad;
-    }
-
-    public void setPrimaNavidad(BigDecimal primaNavidad) {
-        this.primaNavidad = primaNavidad;
-    }
-
-    public BigDecimal getValSesionConcE() {
-        return valSesionConcE;
-    }
-
-    /*
-     * public void setValSesionConcE(BigDecimal valSesionConcE) {
-     * this.valSesionConcE = valSesionConcE;
-     * }
-     */
-
-    public BigDecimal getValSesionConc1() {
-        return valSesionConc1;
-    }
-
-    /*
-     * public void setValSesionConc1(BigDecimal valSesionConc1) {
-     * this.valSesionConc1 = valSesionConc1;
-     * }
-     */
-
-    public BigDecimal getValSesionConc2() {
-        return valSesionConc2;
-    }
-
-    /*
-     * public void setValSesionConc2(BigDecimal valSesionConc2) {
-     * this.valSesionConc2 = valSesionConc2;
-     * }
-     */
-
-    public BigDecimal getValSesionConc3() {
-        return valSesionConc3;
-    }
-
-    /*
-     * public void setValSesionConc3(BigDecimal valSesionConc3) {
-     * this.valSesionConc3 = valSesionConc3;
-     * }
-     */
-
-    public BigDecimal getValSesionConc4() {
-        return valSesionConc4;
-    }
-
-    /*
-     * public void setValSesionConc4(BigDecimal valSesionConc4) {
-     * this.valSesionConc4 = valSesionConc4;
-     * }
-     */
-
-    public BigDecimal getValSesionConc5() {
-        return valSesionConc5;
-    }
-
-    /*
-     * public void setValSesionConc5(BigDecimal valSesionConc5) {
-     * this.valSesionConc5 = valSesionConc5;
-     * }
-     */
-
-    public BigDecimal getValSesionConc6() {
-        return valSesionConc6;
-    }
-
-    /*
-     * public void setValSesionConc6(BigDecimal valSesionConc6) {
-     * this.valSesionConc6 = valSesionConc6;
-     * }
-     */
-
-    public BigDecimal getLimIcld() {
-        return limIcld;
-    }
-
-    /*
-     * public void setLimIcld(BigDecimal limIcld) {
-     * this.limIcld = limIcld;
-     * }
-     */
 }
