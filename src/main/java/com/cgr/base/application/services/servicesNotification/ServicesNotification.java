@@ -28,107 +28,102 @@ import org.springframework.stereotype.Service;
 @Service
 public class ServicesNotification {
 
-    @Autowired
-    private RepositoryNotification repositoryNotification;
+        @Autowired
+        private RepositoryNotification repositoryNotification;
 
-    @Autowired
-    private IEntityProvitionalPlanJpa repositoryEntityProvitionalPlan;
+        @Autowired
+        private IEntityProvitionalPlanJpa repositoryEntityProvitionalPlan;
 
-    @Autowired
-    private IUserRepositoryJpa repositoryUser;
+        @Autowired
+        private IUserRepositoryJpa repositoryUser;
 
-    @Autowired
-    private LogExitService logExitService;
+        @Autowired
+        private LogExitService logExitService;
 
-    @Autowired
-    private DtoMapper dtoMapper;
+        @Autowired
+        private DtoMapper dtoMapper;
 
-    public EntityNotificationDto saveNotification(WsChatMessage notification) {
+        public EntityNotificationDto saveNotification(WsChatMessage notification) {
 
-        List<EntityProvitionalPlan> entityProvitionalPlan = this.repositoryEntityProvitionalPlan
-                .findByName(notification.getEntity().toLowerCase());
+                List<EntityProvitionalPlan> entityProvitionalPlan = this.repositoryEntityProvitionalPlan
+                                .findByName(notification.getEntity().toLowerCase());
 
-        Optional<UserEntity> userEntity = this.repositoryUser.findBySAMAccountName(notification.getSAMAccountName());
+                Optional<UserEntity> userEntity = this.repositoryUser
+                                .findBySAMAccountName(notification.getSAMAccountName());
 
-        if (entityProvitionalPlan.isEmpty() || !userEntity.isPresent()) {
-            return null;
+                if (entityProvitionalPlan.isEmpty() || !userEntity.isPresent()) {
+                        return null;
+                }
+
+                EntityNotification entityNotification = this.dtoMapper.convertToDto(notification,
+                                EntityNotification.class);
+
+                entityNotification.setEntity(entityProvitionalPlan.get(0));
+
+                entityNotification.setUser(userEntity.get());
+
+                entityNotification = repositoryNotification.save(entityNotification);
+
+                EntityNotificationDto entityNotificationDto = this.dtoMapper.convertToDto(entityNotification,
+                                EntityNotificationDto.class);
+
+                entityNotificationDto.setDate(entityNotification.getDate());
+
+                return entityNotificationDto;
         }
 
-        EntityNotification entityNotification = this.dtoMapper.convertToDto(notification, EntityNotification.class);
+        public List<EntityNotificationDto> getAllNotifications() {
 
-        entityNotification.setEntity(entityProvitionalPlan.get(0));
+                List<EntityNotification> entityNotifications = repositoryNotification.findAll();
 
-        entityNotification.setUser(userEntity.get());
+                List<EntityNotificationDto> entityNotificationsDto = this.dtoMapper.convertToListDto(
+                                entityNotifications,
+                                EntityNotificationDto.class);
 
-        entityNotification = repositoryNotification.save(entityNotification);
-
-        EntityNotificationDto entityNotificationDto = this.dtoMapper.convertToDto(entityNotification,
-                EntityNotificationDto.class);
-
-        entityNotificationDto.setDate(entityNotification.getDate());
-
-        return entityNotificationDto;
-    }
-
-    public List<EntityNotificationDto> getAllNotifications() {
-
-        List<EntityNotification> entityNotifications = repositoryNotification.findAll();
-
-        List<EntityNotificationDto> entityNotificationsDto = this.dtoMapper.convertToListDto(entityNotifications,
-                EntityNotificationDto.class);
-
-        return entityNotificationsDto;
-    }
-
-    public List<EntityNotificationDto> getNotificationsByEntity(Integer entity) {
-
-        List<EntityNotification> entityNotifications = repositoryNotification.findByEntityId(entity);
-
-        List<EntityNotificationDto> entityNotificationsDto = this.dtoMapper.convertToListDto(entityNotifications,
-                EntityNotificationDto.class);
-
-        return entityNotificationsDto;
-    }
-
-    public Map<String, Object> getNotificationsSinceLastLogout(String samAccountName) {
-        // Obtener el último log de salida del usuario
-        LogExitDto lastLog = logExitService.getLastLog(samAccountName);
-
-        // Si no hay registro de cierre de sesión, devolvemos 0 notificaciones
-        if (lastLog == null) {
-            return Map.of(
-                    "totalNotifications", 0,
-                    "notificationsByEntity", Collections.emptyMap());
+                return entityNotificationsDto;
         }
 
-        Date lastLogoutDate = lastLog.getDataSessionEnd();
+        public List<EntityNotificationDto> getNotificationsByEntity(Integer entity) {
 
-        // Obtener el usuario desde la BD
-        Optional<UserEntity> userEntity = repositoryUser.findBySAMAccountName(samAccountName);
-        if (userEntity.isEmpty()) {
-            return Map.of(
-                    "totalNotifications", 0,
-                    "notificationsByEntity", Collections.emptyMap());
+                List<EntityNotification> entityNotifications = repositoryNotification.findByEntityId(entity);
+
+                List<EntityNotificationDto> entityNotificationsDto = this.dtoMapper.convertToListDto(
+                                entityNotifications,
+                                EntityNotificationDto.class);
+
+                return entityNotificationsDto;
         }
 
-        UserEntity user = userEntity.get();
+        public Map<String, Object> getNotificationsSinceLastLogout(String samAccountName) {
+                // Obtener el último log de salida del usuario
+                LogExitDto lastLog = logExitService.getLastLog(samAccountName);
 
-        // Buscar notificaciones desde el último deslogueo
-        List<EntityNotification> newNotifications = repositoryNotification
-                .findByUserAndDateAfter(user, lastLogoutDate);
+                // Si no hay registro de cierre de sesión, devolvemos 0 notificaciones
+                if (lastLog == null) {
+                        return Map.of(
+                                        "totalNotifications", 0,
+                                        "notificationsByEntity", Collections.emptyMap());
+                }
 
-        // Total de notificaciones nuevas
-        int totalNotifications = newNotifications.size();
+                Date lastLogoutDate = lastLog.getDataSessionEnd();
 
-        // Agrupar por entidad y contar cuántas notificaciones hay por cada una
-        Map<Object, Long> notificationsByEntity = newNotifications.stream()
-                .collect(Collectors.groupingBy(
-                        notification -> notification.getEntity().getEntity_name(), // Nombre de la entidad
-                        Collectors.counting()));
+                // Buscar notificaciones desde el último deslogueo
+                List<EntityNotification> newNotifications = repositoryNotification
+                                .findByUserAndDateAfter(lastLogoutDate);
 
-        return Map.of(
-                "totalNotifications", totalNotifications,
-                "notificationsByEntity", notificationsByEntity);
-    }
+                // Total de notificaciones nuevas
+                int totalNotifications = newNotifications.size();
+
+                // Agrupar por entidad y contar cuántas notificaciones hay por cada una
+                Map<Object, Long> notificationsByEntity = newNotifications.stream()
+                                .collect(Collectors.groupingBy(
+                                                notification -> notification.getEntity().getEntity_name(), // Nombre de
+                                                                                                           // la entidad
+                                                Collectors.counting()));
+
+                return Map.of(
+                                "totalNotifications", totalNotifications,
+                                "notificationsByEntity", notificationsByEntity);
+        }
 
 }
