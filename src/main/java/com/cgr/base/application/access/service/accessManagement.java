@@ -23,7 +23,7 @@ public class accessManagement {
     public List<Map<String, Object>> getAvailableMenus() {
         String sql = "SELECT id, title" +
                 " FROM cuipo_dev.dbo.menus " +
-                "WHERE title <> 'Gestor de Accesos'";
+                " WHERE id <> 1";
 
         Query query = entityManager.createNativeQuery(sql);
 
@@ -74,34 +74,20 @@ public class accessManagement {
     @Transactional
     public boolean updateRoleModules(Long roleId, List<Integer> moduleIds) {
         try {
-            System.out.println("Iniciando actualización de módulos para el rol ID: " + roleId);
-            System.out.println("Lista inicial de módulos: " + moduleIds);
 
-            // Obtener el ID del módulo "Gestor de Accesos"
-            Long gestorId = ((Number) entityManager.createNativeQuery(
-                    "SELECT id FROM cuipo_dev.dbo.menus WHERE title = 'Gestor de Accesos'")
-                    .getSingleResult()).longValue();
-
-            System.out.println("ID de 'Gestor de Accesos': " + gestorId);
+            int gestorId = 1;
 
             if (roleId == 1) {
-                // Si el rol es Administrador (1) y no tiene "Gestor de Accesos", se agrega
-                // automáticamente
-                if (!moduleIds.contains(gestorId.intValue())) {
-                    System.out.println("Rol Administrador sin 'Gestor de Accesos', agregando...");
-                    moduleIds.add(gestorId.intValue());
+
+                if (!moduleIds.contains(gestorId)) {
+                    moduleIds.add(gestorId);
                 }
             } else {
-                // Para otros roles, si tienen "Gestor de Accesos", se elimina
-                if (moduleIds.contains(gestorId.intValue())) {
-                    System.out.println("Rol no Administrador con 'Gestor de Accesos', eliminando...");
-                    moduleIds.remove(gestorId.intValue());
+                if (moduleIds.contains(gestorId)) {
+                    moduleIds.remove(gestorId);
                 }
             }
 
-            System.out.println("Lista de módulos después de validaciones: " + moduleIds);
-
-            // Obtener submódulos de los módulos seleccionados
             String sql = "SELECT id FROM cuipo_dev.dbo.submenus WHERE menu_id IN (:moduleIds)";
             Query query = entityManager.createNativeQuery(sql);
             query.setParameter("moduleIds", moduleIds);
@@ -113,10 +99,6 @@ public class accessManagement {
                     .map(o -> ((Number) o).intValue())
                     .collect(Collectors.toList());
 
-            System.out.println("Lista de submódulos asociados: " + submoduleIds);
-
-            // Eliminar relaciones previas
-            System.out.println("Eliminando relaciones previas en menu_roles y roles_submenu...");
             entityManager.createNativeQuery("DELETE FROM cuipo_dev.dbo.menu_roles WHERE role_id = :roleId")
                     .setParameter("roleId", roleId)
                     .executeUpdate();
@@ -125,11 +107,8 @@ public class accessManagement {
                     .setParameter("roleId", roleId)
                     .executeUpdate();
 
-            // Insertar nuevas relaciones en menu_roles
             if (!moduleIds.isEmpty()) {
-                System.out.println("Insertando nuevas relaciones en menu_roles...");
                 for (Integer moduleId : moduleIds) {
-                    System.out.println("Asignando módulo: " + moduleId + " al rol: " + roleId);
                     entityManager.createNativeQuery(
                             "INSERT INTO cuipo_dev.dbo.menu_roles (role_id, menu_id) VALUES (:roleId, :moduleId)")
                             .setParameter("roleId", roleId)
@@ -138,11 +117,10 @@ public class accessManagement {
                 }
             }
 
-            // Insertar nuevas relaciones en roles_submenu
             if (!submoduleIds.isEmpty()) {
-                System.out.println("Insertando nuevas relaciones en roles_submenu...");
+
                 for (Integer submoduleId : submoduleIds) {
-                    System.out.println("Asignando submódulo: " + submoduleId + " al rol: " + roleId);
+
                     entityManager.createNativeQuery(
                             "INSERT INTO cuipo_dev.dbo.roles_submenu (role_id, submenu_id) VALUES (:roleId, :submenuId)")
                             .setParameter("roleId", roleId)
@@ -151,11 +129,9 @@ public class accessManagement {
                 }
             }
 
-            System.out.println("Actualización de módulos completada exitosamente para el rol ID: " + roleId);
             return true;
         } catch (Exception e) {
-            System.err.println("Error al actualizar módulos del rol: " + e.getMessage());
-            e.printStackTrace();
+
             throw new RuntimeException("Error al actualizar módulos del rol", e);
         }
     }

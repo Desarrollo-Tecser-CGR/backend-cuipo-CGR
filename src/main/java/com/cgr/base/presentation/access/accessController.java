@@ -24,10 +24,9 @@ public class accessController extends AbstractController {
     @Autowired
     accessManagement Access;
 
-    //Editar ejemplo de PreAuthorize
-    @PreAuthorize("hasAuthority('MENU_7') or hasAuthority('MENU_8')")
+    @PreAuthorize("hasAuthority('MENU_1')")
     @GetMapping("/module/list")
-    public ResponseEntity<?> getAvailableMenus() {        
+    public ResponseEntity<?> getAvailableMenus() {
         List<Map<String, Object>> menus = Access.getAvailableMenus();
         return requestResponse(menus, "Available menus successfully retrieved.", HttpStatus.OK, true);
     }
@@ -39,6 +38,7 @@ public class accessController extends AbstractController {
                 true);
     }
 
+    @PreAuthorize("hasAuthority('MENU_1')")
     @PutMapping("/config")
     public ResponseEntity<?> updateRoleModules(@RequestBody Map<String, Object> request) {
 
@@ -58,7 +58,6 @@ public class accessController extends AbstractController {
                     : requestResponse(null, "Error al actualizar los módulos.", HttpStatus.INTERNAL_SERVER_ERROR,
                             false);
         } catch (Exception e) {
-            e.printStackTrace();
             return requestResponse(null, "Error procesando la solicitud.", HttpStatus.INTERNAL_SERVER_ERROR, false);
         }
     }

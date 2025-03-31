@@ -1,13 +1,78 @@
 package com.cgr.base.presentation.certifications;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cgr.base.application.certifications.service.CertificationsService;
+import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.cgr.base.presentation.controller.AbstractController;
 
+import jakarta.servlet.http.HttpServletRequest;
+
+@PreAuthorize("hasAuthority('MENU_8')")
 @RestController
 @RequestMapping("/api/v1/certifications")
 public class certificationsController extends AbstractController {
 
+    @Autowired
+    private CertificationsService Certification;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @GetMapping("/options")
+    public ResponseEntity<?> getUniqueEntities() {
+        List<Map<String, String>> options = Certification.getUniqueEntities();
+        return requestResponse(options, "List options successfully retrieved.", HttpStatus.OK, true);
+    }
+
+    @GetMapping("/info/{entidad}")
+    public ResponseEntity<?> getRecordsByEntidad(@PathVariable("entidad") String entidad) {
+        List<Map<String, Object>> records = Certification.getRecordsByCodigoEntidad(entidad);
+        return requestResponse(records, "Records retrieved successfully.", HttpStatus.OK, true);
+    }
+
+    @PutMapping("/update/calidad")
+    public ResponseEntity<?> updateCalidad(@RequestBody Map<String, String> requestBody,
+            HttpServletRequest httpRequest) {
+        String header = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = header.split(" ")[1];
+
+        Long userId = jwtService.extractUserIdFromToken(token);
+
+        if (userId == null) {
+            return new ResponseEntity<>("User ID not Found.", HttpStatus.FORBIDDEN);
+        }
+
+        String response = Certification.updateCertification(requestBody, userId, "calidad");
+        return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
+    }
+
+    @PutMapping("/update/l617")
+    public ResponseEntity<?> updateL617(@RequestBody Map<String, String> requestBody, HttpServletRequest httpRequest) {
+
+        String header = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = header.split(" ")[1];
+
+        Long userId = jwtService.extractUserIdFromToken(token);
+
+        if (userId == null) {
+            return new ResponseEntity<>("User ID not Found.", HttpStatus.FORBIDDEN);
+        }
+        String response = Certification.updateCertification(requestBody, userId, "L617");
+        return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
+    }
 
 }

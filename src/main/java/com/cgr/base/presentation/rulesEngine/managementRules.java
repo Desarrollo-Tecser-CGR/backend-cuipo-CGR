@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,6 +43,7 @@ public class managementRules extends AbstractController {
     @Autowired
     private detailsInfo FilterDetail;
 
+    @PreAuthorize("hasAuthority('MENU_2') or hasAuthority('MENU_8')")
     @PostMapping("/general/data")
     public ResponseEntity<?> getGeneralRules(
             @RequestBody(required = false) Map<String, String> filters) {
@@ -50,24 +52,28 @@ public class managementRules extends AbstractController {
         return requestResponse(result, "General Rules successfully retrieved.", HttpStatus.OK, true);
     }
 
+    @PreAuthorize("hasAuthority('MENU_2') or hasAuthority('MENU_8')")
     @PostMapping("/specific/data")
     public ResponseEntity<?> getSpecificRules(@RequestBody(required = false) Map<String, String> filters) {
         List<Map<String, Object>> result = Filter.getFilteredRecordsSR(filters);
         return requestResponse(result, "Specific Rules successfully retrieved.", HttpStatus.OK, true);
     }
 
+    @PreAuthorize("hasAuthority('MENU_2')")
     @GetMapping("/general/options")
     public ResponseEntity<?> getListOptionsG() {
         listOptionsRG options = Filter.getListOptionsGenerals();
         return requestResponse(options, "List options successfully retrieved.", HttpStatus.OK, true);
     }
 
+    @PreAuthorize("hasAuthority('MENU_2')")
     @GetMapping("/specific/options")
     public ResponseEntity<?> getListOptionsE() {
         listOptionsEG options = Filter.getListOptionsSpecific();
         return requestResponse(options, "List options successfully retrieved.", HttpStatus.OK, true);
     }
 
+    @PreAuthorize("hasAuthority('MENU_2')")
     @PostMapping("/general/export-csv")
     public ResponseEntity<byte[]> exportFilteredDataToCsvGR(
             @RequestBody(required = false) Map<String, String> filters) {
@@ -89,6 +95,7 @@ public class managementRules extends AbstractController {
         }
     }
 
+    @PreAuthorize("hasAuthority('MENU_2')")
     @PostMapping("/specific/export-csv")
     public ResponseEntity<byte[]> exportFilteredDataToCsvSR(
             @RequestBody(required = false) Map<String, String> filters) {
@@ -110,6 +117,7 @@ public class managementRules extends AbstractController {
         }
     }
 
+    @PreAuthorize("hasAuthority('MENU_2')")
     @PostMapping("/general/lastUpdate")
     public ResponseEntity<?> getLastUpdateGeneralRules(@RequestBody Map<String, String> request) {
         try {
@@ -127,6 +135,7 @@ public class managementRules extends AbstractController {
         }
     }
 
+    @PreAuthorize("hasAuthority('MENU_2')")
     @PostMapping("/specific/lastUpdate")
     public ResponseEntity<?> getLastUpdateSpecificRules(@RequestBody Map<String, String> request) {
         try {
@@ -144,6 +153,7 @@ public class managementRules extends AbstractController {
         }
     }
 
+    @PreAuthorize("hasAuthority('MENU_2')")
     @PostMapping("/specific/data/icld")
     public ResponseEntity<?> getSpecificDetailsICLD(@RequestBody Map<String, String> filters) {
         try {
@@ -159,6 +169,7 @@ public class managementRules extends AbstractController {
         }
     }
 
+    @PreAuthorize("hasAuthority('MENU_2')")
     @PostMapping("/specific/data/gf")
     public ResponseEntity<?> getSpecificDetailsGF(@RequestBody Map<String, String> filters) {
         try {
