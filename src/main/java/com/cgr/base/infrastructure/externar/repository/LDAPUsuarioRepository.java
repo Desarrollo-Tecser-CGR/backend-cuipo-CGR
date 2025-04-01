@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
-//import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 
 import com.cgr.base.application.auth.service.ExternalAuthService;
@@ -38,7 +37,7 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
             // Obtener información adicional del usuario desde el endpoint externo
             UserEntity userEntity = obtenerInformacionUsuarioExterna(samAccountName);
             if (userEntity != null) {
-                System.out.println("Información del usuario obtenida del endpoint externo: " + userEntity);
+                System.out.println("Información del usuario obtenida del endpoint de validacion: " + userEntity);
             }
 
             return true;
@@ -68,14 +67,14 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
                 UserEntity userEntity = new UserEntity();
                 userEntity.setSAMAccountName(jsonNode.get("usuario").asText());
                 userEntity.setFullName(jsonNode.get("nombreMostrar").asText());
-                userEntity.setEmail(jsonNode.get("usuario").asText() + "@contraloria.gov.co");
+                userEntity.setEmail(jsonNode.get("usuario").asText() + "@");
                 userEntity.setPhone(jsonNode.get("numeroTelefono").asText());
                 userEntity.setCargo(jsonNode.get("descripcionCargo").asText());
                 userEntity.setEnabled(true);
 
                 return userEntity;
             } else {
-                System.err.println("Error al obtener información del usuario desde el endpoint externo.");
+                System.err.println("Error al obtener información del usuario desde el endpoint de validacion.");
                 return null;
             }
         } catch (Exception e) {
