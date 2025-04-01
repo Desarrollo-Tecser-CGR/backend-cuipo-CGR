@@ -27,9 +27,6 @@ public class queryFilters {
     @Value("${TABLA_GENERAL_RULES}")
     private String tablaGenerales;
 
-    @Value("${TABLA_SPECIFIC_RULES}")
-    private String tablaEspecificas;
-
     private boolean tablaExiste(String tabla) {
         String sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, tabla);
@@ -50,14 +47,14 @@ public class queryFilters {
     }
 
     public listOptionsEG getListOptionsSpecific() {
-        if (!tablaExiste(tablaEspecificas)) {
+        if (!tablaExiste("SPECIFIC_RULES_DATA")) {
             return listOptionsEG.builder().build();
         }
         return listOptionsEG.builder()
-                .fechas(getFechas(tablaEspecificas))
-                .trimestres(convertirTrimestres(getTrimestres(tablaEspecificas)))
-                .entidades(getEntidades(tablaEspecificas))
-                .ambitos(getAmbitos(tablaEspecificas))
+                .fechas(getFechas("SPECIFIC_RULES_DATA"))
+                .trimestres(convertirTrimestres(getTrimestres("SPECIFIC_RULES_DATA")))
+                .entidades(getEntidades("SPECIFIC_RULES_DATA"))
+                .ambitos(getAmbitos("SPECIFIC_RULES_DATA"))
                 .reportes(getFormReports())
                 .build();
     }
@@ -189,7 +186,7 @@ public class queryFilters {
         String tablaConsulta;
 
         if (reporteCodigo == null || reporteCodigo.trim().isEmpty()) {
-            tablaConsulta = tablaEspecificas;
+            tablaConsulta = "SPECIFIC_RULES_DATA";
         } else {
             tablaConsulta = obtenerTablaDesdeCodigo(reporteCodigo);
         }
@@ -418,11 +415,11 @@ public class queryFilters {
     }
 
     public String getLastUpdateDateSR(Integer fecha, Integer trimestre) {
-        if (!tablaExiste(tablaEspecificas) || fecha == null || trimestre == null) {
+        if (!tablaExiste("SPECIFIC_RULES_DATA") || fecha == null || trimestre == null) {
             return null;
         }
 
-        String sql = "SELECT MAX(FECHA_CARGUE) FROM " + tablaEspecificas +
+        String sql = "SELECT MAX(FECHA_CARGUE) FROM " + "SPECIFIC_RULES_DATA" +
                 " WHERE FECHA = ? AND TRIMESTRE = ?";
 
         return jdbcTemplate.queryForObject(sql, String.class, fecha, trimestre);
