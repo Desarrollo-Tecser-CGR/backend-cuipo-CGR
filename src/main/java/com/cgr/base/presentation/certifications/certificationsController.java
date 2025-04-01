@@ -21,6 +21,7 @@ import static com.cgr.base.infrastructure.persistence.entity.log.LogType.CERTIFI
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.cgr.base.presentation.controller.AbstractController;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @PreAuthorize("hasAuthority('MENU_8')")
@@ -65,8 +66,12 @@ public class certificationsController extends AbstractController {
             logGeneralService.createLog(userId, CERTIFICATE, "Modificación de certificación de calidad " + requestBody);
             return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
 
+        } catch (EntityNotFoundException e) {
+            return requestResponse(null, e.getMessage(), HttpStatus.NOT_FOUND, false);
+        } catch (IllegalArgumentException e) {
+            return requestResponse(null, e.getMessage(), HttpStatus.BAD_REQUEST, false);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return requestResponse(null, "Error inesperado.", HttpStatus.INTERNAL_SERVER_ERROR, false);
         }
 
     }
@@ -88,10 +93,13 @@ public class certificationsController extends AbstractController {
             logGeneralService.createLog(userId, CERTIFICATE, "Modificación de certificación L617 " + requestBody);
             return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
 
+        } catch (EntityNotFoundException e) {
+            return requestResponse(null, e.getMessage(), HttpStatus.NOT_FOUND, false);
+        } catch (IllegalArgumentException e) {
+            return requestResponse(null, e.getMessage(), HttpStatus.BAD_REQUEST, false);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return requestResponse(null, "Error inesperado.", HttpStatus.INTERNAL_SERVER_ERROR, false);
         }
-
     }
 
 }
