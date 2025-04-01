@@ -14,16 +14,31 @@ spring:
     password: ${DATASOURCE_PASSWORD}
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     url: ${DATASOURCE_URL}
+    hikari:
+      connection-timeout: 3600000
+      max-lifetime: 7200000
+      idle-timeout: 1200000
+      maximum-pool-size: 30
   jpa:
     database-platform: org.hibernate.dialect.SQLServer2012Dialect
     show-sql: false
     hibernate:
       ddl-auto: none
     open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 1000
+          fetch_size: 5000
+        order_inserts: true
+        order_updates: true
+        format_sql: false
+
   output:
     ansi:
       enabled: always
-  # Configuración Seguridad de la aplicación
+  
+# Configuración Seguridad de la aplicación
 security:
   enable: false
   user:

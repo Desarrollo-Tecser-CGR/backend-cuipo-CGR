@@ -3,6 +3,7 @@ package com.cgr.base.presentation.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,7 @@ import com.cgr.base.presentation.controller.AbstractController;
 
 import jakarta.validation.Valid;
 
+@PreAuthorize("hasAuthority('MENU_1')")
 @RestController
 @RequestMapping("/api/v1/user")
 public class UserController extends AbstractController {
@@ -31,25 +33,25 @@ public class UserController extends AbstractController {
         this.synchronizerUsers = synchronizerUsers;
     }
 
-    @GetMapping
+    @GetMapping("/info/list")
     public ResponseEntity<?> getAll() {
         return requestResponse(this.userService.findAll(), "System Users.", HttpStatus.OK, true);
     }
 
-    @PostMapping
+    @PostMapping("/config/role")
     public ResponseEntity<?> assignRole(@Valid @RequestBody UserWithRolesRequestDto rolesRequestDto,
             BindingResult result) {
         return requestResponse(result, () -> this.userService.assignRolesToUser(rolesRequestDto), "Roles Updated.",
                 HttpStatus.CREATED, true);
     }
 
-    @GetMapping("/synchronize")
+    @GetMapping("/config/synchronize")
     public ResponseEntity<?> synchronizeAD() {
         return requestResponse(this.synchronizerUsers.synchronizeUsers(),
                 "System Synchronized with Active Directory.", HttpStatus.OK, true);
     }
 
-    @GetMapping("/filter")
+    @GetMapping("/info/filter")
     public ResponseEntity<?> findWithFilters(@Valid @RequestBody UserFilterRequestDto userFilter,
             BindingResult result, Pageable pageable) {
         return requestResponse(result, () -> this.userService.findWithFilters(userFilter, pageable),

@@ -1,39 +1,48 @@
 package com.cgr.base.application.logs.service;
 
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.application.auth.dto.AuthRequestDto;
-import com.cgr.base.application.logs.dto.LogDto;
-import com.cgr.base.application.logs.usecase.ILogUseCase;
-import com.cgr.base.domain.repository.ILogRepository;
 import com.cgr.base.infrastructure.persistence.entity.log.LogEntity;
-import com.cgr.base.infrastructure.utilities.DtoMapper;
-
-import lombok.AllArgsConstructor;
+import com.cgr.base.infrastructure.persistence.repository.logs.ILogsRepositoryJpa;
+import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 
 @Service
-@AllArgsConstructor
-public class LogService implements ILogUseCase {
 
-    private final ILogRepository adapterLogRepository;
+public class LogService {
 
-    private final DtoMapper dtoMapper;
+    @Autowired
+    private ILogsRepositoryJpa LogRepo;
 
-    // Obtener todos los registros.
-    @Override
-    public List<LogDto> logFindAll() {
-        return this.dtoMapper.convertToListDto(this.adapterLogRepository.logFindAll(), LogDto.class);
+    @Autowired
+    private IUserRepositoryJpa UserRepo;
+
+    public List<Map<String, Object>> getAllLogsDesc() {
+
+        List<LogEntity> logs = LogRepo.findAllByOrderByDateSessionStartDesc();
+        List<Map<String, Object>> result = logs.stream()
+                .map(log -> {
+                    String fullName = UserRepo.findFullNameById(log.getUserId());
+                    Map<String, Object> logMap = new HashMap<>();
+                    logMap.put("id", log.getId());
+                    logMap.put("dateSessionStart", log.getDateSessionStart());
+                    logMap.put("userId", log.getUserId());
+                    logMap.put("fullName", fullName != null ? fullName : null);
+                    logMap.put("roles", log.getRoles());
+                    return logMap;
+                })
+                .collect(Collectors.toList());
+
+        return result;
     }
 
-    // Crear un nuevo registro.
-    @Override
-    public LogEntity createLog(AuthRequestDto userRequest) {
-        LogEntity logEntity = new LogEntity(userRequest.getSAMAccountName(), new Date(), true,
-                userRequest.getSAMAccountName());
-        return this.adapterLogRepository.createLog(logEntity, userRequest.getSAMAccountName());
+    public LogEntity saveLog(LogEntity log) {
+        return LogRepo.save(log);
     }
 
 }

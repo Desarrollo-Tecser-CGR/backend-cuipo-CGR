@@ -20,10 +20,10 @@ public class dataTransfer_29 {
     private JdbcTemplate jdbcTemplate;
 
     @Value("${TABLA_EJEC_GASTOS}")
-    private String ejecGastos;
+    private String TABLA_EJEC_GASTOS;
 
-    @Value("${TABLA_E029}")
-    private String tablaE029;
+    @Value("${DATASOURCE_NAME}")
+private String DATASOURCE_NAME;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -32,31 +32,33 @@ public class dataTransfer_29 {
     public void applySpecificRule29A() {
 
         String sqlCheckTable = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'E029'";
-        String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'TABLA_E029')"
-                +
-                " BEGIN " +
-                " CREATE TABLE [" + tablaE029 + "] (" +
-                "FECHA varchar(50)," +
-                "TRIMESTRE varchar(50)," +
-                "CODIGO_ENTIDAD VARCHAR(50), " +
-                "AMBITO_CODIGO VARCHAR(50), " +
-                "GASTOS_FUNCIONAMIENTO_ASAM DECIMAL(18,2), " +
-                "CATEGORIA VARCHAR(50), " +
-                "NO_DIPUTADOS INT, " +
-                "LIM_GASTO_ASAMBLEA DECIMAL(18,2), " +
-                "MAX_SESIONES_ASAM INT, " +
-                "REMU_DIPUTADOS_SMMLV DECIMAL(18,2), " +
-                "SMMLV DECIMAL(18,2), " +
-                "GASTOS_ASAMBLEA DECIMAL(18,2), " +
-                "REMUNERACION_DIPUTADOS DECIMAL(18,2), " +
-                "PRESTACIONES_SOCIALES DECIMAL(18,2), " +
-                "ALERTA VARCHAR(200), " +
-                "CUENTAS VARCHAR(MAX)" +
-                "); " +
-                "END";
-        Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
+        Integer count = ((Number) entityManager.createNativeQuery(sqlCheckTable).getSingleResult()).intValue();
 
         if (count == 0) {
+
+            String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'E029') "
+                    +
+                    "BEGIN " +
+                    "  CREATE TABLE [E029] ( " +
+                    "    FECHA                    VARCHAR(50), " +
+                    "    TRIMESTRE                VARCHAR(50), " +
+                    "    CODIGO_ENTIDAD           VARCHAR(50), " +
+                    "    AMBITO_CODIGO            VARCHAR(50), " +
+                    "    GASTOS_FUNCIONAMIENTO_ASAM DECIMAL(18,2), " +
+                    "    CATEGORIA                VARCHAR(50), " +
+                    "    NO_DIPUTADOS             INT, " +
+                    "    LIM_GASTO_ASAMBLEA       DECIMAL(18,2), " +
+                    "    MAX_SESIONES_ASAM        INT, " +
+                    "    REMU_DIPUTADOS_SMMLV     DECIMAL(18,2), " +
+                    "    SMMLV                    DECIMAL(18,2), " +
+                    "    GASTOS_ASAMBLEA          DECIMAL(18,2), " +
+                    "    REMUNERACION_DIPUTADOS   DECIMAL(18,2), " +
+                    "    PRESTACIONES_SOCIALES    DECIMAL(18,2), " +
+                    "    ALERTA_29A               VARCHAR(200), " +
+                    "    CUENTAS                  VARCHAR(MAX) " +
+                    "  ); " +
+                    "END";
+
             entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
         }
 
@@ -79,24 +81,47 @@ public class dataTransfer_29 {
                 "CUENTAS");
 
         String checkColumnsQuery = String.format(
-                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
-                        "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaE029,
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+                        + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+                "E029",
                 "'" + String.join("','", requiredColumns) + "'");
+
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+
         for (String col : requiredColumns) {
             if (!existingCols.contains(col)) {
+                String columnType;
+                switch (col) {
+                    case "GASTOS_FUNCIONAMIENTO_ASAM":
+                    case "LIM_GASTO_ASAMBLEA":
+                    case "REMU_DIPUTADOS_SMMLV":
+                    case "SMMLV":
+                    case "GASTOS_ASAMBLEA":
+                    case "REMUNERACION_DIPUTADOS":
+                    case "PRESTACIONES_SOCIALES":
+                        columnType = "DECIMAL(18,2)";
+                        break;
+                    case "NO_DIPUTADOS":
+                    case "MAX_SESIONES_ASAM":
+                        columnType = "INT";
+                        break;
+                    case "ALERTA_29A":
+                        columnType = "VARCHAR(200)";
+                        break;
+                    case "CUENTAS":
+                        columnType = "VARCHAR(MAX)";
+                        break;
+                    default:
+                        columnType = "VARCHAR(50)";
+                }
+
                 String addColumnQuery = String.format(
-                        "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaE029, col);
+                        "ALTER TABLE [%s] ADD [%s] %s NULL",
+                        "E029", col, columnType);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
 
-        // 2. Construir la consulta INSERT utilizando WITH.
-        // Se inyecta la tabla de ejecución de gastos (ejecGastos) en todas las
-        // referencias al origen
-        // y se utiliza tablaE029 para la tabla destino.
         String insertQuery = String.format("""
                 ;WITH
                 Main AS (
@@ -113,13 +138,13 @@ public class dataTransfer_29 {
                         p.REMU_DIPUTADOS_SMMLV,
                         pa.SMMLV
                     FROM %s AS g
-                    LEFT JOIN cuipo_dev.dbo.CATEGORIAS AS c
+                    LEFT JOIN %s.dbo.CATEGORIAS AS c
                         ON g.CODIGO_ENTIDAD = c.CODIGO_ENTIDAD
                        AND g.AMBITO_CODIGO = c.AMBITO_CODIGO
-                    LEFT JOIN cuipo_dev.dbo.PORCENTAJES_LIMITES AS p
+                    LEFT JOIN %s.dbo.PORCENTAJES_LIMITES AS p
                         ON p.AMBITO_CODIGO = c.AMBITO_CODIGO
                        AND p.CATEGORIA_CODIGO = c.CATEGORIA
-                    LEFT JOIN cuipo_dev.dbo.PARAMETRIZACION_ANUAL AS pa
+                    LEFT JOIN %s.dbo.PARAMETRIZACION_ANUAL AS pa
                         ON g.FECHA = pa.FECHA
                     WHERE g.TRIMESTRE = '12'
                       AND (g.AMBITO_CODIGO = 'A438' OR g.AMBITO_CODIGO = 'A441')
@@ -318,15 +343,16 @@ public class dataTransfer_29 {
                       AND t.AMBITO_CODIGO = m.AMBITO_CODIGO
                 )
                 """,
-                // Reemplazos para ejecGastos en cada referencia del origen:
-                ejecGastos, // Main
-                ejecGastos, // Asamblea
-                ejecGastos, // RemuDip
-                ejecGastos, // DatosPrestaciones
-                ejecGastos, // CuentasReportadas
-                // Reemplazos para tabla destino:
-                tablaE029, // INSERT INTO
-                tablaE029 // WHERE NOT EXISTS
+                TABLA_EJEC_GASTOS,
+                DATASOURCE_NAME,
+                DATASOURCE_NAME,
+                DATASOURCE_NAME, // Main
+                TABLA_EJEC_GASTOS, // Asamblea
+                TABLA_EJEC_GASTOS, // RemuDip
+                TABLA_EJEC_GASTOS, // DatosPrestaciones
+                TABLA_EJEC_GASTOS, // CuentasReportadas
+                "E029", // INSERT INTO
+                "E029" // WHERE NOT EXISTS
         );
 
         // 3. Ejecutar la consulta de inserción.
@@ -335,7 +361,7 @@ public class dataTransfer_29 {
 
     @Transactional
     public void applySpecificRule29B() {
-        // Lista de columnas que se actualizarán
+        // Lista de columnas que se actualizarán en la tabla E029
         List<String> requiredColumns = Arrays.asList(
                 "IBC",
                 "CESANTIAS",
@@ -343,50 +369,62 @@ public class dataTransfer_29 {
                 "SALUD",
                 "PENSION",
                 "RIESGOS_PROFESIONALES",
-                "INGRESOS_CESANTIAS",
+                "INTERESES_CESANTIAS",
                 "VACACIONES",
                 "PRIMA_VACACIONES",
                 "PRIMA_NAVIDAD");
 
-        // Verificar que las columnas existan en la tabla
+        // 1. Verificar que esas columnas existan y, si no, crearlas
         String checkColumnsQuery = String.format(
-                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaE029,
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+                        + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+                "E029",
                 "'" + String.join("','", requiredColumns) + "'");
-
         List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
 
         for (String column : requiredColumns) {
             if (!existingColumns.contains(column)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s DECIMAL(18,2) NULL",
-                        tablaE029, column);
+                        "E029", column);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
 
-        // Construir la consulta UPDATE usando una CTE para realizar los cálculos
-        String query = "UPDATE E029 " +
-                "SET PRESTACIONES_SOCIALES = " +
-                "(REMUNERACION_DIPUTADOS * pa.APORTES_PARAFISCALES) + " +
-                "(REMUNERACION_DIPUTADOS * pa.SALUD) + " +
-                "(REMUNERACION_DIPUTADOS * pa.PENSION) + " +
-                "(REMUNERACION_DIPUTADOS * pa.RIESGOS_PROFESIONALES) + " +
-                "(GASTOS_FUNCIONAMIENTO_ASAM / pa.CESANTIAS) + " +
-                "((GASTOS_FUNCIONAMIENTO_ASAM / pa.CESANTIAS) * pa.INTERESES_CESANTIAS) + " +
-                "((GASTOS_FUNCIONAMIENTO_ASAM / 30) * pa.VACAIONES) + " +
-                "((GASTOS_FUNCIONAMIENTO_ASAM / 30) * pa.PRIMA_VACACIONES) + " +
-                "(GASTOS_FUNCIONAMIENTO_ASAM + (((GASTOS_FUNCIONAMIENTO_ASAM / 30) * pa.PRIMA_VACACIONES) * pa.PRIMA_NAVIDAD)) "
-                +
-                "FROM E029 e " +
-                "JOIN PARAMETRIZACION_ANUAL pa " +
-                "ON e.FECHA = pa.FECHA";
-        jdbcTemplate.execute(query);
+        String calcIbcQuery = String.format("""
+                UPDATE %s
+                SET
+                    IBC = REMUNERACION_DIPUTADOS / 12,
+                    CESANTIAS = REMUNERACION_DIPUTADOS / 8
+                """,
+                "E029");
+        jdbcTemplate.execute(calcIbcQuery);
+
+        String updateOtherColsQuery = String.format("""
+                UPDATE e
+                SET
+                    e.APORTES_PARAFISCALES    = (e.IBC * pa.APORTES_PARAFISCALES),
+                    e.SALUD                   = (e.IBC * pa.SALUD),
+                    e.PENSION                 = (e.IBC * pa.PENSION),
+                    e.RIESGOS_PROFESIONALES   = (e.IBC * pa.RIESGOS_PROFESIONALES),
+                    e.INTERESES_CESANTIAS     = (e.CESANTIAS * pa.INTERESES_CESANTIAS),
+                    e.VACACIONES              = ((e.REMUNERACION_DIPUTADOS / 30) * 15),
+                    e.PRIMA_VACACIONES        = ((e.REMUNERACION_DIPUTADOS / 30) * 15),
+                    e.PRIMA_NAVIDAD           = (
+                        e.REMUNERACION_DIPUTADOS
+                        + ((1.0 / 12) * ((e.REMUNERACION_DIPUTADOS / 30) * 15))
+                    )
+                FROM %s e
+                JOIN PARAMETRIZACION_ANUAL pa ON e.FECHA = pa.FECHA;
+                """,
+                "E029");
+
+        jdbcTemplate.execute(updateOtherColsQuery);
     }
 
     @Transactional
     public void applySpecificRule29C() {
-        // Lista de columnas a actualizar
+        // Lista de columnas a actualizar/crear en la tabla
         List<String> requiredColumns = Arrays.asList(
                 "PS_SS_VALOR_MAXIMO_AUTORIZADO",
                 "CONTROL_PS_SS",
@@ -394,31 +432,36 @@ public class dataTransfer_29 {
                 "CONTROL_REMU_DIP",
                 "OTROS_GASTOS_ASAM",
                 "RELACION_GASTOS_EJECUTADOS",
-                "ALERTA_29C");
+                "ALERTA_29C",
+                "REGLA_ESPECIFICA_29" // <-- NUEVA COLUMNA
+        );
 
         // Verificar si las columnas existen en la tabla
         String checkColumnsQuery = String.format(
-                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaE029,
+                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+                        + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+                "E029",
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
 
-        // Si no existen, se crean: se usan DECIMAL(18,2) para los campos numéricos y
-        // VARCHAR(MAX) para ALERTA.
+        // Crear columnas que no existen
         for (String column : requiredColumns) {
             if (!existingColumns.contains(column)) {
                 String addColumnQuery;
-                if ("ALERTA_29C".equals(column)) {
-                    addColumnQuery = String.format("ALTER TABLE %s ADD %s VARCHAR(MAX) NULL", tablaE029, column);
+                if ("ALERTA_29C".equals(column) || "REGLA_ESPECIFICA_29".equals(column)) {
+                    addColumnQuery = String.format(
+                            "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
+                            "E029", column);
                 } else {
-                    addColumnQuery = String.format("ALTER TABLE %s ADD %s DECIMAL(18,2) NULL", tablaE029, column);
+                    addColumnQuery = String.format(
+                            "ALTER TABLE %s ADD %s DECIMAL(18,2) NULL",
+                            "E029", column);
                 }
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
 
-        // Construir la consulta UPDATE utilizando una CTE para realizar los cálculos
         String updateQuery = String.format(
                 """
                         WITH Calculos AS (
@@ -427,24 +470,54 @@ public class dataTransfer_29 {
                                 TRIMESTRE,
                                 CODIGO_ENTIDAD,
                                 AMBITO_CODIGO,
-                                (APORTES_PARAFISCALES + SALUD + PENSION + RIESGOS_PROFESIONALES + CESANTIAS + INGRESOS_CESANTIAS + VACACIONES + PRIMA_VACACIONES + PRIMA_NAVIDAD) AS PS_SS_VALOR_MAXIMO_AUTORIZADO,
-                                (PRESTACIONES_SOCIALES / (APORTES_PARAFISCALES + SALUD + PENSION + RIESGOS_PROFESIONALES + CESANTIAS + INGRESOS_CESANTIAS + VACACIONES + PRIMA_VACACIONES + PRIMA_NAVIDAD)) AS CONTROL_PS_SS,
-                                (NO_DIPUTADOS * MAX_SESIONES_ASAM * (REMU_DIPUTADOS_SMMLV * SMMLV)) AS MAXIMO_AUTORIZADO_REMU_DIP,
-                                (REMUNERACION_DIPUTADOS / (NO_DIPUTADOS * MAX_SESIONES_ASAM * (REMU_DIPUTADOS_SMMLV * SMMLV))) AS CONTROL_REMU_DIP,
-                                (GASTOS_ASAMBLEA - REMUNERACION_DIPUTADOS - PRESTACIONES_SOCIALES) AS OTROS_GASTOS_ASAM,
-                                (((GASTOS_ASAMBLEA - REMUNERACION_DIPUTADOS - PRESTACIONES_SOCIALES) / REMUNERACION_DIPUTADOS) * 100) AS RELACION_GASTOS_EJECUTADOS,
+                                (APORTES_PARAFISCALES + SALUD + PENSION + RIESGOS_PROFESIONALES
+                                 + CESANTIAS + INTERESES_CESANTIAS + VACACIONES + PRIMA_VACACIONES + PRIMA_NAVIDAD)
+                                 AS PS_SS_VALOR_MAXIMO_AUTORIZADO,
+
+                                (PRESTACIONES_SOCIALES /
+                                 (APORTES_PARAFISCALES + SALUD + PENSION + RIESGOS_PROFESIONALES
+                                  + CESANTIAS + INTERESES_CESANTIAS + VACACIONES + PRIMA_VACACIONES + PRIMA_NAVIDAD)
+                                ) AS CONTROL_PS_SS,
+
+                                (NO_DIPUTADOS * MAX_SESIONES_ASAM * (REMU_DIPUTADOS_SMMLV * SMMLV))
+                                AS MAXIMO_AUTORIZADO_REMU_DIP,
+
+                                (REMUNERACION_DIPUTADOS /
+                                 (NO_DIPUTADOS * MAX_SESIONES_ASAM * (REMU_DIPUTADOS_SMMLV * SMMLV))
+                                ) AS CONTROL_REMU_DIP,
+
+                                (GASTOS_ASAMBLEA - REMUNERACION_DIPUTADOS - PRESTACIONES_SOCIALES)
+                                AS OTROS_GASTOS_ASAM,
+
+                                ( ((GASTOS_ASAMBLEA - REMUNERACION_DIPUTADOS - PRESTACIONES_SOCIALES)
+                                  / REMUNERACION_DIPUTADOS) * 100
+                                ) AS RELACION_GASTOS_EJECUTADOS,
+
                                 CASE
                                     WHEN REMUNERACION_DIPUTADOS IS NULL
-                                        OR LIM_GASTO_ASAMBLEA IS NULL
+                                         OR LIM_GASTO_ASAMBLEA IS NULL
+                                    THEN 'La entidad presenta posibles inconsistencias'
 
-                                    THEN 'La entidad presente posibles inconsistencias'
-
-                                    WHEN (((GASTOS_ASAMBLEA - REMUNERACION_DIPUTADOS - PRESTACIONES_SOCIALES)
-                                        / REMUNERACION_DIPUTADOS) * 100) <= LIM_GASTO_ASAMBLEA
+                                    WHEN ((((GASTOS_ASAMBLEA - REMUNERACION_DIPUTADOS - PRESTACIONES_SOCIALES)
+                                          / REMUNERACION_DIPUTADOS) * 100)
+                                          <= LIM_GASTO_ASAMBLEA)
                                     THEN 'La entidad excede los límites'
 
                                     ELSE 'La entidad NO excede los límites'
-                                END AS ALERTA_29C
+                                END AS ALERTA_29C,
+
+                                CASE
+                                    WHEN REMUNERACION_DIPUTADOS IS NULL
+                                         OR LIM_GASTO_ASAMBLEA IS NULL
+                                    THEN 'NO DATA'
+
+                                    WHEN ((((GASTOS_ASAMBLEA - REMUNERACION_DIPUTADOS - PRESTACIONES_SOCIALES)
+                                          / REMUNERACION_DIPUTADOS) * 100)
+                                          <= LIM_GASTO_ASAMBLEA)
+                                    THEN 'EXCEDE'
+
+                                    ELSE 'NO EXCEDE'
+                                END AS REGLA_ESPECIFICA_29
 
                             FROM %s
                         )
@@ -456,7 +529,8 @@ public class dataTransfer_29 {
                             e.CONTROL_REMU_DIP = c.CONTROL_REMU_DIP,
                             e.OTROS_GASTOS_ASAM = c.OTROS_GASTOS_ASAM,
                             e.RELACION_GASTOS_EJECUTADOS = c.RELACION_GASTOS_EJECUTADOS,
-                            e.ALERTA_29C = c.ALERTA_29C
+                            e.ALERTA_29C = c.ALERTA_29C,
+                            e.REGLA_ESPECIFICA_29 = c.REGLA_ESPECIFICA_29
                         FROM %s e
                         INNER JOIN Calculos c
                             ON e.FECHA = c.FECHA
@@ -464,7 +538,8 @@ public class dataTransfer_29 {
                            AND e.CODIGO_ENTIDAD = c.CODIGO_ENTIDAD
                            AND e.AMBITO_CODIGO = c.AMBITO_CODIGO;
                         """,
-                tablaE029, tablaE029);
+                "E029",
+                "E029");
 
         jdbcTemplate.execute(updateQuery);
     }

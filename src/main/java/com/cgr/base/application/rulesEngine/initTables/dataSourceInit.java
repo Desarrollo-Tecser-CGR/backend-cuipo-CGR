@@ -11,22 +11,16 @@ import jakarta.transaction.Transactional;
 public class dataSourceInit {
 
         @Value("${TABLA_PROG_INGRESOS}")
-        private String progIngresos;
+        private String TABLA_PROG_INGRESOS;
 
         @Value("${TABLA_EJEC_INGRESOS}")
-        private String ejecIngresos;
+        private String TABLA_EJEC_INGRESOS;
 
         @Value("${TABLA_PROG_GASTOS}")
-        private String progGastos;
+        private String TABLA_PROG_GASTOS;
 
         @Value("${TABLA_EJEC_GASTOS}")
-        private String ejecGastos;
-
-        @Value("${TABLA_GENERAL_RULES}")
-        private String tablaReglas;
-
-        @Value("${TABLA_SPECIFIC_RULES}")
-        private String tablaSpecific;
+        private String TABLA_EJEC_GASTOS;
 
         private String[] tablas;
 
@@ -36,7 +30,7 @@ public class dataSourceInit {
         @Transactional
         public void processTablesRules() {
 
-                this.tablas = new String[] { progIngresos, ejecIngresos, progGastos, ejecGastos };
+                this.tablas = new String[] { TABLA_PROG_INGRESOS, TABLA_EJEC_INGRESOS, TABLA_PROG_GASTOS, TABLA_EJEC_GASTOS };
 
                 // Paso 1: Agregar columnas TRIMESTRE y FECHA
                 addComputedColumns();
@@ -98,12 +92,12 @@ public class dataSourceInit {
 
         private void transferUniqueData() {
 
-                if (!tableExists(tablaReglas)) {
+                if (!tableExists("GENERAL_RULES_DATA")) {
                         createGeneralRulesTable();
                 }
 
                 for (String tabla : tablas) {
-                        String sqlInsert = "INSERT INTO [" + tablaReglas + "] " +
+                        String sqlInsert = "INSERT INTO [GENERAL_RULES_DATA] " +
                                         "([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO], [NOMBRE_ENTIDAD], [AMBITO_NOMBRE]) "
                                         +
                                         "SELECT DISTINCT " +
@@ -116,7 +110,7 @@ public class dataSourceInit {
                                         "FROM [" + tabla + "] t " +
                                         "WHERE NOT EXISTS ( " +
                                         "    SELECT 1 " +
-                                        "    FROM [" + tablaReglas + "] r " +
+                                        "    FROM [GENERAL_RULES_DATA] r " +
                                         "    WHERE r.[FECHA] = t.[FECHA] " +
                                         "      AND r.[TRIMESTRE] = t.[TRIMESTRE] " +
                                         "      AND r.[CODIGO_ENTIDAD] = t.[CODIGO_ENTIDAD_INT] " +
@@ -135,14 +129,15 @@ public class dataSourceInit {
         }
 
         private void createGeneralRulesTable() {
-                String sqlCreateTable = "CREATE TABLE [" + tablaReglas + "] (" +
+                String sqlCreateTable = "CREATE TABLE [GENERAL_RULES_DATA] (" +
                                 "[FECHA] INT, " +
                                 "[TRIMESTRE] INT, " +
                                 "[CODIGO_ENTIDAD] BIGINT, " +
                                 "[AMBITO_CODIGO] NVARCHAR(50), " +
                                 "[NOMBRE_ENTIDAD] NVARCHAR(255), " +
                                 "[AMBITO_NOMBRE] NVARCHAR(255), " +
-                                "[FECHA_CARGUE] DATETIME NOT NULL DEFAULT (GETUTCDATE() AT TIME ZONE 'UTC' AT TIME ZONE 'SA Pacific Standard Time'), " +
+                                "[FECHA_CARGUE] DATETIME NOT NULL DEFAULT (GETUTCDATE() AT TIME ZONE 'UTC' AT TIME ZONE 'SA Pacific Standard Time'), "
+                                +
                                 "CONSTRAINT PK_GeneralRules PRIMARY KEY ([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO]))";
                 entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
         }
@@ -181,21 +176,22 @@ public class dataSourceInit {
                 String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'SPECIFIC_RULES_DATA')"
                                 +
                                 " BEGIN " +
-                                " CREATE TABLE [" + tablaSpecific + "] (" +
+                                " CREATE TABLE [SPECIFIC_RULES_DATA] (" +
                                 "[FECHA] INT, " +
                                 "[TRIMESTRE] INT, " +
                                 "[CODIGO_ENTIDAD] BIGINT, " +
                                 "[AMBITO_CODIGO] NVARCHAR(50), " +
                                 "[NOMBRE_ENTIDAD] VARCHAR(255), " +
                                 "[AMBITO_NOMBRE] VARCHAR(50), " +
-                                "[FECHA_CARGUE] DATETIME NOT NULL DEFAULT (GETUTCDATE() AT TIME ZONE 'UTC' AT TIME ZONE 'SA Pacific Standard Time'), " +
+                                "[FECHA_CARGUE] DATETIME NOT NULL DEFAULT (GETUTCDATE() AT TIME ZONE 'UTC' AT TIME ZONE 'SA Pacific Standard Time'), "
+                                +
                                 "CONSTRAINT PK_AggregatedData PRIMARY KEY ([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO], [NOMBRE_ENTIDAD], [AMBITO_NOMBRE])"
                                 +
                                 " ) " +
                                 " END";
                 entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
 
-                String sqlInsertData = "INSERT INTO [" + tablaSpecific + "] " +
+                String sqlInsertData = "INSERT INTO [SPECIFIC_RULES_DATA] " +
                                 "([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO], [NOMBRE_ENTIDAD], [AMBITO_NOMBRE]) "
                                 +
                                 "SELECT DISTINCT " +
@@ -205,11 +201,11 @@ public class dataSourceInit {
                                 "    t.[AMBITO_CODIGO_STR] AS AMBITO_CODIGO, " +
                                 "    t.[NOMBRE_ENTIDAD], " +
                                 "    t.[AMBITO_NOMBRE] " +
-                                "FROM [" + ejecGastos + "] t " +
+                                "FROM [" + TABLA_EJEC_GASTOS + "] t " +
                                 "WHERE t.[AMBITO_CODIGO_STR] IN ('A438', 'A439', 'A440', 'A441') " +
                                 "AND NOT EXISTS ( " +
                                 "    SELECT 1 " +
-                                "    FROM [" + tablaSpecific + "] " + "r " +
+                                "    FROM [SPECIFIC_RULES_DATA] " + "r " +
                                 "    WHERE r.[FECHA] = t.[FECHA] " +
                                 "      AND r.[TRIMESTRE] = t.[TRIMESTRE] " +
                                 "      AND r.[CODIGO_ENTIDAD] = t.[CODIGO_ENTIDAD_INT] " +
@@ -217,7 +213,7 @@ public class dataSourceInit {
                                 ")";
                 entityManager.createNativeQuery(sqlInsertData).executeUpdate();
 
-                String sqlInsertData2 = "INSERT INTO [" + tablaSpecific + "] " +
+                String sqlInsertData2 = "INSERT INTO [SPECIFIC_RULES_DATA] " +
                                 "([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO], [NOMBRE_ENTIDAD], [AMBITO_NOMBRE]) "
                                 +
                                 "SELECT DISTINCT " +
@@ -227,17 +223,33 @@ public class dataSourceInit {
                                 "    t.[AMBITO_CODIGO_STR] AS AMBITO_CODIGO, " +
                                 "    t.[NOMBRE_ENTIDAD], " +
                                 "    t.[AMBITO_NOMBRE] " +
-                                "FROM [" + ejecIngresos + "] t " +
+                                "FROM [" + TABLA_EJEC_INGRESOS + "] t " +
                                 "WHERE t.[AMBITO_CODIGO_STR] IN ('A438', 'A439', 'A440', 'A441') " +
                                 "AND NOT EXISTS ( " +
                                 "    SELECT 1 " +
-                                "    FROM [" + tablaSpecific + "] " + "r " +
+                                "    FROM [SPECIFIC_RULES_DATA] " + "r " +
                                 "    WHERE r.[FECHA] = t.[FECHA] " +
                                 "      AND r.[TRIMESTRE] = t.[TRIMESTRE] " +
                                 "      AND r.[CODIGO_ENTIDAD] = t.[CODIGO_ENTIDAD_INT] " +
                                 "      AND r.[AMBITO_CODIGO] = t.[AMBITO_CODIGO_STR] " +
                                 ")";
                 entityManager.createNativeQuery(sqlInsertData2).executeUpdate();
+        }
+
+        @Transactional
+        public void createLogsGeneralTable() {
+                String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'logs_general' AND schema_id = SCHEMA_ID('dbo')) "
+                                +
+                                "BEGIN " +
+                                "CREATE TABLE logs_general (" +
+                                "id BIGINT IDENTITY(1,1) PRIMARY KEY, " +
+                                "user_id BIGINT NOT NULL, " +
+                                "log_type VARCHAR(20), " +
+                                "detail VARCHAR(255), " +
+                                "create_date DATETIME NOT NULL DEFAULT GETDATE()" +
+                                ") " +
+                                "END";
+                entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
         }
 
 }

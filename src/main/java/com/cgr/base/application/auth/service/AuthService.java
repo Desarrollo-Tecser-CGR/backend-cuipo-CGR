@@ -1,10 +1,14 @@
 package com.cgr.base.application.auth.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,15 +16,17 @@ import com.cgr.base.application.auth.dto.AuthRequestDto;
 import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.application.auth.mapper.AuthMapper;
 import com.cgr.base.application.auth.usecase.IAuthUseCase;
-import com.cgr.base.application.logs.usecase.ILogUseCase;
+import com.cgr.base.application.logs.service.LogService;
 import com.cgr.base.domain.models.UserModel;
 import com.cgr.base.domain.repository.IActiveDirectoryUserRepository;
 import com.cgr.base.domain.repository.IUserRepository;
 import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
+import com.cgr.base.infrastructure.persistence.entity.log.LogEntity;
 import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
+import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,15 +36,23 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class AuthService implements IAuthUseCase {
 
+    @Autowired
+    private final LogService LogService;
+
+    @Autowired
     private final IUserRepository userRepository;
 
+    @Autowired
     private final IUserRepositoryJpa userRepositoryFull;
 
+    @Autowired
     private final IActiveDirectoryUserRepository activeDirectoryUserRepository;
 
+    @Autowired
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
-    private final ILogUseCase logService;
+    @Autowired
+    private final JwtService jwtService;
 
     // Autenticación utilizando SAMAccountName y contraseña.
     @Transactional
@@ -103,7 +117,11 @@ public class AuthService implements IAuthUseCase {
                         .findBySAMAccountNameWithRoles(userRequest.getSAMAccountName()).get();
                 AuthResponseDto userRequestDto = AuthMapper.INSTANCE.toAuthResponDto(userRequest);
 
-                userRequestDto.setRoles(user.getRoles().stream().map(RoleEntity::getName).toList());
+                List<AuthResponseDto.RoleDto> rolesDto = user.getRoles().stream()
+                        .map(role -> new AuthResponseDto.RoleDto(role.getId(), role.getName()))
+                        .toList();
+
+                userRequestDto.setRoles(rolesDto);
 
                 String token = jwtAuthenticationProvider.createToken(userRequestDto, user.getRoles());
 
@@ -115,22 +133,35 @@ public class AuthService implements IAuthUseCase {
                 userRequestDto.setToken(token);
                 userRequestDto.setIsEnable(true);
 
-                this.logService.createLog(userRequest);
+                userRequest.setEmail(user.getEmail());
+
+                Long userId = jwtService.extractUserIdFromToken(token);
+
+                LogEntity log = new LogEntity();
+
+                log.setDateSessionStart(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                log.setUserId(userId);
+                log.setRoles(user.getRoles().stream()
+                        .map(RoleEntity::getName)
+                        .collect(Collectors.joining(",")));
+                LogService.saveLog(log);
 
                 response.put("user", userRequestDto);
                 response.put("message", "User Authenticated Successfully.");
                 response.put("statusCode", 200);
                 response.put("status", "success");
                 return response;
+            } else {
+                throw new SecurityException("Invalid credentials for user: " + userRequest.getSAMAccountName());
             }
 
+        } catch (SecurityException e) {
+            throw new RuntimeException("Unauthorized: " + e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Bad Request: " + e.getMessage(), e);
         } catch (Exception e) {
-            response.put("errormsj", e.getMessage());
-            response.put("message", "Error Authenticating User with LDAP.");
-            response.put("statusCode", 500);
-            response.put("status", "error");
+            throw new RuntimeException("Internal Server Error: " + e.getMessage(), e);
         }
-        return response;
     }
 
 }

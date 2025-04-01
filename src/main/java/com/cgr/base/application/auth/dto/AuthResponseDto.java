@@ -18,7 +18,15 @@ public class AuthResponseDto {
     private String sAMAccountName;
     private String token;
     private Boolean isEnable;
-    private List<String> roles;
+    private List<RoleDto> roles;
     private List<Menu> menus;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RoleDto {
+        private Long id;
+        private String name;
+    }
 
 }

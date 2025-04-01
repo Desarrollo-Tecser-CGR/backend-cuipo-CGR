@@ -4,6 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.cgr.base.application.certifications.service.initTablaCertifications;
+import com.cgr.base.application.parameterization.generalParameter;
+import com.cgr.base.application.parameterization.specificParameter;
+import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_17;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EG;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EI;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_PG;
@@ -11,8 +15,7 @@ import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_PI;
 import com.cgr.base.application.rulesEngine.initTables.dataCategoryInit;
 import com.cgr.base.application.rulesEngine.initTables.dataParameterInit;
 import com.cgr.base.application.rulesEngine.initTables.dataSourceInit;
-import com.cgr.base.application.rulesEngine.parameterization.generalParameter;
-import com.cgr.base.application.rulesEngine.parameterization.specificParameter;
+import com.cgr.base.application.rulesEngine.specificRules.columnsER;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_22;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_23;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_24;
@@ -23,6 +26,7 @@ import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_28;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_29;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_30;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_31;
+import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_32;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_GF;
 
 @Service
@@ -48,6 +52,9 @@ public class initDependencies {
 
     @Autowired
     private dataTransfer_PG RulesPG;
+
+    @Autowired
+    private dataTransfer_17 Rule17;
 
     @Autowired
     private dataTransfer_22 Rules22;
@@ -80,6 +87,12 @@ public class initDependencies {
     private dataTransfer_31 Rules31;
 
     @Autowired
+    private dataTransfer_32 Rules32;
+
+    @Autowired
+    private columnsER ER;
+
+    @Autowired
     private dataTransfer_GF RulesGF;
 
     @Autowired
@@ -88,14 +101,18 @@ public class initDependencies {
     @Autowired
     private specificParameter ParameterRE;
 
+    @Autowired
+    private initTablaCertifications Certificator;
+
     @Async
     public void initializeDependencies() {
 
         // MotorReglas.processTablesRules();
-        // Parametria.processTablesSource();
+        Parametria.processTablesSource();
         // Categorias.initCategoryTable();
-        ParameterRG.tableGeneralRulesName();
-        ParameterRE.tableSpecificRulesName();
+        // ParameterRG.tableGeneralRulesName();
+        // ParameterRE.tableSpecificRulesName();
+        // Certificator.generateControlTable();
 
     }
 
@@ -122,6 +139,7 @@ public class initDependencies {
             case "15" -> RulesEG.applyGeneralRule15();
             case "16A" -> RulesEG.applyGeneralRule16A();
             case "16B" -> RulesEG.applyGeneralRule16B();
+            case "17" -> Rule17.applyGeneralRule17();
             default -> throw new IllegalArgumentException("Invalid Rule.");
         }
     }
@@ -153,6 +171,7 @@ public class initDependencies {
             case "29C" -> Rules29.applySpecificRule29C();
             case "30" -> Rules30.applySpecificRule30();
             case "31" -> Rules31.applySpecificRule31();
+            case "32" -> Rules32.applySpecificRule32();
             default -> throw new IllegalArgumentException("Invalid Rule.");
         }
     }
