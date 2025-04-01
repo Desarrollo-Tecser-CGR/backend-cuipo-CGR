@@ -15,7 +15,7 @@ public class dataTransfer_22 {
     private JdbcTemplate jdbcTemplate;
 
     @Value("${TABLA_EJEC_INGRESOS}")
-    private String ejecIngresos;
+    private String TABLA_EJEC_INGRESOS;
 
     public void applyGeneralRule22A() {
 
@@ -81,7 +81,7 @@ public class dataTransfer_22 {
                 ;
                 """,
                 // Para la CTE
-                ejecIngresos, // e
+                TABLA_EJEC_INGRESOS, // e
                 "CUENTAS_ICLD", // c
                 "SPECIFIC_RULES_DATA");
 
@@ -100,11 +100,11 @@ public class dataTransfer_22 {
         // 1) Definimos la(s) columna(s) requeridas (en este caso, REGLA_22_A)
         List<String> requiredColumns = Arrays.asList("REGLA_22_A");
 
-        // 2) Verificamos si la columna ya existe en la tabla ejecIngresos
+        // 2) Verificamos si la columna ya existe en la tabla TABLA_EJEC_INGRESOS
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
                         "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                ejecIngresos, // nombre de la tabla de ejecución de ingresos
+                TABLA_EJEC_INGRESOS, // nombre de la tabla de ejecución de ingresos
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -117,7 +117,7 @@ public class dataTransfer_22 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        ejecIngresos, col);
+                        TABLA_EJEC_INGRESOS, col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -142,7 +142,7 @@ public class dataTransfer_22 {
                    ON e.AMBITO_CODIGO = c.AMBITO_CODIGO
                   AND e.CUENTA        = c.CUENTA;
                 """,
-                ejecIngresos, // tabla de ingresos (alias e)
+                TABLA_EJEC_INGRESOS, // tabla de ingresos (alias e)
                 "CUENTAS_ICLD" // tabla de CUENTAS_ICLD (alias c)
         );
 
@@ -279,8 +279,8 @@ public class dataTransfer_22 {
                    AND r.AMBITO_CODIGO  = v.AMBITO_CODIGO
                 ;
                 """,
-                ejecIngresos, "CUENTAS_ICLD",
-                "CUENTAS_ICLD", ejecIngresos,
+                TABLA_EJEC_INGRESOS, "CUENTAS_ICLD",
+                "CUENTAS_ICLD", TABLA_EJEC_INGRESOS,
                 "SPECIFIC_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
@@ -290,7 +290,7 @@ public class dataTransfer_22 {
         // 1) Verificar/crear la columna ALERTA_22_CA0080 de forma más eficiente
         List<String> requiredColumns = Arrays.asList("ALERTA_22_CA0080");
 
-        // 2) Verificamos si la columna ya existe en la tabla ejecIngresos
+        // 2) Verificamos si la columna ya existe en la tabla TABLA_EJEC_INGRESOS
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
                         "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
@@ -352,8 +352,8 @@ public class dataTransfer_22 {
                    AND r.CODIGO_ENTIDAD = v.CODIGO_ENTIDAD
                    AND r.AMBITO_CODIGO = v.AMBITO_CODIGO;
                 """,
-                ejecIngresos,
-                ejecIngresos,
+                TABLA_EJEC_INGRESOS,
+                TABLA_EJEC_INGRESOS,
                 "SPECIFIC_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
@@ -374,11 +374,11 @@ public class dataTransfer_22 {
         // ingresos2
         List<String> requiredColumns = Arrays.asList("ALERTA_22_CA0080");
 
-        // 2) Verificamos si la columna ya existe en la tabla ejecIngresos
+        // 2) Verificamos si la columna ya existe en la tabla TABLA_EJEC_INGRESOS
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
                         "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                ejecIngresos, // nombre de la tabla de ejecución de ingresos
+                TABLA_EJEC_INGRESOS, // nombre de la tabla de ejecución de ingresos
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -391,7 +391,7 @@ public class dataTransfer_22 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        ejecIngresos, col);
+                        TABLA_EJEC_INGRESOS, col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -408,7 +408,7 @@ public class dataTransfer_22 {
                 END
                 FROM %s e;
                 """,
-                ejecIngresos);
+                TABLA_EJEC_INGRESOS);
 
         jdbcTemplate.execute(updateQuery);
     }
@@ -446,8 +446,8 @@ public class dataTransfer_22 {
         }
 
         // 2) Construye el WITH + UPDATE optimizado
-        // T0: combos FECHA/TRIM/ENT/AMB obtenidos de ejecIngresos.
-        // FlagValidaciones: agrupa las filas de ejecIngresos que cumplen las
+        // T0: combos FECHA/TRIM/ENT/AMB obtenidos de TABLA_EJEC_INGRESOS.
+        // FlagValidaciones: agrupa las filas de TABLA_EJEC_INGRESOS que cumplen las
         // condiciones de validación.
         // Validaciones_22D: combina T0 con FlagValidaciones para asignar el mensaje
         // correspondiente.
@@ -512,8 +512,8 @@ public class dataTransfer_22 {
                            AND r.CODIGO_ENTIDAD = v.CODIGO_ENTIDAD
                            AND r.AMBITO_CODIGO = v.AMBITO_CODIGO;
                         """,
-                ejecIngresos,
-                ejecIngresos,
+                TABLA_EJEC_INGRESOS,
+                TABLA_EJEC_INGRESOS,
                 "SPECIFIC_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
@@ -526,7 +526,7 @@ public class dataTransfer_22 {
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
                         + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                ejecIngresos,
+                TABLA_EJEC_INGRESOS,
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -535,7 +535,7 @@ public class dataTransfer_22 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        ejecIngresos, col);
+                        TABLA_EJEC_INGRESOS, col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -558,7 +558,7 @@ public class dataTransfer_22 {
                     ELSE '0'
                 END
                 FROM %s e;
-                """, ejecIngresos);
+                """, TABLA_EJEC_INGRESOS);
 
         jdbcTemplate.execute(updateQuery);
     }
@@ -635,8 +635,8 @@ public class dataTransfer_22 {
                    AND r.CODIGO_ENTIDAD = v.CODIGO_ENTIDAD
                    AND r.AMBITO_CODIGO  = v.AMBITO_CODIGO;
                 """,
-                ejecIngresos,
-                ejecIngresos,
+                TABLA_EJEC_INGRESOS,
+                TABLA_EJEC_INGRESOS,
                 "SPECIFIC_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
@@ -649,7 +649,7 @@ public class dataTransfer_22 {
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
                         + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                ejecIngresos,
+                TABLA_EJEC_INGRESOS,
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -658,7 +658,7 @@ public class dataTransfer_22 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        ejecIngresos, col);
+                        TABLA_EJEC_INGRESOS, col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -674,7 +674,7 @@ public class dataTransfer_22 {
                     COD_FUENTES_FINANCIACION = '1.2.4.3.04' THEN '1'
                     ELSE '0'
                 END;
-                """, ejecIngresos);
+                """, TABLA_EJEC_INGRESOS);
 
         jdbcTemplate.execute(updateQuery);
     }

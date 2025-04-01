@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -14,6 +15,9 @@ public class dataTransfer_30 {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Value("${TABLA_EJEC_INGRESOS}")
+    private String TABLA_EJEC_INGRESOS;
 
     @Transactional
     public void applySpecificRule30() {
@@ -217,7 +221,7 @@ public class dataTransfer_30 {
                 "SET CUOTA_FISCALIZA = ( " +
                 " SELECT SUM(TRY_CAST(vw.TOTAL_RECAUDO AS float)) "
                 +
-                "    FROM VW_OPENDATA_B_EJECUCION_INGRESOS vw " +
+                "    FROM " + TABLA_EJEC_INGRESOS + " vw " +
                 "    WHERE vw.FECHA = E030.FECHA " +
                 "      AND vw.TRIMESTRE = E030.TRIMESTRE " +
                 "      AND vw.CODIGO_ENTIDAD = E030.CODIGO_ENTIDAD " +
@@ -226,7 +230,7 @@ public class dataTransfer_30 {
                 ") " +
                 "WHERE EXISTS ( " +
                 "    SELECT 1 " +
-                "    FROM VW_OPENDATA_B_EJECUCION_INGRESOS vw " +
+                "    FROM " + TABLA_EJEC_INGRESOS + " vw " +
                 "    WHERE vw.FECHA = E030.FECHA " +
                 "      AND vw.TRIMESTRE = E030.TRIMESTRE " +
                 "      AND vw.CODIGO_ENTIDAD = E030.CODIGO_ENTIDAD " +

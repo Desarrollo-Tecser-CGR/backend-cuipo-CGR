@@ -14,7 +14,7 @@ public class dataSourceInit {
         private String TABLA_PROG_INGRESOS;
 
         @Value("${TABLA_EJEC_INGRESOS}")
-        private String ejecIngresos;
+        private String TABLA_EJEC_INGRESOS;
 
         @Value("${TABLA_PROG_GASTOS}")
         private String progGastos;
@@ -30,7 +30,7 @@ public class dataSourceInit {
         @Transactional
         public void processTablesRules() {
 
-                this.tablas = new String[] { TABLA_PROG_INGRESOS, ejecIngresos, progGastos, ejecGastos };
+                this.tablas = new String[] { TABLA_PROG_INGRESOS, TABLA_EJEC_INGRESOS, progGastos, ejecGastos };
 
                 // Paso 1: Agregar columnas TRIMESTRE y FECHA
                 addComputedColumns();
@@ -223,7 +223,7 @@ public class dataSourceInit {
                                 "    t.[AMBITO_CODIGO_STR] AS AMBITO_CODIGO, " +
                                 "    t.[NOMBRE_ENTIDAD], " +
                                 "    t.[AMBITO_NOMBRE] " +
-                                "FROM [" + ejecIngresos + "] t " +
+                                "FROM [" + TABLA_EJEC_INGRESOS + "] t " +
                                 "WHERE t.[AMBITO_CODIGO_STR] IN ('A438', 'A439', 'A440', 'A441') " +
                                 "AND NOT EXISTS ( " +
                                 "    SELECT 1 " +
