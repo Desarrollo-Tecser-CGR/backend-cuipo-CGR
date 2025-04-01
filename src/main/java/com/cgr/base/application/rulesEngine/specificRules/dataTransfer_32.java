@@ -22,7 +22,7 @@ public class dataTransfer_32 {
   private String ejecGastos;
 
   @Value("${TABLA_PROG_GASTOS}")
-  private String progGastos;
+  private String TABLA_PROG_GASTOS;
 
   @PersistenceContext
   private EntityManager entityManager;
@@ -223,7 +223,7 @@ public class dataTransfer_32 {
         );
         """,
         ejecGastos,
-        progGastos,
+        TABLA_PROG_GASTOS,
         "E032",
         "E032");
 

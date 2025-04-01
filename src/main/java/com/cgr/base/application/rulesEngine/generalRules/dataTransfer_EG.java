@@ -20,7 +20,7 @@ public class dataTransfer_EG {
     private String ejecGastos;
 
     @Value("${TABLA_PROG_GASTOS}")
-    private String progGastos;
+    private String TABLA_PROG_GASTOS;
 
     public void applyGeneralRule12() {
         // 1. Validar columnas - Usar una sola consulta batch para verificar todas las
@@ -321,7 +321,7 @@ public class dataTransfer_EG {
                             AND pg.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
                             AND pg.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
                         """,
-                "GENERAL_RULES_DATA", progGastos, progGastos);
+                "GENERAL_RULES_DATA", TABLA_PROG_GASTOS, TABLA_PROG_GASTOS);
 
         Integer progGastosExists = jdbcTemplate.queryForObject(checkProgGastosQuery, Integer.class);
 
@@ -391,7 +391,7 @@ public class dataTransfer_EG {
                             AND pg.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
                         WHERE pg.COD_VIGENCIA_DEL_GASTO = 1
                         """,
-                "GENERAL_RULES_DATA", progGastos, progGastos);
+                "GENERAL_RULES_DATA", TABLA_PROG_GASTOS, TABLA_PROG_GASTOS);
 
         Integer vigenciaProgExists = jdbcTemplate.queryForObject(checkVigenciaProgQuery, Integer.class);
 
@@ -520,7 +520,6 @@ public class dataTransfer_EG {
                 "GENERAL_RULES_DATA", ejecGastos);
         jdbcTemplate.execute(updateNoDataQuery);
 
-        // 4. Actualizar cuentas que no existen en progGastos
         String updateCuentasNoDataQuery = String.format(
                 """
                         UPDATE d
@@ -543,7 +542,7 @@ public class dataTransfer_EG {
                         FROM %s d
                         WHERE REGLA_GENERAL_14B IS NULL
                         """,
-                ejecGastos, ejecGastos, progGastos, "GENERAL_RULES_DATA");
+                ejecGastos, ejecGastos, TABLA_PROG_GASTOS, "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateCuentasNoDataQuery);
 
         // 5. Actualizar cuentas con inconsistencias en COD_VIGENCIA_DEL_GASTO
@@ -568,7 +567,7 @@ public class dataTransfer_EG {
                         FROM %s d
                         WHERE REGLA_GENERAL_14B IS NULL
                         """,
-                ejecGastos, ejecGastos, progGastos, progGastos, "GENERAL_RULES_DATA");
+                ejecGastos, ejecGastos, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS, "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateCuentasNoCumpleQuery);
 
         // 6. Actualizar estado NO DATA (solo cuentas sin programación)
@@ -791,7 +790,8 @@ public class dataTransfer_EG {
                             r.CODIGO_ENTIDAD = cp.CODIGO_ENTIDAD AND
                             r.AMBITO_CODIGO = cp.AMBITO_CODIGO
                         """,
-                ejecGastos, ejecGastos, ejecGastos, ejecGastos, progGastos, progGastos, progGastos, progGastos,
+                ejecGastos, ejecGastos, ejecGastos, ejecGastos, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS,
+                TABLA_PROG_GASTOS,
                 "GENERAL_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);

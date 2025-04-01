@@ -18,7 +18,7 @@ public class dataTransfer_PI {
     private String TABLA_PROG_INGRESOS;
 
     @Value("${TABLA_PROG_GASTOS}")
-    private String progGastos;
+    private String TABLA_PROG_GASTOS;
 
     // Regla1: Presupuesto Definitivo validando Liquidación.
     public void applyGeneralRule1() {
@@ -473,7 +473,7 @@ public class dataTransfer_PI {
                             AND c.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
                         WHERE RIGHT(d.AMBITO_CODIGO, 3) BETWEEN '438' AND '439'
                         """,
-                "GENERAL_RULES_DATA", TABLA_PROG_INGRESOS, TABLA_PROG_INGRESOS, progGastos, progGastos);
+                "GENERAL_RULES_DATA", TABLA_PROG_INGRESOS, TABLA_PROG_INGRESOS, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS);
         jdbcTemplate.execute(updateValuesQuery);
 
         String updateNoDataQuery = String.format(
