@@ -3,18 +3,19 @@ package com.cgr.base.infrastructure.repositories.database.adapter;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.xmlbeans.impl.xb.xsdschema.Attribute.Use;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cgr.base.application.user.dto.UserDto;
-import com.cgr.base.application.user.dto.UserWithRolesRequestDto;
-import com.cgr.base.domain.repository.IUserRoleRepository;
+import com.cgr.base.domain.dto.dtoUser.UserDto;
+import com.cgr.base.domain.dto.dtoUser.UserWithRolesRequestDto;
+import com.cgr.base.infrastructure.repositories.repositories.repositoryActiveDirectory.IUserRoleRepository;
 import com.cgr.base.application.exception.customException.ResourceNotFoundException;
 import com.cgr.base.domain.models.entity.Logs.RoleEntity;
 import com.cgr.base.domain.models.entity.Logs.UserEntity;
 import com.cgr.base.infrastructure.repositories.repositories.role.IRoleRepositoryJpa;
 import com.cgr.base.infrastructure.repositories.repositories.user.IUserRepositoryJpa;
-import com.cgr.base.application.utilities.DtoMapper;
+import com.cgr.base.infrastructure.utilities.DtoMapper;
 
 @Component
 public class UserRepositoryAdapterImpl implements IUserRoleRepository {
@@ -76,21 +77,23 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
     @Override
     public UserDto updateUser(Long id, UserDto userDto) {
         UserEntity userEntity = this.userRepositoryJpa.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("El usuario con id=" + id + " no existe"));
-            if (userEntity != null ){
+                .orElseThrow(() -> new ResourceNotFoundException("El usuario con id=" + id + " no existe"));
+        if (userEntity != null) {
 
-                userEntity = this.dtoMapper.convertToDto(userDto, UserEntity.class);
+            userEntity = this.dtoMapper.convertToDto(userDto, UserEntity.class);
 
-                userEntity.setId(id);
-                
-                List<RoleEntity> roles = this.roleRepositoryJpa.findByIdIn(userDto.getRoleIds());
-                userEntity.setRoles(roles);
-                
-                UserEntity updatedUser = this.userRepositoryJpa.save(userEntity);
+            userEntity.setId(id);
 
-                return this.dtoMapper.convertToDto(updatedUser, UserDto.class);
-            }
-       return null;
-        
+            List<RoleEntity> roles = this.roleRepositoryJpa.findByIdIn(userDto.getRoleIds());
+            userEntity.setRoles(roles);
+
+            UserEntity updatedUser = this.userRepositoryJpa.save(userEntity);
+
+            UserDto user = this.dtoMapper.convertToDto(updatedUser, UserDto.class);
+
+            return user;
+        }
+        return null;
+
     }
 }
