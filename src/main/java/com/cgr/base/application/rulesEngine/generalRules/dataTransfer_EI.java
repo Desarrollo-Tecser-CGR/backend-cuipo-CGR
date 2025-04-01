@@ -21,7 +21,7 @@ public class dataTransfer_EI {
     private JdbcTemplate jdbcTemplate;
 
     @Value("${TABLA_EJEC_INGRESOS}")
-    private String ejecIngresos;
+    private String TABLA_EJEC_INGRESOS;
 
     @Value("${TABLA_PROG_INGRESOS}")
     private String TABLA_PROG_INGRESOS;
@@ -93,7 +93,7 @@ public class dataTransfer_EI {
                             AND d.CODIGO_ENTIDAD = ctn.CODIGO_ENTIDAD
                             AND d.AMBITO_CODIGO = ctn.AMBITO_CODIGO
                         """,
-                "GENERAL_RULES_DATA", ejecIngresos, "GENERAL_RULES_DATA");
+                "GENERAL_RULES_DATA", TABLA_EJEC_INGRESOS, "GENERAL_RULES_DATA");
         jdbcTemplate.execute(checkCuentasTercerNivelQuery);
 
         String updateTrimestre03Query = String.format(
@@ -180,7 +180,7 @@ public class dataTransfer_EI {
                             AND d.CODIGO_ENTIDAD = nd.CODIGO_ENTIDAD
                             AND d.AMBITO_CODIGO = nd.AMBITO_CODIGO
                         """,
-                "GENERAL_RULES_DATA", ejecIngresos, ejecIngresos, "GENERAL_RULES_DATA");
+                "GENERAL_RULES_DATA", TABLA_EJEC_INGRESOS, TABLA_EJEC_INGRESOS, "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateNoDataQuery);
 
         String updateNoCumpleQuery = String.format(
@@ -242,7 +242,8 @@ public class dataTransfer_EI {
                             AND d.CODIGO_ENTIDAD = nc.CODIGO_ENTIDAD
                             AND d.AMBITO_CODIGO = nc.AMBITO_CODIGO
                         """,
-                "GENERAL_RULES_DATA", ejecIngresos, ejecIngresos, ejecIngresos, "GENERAL_RULES_DATA");
+                "GENERAL_RULES_DATA", TABLA_EJEC_INGRESOS, TABLA_EJEC_INGRESOS, TABLA_EJEC_INGRESOS,
+                "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateNoCumpleQuery);
 
         String updateCumpleQuery = String.format(
@@ -304,7 +305,8 @@ public class dataTransfer_EI {
                             AND d.CODIGO_ENTIDAD = c.CODIGO_ENTIDAD
                             AND d.AMBITO_CODIGO = c.AMBITO_CODIGO
                         """,
-                "GENERAL_RULES_DATA", ejecIngresos, ejecIngresos, ejecIngresos, "GENERAL_RULES_DATA");
+                "GENERAL_RULES_DATA", TABLA_EJEC_INGRESOS, TABLA_EJEC_INGRESOS, TABLA_EJEC_INGRESOS,
+                "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateCumpleQuery);
 
         String updateFinalCumpleQuery = String.format(
@@ -511,7 +513,7 @@ public class dataTransfer_EI {
                 DATASOURCE_NAME,
                 TABLA_PROG_INGRESOS,
                 DATASOURCE_NAME,
-                ejecIngresos,
+                TABLA_EJEC_INGRESOS,
                 "GENERAL_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
@@ -520,7 +522,7 @@ public class dataTransfer_EI {
     @Transactional
     public void applyGeneralRule17() {
 
-        UtilsDB.ensureColumnsExist(ejecIngresos,
+        UtilsDB.ensureColumnsExist(TABLA_EJEC_INGRESOS,
                 "VAL_RT_TV_17:NVARCHAR(50)",
                 "VAL_RT_TP_17A:NVARCHAR(50)",
                 "VAL_RT_AP_17B:NVARCHAR(50)",
@@ -549,7 +551,7 @@ public class dataTransfer_EI {
                         AND g.CUENTA = e.CUENTA
                     )
                     FROM %s e
-                """, ejecIngresos, ejecIngresos);
+                """, TABLA_EJEC_INGRESOS, TABLA_EJEC_INGRESOS);
 
         entityManager.createNativeQuery(updateQueryA).executeUpdate();
 
@@ -573,7 +575,7 @@ public class dataTransfer_EI {
                             )
                         END
                     FROM %s e
-                """, ejecIngresos, ejecIngresos);
+                """, TABLA_EJEC_INGRESOS, TABLA_EJEC_INGRESOS);
 
         entityManager.createNativeQuery(updateQueryB).executeUpdate();
 
@@ -593,7 +595,7 @@ public class dataTransfer_EI {
                         AND g.CUENTA = e.CUENTA
                     )
                     FROM %s e
-                """, ejecIngresos, ejecIngresos);
+                """, TABLA_EJEC_INGRESOS, TABLA_EJEC_INGRESOS);
 
         entityManager.createNativeQuery(updateQueryC).executeUpdate();
 
@@ -612,7 +614,7 @@ public class dataTransfer_EI {
                             END
                         FROM %s e
                         """,
-                ejecIngresos);
+                TABLA_EJEC_INGRESOS);
 
         entityManager.createNativeQuery(updateQueryD).executeUpdate();
 
@@ -631,7 +633,7 @@ public class dataTransfer_EI {
                             END
                         FROM %s e
                         """,
-                ejecIngresos);
+                TABLA_EJEC_INGRESOS);
 
         entityManager.createNativeQuery(updateQueryE).executeUpdate();
 
