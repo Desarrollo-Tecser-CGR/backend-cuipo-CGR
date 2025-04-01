@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -13,24 +14,33 @@ public class detailsInfo {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Value("${DATASOURCE_NAME}")
+    private String DATASOURCE_NAME;
+
+    @Value("${TABLA_EJEC_INGRESOS}")
+    private String TABLA_EJEC_INGRESOS;
+
+    @Value("${TABLA_EJEC_GASTOS}")
+    private String TABLA_EJEC_GASTOS;
+
     public List<Map<String, Object>> processGFRequest(Map<String, String> filters) {
         if (!validateFilters(filters)) {
             return null;
         }
-    
+
         String fecha = filters.get("fecha");
         String trimestre = filters.get("trimestre");
         String ambito = filters.get("ambito");
         String entidad = filters.get("entidad");
-    
+
         String trimestreBD = String.valueOf(Integer.parseInt(trimestre) * 3);
-    
+
         return getFilteredRecordsGF(fecha, trimestreBD, ambito, entidad);
     }
 
     public List<Map<String, Object>> getFilteredRecordsGF(String fecha, String trimestre, String ambitoCodigo,
             String entidadCodigo) {
-        String tablaConsulta = "[cuipo_dev].[dbo].[VW_OPENDATA_D_EJECUCION_GASTOS]";
+        String tablaConsulta = "[" + DATASOURCE_NAME + "].[dbo].[" + TABLA_EJEC_GASTOS + "]";
 
         List<String> columnasValidas = List.of(
                 "CUENTA", "NOMBRE_CUENTA",
@@ -85,7 +95,7 @@ public class detailsInfo {
 
     public List<Map<String, Object>> getFilteredRecordsICLD(String fecha, String trimestre, String ambitoCodigo,
             String entidadCodigo) {
-        String tablaConsulta = "[cuipo_dev].[dbo].[VW_OPENDATA_B_EJECUCION_INGRESOS]";
+        String tablaConsulta = "[" + DATASOURCE_NAME + "].[dbo].[" + TABLA_EJEC_INGRESOS + "]";
 
         List<String> columnasValidas = List.of(
                 "CUENTA", "NOMBRE_CUENTA",

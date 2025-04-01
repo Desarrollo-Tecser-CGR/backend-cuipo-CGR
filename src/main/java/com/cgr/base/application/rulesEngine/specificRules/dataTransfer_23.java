@@ -13,11 +13,11 @@ public class dataTransfer_23 {
         @PersistenceContext
         private EntityManager entityManager;
 
-        @Value("${TABLA_SPECIFIC_RULES}")
-        private String tablaReglasEspecificas;
-
         @Value("${TABLA_EJEC_INGRESOS}")
-        private String tablaEjecIngresos;
+        private String TABLA_EJEC_INGRESOS;
+
+        @Value("${DATASOURCE_NAME}")
+        private String DATASOURCE_NAME;
 
         @Transactional
         public void applySpecificRule23() {
@@ -40,7 +40,7 @@ public class dataTransfer_23 {
                                 "AND COLUMN_NAME = 'REGLA_ESPECIFICA_23A'" +
                                 ") " +
                                 "BEGIN " +
-                                "ALTER TABLE [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] " +
+                                "ALTER TABLE [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] " +
                                 "ADD REGLA_ESPECIFICA_23A VARCHAR(255); " +
                                 "END; ";
                 entityManager.createNativeQuery(createColumnCA0086).executeUpdate();
@@ -50,7 +50,7 @@ public class dataTransfer_23 {
                                 "    AMBITO_CODIGO, " +
                                 "    CUENTA " +
                                 "FROM " +
-                                "    VW_OPENDATA_B_EJECUCION_INGRESOS " +
+                                "    " + TABLA_EJEC_INGRESOS + " " +
                                 "WHERE " +
                                 "    NOM_FUENTES_FINANCIACION = 'INGRESOS CORRIENTES DE LIBRE DESTINACION' " +
                                 "), " +
@@ -60,7 +60,7 @@ public class dataTransfer_23 {
                                 "    AMBITO_CODIGO, " +
                                 "    CUENTA " +
                                 "FROM " +
-                                "    VW_OPENDATA_B_EJECUCION_INGRESOS " +
+                                "    " + TABLA_EJEC_INGRESOS + " " +
                                 "WHERE " +
                                 "    NOM_FUENTES_FINANCIACION = 'ICLD LEY 99 - DESTINO AMBIENTAL' " +
                                 ") " +
@@ -89,7 +89,7 @@ public class dataTransfer_23 {
                                 "AND COLUMN_NAME = 'ALERTA_CA0087'" +
                                 ") " +
                                 "BEGIN " +
-                                "ALTER TABLE [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] " +
+                                "ALTER TABLE [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] " +
                                 "ADD ALERTA_CA0087 VARCHAR(255); " +
                                 "END; ";
                 entityManager.createNativeQuery(createColumnCA0087).executeUpdate();
@@ -99,7 +99,7 @@ public class dataTransfer_23 {
                                 "    AMBITO_CODIGO, " +
                                 "    CUENTA " +
                                 "FROM " +
-                                "    VW_OPENDATA_B_EJECUCION_INGRESOS " +
+                                "    " + TABLA_EJEC_INGRESOS + " " +
                                 "WHERE " +
                                 "    NOM_FUENTES_FINANCIACION = 'INGRESOS CORRIENTES DE LIBRE DESTINACION' " +
                                 "), " +
@@ -109,7 +109,7 @@ public class dataTransfer_23 {
                                 "    AMBITO_CODIGO, " +
                                 "    CUENTA " +
                                 "FROM " +
-                                "    VW_OPENDATA_B_EJECUCION_INGRESOS " +
+                                "    " + TABLA_EJEC_INGRESOS + " " +
                                 "WHERE " +
                                 "    NOM_FUENTES_FINANCIACION = 'ICLD LEY 99 - DESTINO AMBIENTAL' " +
                                 ") " +
@@ -139,7 +139,7 @@ public class dataTransfer_23 {
                                 "AND COLUMN_NAME = 'ALERTA_CA0088'" +
                                 ") " +
                                 "BEGIN " +
-                                "ALTER TABLE [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] " +
+                                "ALTER TABLE [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] " +
                                 "ADD ALERTA_CA0088 VARCHAR(255); " +
                                 "END; ";
 
@@ -150,7 +150,7 @@ public class dataTransfer_23 {
                                 "    AMBITO_CODIGO, " +
                                 "    NOM_TIPO_NORMA " +
                                 "FROM " +
-                                "    VW_OPENDATA_B_EJECUCION_INGRESOS " +
+                                "    " + TABLA_EJEC_INGRESOS + " " +
                                 "WHERE " +
                                 "    NOM_FUENTES_FINANCIACION = 'ICLD LEY 99 - DESTINO AMBIENTAL' " +
                                 ") " +
@@ -175,7 +175,7 @@ public class dataTransfer_23 {
                                 "AND COLUMN_NAME = 'REGLA_ESPECIFICA_23B'" +
                                 ") " +
                                 "BEGIN " +
-                                "ALTER TABLE [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] " +
+                                "ALTER TABLE [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] " +
                                 "ADD REGLA_ESPECIFICA_23B VARCHAR(255); " +
                                 "END; ";
 
@@ -186,7 +186,7 @@ public class dataTransfer_23 {
                                 "    AMBITO_CODIGO, " +
                                 "    CUENTA " +
                                 "FROM " +
-                                "    VW_OPENDATA_B_EJECUCION_INGRESOS " +
+                                "    " + TABLA_EJEC_INGRESOS + " " +
                                 "WHERE " +
                                 "    CUENTA IN ( " +
                                 "        '1.1.01.01.014', " +
@@ -218,7 +218,7 @@ public class dataTransfer_23 {
                                 "AND TABLE_SCHEMA = 'dbo'" +
                                 ") " +
                                 "BEGIN " +
-                                "ALTER TABLE [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] " +
+                                "ALTER TABLE [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] " +
                                 "ADD ALERTA_CA0090 VARCHAR(255); " +
                                 "END; ";
 
@@ -232,7 +232,7 @@ public class dataTransfer_23 {
                                 "    MAX(CASE WHEN CUENTA = '1.1.02.06.003.01.14' THEN 1 ELSE 0 END) AS HasParticipacion "
                                 +
                                 "FROM " +
-                                "    VW_OPENDATA_B_EJECUCION_INGRESOS " +
+                                "    " + TABLA_EJEC_INGRESOS + " " +
                                 "WHERE " +
                                 "    CUENTA IN ('1.1.01.01.014', '1.1.01.01.014.01', '1.1.01.01.014.02', '1.1.02.06.003.01.14') "
                                 +
@@ -261,7 +261,7 @@ public class dataTransfer_23 {
                                 "AND COLUMN_NAME = 'REGLA_ESPECIFICA_23C'" +
                                 ") " +
                                 "BEGIN " +
-                                "ALTER TABLE [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] " +
+                                "ALTER TABLE [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] " +
                                 "ADD REGLA_ESPECIFICA_23C VARCHAR(255); " +
                                 "END; ";
                 entityManager.createNativeQuery(createColumnCA0091).executeUpdate();
@@ -272,7 +272,7 @@ public class dataTransfer_23 {
                                 "    PERIODO, " +
                                 "    COUNT(DISTINCT CUENTA) AS ConceptCount " +
                                 "FROM " +
-                                "    VW_OPENDATA_B_EJECUCION_INGRESOS " +
+                                "    " + TABLA_EJEC_INGRESOS + " " +
                                 "WHERE " +
                                 "    AMBITO_CODIGO = 'A441' " +
                                 "    AND COD_FUENTES_FINANCIACION = '1.2.3.4.03' " +
@@ -302,7 +302,7 @@ public class dataTransfer_23 {
                                 "AND COLUMN_NAME = 'ALERTA_CA0092'" +
                                 ") " +
                                 "BEGIN " +
-                                "ALTER TABLE [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] " +
+                                "ALTER TABLE [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] " +
                                 "ADD ALERTA_CA0092 VARCHAR(255); " +
                                 "END; ";
 
@@ -313,7 +313,7 @@ public class dataTransfer_23 {
                                 "    AMBITO_CODIGO, " +
                                 "    PERIODO " +
                                 "FROM " +
-                                "    VW_OPENDATA_B_EJECUCION_INGRESOS " +
+                                "    " + TABLA_EJEC_INGRESOS + " " +
                                 "WHERE " +
                                 "    AMBITO_CODIGO = 'A441' " +
                                 "    AND COD_FUENTES_FINANCIACION = '1.2.3.4.03' " +

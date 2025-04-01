@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,9 +21,12 @@ public class accessManagement {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Value("${DATASOURCE_NAME}")
+    private String DATASOURCE_NAME;
+
     public List<Map<String, Object>> getAvailableMenus() {
         String sql = "SELECT id, title" +
-                " FROM cuipo_dev.dbo.menus " +
+                " FROM " + DATASOURCE_NAME + ".dbo.menus " +
                 " WHERE id <> 1";
 
         Query query = entityManager.createNativeQuery(sql);
@@ -37,9 +41,9 @@ public class accessManagement {
 
     public List<Map<String, Object>> getRolesWithMenus() {
         String sql = "SELECT r.id AS role_id, r.name AS role_name, m.id AS menu_id, m.title AS menu_title " +
-                "FROM cuipo_dev.dbo.roles r " +
-                "LEFT JOIN cuipo_dev.dbo.menu_roles mr ON r.id = mr.role_id " +
-                "LEFT JOIN cuipo_dev.dbo.menus m ON mr.menu_id = m.id " +
+                "FROM " + DATASOURCE_NAME + ".dbo.roles r " +
+                "LEFT JOIN " + DATASOURCE_NAME + ".dbo.menu_roles mr ON r.id = mr.role_id " +
+                "LEFT JOIN " + DATASOURCE_NAME + ".dbo.menus m ON mr.menu_id = m.id " +
                 "WHERE m.title IS NULL OR m.title <> 'Gestor de Accesos' " +
                 "ORDER BY r.id";
 
@@ -88,7 +92,7 @@ public class accessManagement {
                 }
             }
 
-            String sql = "SELECT id FROM cuipo_dev.dbo.submenus WHERE menu_id IN (:moduleIds)";
+            String sql = "SELECT id FROM " + DATASOURCE_NAME + ".dbo.submenus WHERE menu_id IN (:moduleIds)";
             Query query = entityManager.createNativeQuery(sql);
             query.setParameter("moduleIds", moduleIds);
 
@@ -99,18 +103,18 @@ public class accessManagement {
                     .map(o -> ((Number) o).intValue())
                     .collect(Collectors.toList());
 
-            entityManager.createNativeQuery("DELETE FROM cuipo_dev.dbo.menu_roles WHERE role_id = :roleId")
+            entityManager.createNativeQuery("DELETE FROM " + DATASOURCE_NAME + ".dbo.menu_roles WHERE role_id = :roleId")
                     .setParameter("roleId", roleId)
                     .executeUpdate();
 
-            entityManager.createNativeQuery("DELETE FROM cuipo_dev.dbo.roles_submenu WHERE role_id = :roleId")
+            entityManager.createNativeQuery("DELETE FROM " + DATASOURCE_NAME + ".dbo.roles_submenu WHERE role_id = :roleId")
                     .setParameter("roleId", roleId)
                     .executeUpdate();
 
             if (!moduleIds.isEmpty()) {
                 for (Integer moduleId : moduleIds) {
                     entityManager.createNativeQuery(
-                            "INSERT INTO cuipo_dev.dbo.menu_roles (role_id, menu_id) VALUES (:roleId, :moduleId)")
+                            "INSERT INTO " + DATASOURCE_NAME + ".dbo.menu_roles (role_id, menu_id) VALUES (:roleId, :moduleId)")
                             .setParameter("roleId", roleId)
                             .setParameter("moduleId", moduleId)
                             .executeUpdate();
@@ -122,7 +126,7 @@ public class accessManagement {
                 for (Integer submoduleId : submoduleIds) {
 
                     entityManager.createNativeQuery(
-                            "INSERT INTO cuipo_dev.dbo.roles_submenu (role_id, submenu_id) VALUES (:roleId, :submenuId)")
+                            "INSERT INTO " + DATASOURCE_NAME + ".dbo.roles_submenu (role_id, submenu_id) VALUES (:roleId, :submenuId)")
                             .setParameter("roleId", roleId)
                             .setParameter("submenuId", submoduleId)
                             .executeUpdate();

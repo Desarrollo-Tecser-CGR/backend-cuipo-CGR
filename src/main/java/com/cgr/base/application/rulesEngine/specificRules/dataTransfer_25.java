@@ -15,13 +15,7 @@ public class dataTransfer_25 {
     private JdbcTemplate jdbcTemplate;
 
     @Value("${TABLA_EJEC_GASTOS}")
-    private String ejecGastos;
-
-    @Value("${TABLA_EJEC_GASTOS2}")
-    private String ejecGastos2;
-
-    @Value("${TABLA_SPECIFIC_RULES}")
-    private String tablaReglasEspecificas;
+    private String TABLA_EJEC_GASTOS;
 
     public void applySpecificRule25A() {
 
@@ -33,7 +27,7 @@ public class dataTransfer_25 {
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
                         + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaReglasEspecificas,
+                "SPECIFIC_RULES_DATA",
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -43,7 +37,7 @@ public class dataTransfer_25 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglasEspecificas, col);
+                        "SPECIFIC_RULES_DATA", col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -133,23 +127,21 @@ public class dataTransfer_25 {
                            AND r.AMBITO_CODIGO  = g.AMBITO_CODIGO
                         ;
                         """,
-                // 1) Reemplaza %s por la tabla "VW_OPENDATA_D_EJECUCION_GASTOS"
-                ejecGastos,
-                // 2) Reemplaza %s por la tabla de reglas (por ej. "GENERAL_RULES_DATA")
-                tablaReglasEspecificas);
+                TABLA_EJEC_GASTOS,
+                "SPECIFIC_RULES_DATA");
 
         // 3) Ejecutar la query
         jdbcTemplate.execute(updateQuery);
     }
 
     public void applySpecificRule25_A() {
-        // 1) Definir y verificar la columna requerida en la tabla detalle (ejecGastos2)
+        // 1) Definir y verificar la columna requerida en la tabla detalle (TABLA_EJEC_GASTOS2)
         List<String> requiredColumns = Arrays.asList("REGLA_25_A");
 
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
                         "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                ejecGastos,
+                TABLA_EJEC_GASTOS,
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -157,7 +149,7 @@ public class dataTransfer_25 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        ejecGastos, col);
+                        TABLA_EJEC_GASTOS, col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -240,7 +232,7 @@ public class dataTransfer_25 {
                             ELSE '0'
                         END;
                         """,
-                ejecGastos);
+                TABLA_EJEC_GASTOS);
 
         jdbcTemplate.execute(updateQuery);
     }
@@ -252,7 +244,7 @@ public class dataTransfer_25 {
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
                         + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaReglasEspecificas,
+                "SPECIFIC_RULES_DATA",
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -261,7 +253,7 @@ public class dataTransfer_25 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglasEspecificas, col);
+                        "SPECIFIC_RULES_DATA", col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -297,22 +289,22 @@ public class dataTransfer_25 {
                            AND r.AMBITO_CODIGO  = b.AMBITO_CODIGO
                         ;
                         """,
-                ejecGastos,
-                ejecGastos,
-                tablaReglasEspecificas);
+                TABLA_EJEC_GASTOS,
+                TABLA_EJEC_GASTOS,
+                "SPECIFIC_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
     }
 
     public void applySpecificRule25_B() {
         // 1) Verificar/crear la columna ALERTA_25_CA0105 en la tabla detalle
-        // (ejecGastos2)
+        // (TABLA_EJEC_GASTOS2)
         List<String> requiredColumns = Arrays.asList("ALERTA_25_CA0105");
 
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
                         "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                ejecGastos, // Asegúrate de que esta variable contenga el nombre real de la tabla detalle
+                TABLA_EJEC_GASTOS, // Asegúrate de que esta variable contenga el nombre real de la tabla detalle
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -320,7 +312,7 @@ public class dataTransfer_25 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        ejecGastos, col);
+                        TABLA_EJEC_GASTOS, col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -336,7 +328,7 @@ public class dataTransfer_25 {
                             ELSE '0'
                         END;
                         """,
-                ejecGastos);
+                TABLA_EJEC_GASTOS);
 
         jdbcTemplate.execute(updateQuery);
     }
