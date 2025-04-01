@@ -20,7 +20,10 @@ public class dataTransfer_29 {
     private JdbcTemplate jdbcTemplate;
 
     @Value("${TABLA_EJEC_GASTOS}")
-    private String ejecGastos;
+    private String TABLA_EJEC_GASTOS;
+
+    @Value("${DATASOURCE_NAME}")
+private String DATASOURCE_NAME;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -135,13 +138,13 @@ public class dataTransfer_29 {
                         p.REMU_DIPUTADOS_SMMLV,
                         pa.SMMLV
                     FROM %s AS g
-                    LEFT JOIN " + DATASOURCE_NAME + ".dbo.CATEGORIAS AS c
+                    LEFT JOIN %s.dbo.CATEGORIAS AS c
                         ON g.CODIGO_ENTIDAD = c.CODIGO_ENTIDAD
                        AND g.AMBITO_CODIGO = c.AMBITO_CODIGO
-                    LEFT JOIN " + DATASOURCE_NAME + ".dbo.PORCENTAJES_LIMITES AS p
+                    LEFT JOIN %s.dbo.PORCENTAJES_LIMITES AS p
                         ON p.AMBITO_CODIGO = c.AMBITO_CODIGO
                        AND p.CATEGORIA_CODIGO = c.CATEGORIA
-                    LEFT JOIN " + DATASOURCE_NAME + ".dbo.PARAMETRIZACION_ANUAL AS pa
+                    LEFT JOIN %s.dbo.PARAMETRIZACION_ANUAL AS pa
                         ON g.FECHA = pa.FECHA
                     WHERE g.TRIMESTRE = '12'
                       AND (g.AMBITO_CODIGO = 'A438' OR g.AMBITO_CODIGO = 'A441')
@@ -340,11 +343,14 @@ public class dataTransfer_29 {
                       AND t.AMBITO_CODIGO = m.AMBITO_CODIGO
                 )
                 """,
-                ejecGastos, // Main
-                ejecGastos, // Asamblea
-                ejecGastos, // RemuDip
-                ejecGastos, // DatosPrestaciones
-                ejecGastos, // CuentasReportadas
+                TABLA_EJEC_GASTOS,
+                DATASOURCE_NAME,
+                DATASOURCE_NAME,
+                DATASOURCE_NAME, // Main
+                TABLA_EJEC_GASTOS, // Asamblea
+                TABLA_EJEC_GASTOS, // RemuDip
+                TABLA_EJEC_GASTOS, // DatosPrestaciones
+                TABLA_EJEC_GASTOS, // CuentasReportadas
                 "E029", // INSERT INTO
                 "E029" // WHERE NOT EXISTS
         );

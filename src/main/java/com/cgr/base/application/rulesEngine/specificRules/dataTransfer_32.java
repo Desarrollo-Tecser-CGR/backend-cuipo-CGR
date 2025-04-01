@@ -19,7 +19,7 @@ public class dataTransfer_32 {
   private JdbcTemplate jdbcTemplate;
 
   @Value("${TABLA_EJEC_GASTOS}")
-  private String ejecGastos;
+  private String TABLA_EJEC_GASTOS;
 
   @Value("${TABLA_PROG_GASTOS}")
   private String TABLA_PROG_GASTOS;
@@ -222,7 +222,7 @@ public class dataTransfer_32 {
               AND e.NOMBRE_CUENTA = Calculos.NOMBRE_CUENTA
         );
         """,
-        ejecGastos,
+        TABLA_EJEC_GASTOS,
         TABLA_PROG_GASTOS,
         "E032",
         "E032");

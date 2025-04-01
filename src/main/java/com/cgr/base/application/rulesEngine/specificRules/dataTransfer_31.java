@@ -14,7 +14,7 @@ import jakarta.persistence.PersistenceContext;
 public class dataTransfer_31 {
 
     @Value("${TABLA_EJEC_GASTOS}")
-    private String ejecGastos;
+    private String TABLA_EJEC_GASTOS;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -108,7 +108,7 @@ public class dataTransfer_31 {
                 "    s.TRIMESTRE, " +
                 "    s.FECHA " +
                 "FROM " +
-                "    [" + ejecGastos + "] s " +
+                "    [" + TABLA_EJEC_GASTOS + "] s " +
                 "WHERE " +
                 "    s.TRIMESTRE = '12' " +
                 "    AND s.AMBITO_CODIGO ='A440' " +
@@ -133,29 +133,29 @@ public class dataTransfer_31 {
         String sql = "UPDATE [E031] " +
                 "SET GAST_COMPROMETIDOS = ( " +
                 "    SELECT SUM(CAST(COMPROMISOS AS FLOAT)) " +
-                "    FROM [" + ejecGastos + "] " +
+                "    FROM [" + TABLA_EJEC_GASTOS + "] " +
                 "    WHERE " +
                 "        COD_SECCION_PRESUPUESTAL = 17 " +
                 "        AND (COD_VIGENCIA_DEL_GASTO = 1 OR COD_VIGENCIA_DEL_GASTO = 4) " +
                 "        AND CUENTA = '2' " +
                 "        AND TRIMESTRE = '12' " +
-                "        AND [" + ejecGastos + "].TRIMESTRE = [E031].TRIMESTRE " +
-                "        AND [" + ejecGastos + "].FECHA = [E031].FECHA " +
-                "        AND [" + ejecGastos + "].CODIGO_ENTIDAD = [E031].CODIGO_ENTIDAD " +
-                "        AND [" + ejecGastos + "].AMBITO_CODIGO = [E031].AMBITO_CODIGO " +
+                "        AND [" + TABLA_EJEC_GASTOS + "].TRIMESTRE = [E031].TRIMESTRE " +
+                "        AND [" + TABLA_EJEC_GASTOS + "].FECHA = [E031].FECHA " +
+                "        AND [" + TABLA_EJEC_GASTOS + "].CODIGO_ENTIDAD = [E031].CODIGO_ENTIDAD " +
+                "        AND [" + TABLA_EJEC_GASTOS + "].AMBITO_CODIGO = [E031].AMBITO_CODIGO " +
                 ") " +
                 "WHERE EXISTS ( " +
                 "    SELECT 1 " +
-                "    FROM [" + ejecGastos + "] " +
+                "    FROM [" + TABLA_EJEC_GASTOS + "] " +
                 "    WHERE " +
                 "        COD_SECCION_PRESUPUESTAL = 17 " +
                 "        AND (COD_VIGENCIA_DEL_GASTO = 1 OR COD_VIGENCIA_DEL_GASTO = 4) " +
                 "        AND CUENTA = '2' " +
                 "        AND TRIMESTRE = '12' " +
-                "        AND [" + ejecGastos + "].TRIMESTRE = [E031].TRIMESTRE " +
-                "        AND [" + ejecGastos + "].FECHA = [E031].FECHA " +
-                "        AND [" + ejecGastos + "].CODIGO_ENTIDAD = [E031].CODIGO_ENTIDAD " +
-                "        AND [" + ejecGastos + "].AMBITO_CODIGO = [E031].AMBITO_CODIGO " +
+                "        AND [" + TABLA_EJEC_GASTOS + "].TRIMESTRE = [E031].TRIMESTRE " +
+                "        AND [" + TABLA_EJEC_GASTOS + "].FECHA = [E031].FECHA " +
+                "        AND [" + TABLA_EJEC_GASTOS + "].CODIGO_ENTIDAD = [E031].CODIGO_ENTIDAD " +
+                "        AND [" + TABLA_EJEC_GASTOS + "].AMBITO_CODIGO = [E031].AMBITO_CODIGO " +
                 ")";
         entityManager.createNativeQuery(sql).executeUpdate();
     }

@@ -19,6 +19,9 @@ public class dataTransfer_30 {
     @Value("${TABLA_EJEC_INGRESOS}")
     private String TABLA_EJEC_INGRESOS;
 
+    @Value("${TABLA_EJEC_GASTOS}")
+    private String TABLA_EJEC_GASTOS;
+
     @Transactional
     public void applySpecificRule30() {
 
@@ -125,7 +128,7 @@ public class dataTransfer_30 {
                 "    s.TRIMESTRE, " +
                 "    s.FECHA " +
                 "FROM " +
-                "    [dbo].[VW_OPENDATA_D_EJECUCION_GASTOS] s " +
+                "    [dbo].[" + TABLA_EJEC_GASTOS + "] s " +
                 "WHERE " +
                 "    s.TRIMESTRE = '12' " +
                 "    AND s.AMBITO_CODIGO IN ('A438', 'A441') " +
@@ -174,29 +177,29 @@ public class dataTransfer_30 {
         String sql = "UPDATE E030 " +
                 "SET GAST_COMPROMETIDOS = ( " +
                 "    SELECT SUM(CAST(COMPROMISOS AS FLOAT)) " +
-                "    FROM VW_OPENDATA_D_EJECUCION_GASTOS " +
+                "    FROM " + TABLA_EJEC_GASTOS + " " +
                 "    WHERE " +
                 "        COD_SECCION_PRESUPUESTAL = 17 " +
                 "        AND (COD_VIGENCIA_DEL_GASTO = 1 OR COD_VIGENCIA_DEL_GASTO = 4) " +
                 "        AND CUENTA = '2' " +
                 "        AND TRIMESTRE = '12' " +
-                "        AND VW_OPENDATA_D_EJECUCION_GASTOS.TRIMESTRE = E030.TRIMESTRE " +
-                "        AND VW_OPENDATA_D_EJECUCION_GASTOS.FECHA = E030.FECHA " +
-                "        AND VW_OPENDATA_D_EJECUCION_GASTOS.CODIGO_ENTIDAD = E030.CODIGO_ENTIDAD " +
-                "        AND VW_OPENDATA_D_EJECUCION_GASTOS.AMBITO_CODIGO = E030.AMBITO_CODIGO " +
+                "        AND " + TABLA_EJEC_GASTOS + ".TRIMESTRE = E030.TRIMESTRE " +
+                "        AND " + TABLA_EJEC_GASTOS + ".FECHA = E030.FECHA " +
+                "        AND " + TABLA_EJEC_GASTOS + ".CODIGO_ENTIDAD = E030.CODIGO_ENTIDAD " +
+                "        AND " + TABLA_EJEC_GASTOS + ".AMBITO_CODIGO = E030.AMBITO_CODIGO " +
                 ") " +
                 "WHERE EXISTS ( " +
                 "    SELECT 1 " +
-                "    FROM VW_OPENDATA_D_EJECUCION_GASTOS " +
+                "    FROM " + TABLA_EJEC_GASTOS + " " +
                 "    WHERE " +
                 "        COD_SECCION_PRESUPUESTAL = 17 " +
                 "        AND (COD_VIGENCIA_DEL_GASTO = 1 OR COD_VIGENCIA_DEL_GASTO = 4) " +
                 "        AND CUENTA = '2' " +
                 "        AND TRIMESTRE = '12' " +
-                "        AND VW_OPENDATA_D_EJECUCION_GASTOS.TRIMESTRE = E030.TRIMESTRE " +
-                "        AND VW_OPENDATA_D_EJECUCION_GASTOS.FECHA = E030.FECHA " +
-                "        AND VW_OPENDATA_D_EJECUCION_GASTOS.CODIGO_ENTIDAD = E030.CODIGO_ENTIDAD " +
-                "        AND VW_OPENDATA_D_EJECUCION_GASTOS.AMBITO_CODIGO = E030.AMBITO_CODIGO " +
+                "        AND " + TABLA_EJEC_GASTOS + ".TRIMESTRE = E030.TRIMESTRE " +
+                "        AND " + TABLA_EJEC_GASTOS + ".FECHA = E030.FECHA " +
+                "        AND " + TABLA_EJEC_GASTOS + ".CODIGO_ENTIDAD = E030.CODIGO_ENTIDAD " +
+                "        AND " + TABLA_EJEC_GASTOS + ".AMBITO_CODIGO = E030.AMBITO_CODIGO " +
                 ")";
         entityManager.createNativeQuery(sql).executeUpdate();
     }

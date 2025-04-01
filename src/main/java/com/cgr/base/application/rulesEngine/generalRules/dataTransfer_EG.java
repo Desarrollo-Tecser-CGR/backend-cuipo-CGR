@@ -17,7 +17,7 @@ public class dataTransfer_EG {
     private JdbcTemplate jdbcTemplate;
 
     @Value("${TABLA_EJEC_GASTOS}")
-    private String ejecGastos;
+    private String TABLA_EJEC_GASTOS;
 
     @Value("${TABLA_PROG_GASTOS}")
     private String TABLA_PROG_GASTOS;
@@ -72,7 +72,7 @@ public class dataTransfer_EG {
                                 (FECHA, TRIMESTRE, CODIGO_ENTIDAD_INT, AMBITO_CODIGO_STR)
                                 INCLUDE (CUENTA, COMPROMISOS, OBLIGACIONES, PAGOS);
                                 """,
-                        ejecGastos));
+                        TABLA_EJEC_GASTOS));
 
         // 3. Procesamiento en un solo paso - Actualizar datos de validación
         // directamente
@@ -183,7 +183,7 @@ public class dataTransfer_EG {
                             AND v.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD
                             AND v.AMBITO_CODIGO = d.AMBITO_CODIGO
                         """,
-                ejecGastos, ejecGastos, ejecGastos, ejecGastos, "GENERAL_RULES_DATA", "GENERAL_RULES_DATA");
+                TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS, "GENERAL_RULES_DATA", "GENERAL_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
 
@@ -191,7 +191,7 @@ public class dataTransfer_EG {
         jdbcTemplate.execute(
                 String.format(
                         "IF EXISTS (SELECT * FROM sys.indexes WHERE name = 'IDX_TEMP_GASTOS_RULE12') DROP INDEX IDX_TEMP_GASTOS_RULE12 ON %s",
-                        ejecGastos));
+                        TABLA_EJEC_GASTOS));
     }
 
     // Regla 15:
@@ -246,7 +246,7 @@ public class dataTransfer_EG {
                                           WHEN CA.ULT_DIGITO = CA.PRIMER_DIGITO THEN 'OK'
                                           ELSE 'ALERTA'
                                         END AS ALERTA_RESULTADO
-                                    FROM VW_OPENDATA_D_EJECUCION_GASTOS e
+                                    FROM %s e
                                     CROSS APPLY (
                                       SELECT
                                         RIGHT(REPLACE(e.CUENTA, '.', ''), 1) AS ULT_DIGITO,
@@ -286,7 +286,7 @@ public class dataTransfer_EG {
                                     AND r.CODIGO_ENTIDAD = a.CODIGO_ENTIDAD
                                     AND r.AMBITO_CODIGO = a.AMBITO_CODIGO;
                         """,
-                "GENERAL_RULES_DATA");
+                TABLA_EJEC_GASTOS, "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateQuery);
     }
 
@@ -335,7 +335,7 @@ public class dataTransfer_EG {
                             AND eg.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
                             AND eg.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
                         """,
-                "GENERAL_RULES_DATA", ejecGastos, ejecGastos);
+                "GENERAL_RULES_DATA", TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS);
 
         Integer ejecGastosExists = jdbcTemplate.queryForObject(checkEjecGastosQuery, Integer.class);
 
@@ -407,7 +407,7 @@ public class dataTransfer_EG {
                             AND eg.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
                         WHERE eg.COD_VIGENCIA_DEL_GASTO = 1
                         """,
-                "GENERAL_RULES_DATA", ejecGastos, ejecGastos);
+                "GENERAL_RULES_DATA", TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS);
 
         Integer vigenciaEjecExists = jdbcTemplate.queryForObject(checkVigenciaEjecQuery, Integer.class);
 
@@ -502,7 +502,7 @@ public class dataTransfer_EG {
                 "GENERAL_RULES_DATA");
         jdbcTemplate.execute(initializeColumnsQuery);
 
-        // 3. Actualizar registros sin datos en ejecGastos
+        // 3. Actualizar registros sin datos en TABLA_EJEC_GASTOS
         String updateNoDataQuery = String.format(
                 """
                         UPDATE d
@@ -517,7 +517,7 @@ public class dataTransfer_EG {
                             AND e.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
                         )
                         """,
-                "GENERAL_RULES_DATA", ejecGastos);
+                "GENERAL_RULES_DATA", TABLA_EJEC_GASTOS);
         jdbcTemplate.execute(updateNoDataQuery);
 
         String updateCuentasNoDataQuery = String.format(
@@ -542,7 +542,7 @@ public class dataTransfer_EG {
                         FROM %s d
                         WHERE REGLA_GENERAL_14B IS NULL
                         """,
-                ejecGastos, ejecGastos, TABLA_PROG_GASTOS, "GENERAL_RULES_DATA");
+                TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS, TABLA_PROG_GASTOS, "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateCuentasNoDataQuery);
 
         // 5. Actualizar cuentas con inconsistencias en COD_VIGENCIA_DEL_GASTO
@@ -567,7 +567,7 @@ public class dataTransfer_EG {
                         FROM %s d
                         WHERE REGLA_GENERAL_14B IS NULL
                         """,
-                ejecGastos, ejecGastos, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS, "GENERAL_RULES_DATA");
+                TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS, "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateCuentasNoCumpleQuery);
 
         // 6. Actualizar estado NO DATA (solo cuentas sin programación)
@@ -643,7 +643,7 @@ public class dataTransfer_EG {
                 WITH filtered_data AS (
                     SELECT d.FECHA, d.TRIMESTRE, d.CODIGO_ENTIDAD, d.AMBITO_CODIGO,
                            MAX(CASE WHEN d.CUENTA = '2.99' THEN 1 ELSE 0 END) AS tieneCuenta299
-                    FROM [dbo].[VW_OPENDATA_D_EJECUCION_GASTOS] d
+                    FROM [dbo].[%s] d
                     GROUP BY d.FECHA, d.TRIMESTRE, d.CODIGO_ENTIDAD, d.AMBITO_CODIGO
                 )
                 UPDATE r
@@ -664,7 +664,7 @@ public class dataTransfer_EG {
                     AND r.TRIMESTRE = fd.TRIMESTRE
                     AND r.CODIGO_ENTIDAD = fd.CODIGO_ENTIDAD
                     AND r.AMBITO_CODIGO = fd.AMBITO_CODIGO;
-                """, "GENERAL_RULES_DATA");
+                """, TABLA_EJEC_GASTOS, "GENERAL_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
     }
@@ -790,7 +790,7 @@ public class dataTransfer_EG {
                             r.CODIGO_ENTIDAD = cp.CODIGO_ENTIDAD AND
                             r.AMBITO_CODIGO = cp.AMBITO_CODIGO
                         """,
-                ejecGastos, ejecGastos, ejecGastos, ejecGastos, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS,
+                TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS,
                 TABLA_PROG_GASTOS,
                 "GENERAL_RULES_DATA");
 
@@ -840,7 +840,7 @@ public class dataTransfer_EG {
                             AND a.AMBITO_CODIGO_STR = %s.AMBITO_CODIGO
                         )
                         """,
-                "GENERAL_RULES_DATA", ejecGastos, ejecGastos, "GENERAL_RULES_DATA", "GENERAL_RULES_DATA",
+                "GENERAL_RULES_DATA", TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS, "GENERAL_RULES_DATA", "GENERAL_RULES_DATA",
                 "GENERAL_RULES_DATA", "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateNoDataQuery);
 
@@ -919,7 +919,7 @@ public class dataTransfer_EG {
                             AND d.CODIGO_ENTIDAD = c.CODIGO_ENTIDAD
                             AND d.AMBITO_CODIGO = c.AMBITO_CODIGO
                         """,
-                "GENERAL_RULES_DATA", ejecGastos, ejecGastos, "GENERAL_RULES_DATA");
+                "GENERAL_RULES_DATA", TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS, "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateVariacionesQuery);
 
         // 6. Validar estados (NO DATA, NO CUMPLE, CUMPLE)
@@ -993,7 +993,7 @@ public class dataTransfer_EG {
                             AND a.AMBITO_CODIGO_STR = %s.AMBITO_CODIGO
                         )
                         """,
-                "GENERAL_RULES_DATA", ejecGastos, ejecGastos, "GENERAL_RULES_DATA", "GENERAL_RULES_DATA",
+                "GENERAL_RULES_DATA", TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS, "GENERAL_RULES_DATA", "GENERAL_RULES_DATA",
                 "GENERAL_RULES_DATA", "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateNoDataQuery);
 
@@ -1069,7 +1069,7 @@ public class dataTransfer_EG {
                             AND d.CODIGO_ENTIDAD = c.CODIGO_ENTIDAD
                             AND d.AMBITO_CODIGO = c.AMBITO_CODIGO
                         """,
-                ejecGastos, ejecGastos, "GENERAL_RULES_DATA", ejecGastos, ejecGastos, "GENERAL_RULES_DATA");
+                TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS, "GENERAL_RULES_DATA", TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS, "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateVariacionesQuery);
 
         // 5. Validar estados (NO DATA, NO CUMPLE, CUMPLE) (igual que 16A, pero sin la
