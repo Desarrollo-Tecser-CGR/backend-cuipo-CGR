@@ -17,17 +17,14 @@ public class dataParameterInit {
     @Value("${TABLA_MEDIDAS_GF}")
     private String tablaMGF;
 
-    @Value("${TABLA_MEDIDAS_ICLD}")
-    private String tablaMICLD;
-
     @Transactional
     public void processTablesSource() {
 
-        // tableLimites();
+        tableLimites();
         tableParametrosAnuales();
-        // tableCuentaICLD();
-        // tableMedidasGF();
-        // tableMedidasICLD();
+        tableCuentaICLD();
+        tableMedidasGF();
+        tableMedidasICLD();
 
     }
 
@@ -74,10 +71,10 @@ public class dataParameterInit {
     private void tableMedidasICLD() {
 
         String sqlCheckTable = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'MEDIDAS_ICLD'";
-        String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'TABLA_MEDIDAS_ICLD')"
+        String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'MEDIDAS_ICLD')"
                 +
                 " BEGIN " +
-                " CREATE TABLE [" + tablaMICLD + "] (" +
+                " CREATE TABLE [MEDIDAS_ICLD] (" +
                 "[FECHA] varchar(max)," +
                 "[TRIMESTRE] varchar(max)," +
                 "[CODIGO_ENTIDAD] varchar(max)," +
