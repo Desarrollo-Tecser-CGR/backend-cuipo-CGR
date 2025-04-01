@@ -7,21 +7,24 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.cgr.base.infrastructure.persistence.entity.log.LogType;
 import com.cgr.base.infrastructure.persistence.entity.log.LogsEntityGeneral;
 
 @Repository
 public interface ILogGeneralRepositoryJpa extends JpaRepository<LogsEntityGeneral, Long> {
 
-    @Query("SELECT l FROM LogsEntityGeneral l " +
-           "WHERE (:userId IS NULL OR l.userId = :userId) " +
-           "AND (:logType IS NULL OR l.logType = :logType) " +
-           "AND (:detail IS NULL OR l.detail LIKE CONCAT('%', :detail, '%'))" +
-           "AND (:createdAt IS NULL OR l.createdAt = :createdAt)")
-    List<LogsEntityGeneral> findLogsByFilters(
-            @Param("userId") Long userId,
-            @Param("logType") LogType logType,
-            @Param("detail") String detail,
-            @Param("createdAt") String create_date);
+       @Query(value = "SELECT l.*, u.full_name " +
+       "FROM logs_general l " +
+       "LEFT JOIN users u ON l.user_id = u.id " +
+       "WHERE (:userId IS NULL OR l.user_id = :userId) " +
+       "AND (:logType IS NULL OR l.log_type = :logType) " +
+       "AND (:detail IS NULL OR l.detail LIKE CONCAT('%', :detail, '%')) " +
+       "AND (:createdAt IS NULL OR l.create_date = :createdAt)",
+nativeQuery = true)
+List<Object[]> findLogsWithUserFullNameByFiltersNative(
+@Param("userId") Long userId,
+@Param("logType") String logType,
+@Param("detail") String detail,
+@Param("createdAt") String create_date);
+
             
 }

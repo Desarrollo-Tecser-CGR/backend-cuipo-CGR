@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cgr.base.application.logs.dto.LogWithUserFullNameDTO;
 import com.cgr.base.application.logs.service.LogGeneralService;
 import com.cgr.base.infrastructure.persistence.entity.log.LogType;
-import com.cgr.base.infrastructure.persistence.entity.log.LogsEntityGeneral;
 import com.cgr.base.presentation.controller.AbstractController;
 
 // Asegúrate de importar tus clases y métodos auxiliares, por ejemplo, requestResponse(...)
@@ -22,7 +22,7 @@ import com.cgr.base.presentation.controller.AbstractController;
 @RestController
 @RequestMapping("/api/v1/logs")
 public class logsGenerals extends AbstractController {
-   
+
     @Autowired
     private final LogGeneralService logService;
 
@@ -35,7 +35,7 @@ public class logsGenerals extends AbstractController {
             @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam(value = "logType", required = false) String logTypeStr,
             @RequestParam(value = "detail", required = false) String detail,
-            @RequestParam(value = "createdAt", required = false) String createdAt){
+            @RequestParam(value = "createdAt", required = false) String create_date) {
 
         // Convertir logTypeStr a enum (si se envía)
         LogType logType = null;
@@ -47,7 +47,8 @@ public class logsGenerals extends AbstractController {
             }
         }
 
-        List<LogsEntityGeneral> logs = logService.findLogsByFilters(userId, logType, detail, createdAt);
+        List<LogWithUserFullNameDTO> logs = logService.findLogsByFilters(userId, logType, detail, create_date);
         return requestResponse(logs, "Login Logs filtrados.", HttpStatus.OK, true);
+
     }
 }
