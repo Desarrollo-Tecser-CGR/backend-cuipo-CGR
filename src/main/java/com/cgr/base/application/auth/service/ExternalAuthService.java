@@ -18,13 +18,6 @@ public class ExternalAuthService {
     @Value("${external.auth.url}")
     private String externalAuthUrl = "https://serviciosint.contraloria.gov.co/directorio/usuarios/autenticar";
 
-    /**
-     * Método para autenticar al usuario con el endpoint externo.
-     * 
-     * @param username Nombre de usuario
-     * @param password Contraseña del usuario
-     * @return true si la autenticación es exitosa, false si no lo es
-     */
     public boolean authenticateWithExternalService(String username, String password) {
 
         System.out.println(username + " " + password);
