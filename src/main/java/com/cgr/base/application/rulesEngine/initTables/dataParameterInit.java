@@ -1,6 +1,5 @@
 package com.cgr.base.application.rulesEngine.initTables;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +12,6 @@ public class dataParameterInit {
 
     @PersistenceContext
     private EntityManager entityManager;
-
-    @Value("${TABLA_MEDIDAS_GF}")
-    private String tablaMGF;
 
     @Transactional
     public void processTablesSource() {
@@ -30,10 +26,10 @@ public class dataParameterInit {
 
     private void tableMedidasGF() {
         String sqlCheckTable = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'MEDIDAS_GF'";
-        String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'TABLA_MEDIDAS_GF')"
+        String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'MEDIDAS_GF')"
                 +
                 " BEGIN " +
-                " CREATE TABLE [" + tablaMGF + "] (" +
+                " CREATE TABLE [MEDIDAS_GF] (" +
                 "[FECHA] varchar(max)," +
                 "[TRIMESTRE] varchar(max)," +
                 "[CODIGO_ENTIDAD] varchar(max)," +

@@ -11,106 +11,99 @@ import org.springframework.stereotype.Service;
 @Service
 public class dataTransfer_26 {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
 
-    @Value("${TABLA_SPECIFIC_RULES}")
-    private String tablaReglasEspecificas;
+  @Value("${TABLA_SPECIFIC_RULES}")
+  private String tablaReglasEspecificas;
 
-    @Value("${TABLA_MEDIDAS_GF}")
-    private String tablaMedidasGF;
+  public void applySpecificRule26() {
+    // 1) Definir columnas requeridas
+    List<String> requiredColumns = Arrays.asList(
+        "FECHA",
+        "TRIMESTRE",
+        "CODIGO_ENTIDAD",
+        "AMBITO_CODIGO",
+        "GASTOS_FUNCIONAMIENTO",
+        "GF_PREV_YEAR",
+        "VariacionAnual",
+        "VariacionesPositivas",
+        "VariacionesNegativas",
+        "Promedio_Pos",
+        "Mediana_Pos",
+        "DesvEstandar_Pos",
+        "CV_Mean_Pos",
+        "DesvMediana_Pos",
+        "CV_Mediana_Pos",
+        "Promedio_Neg",
+        "Mediana_Neg",
+        "DesvEstandar_Neg",
+        "CV_Mean_Neg",
+        "DesvMediana_Neg",
+        "CV_Mediana_Neg",
+        "INT_CONF_SUP",
+        "INT_CONF_INF",
+        "ALERTA_26_CA0109",
+        "ALERTA_26_CA0110",
+        "REGLA_ESPECIFICA_26");
 
-    public void applySpecificRule26() {
-        // 1) Definir columnas requeridas
-        List<String> requiredColumns = Arrays.asList(
-            "FECHA",
-            "TRIMESTRE",
-            "CODIGO_ENTIDAD",
-            "AMBITO_CODIGO",
-            "GASTOS_FUNCIONAMIENTO",
-            "GF_PREV_YEAR",
-            "VariacionAnual",
-            "VariacionesPositivas",
-            "VariacionesNegativas",
-            "Promedio_Pos",
-            "Mediana_Pos",
-            "DesvEstandar_Pos",
-            "CV_Mean_Pos",
-            "DesvMediana_Pos",
-            "CV_Mediana_Pos",
-            "Promedio_Neg",
-            "Mediana_Neg",
-            "DesvEstandar_Neg",
-            "CV_Mean_Neg",
-            "DesvMediana_Neg",
-            "CV_Mediana_Neg",
-            "INT_CONF_SUP",
-            "INT_CONF_INF",
-            "ALERTA_26_CA0109",
-            "ALERTA_26_CA0110",
-            "REGLA_ESPECIFICA_26"
-        );
-    
-        // Lista de columnas que quieres como DECIMAL(18,5) 
-        // (i.e., 3-5 decimales). Ajusta según tu lógica:
-        List<String> decimalColumns = Arrays.asList(
-            "GASTOS_FUNCIONAMIENTO",
-            "GF_PREV_YEAR",
-            "VariacionAnual",
-            "VariacionesPositivas",
-            "VariacionesNegativas",
-            "Promedio_Pos",
-            "Mediana_Pos",
-            "DesvEstandar_Pos",
-            "CV_Mean_Pos",
-            "DesvMediana_Pos",
-            "CV_Mediana_Pos",
-            "Promedio_Neg",
-            "Mediana_Neg",
-            "DesvEstandar_Neg",
-            "CV_Mean_Neg",
-            "DesvMediana_Neg",
-            "CV_Mediana_Neg"
-        );
-        // Observa que INT_CONF_SUP, INT_CONF_INF, ALERTA_26_CA0109 y ALERTA_26_CA0110 
-        // se guardarán como texto (VARCHAR) 
-        // ya que construyen cadenas con paréntesis y/o mensajes.
-    
-        // 2) Revisar cuáles columnas existen en tablaMedidasGF y crearlas si faltan
-        String checkColumnsQuery = String.format(
-            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
-          + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-            tablaMedidasGF,
-            "'" + String.join("','", requiredColumns) + "'"
-        );
-        List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
-    
-        for (String col : requiredColumns) {
-            if (!existingCols.contains(col)) {
-                // Escoger el tipo de columna
-                String columnType;
-                if (decimalColumns.contains(col)) {
-                    columnType = "DECIMAL(18,5)";
-                } else {
-                    // Lo dejamos en VARCHAR(MAX) para cadenas
-                    columnType = "VARCHAR(MAX)";
-                }
-                String addColumnQuery = String.format(
-                    "ALTER TABLE %s ADD %s %s NULL",
-                    tablaMedidasGF, col, columnType
-                );
-                jdbcTemplate.execute(addColumnQuery);
-            }
+    // Lista de columnas que quieres como DECIMAL(18,5)
+    // (i.e., 3-5 decimales). Ajusta según tu lógica:
+    List<String> decimalColumns = Arrays.asList(
+        "GASTOS_FUNCIONAMIENTO",
+        "GF_PREV_YEAR",
+        "VariacionAnual",
+        "VariacionesPositivas",
+        "VariacionesNegativas",
+        "Promedio_Pos",
+        "Mediana_Pos",
+        "DesvEstandar_Pos",
+        "CV_Mean_Pos",
+        "DesvMediana_Pos",
+        "CV_Mediana_Pos",
+        "Promedio_Neg",
+        "Mediana_Neg",
+        "DesvEstandar_Neg",
+        "CV_Mean_Neg",
+        "DesvMediana_Neg",
+        "CV_Mediana_Neg");
+    // Observa que INT_CONF_SUP, INT_CONF_INF, ALERTA_26_CA0109 y ALERTA_26_CA0110
+    // se guardarán como texto (VARCHAR)
+    // ya que construyen cadenas con paréntesis y/o mensajes.
+
+    // 2) Revisar cuáles columnas existen en tablaMedidasGF y crearlas si faltan
+    String checkColumnsQuery = String.format(
+        "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
+            + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
+        "MEDIDAS_GF",
+        "'" + String.join("','", requiredColumns) + "'");
+    List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
+
+    for (String col : requiredColumns) {
+      if (!existingCols.contains(col)) {
+        // Escoger el tipo de columna
+        String columnType;
+        if (decimalColumns.contains(col)) {
+          columnType = "DECIMAL(18,5)";
+        } else {
+          // Lo dejamos en VARCHAR(MAX) para cadenas
+          columnType = "VARCHAR(MAX)";
         }
-    
-        // 3) Eliminar registros existentes de la tabla destino
-        String deleteQuery = String.format("DELETE FROM %s", tablaMedidasGF);
-        jdbcTemplate.execute(deleteQuery);
-    
-        // 4) Construir la consulta WITH e INSERT
-        //    Usamos CAST(... AS DECIMAL(18,5)) para forzar 5 decimales
-        String insertQuery = String.format(
-            """
+        String addColumnQuery = String.format(
+            "ALTER TABLE %s ADD %s %s NULL",
+            "MEDIDAS_GF", col, columnType);
+        jdbcTemplate.execute(addColumnQuery);
+      }
+    }
+
+    // 3) Eliminar registros existentes de la tabla destino
+    String deleteQuery = String.format("DELETE FROM %s", "MEDIDAS_GF");
+    jdbcTemplate.execute(deleteQuery);
+
+    // 4) Construir la consulta WITH e INSERT
+    // Usamos CAST(... AS DECIMAL(18,5)) para forzar 5 decimales
+    String insertQuery = String.format(
+        """
             ;WITH Base AS (
               SELECT
                   FECHA,
@@ -227,29 +220,29 @@ public class dataTransfer_26 {
               f.TRIMESTRE,
               f.CODIGO_ENTIDAD,
               f.AMBITO_CODIGO,
-    
+
               -- Aseguramos 5 decimales:
               CAST(f.GASTOS_FUNCIONAMIENTO AS DECIMAL(18,5))  AS GASTOS_FUNCIONAMIENTO,
               CAST(f.GF_PREV_YEAR AS DECIMAL(18,5))           AS GF_PREV_YEAR,
               CAST(f.VariacionAnual AS DECIMAL(18,5))         AS VariacionAnual,
               CAST(f.VariacionesPositivas AS DECIMAL(18,5))   AS VariacionesPositivas,
               CAST(f.VariacionesNegativas AS DECIMAL(18,5))   AS VariacionesNegativas,
-    
+
               CAST(ap.Promedio_Pos AS DECIMAL(18,5))          AS Promedio_Pos,
               CAST(ap.Mediana_Pos AS DECIMAL(18,5))           AS Mediana_Pos,
               CAST(ap.DesvEstandar_Pos AS DECIMAL(18,5))      AS DesvEstandar_Pos,
               CAST(ap.CV_Mean_Pos AS DECIMAL(18,5))           AS CV_Mean_Pos,
               CAST(ap.DesvMediana_Pos AS DECIMAL(18,5))       AS DesvMediana_Pos,
               CAST(ap.CV_Mediana_Pos AS DECIMAL(18,5))        AS CV_Mediana_Pos,
-    
+
               CAST(an.Promedio_Neg AS DECIMAL(18,5))          AS Promedio_Neg,
               CAST(an.Mediana_Neg AS DECIMAL(18,5))           AS Mediana_Neg,
               CAST(an.DesvEstandar_Neg AS DECIMAL(18,5))      AS DesvEstandar_Neg,
               CAST(an.CV_Mean_Neg AS DECIMAL(18,5))           AS CV_Mean_Neg,
               CAST(an.DesvMediana_Neg AS DECIMAL(18,5))       AS DesvMediana_Neg,
               CAST(an.CV_Mediana_Neg AS DECIMAL(18,5))        AS CV_Mediana_Neg,
-    
-              -- Mantener INT_CONF_SUP e INT_CONF_INF como VARCHAR 
+
+              -- Mantener INT_CONF_SUP e INT_CONF_INF como VARCHAR
               -- dado que construyen cadenas con '(' y ')'
               CASE
                 WHEN ap.CV_Mean_Pos < ap.CV_Mediana_Pos
@@ -264,7 +257,7 @@ public class dataTransfer_26 {
                             CAST(ap.Mediana_Pos + 2 * ap.DesvEstandar_Pos AS VARCHAR(20)),
                             ')')
               END AS INT_CONF_SUP,
-    
+
               CASE
                 WHEN an.CV_Mean_Neg < an.CV_Mediana_Neg
                   THEN CONCAT('(',
@@ -278,7 +271,7 @@ public class dataTransfer_26 {
                             CAST(an.Mediana_Neg + 2 * an.DesvEstandar_Neg AS VARCHAR(20)),
                             ')')
               END AS INT_CONF_INF,
-    
+
               CASE
                 WHEN f.VariacionAnual IS NOT NULL AND f.VariacionAnual > 80 THEN 'Variación superior al 80%%'
                 WHEN f.VariacionAnual = 0 THEN 'Variación igual a 0'
@@ -301,7 +294,7 @@ public class dataTransfer_26 {
                      THEN 'Excede límite inferior'
                 ELSE NULL
               END AS ALERTA_26_CA0109,
-    
+
               CASE
                 WHEN f.VariacionAnual IS NULL THEN 'Sin Variacion'
                 WHEN f.VariacionAnual > 0 THEN
@@ -314,7 +307,7 @@ public class dataTransfer_26 {
                              END)
                             THEN 'Cumple'
                        WHEN (
-                             (f.VariacionAnual 
+                             (f.VariacionAnual
                               - (CASE
                                    WHEN ap.CV_Mean_Pos < ap.CV_Mediana_Pos
                                      THEN (ap.Promedio_Pos + 2 * ap.DesvEstandar_Pos)
@@ -366,7 +359,7 @@ public class dataTransfer_26 {
                              END)
                             THEN 'NO EXCEDE'
                        WHEN (
-                             (f.VariacionAnual 
+                             (f.VariacionAnual
                               - (CASE
                                    WHEN ap.CV_Mean_Pos < ap.CV_Mediana_Pos
                                      THEN (ap.Promedio_Pos + 2 * ap.DesvEstandar_Pos)
@@ -410,13 +403,11 @@ public class dataTransfer_26 {
             CROSS JOIN AggPos ap
             CROSS JOIN AggNeg an
             """,
-            tablaReglasEspecificas,
-            tablaMedidasGF
-        );
-    
-        // 5) Ejecutar la consulta
-        jdbcTemplate.execute(insertQuery);
-    }
-    
+        tablaReglasEspecificas,
+        "MEDIDAS_GF");
+
+    // 5) Ejecutar la consulta
+    jdbcTemplate.execute(insertQuery);
+  }
 
 }
