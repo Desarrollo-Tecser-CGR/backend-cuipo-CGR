@@ -15,7 +15,7 @@ public class dataTransfer_PI {
     private JdbcTemplate jdbcTemplate;
 
     @Value("${TABLA_PROG_INGRESOS}")
-    private String progIngresos;
+    private String TABLA_PROG_INGRESOS;
 
     @Value("${TABLA_PROG_GASTOS}")
     private String progGastos;
@@ -26,14 +26,14 @@ public class dataTransfer_PI {
                 "PRES_DEF_PI_C1_1",
                 "REGLA_GENERAL_1",
                 "ALERTA_1");
-    
+
         for (String column : requiredColumns) {
             String checkColumnQuery = String.format(
                     "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME = '%s'",
                     "GENERAL_RULES_DATA", column);
-    
+
             Integer columnExists = jdbcTemplate.queryForObject(checkColumnQuery, Integer.class);
-    
+
             if (columnExists == null || columnExists == 0) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s %s NULL",
@@ -43,88 +43,88 @@ public class dataTransfer_PI {
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
-    
+
         // Validar entidades en liquidación antes de cualquier otra validación
         String updateLiquidacionQuery = String.format(
                 """
-                UPDATE %s
-                SET REGLA_GENERAL_1 = 'NO APLICA',
-                    ALERTA_1 = 'Los Criterios de Validación NO Aplican para Entidades en Liquidación.'
-                WHERE NOMBRE_ENTIDAD LIKE '%%En Liquidaci%%'
-                """,
+                        UPDATE %s
+                        SET REGLA_GENERAL_1 = 'NO APLICA',
+                            ALERTA_1 = 'Los Criterios de Validación NO Aplican para Entidades en Liquidación.'
+                        WHERE NOMBRE_ENTIDAD LIKE '%%En Liquidaci%%'
+                        """,
                 "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateLiquidacionQuery);
-    
+
         // Verificar si existen registros en progIngresos con CUENTA = '1'
         String cuentaCheckQuery = String.format(
                 "SELECT COUNT(*) FROM %s WHERE CUENTA = '1'",
-                progIngresos);
-    
+                TABLA_PROG_INGRESOS);
+
         Integer cuentaExists = jdbcTemplate.queryForObject(cuentaCheckQuery, Integer.class);
-    
+
         if (cuentaExists == null || cuentaExists == 0) {
             String updateNoDataQuery = String.format(
                     """
-                    UPDATE %s
-                    SET REGLA_GENERAL_1 = 'NO DATA',
-                        ALERTA_1 = 'No Existen Registros para la Cuenta 1.',
-                        PRES_DEF_PI_C1_1 = NULL
-                    """,
+                            UPDATE %s
+                            SET REGLA_GENERAL_1 = 'NO DATA',
+                                ALERTA_1 = 'No Existen Registros para la Cuenta 1.',
+                                PRES_DEF_PI_C1_1 = NULL
+                            """,
                     "GENERAL_RULES_DATA");
             jdbcTemplate.execute(updateNoDataQuery);
             return;
         }
-    
-        // Actualizar el presupuesto definitivo en "GENERAL_RULES_DATA" desde progIngresos
+
+        // Actualizar el presupuesto definitivo en "GENERAL_RULES_DATA" desde
+        // progIngresos
         String updatePresupuestoQuery = String.format(
                 """
-                UPDATE d
-                SET d.PRES_DEF_PI_C1_1 = a.PRESUPUESTO_DEFINITIVO
-                FROM %s d
-                INNER JOIN %s a WITH (INDEX(IDX_%s_COMPUTED))
-                    ON a.FECHA = d.FECHA
-                    AND a.TRIMESTRE = d.TRIMESTRE
-                    AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                    AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                WHERE a.CUENTA = '1'
-                """,
-                "GENERAL_RULES_DATA", progIngresos, progIngresos);
+                        UPDATE d
+                        SET d.PRES_DEF_PI_C1_1 = a.PRESUPUESTO_DEFINITIVO
+                        FROM %s d
+                        INNER JOIN %s a WITH (INDEX(IDX_%s_COMPUTED))
+                            ON a.FECHA = d.FECHA
+                            AND a.TRIMESTRE = d.TRIMESTRE
+                            AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
+                            AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
+                        WHERE a.CUENTA = '1'
+                        """,
+                "GENERAL_RULES_DATA", TABLA_PROG_INGRESOS, TABLA_PROG_INGRESOS);
         jdbcTemplate.execute(updatePresupuestoQuery);
-    
+
         // Marcar registros sin presupuesto definitivo
         String updateNoPresupuestoQuery = String.format(
                 """
-                UPDATE %s
-                SET REGLA_GENERAL_1 = 'NO DATA',
-                    ALERTA_1 = 'No se Registra Presupuesto Definitivo en la Cuenta 1.'
-                WHERE PRES_DEF_PI_C1_1 IS NULL
-                """,
+                        UPDATE %s
+                        SET REGLA_GENERAL_1 = 'NO DATA',
+                            ALERTA_1 = 'No se Registra Presupuesto Definitivo en la Cuenta 1.'
+                        WHERE PRES_DEF_PI_C1_1 IS NULL
+                        """,
                 "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateNoPresupuestoQuery);
-    
+
         // Validación de PRES_DEF_PI_C1_1 < 100,000,000 (excluyendo NO APLICA)
         String updateMenorQuery = String.format(
                 """
-                UPDATE %s
-                SET REGLA_GENERAL_1 = 'NO CUMPLE',
-                    ALERTA_1 = 'La entidad NO Satisface los Criterios de Validación.'
-                WHERE PRES_DEF_PI_C1_1 < 100000000 AND REGLA_GENERAL_1 IS NULL
-                """,
+                        UPDATE %s
+                        SET REGLA_GENERAL_1 = 'NO CUMPLE',
+                            ALERTA_1 = 'La entidad NO Satisface los Criterios de Validación.'
+                        WHERE PRES_DEF_PI_C1_1 < 100000000 AND REGLA_GENERAL_1 IS NULL
+                        """,
                 "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateMenorQuery);
-    
+
         // Validación de PRES_DEF_PI_C1_1 >= 100,000,000 (excluyendo NO APLICA)
         String updateMayorQuery = String.format(
                 """
-                UPDATE %s
-                SET REGLA_GENERAL_1 = 'CUMPLE',
-                    ALERTA_1 = 'La Entidad satisface los Criterios de Validación.'
-                WHERE PRES_DEF_PI_C1_1 >= 100000000 AND REGLA_GENERAL_1 IS NULL
-                """,
+                        UPDATE %s
+                        SET REGLA_GENERAL_1 = 'CUMPLE',
+                            ALERTA_1 = 'La Entidad satisface los Criterios de Validación.'
+                        WHERE PRES_DEF_PI_C1_1 >= 100000000 AND REGLA_GENERAL_1 IS NULL
+                        """,
                 "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateMayorQuery);
     }
-    
 
     // Regla2: Presupuesto Inicial VS Presupuesto Definitivo.
     public void applyGeneralRule2() {
@@ -173,7 +173,7 @@ public class dataTransfer_PI {
                             AND (a.PRESUPUESTO_INICIAL IS NULL OR a.PRESUPUESTO_DEFINITIVO IS NULL)
                         )
                         """,
-                progIngresos, progIngresos, "GENERAL_RULES_DATA", progIngresos);
+                TABLA_PROG_INGRESOS, TABLA_PROG_INGRESOS, "GENERAL_RULES_DATA", TABLA_PROG_INGRESOS);
         jdbcTemplate.execute(updateNoDataQuery);
 
         String updateNoCumpleQuery = String.format(
@@ -202,7 +202,7 @@ public class dataTransfer_PI {
                             AND a.PRESUPUESTO_DEFINITIVO = '0'
                         )
                         """,
-                progIngresos, progIngresos, "GENERAL_RULES_DATA", progIngresos);
+                TABLA_PROG_INGRESOS, TABLA_PROG_INGRESOS, "GENERAL_RULES_DATA", TABLA_PROG_INGRESOS);
         jdbcTemplate.execute(updateNoCumpleQuery);
 
         String updateNoDataIfMixedQuery = String.format(
@@ -302,7 +302,8 @@ public class dataTransfer_PI {
                             AND d.CODIGO_ENTIDAD = nd.CODIGO_ENTIDAD
                             AND d.AMBITO_CODIGO = nd.AMBITO_CODIGO
                         """,
-                "GENERAL_RULES_DATA", progIngresos, progIngresos, progIngresos, "GENERAL_RULES_DATA");
+                "GENERAL_RULES_DATA", TABLA_PROG_INGRESOS, TABLA_PROG_INGRESOS, TABLA_PROG_INGRESOS,
+                "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateNoDataQuery);
 
         String updateNoCumpleQuery = String.format(
@@ -342,7 +343,8 @@ public class dataTransfer_PI {
                             AND d.CODIGO_ENTIDAD = nc.CODIGO_ENTIDAD
                             AND d.AMBITO_CODIGO = nc.AMBITO_CODIGO
                         """,
-                "GENERAL_RULES_DATA", progIngresos, progIngresos, progIngresos, "GENERAL_RULES_DATA");
+                "GENERAL_RULES_DATA", TABLA_PROG_INGRESOS, TABLA_PROG_INGRESOS, TABLA_PROG_INGRESOS,
+                "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateNoCumpleQuery);
 
         String updateCumpleQuery = String.format(
@@ -471,7 +473,7 @@ public class dataTransfer_PI {
                             AND c.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
                         WHERE RIGHT(d.AMBITO_CODIGO, 3) BETWEEN '438' AND '439'
                         """,
-                "GENERAL_RULES_DATA", progIngresos, progIngresos, progGastos, progGastos);
+                "GENERAL_RULES_DATA", TABLA_PROG_INGRESOS, TABLA_PROG_INGRESOS, progGastos, progGastos);
         jdbcTemplate.execute(updateValuesQuery);
 
         String updateNoDataQuery = String.format(

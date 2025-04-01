@@ -283,13 +283,13 @@ public class queryFilters {
     }
 
     private List<String> obtenerColumnasReglaGeneral(String codigoFormulario) {
-        if (!tablaExiste(tablaGenerales)) {
+        if (!tablaExiste("GENERAL_RULES_DATA")) {
             return List.of();
         }
 
         if (codigoFormulario == null || codigoFormulario.isEmpty()) {
             String sql = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME LIKE 'REGLA_GENERAL_%'";
-            return jdbcTemplate.queryForList(sql, String.class, tablaGenerales);
+            return jdbcTemplate.queryForList(sql, String.class, "GENERAL_RULES_DATA");
         }
 
         if (!tablaExiste("GENERAL_RULES_TABLES")) {
@@ -309,7 +309,7 @@ public class queryFilters {
 
         String sql = String.format("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND (%s)",
                 condition);
-        return jdbcTemplate.queryForList(sql, String.class, tablaGenerales);
+        return jdbcTemplate.queryForList(sql, String.class, "GENERAL_RULES_DATA");
     }
 
     private Map<String, String> obtenerNombresRG(List<String> codigosRegla) {

@@ -11,7 +11,7 @@ import jakarta.transaction.Transactional;
 public class dataSourceInit {
 
         @Value("${TABLA_PROG_INGRESOS}")
-        private String progIngresos;
+        private String TABLA_PROG_INGRESOS;
 
         @Value("${TABLA_EJEC_INGRESOS}")
         private String ejecIngresos;
@@ -30,7 +30,7 @@ public class dataSourceInit {
         @Transactional
         public void processTablesRules() {
 
-                this.tablas = new String[] { progIngresos, ejecIngresos, progGastos, ejecGastos };
+                this.tablas = new String[] { TABLA_PROG_INGRESOS, ejecIngresos, progGastos, ejecGastos };
 
                 // Paso 1: Agregar columnas TRIMESTRE y FECHA
                 addComputedColumns();

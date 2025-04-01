@@ -24,7 +24,7 @@ public class dataTransfer_EI {
     private String ejecIngresos;
 
     @Value("${TABLA_PROG_INGRESOS}")
-    private String progIngresos;
+    private String TABLA_PROG_INGRESOS;
 
     @Value("${DATASOURCE_NAME}")
     private String DATASOURCE_NAME;
@@ -509,7 +509,7 @@ public class dataTransfer_EI {
                                            AND r.AMBITO_CODIGO = v.AMBITO_CODIGO;
                         """,
                 DATASOURCE_NAME,
-                progIngresos,
+                TABLA_PROG_INGRESOS,
                 DATASOURCE_NAME,
                 ejecIngresos,
                 "GENERAL_RULES_DATA");

@@ -17,9 +17,6 @@ public class dataTransfer_25 {
     @Value("${TABLA_EJEC_GASTOS}")
     private String ejecGastos;
 
-    @Value("${TABLA_EJEC_GASTOS2}")
-    private String ejecGastos2;
-
     public void applySpecificRule25A() {
 
         // --------------------------------------------------------------------
