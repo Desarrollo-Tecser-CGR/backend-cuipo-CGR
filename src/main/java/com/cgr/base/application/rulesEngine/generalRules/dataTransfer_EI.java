@@ -20,9 +20,6 @@ public class dataTransfer_EI {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Value("${TABLA_GENERAL_RULES}")
-    private String tablaReglas;
-
     @Value("${TABLA_EJEC_INGRESOS}")
     private String ejecIngresos;
 
@@ -56,7 +53,7 @@ public class dataTransfer_EI {
 
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaReglas, "'" + String.join("','", requiredColumns) + "'");
+                "GENERAL_RULES_DATA", "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
 
@@ -64,7 +61,7 @@ public class dataTransfer_EI {
             if (!existingColumns.contains(column)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglas, column);
+                        "GENERAL_RULES_DATA", column);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -96,7 +93,7 @@ public class dataTransfer_EI {
                             AND d.CODIGO_ENTIDAD = ctn.CODIGO_ENTIDAD
                             AND d.AMBITO_CODIGO = ctn.AMBITO_CODIGO
                         """,
-                tablaReglas, ejecIngresos, tablaReglas);
+                "GENERAL_RULES_DATA", ejecIngresos, "GENERAL_RULES_DATA");
         jdbcTemplate.execute(checkCuentasTercerNivelQuery);
 
         String updateTrimestre03Query = String.format(
@@ -116,7 +113,7 @@ public class dataTransfer_EI {
                             VALORES_NO_DATA_5 = NULL
                         WHERE TRIMESTRE = '03'
                         """,
-                tablaReglas);
+                "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateTrimestre03Query);
 
         String processTrimestres = String.format(
@@ -151,7 +148,7 @@ public class dataTransfer_EI {
                         WHERE d.TRIMESTRE != '03'
                             AND (prev.FECHA IS NULL OR prev.TRIMESTRE IS NULL)
                         """,
-                tablaReglas, tablaReglas, tablaReglas);
+                "GENERAL_RULES_DATA", "GENERAL_RULES_DATA", "GENERAL_RULES_DATA");
         jdbcTemplate.execute(processTrimestres);
 
         String updateNoDataQuery = String.format(
@@ -183,7 +180,7 @@ public class dataTransfer_EI {
                             AND d.CODIGO_ENTIDAD = nd.CODIGO_ENTIDAD
                             AND d.AMBITO_CODIGO = nd.AMBITO_CODIGO
                         """,
-                tablaReglas, ejecIngresos, ejecIngresos, tablaReglas);
+                "GENERAL_RULES_DATA", ejecIngresos, ejecIngresos, "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateNoDataQuery);
 
         String updateNoCumpleQuery = String.format(
@@ -245,7 +242,7 @@ public class dataTransfer_EI {
                             AND d.CODIGO_ENTIDAD = nc.CODIGO_ENTIDAD
                             AND d.AMBITO_CODIGO = nc.AMBITO_CODIGO
                         """,
-                tablaReglas, ejecIngresos, ejecIngresos, ejecIngresos, tablaReglas);
+                "GENERAL_RULES_DATA", ejecIngresos, ejecIngresos, ejecIngresos, "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateNoCumpleQuery);
 
         String updateCumpleQuery = String.format(
@@ -307,7 +304,7 @@ public class dataTransfer_EI {
                             AND d.CODIGO_ENTIDAD = c.CODIGO_ENTIDAD
                             AND d.AMBITO_CODIGO = c.AMBITO_CODIGO
                         """,
-                tablaReglas, ejecIngresos, ejecIngresos, ejecIngresos, tablaReglas);
+                "GENERAL_RULES_DATA", ejecIngresos, ejecIngresos, ejecIngresos, "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateCumpleQuery);
 
         String updateFinalCumpleQuery = String.format(
@@ -320,7 +317,7 @@ public class dataTransfer_EI {
                         AND CUENTAS_NO_DATA_5 IS NULL
                         AND (CUENTAS_CUMPLE_5 IS NOT NULL OR REGLA_GENERAL_5 IS NULL)
                         """,
-                tablaReglas);
+                "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateFinalCumpleQuery);
 
         String updateFinalNoCumpleQuery = String.format(
@@ -332,7 +329,7 @@ public class dataTransfer_EI {
                         AND CUENTAS_NO_CUMPLE_5 IS NOT NULL
                         AND CUENTAS_NO_DATA_5 IS NULL
                         """,
-                tablaReglas);
+                "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateFinalNoCumpleQuery);
 
         String updateFinalNoDataQuery = String.format(
@@ -344,7 +341,7 @@ public class dataTransfer_EI {
                         AND CUENTAS_NO_CUMPLE_5 IS NULL
                         AND CUENTAS_NO_DATA_5 IS NOT NULL
                         """,
-                tablaReglas);
+                "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateFinalNoDataQuery);
 
         String updateFinalMixedFailQuery = String.format(
@@ -356,7 +353,7 @@ public class dataTransfer_EI {
                         AND CUENTAS_NO_CUMPLE_5 IS NOT NULL
                         AND CUENTAS_NO_DATA_5 IS NOT NULL
                         """,
-                tablaReglas);
+                "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateFinalMixedFailQuery);
     }
 
@@ -369,7 +366,7 @@ public class dataTransfer_EI {
 
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaReglas,
+                "GENERAL_RULES_DATA",
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -378,7 +375,7 @@ public class dataTransfer_EI {
             if (!existingColumns.contains(column)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglas, column);
+                        "GENERAL_RULES_DATA", column);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -515,7 +512,7 @@ public class dataTransfer_EI {
                 progIngresos,
                 DATASOURCE_NAME,
                 ejecIngresos,
-                tablaReglas);
+                "GENERAL_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
     }

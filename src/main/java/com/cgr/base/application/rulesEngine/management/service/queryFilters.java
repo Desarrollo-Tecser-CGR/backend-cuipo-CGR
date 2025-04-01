@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -24,9 +23,6 @@ public class queryFilters {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Value("${TABLA_GENERAL_RULES}")
-    private String tablaGenerales;
-
     private boolean tablaExiste(String tabla) {
         String sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, tabla);
@@ -34,14 +30,14 @@ public class queryFilters {
     }
 
     public listOptionsRG getListOptionsGenerals() {
-        if (!tablaExiste(tablaGenerales)) {
+        if (!tablaExiste("GENERAL_RULES_DATA")) {
             return listOptionsRG.builder().build();
         }
         return listOptionsRG.builder()
-                .fechas(getFechas(tablaGenerales))
-                .trimestres(convertirTrimestres(getTrimestres(tablaGenerales)))
-                .entidades(getEntidades(tablaGenerales))
-                .ambitos(getAmbitos(tablaGenerales))
+                .fechas(getFechas("GENERAL_RULES_DATA"))
+                .trimestres(convertirTrimestres(getTrimestres("GENERAL_RULES_DATA")))
+                .entidades(getEntidades("GENERAL_RULES_DATA"))
+                .ambitos(getAmbitos("GENERAL_RULES_DATA"))
                 .formularios(getFormTables())
                 .build();
     }
@@ -122,7 +118,7 @@ public class queryFilters {
     }
 
     public List<Map<String, Object>> getFilteredRecordsGR(Map<String, String> filters) {
-        if (!tablaExiste(tablaGenerales))
+        if (!tablaExiste("GENERAL_RULES_DATA"))
             return List.of();
 
         String fecha = filters != null ? filters.get("fecha") : null;
@@ -140,7 +136,7 @@ public class queryFilters {
             sql.append(", ").append(String.join(", ", columnasReglaGeneral));
         }
 
-        sql.append(" FROM ").append(tablaGenerales).append(" WHERE 1=1");
+        sql.append(" FROM ").append("GENERAL_RULES_DATA").append(" WHERE 1=1");
 
         if (fecha != null) {
             sql.append(" AND FECHA = ").append(Integer.parseInt(fecha));
@@ -404,11 +400,11 @@ public class queryFilters {
     }
 
     public String getLastUpdateDateGR(Integer fecha, Integer trimestre) {
-        if (!tablaExiste(tablaGenerales) || fecha == null || trimestre == null) {
+        if (!tablaExiste("GENERAL_RULES_DATA") || fecha == null || trimestre == null) {
             return null;
         }
 
-        String sql = "SELECT MAX(FECHA_CARGUE) FROM " + tablaGenerales +
+        String sql = "SELECT MAX(FECHA_CARGUE) FROM " + "GENERAL_RULES_DATA" +
                 " WHERE FECHA = ? AND TRIMESTRE = ?";
 
         return jdbcTemplate.queryForObject(sql, String.class, fecha, trimestre);

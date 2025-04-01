@@ -22,9 +22,6 @@ public class dataSourceInit {
         @Value("${TABLA_EJEC_GASTOS}")
         private String ejecGastos;
 
-        @Value("${TABLA_GENERAL_RULES}")
-        private String tablaReglas;
-
         private String[] tablas;
 
         @PersistenceContext
@@ -95,12 +92,12 @@ public class dataSourceInit {
 
         private void transferUniqueData() {
 
-                if (!tableExists(tablaReglas)) {
+                if (!tableExists("GENERAL_RULES_DATA")) {
                         createGeneralRulesTable();
                 }
 
                 for (String tabla : tablas) {
-                        String sqlInsert = "INSERT INTO [" + tablaReglas + "] " +
+                        String sqlInsert = "INSERT INTO [GENERAL_RULES_DATA] " +
                                         "([FECHA], [TRIMESTRE], [CODIGO_ENTIDAD], [AMBITO_CODIGO], [NOMBRE_ENTIDAD], [AMBITO_NOMBRE]) "
                                         +
                                         "SELECT DISTINCT " +
@@ -113,7 +110,7 @@ public class dataSourceInit {
                                         "FROM [" + tabla + "] t " +
                                         "WHERE NOT EXISTS ( " +
                                         "    SELECT 1 " +
-                                        "    FROM [" + tablaReglas + "] r " +
+                                        "    FROM [GENERAL_RULES_DATA] r " +
                                         "    WHERE r.[FECHA] = t.[FECHA] " +
                                         "      AND r.[TRIMESTRE] = t.[TRIMESTRE] " +
                                         "      AND r.[CODIGO_ENTIDAD] = t.[CODIGO_ENTIDAD_INT] " +
@@ -132,7 +129,7 @@ public class dataSourceInit {
         }
 
         private void createGeneralRulesTable() {
-                String sqlCreateTable = "CREATE TABLE [" + tablaReglas + "] (" +
+                String sqlCreateTable = "CREATE TABLE [GENERAL_RULES_DATA] (" +
                                 "[FECHA] INT, " +
                                 "[TRIMESTRE] INT, " +
                                 "[CODIGO_ENTIDAD] BIGINT, " +
