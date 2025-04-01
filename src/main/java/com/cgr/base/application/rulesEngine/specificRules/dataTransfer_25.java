@@ -20,9 +20,6 @@ public class dataTransfer_25 {
     @Value("${TABLA_EJEC_GASTOS2}")
     private String ejecGastos2;
 
-    @Value("${TABLA_SPECIFIC_RULES}")
-    private String tablaReglasEspecificas;
-
     public void applySpecificRule25A() {
 
         // --------------------------------------------------------------------
@@ -33,7 +30,7 @@ public class dataTransfer_25 {
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
                         + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaReglasEspecificas,
+                "SPECIFIC_RULES_DATA",
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -43,7 +40,7 @@ public class dataTransfer_25 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglasEspecificas, col);
+                        "SPECIFIC_RULES_DATA", col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -133,10 +130,8 @@ public class dataTransfer_25 {
                            AND r.AMBITO_CODIGO  = g.AMBITO_CODIGO
                         ;
                         """,
-                // 1) Reemplaza %s por la tabla "VW_OPENDATA_D_EJECUCION_GASTOS"
                 ejecGastos,
-                // 2) Reemplaza %s por la tabla de reglas (por ej. "GENERAL_RULES_DATA")
-                tablaReglasEspecificas);
+                "SPECIFIC_RULES_DATA");
 
         // 3) Ejecutar la query
         jdbcTemplate.execute(updateQuery);
@@ -252,7 +247,7 @@ public class dataTransfer_25 {
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
                         + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaReglasEspecificas,
+                "SPECIFIC_RULES_DATA",
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -261,7 +256,7 @@ public class dataTransfer_25 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglasEspecificas, col);
+                        "SPECIFIC_RULES_DATA", col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -299,7 +294,7 @@ public class dataTransfer_25 {
                         """,
                 ejecGastos,
                 ejecGastos,
-                tablaReglasEspecificas);
+                "SPECIFIC_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
     }

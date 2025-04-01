@@ -14,9 +14,6 @@ public class dataTransfer_22 {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Value("${TABLA_SPECIFIC_RULES}")
-    private String tablaReglasEspecificas;
-
     @Value("${TABLA_EJEC_INGRESOS}")
     private String ejecIngresos;
 
@@ -27,7 +24,7 @@ public class dataTransfer_22 {
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
                         + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaReglasEspecificas,
+                "SPECIFIC_RULES_DATA",
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -37,7 +34,7 @@ public class dataTransfer_22 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglasEspecificas, col);
+                        "SPECIFIC_RULES_DATA", col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -86,7 +83,7 @@ public class dataTransfer_22 {
                 // Para la CTE
                 ejecIngresos, // e
                 "CUENTAS_ICLD", // c
-                tablaReglasEspecificas);
+                "SPECIFIC_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
     }
@@ -175,7 +172,7 @@ public class dataTransfer_22 {
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
                         + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaReglasEspecificas,
+                "SPECIFIC_RULES_DATA",
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -185,7 +182,7 @@ public class dataTransfer_22 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglasEspecificas, col);
+                        "SPECIFIC_RULES_DATA", col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -284,7 +281,7 @@ public class dataTransfer_22 {
                 """,
                 ejecIngresos, "CUENTAS_ICLD",
                 "CUENTAS_ICLD", ejecIngresos,
-                tablaReglasEspecificas);
+                "SPECIFIC_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
     }
@@ -297,7 +294,7 @@ public class dataTransfer_22 {
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
                         "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaReglasEspecificas, // nombre de la tabla de ejecución de ingresos
+                "SPECIFIC_RULES_DATA", // nombre de la tabla de ejecución de ingresos
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -307,7 +304,7 @@ public class dataTransfer_22 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglasEspecificas, col);
+                        "SPECIFIC_RULES_DATA", col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -357,7 +354,7 @@ public class dataTransfer_22 {
                 """,
                 ejecIngresos,
                 ejecIngresos,
-                tablaReglasEspecificas);
+                "SPECIFIC_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
     }
@@ -434,7 +431,7 @@ public class dataTransfer_22 {
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
                         "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaReglasEspecificas,
+                "SPECIFIC_RULES_DATA",
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -443,7 +440,7 @@ public class dataTransfer_22 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglasEspecificas, col);
+                        "SPECIFIC_RULES_DATA", col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -515,12 +512,9 @@ public class dataTransfer_22 {
                            AND r.CODIGO_ENTIDAD = v.CODIGO_ENTIDAD
                            AND r.AMBITO_CODIGO = v.AMBITO_CODIGO;
                         """,
-                // T0 usa (tablaIngresos)
                 ejecIngresos,
-                // FlagValidaciones usa (tablaIngresos)
                 ejecIngresos,
-                // UPDATE final -> (tablaReglasEspecificas)
-                tablaReglasEspecificas);
+                "SPECIFIC_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
     }
@@ -579,7 +573,7 @@ public class dataTransfer_22 {
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
                         + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaReglasEspecificas,
+                "SPECIFIC_RULES_DATA",
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -588,7 +582,7 @@ public class dataTransfer_22 {
             if (!existingCols.contains(col)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglasEspecificas, col);
+                        "SPECIFIC_RULES_DATA", col);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -641,12 +635,9 @@ public class dataTransfer_22 {
                    AND r.CODIGO_ENTIDAD = v.CODIGO_ENTIDAD
                    AND r.AMBITO_CODIGO  = v.AMBITO_CODIGO;
                 """,
-                // T0 utiliza (tablaIngresos)
                 ejecIngresos,
-                // subconsulta e2 -> (tablaIngresos)
                 ejecIngresos,
-                // UPDATE final a (tablaReglasEspecificas)
-                tablaReglasEspecificas);
+                "SPECIFIC_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
     }

@@ -13,9 +13,6 @@ public class dataTransfer_23 {
         @PersistenceContext
         private EntityManager entityManager;
 
-        @Value("${TABLA_SPECIFIC_RULES}")
-        private String tablaReglasEspecificas;
-
         @Value("${TABLA_EJEC_INGRESOS}")
         private String tablaEjecIngresos;
 

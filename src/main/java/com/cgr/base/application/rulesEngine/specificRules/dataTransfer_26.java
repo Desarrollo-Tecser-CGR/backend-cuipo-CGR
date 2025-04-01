@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +12,6 @@ public class dataTransfer_26 {
 
   @Autowired
   private JdbcTemplate jdbcTemplate;
-
-  @Value("${TABLA_SPECIFIC_RULES}")
-  private String tablaReglasEspecificas;
 
   public void applySpecificRule26() {
     // 1) Definir columnas requeridas
@@ -403,7 +399,7 @@ public class dataTransfer_26 {
             CROSS JOIN AggPos ap
             CROSS JOIN AggNeg an
             """,
-        tablaReglasEspecificas,
+        "SPECIFIC_RULES_DATA",
         "MEDIDAS_GF");
 
     // 5) Ejecutar la consulta
