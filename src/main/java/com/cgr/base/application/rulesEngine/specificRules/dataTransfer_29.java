@@ -25,6 +25,9 @@ public class dataTransfer_29 {
     @Value("${TABLA_E029}")
     private String tablaE029;
 
+    @Value("${DATASOURCE_NAME}")
+private String DATASOURCE_NAME;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -149,13 +152,13 @@ public class dataTransfer_29 {
                         p.REMU_DIPUTADOS_SMMLV,
                         pa.SMMLV
                     FROM %s AS g
-                    LEFT JOIN cuipo_dev.dbo.CATEGORIAS AS c
+                    LEFT JOIN " + DATASOURCE_NAME + ".dbo.CATEGORIAS AS c
                         ON g.CODIGO_ENTIDAD = c.CODIGO_ENTIDAD
                        AND g.AMBITO_CODIGO = c.AMBITO_CODIGO
-                    LEFT JOIN cuipo_dev.dbo.PORCENTAJES_LIMITES AS p
+                    LEFT JOIN " + DATASOURCE_NAME + ".dbo.PORCENTAJES_LIMITES AS p
                         ON p.AMBITO_CODIGO = c.AMBITO_CODIGO
                        AND p.CATEGORIA_CODIGO = c.CATEGORIA
-                    LEFT JOIN cuipo_dev.dbo.PARAMETRIZACION_ANUAL AS pa
+                    LEFT JOIN " + DATASOURCE_NAME + ".dbo.PARAMETRIZACION_ANUAL AS pa
                         ON g.FECHA = pa.FECHA
                     WHERE g.TRIMESTRE = '12'
                       AND (g.AMBITO_CODIGO = 'A438' OR g.AMBITO_CODIGO = 'A441')

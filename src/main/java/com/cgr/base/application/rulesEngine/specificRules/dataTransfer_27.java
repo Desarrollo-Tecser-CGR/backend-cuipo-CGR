@@ -3,6 +3,7 @@ package com.cgr.base.application.rulesEngine.specificRules;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,9 @@ public class dataTransfer_27 {
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Value("${DATASOURCE_NAME}")
+    private String DATASOURCE_NAME;
 
     @Async
     @Transactional
@@ -64,7 +68,7 @@ public class dataTransfer_27 {
 
         String sqlInsert = "INSERT INTO E027 (FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO) " +
                 "SELECT DISTINCT s.[FECHA], s.[TRIMESTRE], s.[CODIGO_ENTIDAD], s.[AMBITO_CODIGO] " +
-                "FROM [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] s " +
+                "FROM [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] s " +
                 "WHERE s.[AMBITO_CODIGO] = 'A439' AND s.[TRIMESTRE] = 12 " +
                 "AND NOT EXISTS (" +
                 "    SELECT 1 FROM E027 r " +
@@ -79,7 +83,7 @@ public class dataTransfer_27 {
                 "e.NO_CONCEJALES = c.NO_CONCEJALES, " +
                 "e.CATEGORIA = c.CATEGORIA " +
                 "FROM E027 e " +
-                "LEFT JOIN [cuipo_dev].[dbo].[CATEGORIAS] c " +
+                "LEFT JOIN [" + DATASOURCE_NAME + "].[dbo].[CATEGORIAS] c " +
                 "    ON e.CODIGO_ENTIDAD = c.CODIGO_ENTIDAD " +
                 "    AND e.AMBITO_CODIGO = c.AMBITO_CODIGO";
         entityManager.createNativeQuery(sqlUpdate).executeUpdate();
@@ -87,7 +91,7 @@ public class dataTransfer_27 {
         String sqlUpdatePercentages = "UPDATE e SET " +
                 "e.MAX_SESIONES_CONC = pl.MAX_SESIONES_CONC " +
                 "FROM E027 e " +
-                "LEFT JOIN [cuipo_dev].[dbo].[PORCENTAJES_LIMITES] pl " +
+                "LEFT JOIN [" + DATASOURCE_NAME + "].[dbo].[PORCENTAJES_LIMITES] pl " +
                 "    ON e.AMBITO_CODIGO = pl.AMBITO_CODIGO " +
                 "    AND e.CATEGORIA = pl.CATEGORIA_CODIGO";
         entityManager.createNativeQuery(sqlUpdatePercentages).executeUpdate();
@@ -103,7 +107,7 @@ public class dataTransfer_27 {
                 "    WHEN e.CATEGORIA = '6' THEN pa.VAL_SESION_CONC_6 " +
                 "    ELSE NULL END " +
                 "FROM E027 e " +
-                "LEFT JOIN [cuipo_dev].[dbo].[PARAMETRIZACION_ANUAL] pa " +
+                "LEFT JOIN [" + DATASOURCE_NAME + "].[dbo].[PARAMETRIZACION_ANUAL] pa " +
                 "    ON e.FECHA = pa.FECHA";
         entityManager.createNativeQuery(sqlUpdateParametrization).executeUpdate();
 
@@ -123,7 +127,7 @@ public class dataTransfer_27 {
                 UPDATE e
                 SET e.HONORARIOS_COMP =
                     (SELECT SUM(g.COMPROMISOS)
-                     FROM [cuipo_dev].[dbo].[VW_OPENDATA_D_EJECUCION_GASTOS] g
+                     FROM [" + DATASOURCE_NAME + "].[dbo].[VW_OPENDATA_D_EJECUCION_GASTOS] g
                      WHERE g.CODIGO_ENTIDAD = e.CODIGO_ENTIDAD
                      AND g.FECHA = e.FECHA
                      AND g.TRIMESTRE = e.TRIMESTRE
@@ -166,7 +170,7 @@ public class dataTransfer_27 {
                                 ('2.1.1.01.03')
                              ) AS Cuentas(CUENTA)
                              WHERE NOT EXISTS (
-                                 SELECT 1 FROM [cuipo_dev].[dbo].[VW_OPENDATA_D_EJECUCION_GASTOS] g
+                                 SELECT 1 FROM [" + DATASOURCE_NAME + "].[dbo].[VW_OPENDATA_D_EJECUCION_GASTOS] g
                                  WHERE g.CODIGO_ENTIDAD = E027.CODIGO_ENTIDAD
                                  AND g.FECHA = E027.FECHA
                                  AND g.TRIMESTRE = E027.TRIMESTRE
@@ -183,7 +187,7 @@ public class dataTransfer_27 {
                     UPDATE e
                     SET e.ICLD = s.ICLD
                     FROM E027 e
-                    LEFT JOIN [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] s
+                    LEFT JOIN [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] s
                         ON e.FECHA = s.FECHA
                         AND e.TRIMESTRE = s.TRIMESTRE
                         AND e.CODIGO_ENTIDAD = s.CODIGO_ENTIDAD
@@ -194,7 +198,7 @@ public class dataTransfer_27 {
                     UPDATE e
                     SET e.ICLD_PREV = s.ICLD
                     FROM E027 e
-                    LEFT JOIN [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] s
+                    LEFT JOIN [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] s
                         ON (e.FECHA - 1) = s.FECHA
                         AND e.TRIMESTRE = s.TRIMESTRE
                         AND e.CODIGO_ENTIDAD = s.CODIGO_ENTIDAD
@@ -205,7 +209,7 @@ public class dataTransfer_27 {
                     UPDATE e
                     SET e.GASTOS_COMP_CTA2 = (
                         SELECT SUM(g.COMPROMISOS)
-                        FROM [cuipo_dev].[dbo].[VW_OPENDATA_D_EJECUCION_GASTOS] g
+                        FROM [" + DATASOURCE_NAME + "].[dbo].[VW_OPENDATA_D_EJECUCION_GASTOS] g
                         WHERE g.CODIGO_ENTIDAD = e.CODIGO_ENTIDAD
                         AND g.FECHA = e.FECHA
                         AND g.TRIMESTRE = e.TRIMESTRE
