@@ -1,12 +1,16 @@
 package com.cgr.base.domain.models.entity.Logs;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.cgr.base.domain.models.entity.EntityNotification;
+import com.cgr.base.domain.models.entity.Logs.exit.LogExitEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,10 +18,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
@@ -53,8 +59,25 @@ public class UserEntity {
     @Column(name = "user_type")
     private String userType;
 
+    // jhon
+    @Column(name = "failed_attempts")
+    private Integer failedAttempts = 0;
+
+    @Column(name = "lock_time")
+    private LocalDateTime lockTime;
+
     @OneToMany(mappedBy = "user")
     private List<LogEntity> logs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<LogExitEntity> logsExit = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EntityNotification> notifications = new ArrayList<>();
+
+    @Lob
+    @Column(name = "image_profile", nullable = true)
+    private String imageProfile;
 
     @ManyToMany
     @JsonIgnoreProperties({ "users", "handler", "hibernateLazyInitializer" })

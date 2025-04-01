@@ -1,6 +1,9 @@
 package com.cgr.base.application.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
+import java.io.IOException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -10,13 +13,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.cgr.base.domain.dto.dtoUser.UserDto;
 import com.cgr.base.domain.dto.dtoUser.UserWithRolesRequestDto;
 import com.cgr.base.application.services.user.usecase.IUserSynchronizerUseCase;
 import com.cgr.base.application.services.user.usecase.IUserUseCase;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
@@ -72,6 +78,34 @@ public class UserController extends AbstractController {
         return requestResponse(result, () -> this.userService.updateUser(id, userDto),
                 "Usuario actualizado exitosamente", HttpStatus.OK, true);
 
+    }
+
+    @PostMapping("/upload_image/{userId}")
+    public ResponseEntity<String> uploadProfileImage(@PathVariable Long userId,
+            @RequestParam("image") MultipartFile image,
+            HttpServletRequest request) throws IOException {
+
+        String base64Image = userService.convertToBase64(image);
+        try {
+
+            userService.uploadProfileImage(userId, base64Image);
+            return new ResponseEntity<>("Profile Image Uploaded Successfully.", HttpStatus.OK);
+
+        } catch (IllegalArgumentException e) {
+
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/profile_image/{userId}")
+    public ResponseEntity<String> getProfileImage(@PathVariable Long userId) {
+
+        try {
+            String base64Image = userService.getProfileImage(userId);
+            return new ResponseEntity<>(base64Image, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
 
 }

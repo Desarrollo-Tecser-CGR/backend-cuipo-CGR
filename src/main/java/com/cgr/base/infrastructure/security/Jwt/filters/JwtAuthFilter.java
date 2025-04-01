@@ -14,7 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.cgr.base.application.auth.dtoAuth.AuthResponseDto;
+import com.cgr.base.domain.dto.dtoAuth.AuthResponseDto;
 import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -35,11 +35,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
-    @Autowired
-    private JwtService jwtService;
+    private final JwtService jwtService;
 
-    @Autowired
-    private ObjectMapper getObjectMapper;
+    private final ObjectMapper getObjectMapper;
 
     /**
      * Lista blanca de URIs
@@ -51,6 +49,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/auth/",
             "/swagger-ui",
             "/ws/**",
+            "/api/v1/token",
+            "/api/v1/departments",
+            "/api/v1/municipality",
             "/app/**",
             "/topic/**");
 
@@ -61,6 +62,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
      * @return True la URI existe en la lista blanca, false de lo contrario
      * @throws ServletException
      */
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         System.out.println("llegué aqui shouldNotFilter");
@@ -69,7 +71,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         System.out.println("headers:" + request);
         System.out.println("headers:" + request.getHeaders(HttpHeaders.AUTHORIZATION).toString());
         String requestUri = request.getRequestURI();
-        return urlsToSkip.stream().anyMatch(uri -> requestUri.startsWith(uri));
+        return requestUri.equals("/ws/info") || requestUri.startsWith("/ws/")
+                || urlsToSkip.stream().anyMatch(uri -> requestUri.startsWith(uri));
     }
 
     /**
@@ -94,6 +97,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         System.out.println("=======header +  jwtauth" + header);
+
+        String requestUri = request.getRequestURI();
+
+        if (requestUri.startsWith("/v3/api-docs/") || requestUri.equals("/v3/api-docs")
+                || requestUri.startsWith("/swagger-ui/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if (header == null) {
             responseHandler(response, "Token requerido", HttpServletResponse.SC_FORBIDDEN);

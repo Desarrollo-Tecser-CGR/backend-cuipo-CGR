@@ -16,7 +16,7 @@ public class AuthRequestDto {
     @JsonProperty("sAMAccountName")
     private String sAMAccountName;
     private String password; 
-    private String email;  
-  
+    private String email;
+    private String tipe_of_income;
 
 }

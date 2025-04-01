@@ -13,7 +13,7 @@ import com.cgr.base.application.services.auth.service.MenuService;
 public class MenuController {
 
     @Autowired
-    private MenuService menuTest;  
+    private MenuService menuTest;
 
     @GetMapping("/health")
     public ResponseEntity<String> checkHealth() {

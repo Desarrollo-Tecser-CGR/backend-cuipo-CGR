@@ -11,10 +11,7 @@ import java.util.Optional;
 @Repository
 public interface RepositoryMunicipality extends JpaRepository<EntityMunicipality, Integer> {
 
-
-
     @Query("SELECT e FROM EntityMunicipality e WHERE e.mpio_ccnct = :mpio_ccnct")
     Optional<EntityMunicipality> findByMpioCcdgo(@Param("mpio_ccnct") String mpio_ccnct);
-
 
 }

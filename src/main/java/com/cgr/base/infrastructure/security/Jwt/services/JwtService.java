@@ -13,7 +13,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
-import com.cgr.base.application.auth.dtoAuth.AuthResponseDto;
+import com.cgr.base.domain.dto.dtoAuth.AuthResponseDto;
 import com.cgr.base.domain.models.entity.Logs.RoleEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -141,7 +141,7 @@ public class JwtService {
         return null;
     }
 
-    private Date extractExpiration(String token) {
+    public Date extractExpiration(String token) {
 
         System.out.println("Issu" + JWT.decode(token).getExpiresAt());
 
