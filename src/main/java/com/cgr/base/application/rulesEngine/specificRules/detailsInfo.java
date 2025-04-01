@@ -17,6 +17,12 @@ public class detailsInfo {
     @Value("${DATASOURCE_NAME}")
     private String DATASOURCE_NAME;
 
+    @Value("${TABLA_EJEC_INGRESOS}")
+    private String TABLA_EJEC_INGRESOS;
+
+    @Value("${TABLA_EJEC_GASTOS}")
+    private String TABLA_EJEC_GASTOS;
+
     public List<Map<String, Object>> processGFRequest(Map<String, String> filters) {
         if (!validateFilters(filters)) {
             return null;
@@ -34,7 +40,7 @@ public class detailsInfo {
 
     public List<Map<String, Object>> getFilteredRecordsGF(String fecha, String trimestre, String ambitoCodigo,
             String entidadCodigo) {
-        String tablaConsulta = "[" + DATASOURCE_NAME + "].[dbo].[VW_OPENDATA_D_EJECUCION_GASTOS]";
+        String tablaConsulta = "[" + DATASOURCE_NAME + "].[dbo].[" + TABLA_EJEC_GASTOS + "]";
 
         List<String> columnasValidas = List.of(
                 "CUENTA", "NOMBRE_CUENTA",
@@ -89,7 +95,7 @@ public class detailsInfo {
 
     public List<Map<String, Object>> getFilteredRecordsICLD(String fecha, String trimestre, String ambitoCodigo,
             String entidadCodigo) {
-        String tablaConsulta = "[" + DATASOURCE_NAME + "].[dbo].[VW_OPENDATA_B_EJECUCION_INGRESOS]";
+        String tablaConsulta = "[" + DATASOURCE_NAME + "].[dbo].[" + TABLA_EJEC_INGRESOS + "]";
 
         List<String> columnasValidas = List.of(
                 "CUENTA", "NOMBRE_CUENTA",

@@ -19,7 +19,10 @@ public class dataTransfer_28 {
     private EntityManager entityManager;
 
     @Value("${DATASOURCE_NAME}")
-private String DATASOURCE_NAME;
+    private String DATASOURCE_NAME;
+
+    @Value("${TABLA_EJEC_GASTOS}")
+    private String TABLA_EJEC_GASTOS;
 
     @Async
     @Transactional
@@ -37,7 +40,8 @@ private String DATASOURCE_NAME;
         entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
 
         List<String> additionalColumns = Arrays.asList(
-                "CATEGORIA", "SMMLV", "ALERTA_28", "REGLA_ESPECIFICA_28", "ICLD", "GASTOS_COMP_CTA2", "LIM_GASTOS_SMMLV", "LIM_GASTOS_ICLD",
+                "CATEGORIA", "SMMLV", "ALERTA_28", "REGLA_ESPECIFICA_28", "ICLD", "GASTOS_COMP_CTA2",
+                "LIM_GASTOS_SMMLV", "LIM_GASTOS_ICLD",
                 "GASTO_MAX_PERS", "GASTOS_COMP_ICLD", "GASTOS_COMP_SMMLV", "RAZON_GASTO_LIM");
 
         for (String column : additionalColumns) {
@@ -96,7 +100,7 @@ private String DATASOURCE_NAME;
 
         entityManager.createNativeQuery(sqlUpdateLimIcld).executeUpdate();
 
-        String sqlUpdateAlerta28 = """
+        String sqlUpdateAlerta28 = String.format("""
                     UPDATE E028
                     SET ALERTA_28 =
                         'No se reportaron las siguientes cuentas en Ejecución de Gastos: ' +
@@ -108,7 +112,7 @@ private String DATASOURCE_NAME;
                                 ('2.1.1.01.03')
                              ) AS Cuentas(CUENTA)
                              WHERE NOT EXISTS (
-                                 SELECT 1 FROM [" + DATASOURCE_NAME + "].[dbo].[VW_OPENDATA_D_EJECUCION_GASTOS] g
+                                 SELECT 1 FROM [%s].[dbo].[%s] g
                                  WHERE g.CODIGO_ENTIDAD = E028.CODIGO_ENTIDAD
                                  AND g.FECHA = E028.FECHA
                                  AND g.TRIMESTRE = E028.TRIMESTRE
@@ -119,26 +123,26 @@ private String DATASOURCE_NAME;
                              FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, ''
                         )
                     WHERE ALERTA_28 IS NULL OR ALERTA_28 = ''
-                """;
+                """, DATASOURCE_NAME, TABLA_EJEC_GASTOS);
 
         entityManager.createNativeQuery(sqlUpdateAlerta28).executeUpdate();
 
-        String sqlUpdateIcld = """
+        String sqlUpdateIcld = String.format("""
                     UPDATE e
                     SET e.ICLD = s.ICLD
                     FROM E028 e
-                    LEFT JOIN [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] s
+                    LEFT JOIN [%s].[dbo].[SPECIFIC_RULES_DATA] s
                         ON e.FECHA = s.FECHA
                         AND e.TRIMESTRE = s.TRIMESTRE
                         AND e.CODIGO_ENTIDAD = s.CODIGO_ENTIDAD
-                """;
+                """, DATASOURCE_NAME);
         entityManager.createNativeQuery(sqlUpdateIcld).executeUpdate();
 
-        String sqlUpdateGastosCompCta2 = """
+        String sqlUpdateGastosCompCta2 = String.format("""
                     UPDATE e
                     SET e.GASTOS_COMP_CTA2 = (
                         SELECT SUM(g.COMPROMISOS)
-                        FROM [" + DATASOURCE_NAME + "].[dbo].[VW_OPENDATA_D_EJECUCION_GASTOS] g
+                        FROM [%s].[dbo].[%s] g
                         WHERE g.CODIGO_ENTIDAD = e.CODIGO_ENTIDAD
                         AND g.FECHA = e.FECHA
                         AND g.TRIMESTRE = e.TRIMESTRE
@@ -148,11 +152,11 @@ private String DATASOURCE_NAME;
                         GROUP BY g.CODIGO_ENTIDAD, g.FECHA, g.TRIMESTRE
                     )
                     FROM E028 e
-                """;
+                """, DATASOURCE_NAME, TABLA_EJEC_GASTOS);
 
         entityManager.createNativeQuery(sqlUpdateGastosCompCta2).executeUpdate();
 
-        String sqlUpdatePercentages28 = """
+        String sqlUpdatePercentages28 = String.format("""
                     UPDATE e
                     SET
                         e.LIM_GASTOS_ICLD = CASE
@@ -164,10 +168,10 @@ private String DATASOURCE_NAME;
                             ELSE NULL
                         END
                     FROM E028 e
-                    LEFT JOIN [" + DATASOURCE_NAME + "].[dbo].[PORCENTAJES_LIMITES] pl
+                    LEFT JOIN [%s].[dbo].[PORCENTAJES_LIMITES] pl
                         ON e.AMBITO_CODIGO = pl.AMBITO_CODIGO
                         AND e.CATEGORIA = pl.CATEGORIA_CODIGO
-                """;
+                """, DATASOURCE_NAME);
 
         entityManager.createNativeQuery(sqlUpdatePercentages28).executeUpdate();
 

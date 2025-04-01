@@ -1,6 +1,5 @@
 package com.cgr.base.application.rulesEngine.initTables;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityManager;
@@ -9,9 +8,6 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class dataCategoryInit {
-
-    @Value("${TABLA_CATEGORIAS}")
-    private String tablaCategorias;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -37,9 +33,7 @@ public class dataCategoryInit {
 
         if (count == 0) {
             entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
-            String sql = "INSERT INTO [" + tablaCategorias
-                    +
-                    "] ([CODIGO_ENTIDAD],[AMBITO_CODIGO],[NOMBRE_ENTIDAD],[CATEGORIA],[NO_DIPUTADOS],[NO_CONCEJALES])"
+            String sql = "INSERT INTO [CATEGORIAS] ([CODIGO_ENTIDAD],[AMBITO_CODIGO],[NOMBRE_ENTIDAD],[CATEGORIA],[NO_DIPUTADOS],[NO_CONCEJALES])"
                     + "VALUES " +
                     "('119191000','A438','AMAZONAS','4',11,0)," +
                     "('110505000','A438','ANTIOQUIA','E',26,0)," +
@@ -689,9 +683,7 @@ public class dataCategoryInit {
                     "('216225862','A439','VERGARA','6',0,9)," +
                     "('211841518','A439','PAICOL','6',0,9)";
 
-            String sql2 = "INSERT INTO [" + tablaCategorias
-                    +
-                    "] ([CODIGO_ENTIDAD],[AMBITO_CODIGO],[NOMBRE_ENTIDAD],[CATEGORIA],[NO_DIPUTADOS],[NO_CONCEJALES])"
+            String sql2 = "INSERT INTO [CATEGORIAS] ([CODIGO_ENTIDAD],[AMBITO_CODIGO],[NOMBRE_ENTIDAD],[CATEGORIA],[NO_DIPUTADOS],[NO_CONCEJALES])"
                     + "VALUES " +
                     "('217241872','A439','VILLAVIEJA','6',0,9)," +
                     "('210547605','A439','REMOLINO','6',0,9)," +

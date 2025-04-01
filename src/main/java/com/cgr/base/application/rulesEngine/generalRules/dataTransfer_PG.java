@@ -14,11 +14,8 @@ public class dataTransfer_PG {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Value("${TABLA_GENERAL_RULES}")
-    private String tablaReglas;
-
     @Value("${TABLA_PROG_GASTOS}")
-    private String progGastos;
+    private String TABLA_PROG_GASTOS;
 
     @Value("${DATASOURCE_NAME}")
     private String DATASOURCE_NAME;
@@ -30,14 +27,14 @@ public class dataTransfer_PG {
         for (String column : requiredColumns) {
             String checkColumnQuery = String.format(
                     "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME = '%s'",
-                    tablaReglas, column);
+                    "GENERAL_RULES_DATA", column);
 
             Integer columnExists = jdbcTemplate.queryForObject(checkColumnQuery, Integer.class);
 
             if (columnExists == null || columnExists == 0) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglas, column);
+                        "GENERAL_RULES_DATA", column);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -74,11 +71,11 @@ public class dataTransfer_PG {
                                     THEN 'CUMPLE_TERRITORIAL'
                                     ELSE 'NO CUMPLE'
                                 END AS CUMPLE_STATUS
-                            FROM dbo.VW_OPENDATA_C_PROGRAMACION_GASTOS g
+                            FROM dbo.%s g
                         ) t ON r.FECHA = t.FECHA AND r.TRIMESTRE = t.TRIMESTRE AND r.CODIGO_ENTIDAD = t.CODIGO_ENTIDAD AND r.AMBITO_CODIGO = t.AMBITO_CODIGO
                         GROUP BY r.FECHA, r.TRIMESTRE, r.CODIGO_ENTIDAD, r.AMBITO_CODIGO
                         """,
-                tablaReglas);
+                "GENERAL_RULES_DATA", TABLA_PROG_GASTOS);
         jdbcTemplate.execute(tempTableQuery);
 
         String updateValuesQuery = String.format(
@@ -97,7 +94,7 @@ public class dataTransfer_PG {
                         INNER JOIN #TempGeneralRule7 t
                         ON d.FECHA = t.FECHA AND d.TRIMESTRE = t.TRIMESTRE AND d.CODIGO_ENTIDAD = t.CODIGO_ENTIDAD AND d.AMBITO_CODIGO = t.AMBITO_CODIGO
                         """,
-                tablaReglas);
+                "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateValuesQuery);
 
         String dropTempTableQuery = "DROP TABLE #TempGeneralRule7";
@@ -113,7 +110,7 @@ public class dataTransfer_PG {
 
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaReglas,
+                "GENERAL_RULES_DATA",
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -122,7 +119,7 @@ public class dataTransfer_PG {
             if (!existingColumns.contains(column)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglas, column);
+                        "GENERAL_RULES_DATA", column);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -142,7 +139,7 @@ public class dataTransfer_PG {
                                 FECHA,
                                 CODIGO_ENTIDAD_INT AS CODIGO_ENTIDAD,
                                 AMBITO_CODIGO_STR AS AMBITO_CODIGO
-                            FROM %s.dbo.VW_OPENDATA_C_PROGRAMACION_GASTOS
+                            FROM %s.dbo.%s
                         ),
                         DatosProcesados AS (
                             SELECT
@@ -155,7 +152,7 @@ public class dataTransfer_PG {
                                 SELECT
                                     v.CODIGO_ENTIDAD,
                                     v.AMBITO_CODIGO
-                                FROM dbo.VW_OPENDATA_C_PROGRAMACION_GASTOS v
+                                FROM dbo.%s v
                                 LEFT JOIN dbo.AMBITOS_CAPTURA a
                                     ON v.AMBITO_CODIGO = a.AMBITO_COD
                                 WHERE v.COD_VIGENCIA_DEL_GASTO NOT IN (a.VIGENCIA_AC, a.RESERVAS, a.CXP, a.VF_VA, a.VF_RESERVA, a.VF_CXP)
@@ -177,7 +174,7 @@ public class dataTransfer_PG {
                             FROM DatosProcesados
                         ) AS Resultados;
                         """,
-                DATASOURCE_NAME, DATASOURCE_NAME);
+                DATASOURCE_NAME, DATASOURCE_NAME, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS);
 
         int recordCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
 
@@ -189,7 +186,7 @@ public class dataTransfer_PG {
                             SET ALERTA_8 = 'Alerta_8: No hay valores - No se encontraron registros que coincidan con las condiciones de la consulta para la Regla General 8.'
                             WHERE ALERTA_8 IS NULL OR ALERTA_8 = '';
                             """,
-                    tablaReglas);
+                    "GENERAL_RULES_DATA");
             jdbcTemplate.execute(noDataAlertQuery);
             return;
         }
@@ -210,7 +207,7 @@ public class dataTransfer_PG {
                                 FECHA,
                                 CODIGO_ENTIDAD_INT AS CODIGO_ENTIDAD,
                                 AMBITO_CODIGO_STR AS AMBITO_CODIGO
-                            FROM %s.dbo.VW_OPENDATA_C_PROGRAMACION_GASTOS
+                            FROM %s.dbo.%s
                         ),
                         DatosProcesados AS (
                             -- Parte 1: Todos los registros de GENERAL_RULES_DATA con validación
@@ -265,7 +262,7 @@ public class dataTransfer_PG {
                                     v.AMBITO_CODIGO,
                                     STRING_AGG(v.CUENTA, ', ') AS CUENTAS_NO_CUMPLE_8,
                                     STRING_AGG(CAST(v.COD_VIGENCIA_DEL_GASTO AS VARCHAR(MAX)), ', ') AS COD_VIGENCIA_DEL_GASTO
-                                FROM dbo.VW_OPENDATA_C_PROGRAMACION_GASTOS v
+                                FROM dbo.%s v
                                 LEFT JOIN dbo.AMBITOS_CAPTURA a
                                     ON v.AMBITO_CODIGO = a.AMBITO_COD
                                 WHERE v.COD_VIGENCIA_DEL_GASTO NOT IN (a.VIGENCIA_AC, a.RESERVAS, a.CXP, a.VF_VA, a.VF_RESERVA, a.VF_CXP)
@@ -302,7 +299,7 @@ public class dataTransfer_PG {
                             AND r.CODIGO_ENTIDAD = dp.CODIGO_ENTIDAD
                             AND r.AMBITO_CODIGO = dp.AMBITO_CODIGO;
                         """,
-                DATASOURCE_NAME, DATASOURCE_NAME, tablaReglas);
+                DATASOURCE_NAME, DATASOURCE_NAME, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS, "GENERAL_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
     }
@@ -316,7 +313,7 @@ public class dataTransfer_PG {
 
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaReglas,
+                "GENERAL_RULES_DATA",
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -325,7 +322,7 @@ public class dataTransfer_PG {
             if (!existingColumns.contains(column)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglas, column);
+                        "GENERAL_RULES_DATA", column);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -372,7 +369,7 @@ public class dataTransfer_PG {
                     AND r.CODIGO_ENTIDAD = v.CODIGO_ENTIDAD
                     AND r.AMBITO_CODIGO = v.AMBITO_CODIGO;
                 """,
-                progGastos, tablaReglas);
+                TABLA_PROG_GASTOS, "GENERAL_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
     }
@@ -386,7 +383,7 @@ public class dataTransfer_PG {
         // Verificar si las columnas existen en la tabla
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaReglas,
+                "GENERAL_RULES_DATA",
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -396,7 +393,7 @@ public class dataTransfer_PG {
             if (!existingColumns.contains(column)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglas, column);
+                        "GENERAL_RULES_DATA", column);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -434,8 +431,8 @@ public class dataTransfer_PG {
                 AND r.CODIGO_ENTIDAD = v.CODIGO_ENTIDAD
                 AND r.AMBITO_CODIGO = v.AMBITO_CODIGO;
                 """,
-                tablaReglas,
-                progGastos);
+                "GENERAL_RULES_DATA",
+                TABLA_PROG_GASTOS);
 
         jdbcTemplate.execute(updateQuery);
     }
@@ -457,7 +454,7 @@ public class dataTransfer_PG {
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
                         + "WHERE TABLE_NAME = '%s' "
                         + "AND COLUMN_NAME IN ('%s')",
-                tablaReglas,
+                "GENERAL_RULES_DATA",
                 String.join("','", requiredColumns));
         List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
 
@@ -465,7 +462,7 @@ public class dataTransfer_PG {
             if (!existingColumns.contains(column)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglas,
+                        "GENERAL_RULES_DATA",
                         column);
                 jdbcTemplate.execute(addColumnQuery);
             }
@@ -495,7 +492,7 @@ public class dataTransfer_PG {
                             WHEN SUM(CAST(g.APROPIACION_DEFINITIVA AS BIGINT)) < 100000000 THEN 'CUMPLE'
                             ELSE 'NO CUMPLE'
                         END AS REGLA_GENERAL_10A
-                    FROM VW_OPENDATA_C_PROGRAMACION_GASTOS g
+                    FROM %s g
                     INNER JOIN AmbitoVigencias av
                         ON g.AMBITO_CODIGO = av.AMBITO_COD
                        AND CHARINDEX(CAST(g.COD_VIGENCIA_DEL_GASTO AS VARCHAR), av.VIGENCIAS_APLICABLES) > 0
@@ -510,7 +507,7 @@ public class dataTransfer_PG {
                         g.AMBITO_CODIGO,
                         STRING_AGG(g.CUENTA, ', ') AS LISTA_CUENTAS_10B,
                         'NO CUMPLE' AS REGLA_GENERAL_10B
-                    FROM VW_OPENDATA_C_PROGRAMACION_GASTOS g
+                    FROM %s g
                     INNER JOIN AmbitoVigencias av
                         ON g.AMBITO_CODIGO = av.AMBITO_COD
                        AND CHARINDEX(CAST(g.COD_VIGENCIA_DEL_GASTO AS VARCHAR), av.VIGENCIAS_APLICABLES) > 0
@@ -529,7 +526,7 @@ public class dataTransfer_PG {
                             WHEN SUM(CAST(g.APROPIACION_DEFINITIVA AS BIGINT)) < 100000000 THEN 'NO CUMPLE'
                             ELSE 'CUMPLE'
                         END AS REGLA_GENERAL_10C
-                    FROM VW_OPENDATA_C_PROGRAMACION_GASTOS g
+                    FROM %s g
                     INNER JOIN AmbitoVigencias av
                         ON g.AMBITO_CODIGO = av.AMBITO_COD
                        AND CHARINDEX(CAST(g.COD_VIGENCIA_DEL_GASTO AS VARCHAR), av.VIGENCIAS_APLICABLES) > 0
@@ -603,7 +600,7 @@ public class dataTransfer_PG {
                    AND r.CODIGO_ENTIDAD   = v.CODIGO_ENTIDAD
                    AND r.AMBITO_CODIGO    = v.AMBITO_CODIGO
                 """,
-                tablaReglas);
+                TABLA_PROG_GASTOS, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS, "GENERAL_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
     }
@@ -620,7 +617,7 @@ public class dataTransfer_PG {
 
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                tablaReglas,
+                "GENERAL_RULES_DATA",
                 "'" + String.join("','", requiredColumns) + "'");
 
         List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
@@ -629,7 +626,7 @@ public class dataTransfer_PG {
             if (!existingColumns.contains(column)) {
                 String addColumnQuery = String.format(
                         "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        tablaReglas, column);
+                        "GENERAL_RULES_DATA", column);
                 jdbcTemplate.execute(addColumnQuery);
             }
         }
@@ -721,7 +718,7 @@ public class dataTransfer_PG {
                             AND r.CODIGO_ENTIDAD = v.CODIGO_ENTIDAD
                             AND r.AMBITO_CODIGO = v.AMBITO;
                         """,
-                progGastos, tablaReglas, tablaReglas);
+                TABLA_PROG_GASTOS, "GENERAL_RULES_DATA", "GENERAL_RULES_DATA");
 
         jdbcTemplate.execute(updateQuery);
     }

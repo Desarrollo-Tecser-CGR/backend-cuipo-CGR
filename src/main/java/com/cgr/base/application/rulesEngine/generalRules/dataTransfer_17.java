@@ -17,7 +17,7 @@ public class dataTransfer_17 {
     private dataBaseUtils UtilsDB;
 
     @Value("${TABLA_EJEC_INGRESOS}")
-    private String ejecIngresos;
+    private String TABLA_EJEC_INGRESOS;
 
     public void applyGeneralRule17() {
         ensureColumnsExist();
@@ -31,7 +31,7 @@ public class dataTransfer_17 {
     }
 
     private void ensureColumnsExist() {
-        UtilsDB.ensureColumnsExist(ejecIngresos,
+        UtilsDB.ensureColumnsExist(TABLA_EJEC_INGRESOS,
                 "VAL_RT_TV_17:DECIMAL(18,2)",
                 "VAL_RT_TP_17A:DECIMAL(18,2)",
                 "VAL_RT_AP_17B:DECIMAL(18,2)",
@@ -62,7 +62,7 @@ public class dataTransfer_17 {
                 AND t.FECHA = e.FECHA
                 AND t.CODIGO_ENTIDAD_INT = e.CODIGO_ENTIDAD_INT
                 AND t.CUENTA = e.CUENTA;
-                """, ejecIngresos, ejecIngresos);
+                """, TABLA_EJEC_INGRESOS, TABLA_EJEC_INGRESOS);
 
         jdbcTemplate.update(query);
     }
@@ -90,7 +90,7 @@ public class dataTransfer_17 {
                 AND t.FECHA = e.FECHA
                 AND t.CODIGO_ENTIDAD_INT = e.CODIGO_ENTIDAD_INT
                 AND t.CUENTA = e.CUENTA;
-                """, ejecIngresos, ejecIngresos);
+                """, TABLA_EJEC_INGRESOS, TABLA_EJEC_INGRESOS);
 
         jdbcTemplate.update(query);
     }
@@ -114,7 +114,7 @@ public class dataTransfer_17 {
                 AND t.FECHA = e.FECHA - 1
                 AND t.CODIGO_ENTIDAD_INT = e.CODIGO_ENTIDAD_INT
                 AND t.CUENTA = e.CUENTA;
-                """, ejecIngresos, ejecIngresos);
+                """, TABLA_EJEC_INGRESOS, TABLA_EJEC_INGRESOS);
 
         jdbcTemplate.update(query);
     }
@@ -135,7 +135,7 @@ public class dataTransfer_17 {
                             END
                         FROM %s e;
                         """,
-                ejecIngresos);
+                TABLA_EJEC_INGRESOS);
 
         jdbcTemplate.update(query);
     }
@@ -156,7 +156,7 @@ public class dataTransfer_17 {
                             END
                         FROM %s e;
                         """,
-                ejecIngresos);
+                TABLA_EJEC_INGRESOS);
 
         jdbcTemplate.update(query);
     }
@@ -177,7 +177,7 @@ public class dataTransfer_17 {
                                     ELSE 1
                                 END
                         FROM %s e;
-                        """, ejecIngresos);
+                        """, TABLA_EJEC_INGRESOS);
 
         jdbcTemplate.update(query);
     }
@@ -236,7 +236,7 @@ public class dataTransfer_17 {
                             AND a.CODIGO_ENTIDAD = d.CODIGO_ENTIDAD
                             AND a.AMBITO_CODIGO = d.AMBITO_CODIGO;
                         """,
-                "GENERAL_RULES_DATA", ejecIngresos, ejecIngresos,
+                "GENERAL_RULES_DATA", TABLA_EJEC_INGRESOS, TABLA_EJEC_INGRESOS,
                 "GENERAL_RULES_DATA");
 
         jdbcTemplate.execute(updateRegla17Query);

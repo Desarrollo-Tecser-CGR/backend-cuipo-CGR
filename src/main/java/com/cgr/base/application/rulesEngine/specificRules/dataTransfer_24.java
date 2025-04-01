@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +12,6 @@ public class dataTransfer_24 {
 
   @Autowired
   private JdbcTemplate jdbcTemplate;
-
-  @Value("${TABLA_SPECIFIC_RULES}")
-  private String tablaReglasEspecificas;
-
-  @Value("${TABLA_MEDIDAS_ICLD}")
-  private String tablaMedidasICLD;
 
   public void applySpecificRule24() {
     // Todas las columnas que necesitas
@@ -76,7 +69,7 @@ public class dataTransfer_24 {
     String checkColumnsQuery = String.format(
         "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
             + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-        tablaMedidasICLD,
+        "MEDIDAS_ICLD",
         "'" + String.join("','", requiredColumns) + "'");
     List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
 
@@ -94,7 +87,7 @@ public class dataTransfer_24 {
         }
         String addColumnQuery = String.format(
             "ALTER TABLE %s ADD %s %s NULL",
-            tablaMedidasICLD, col, columnType);
+            "MEDIDAS_ICLD", col, columnType);
         jdbcTemplate.execute(addColumnQuery);
       }
     }
@@ -102,7 +95,7 @@ public class dataTransfer_24 {
     // ---------------------------
     // 2) Limpiar la tabla destino
     // ---------------------------
-    String deleteQuery = String.format("DELETE FROM %s", tablaMedidasICLD);
+    String deleteQuery = String.format("DELETE FROM %s", "MEDIDAS_ICLD");
     jdbcTemplate.execute(deleteQuery);
 
     // ---------------------------
@@ -407,13 +400,9 @@ public class dataTransfer_24 {
             CROSS JOIN AggPos ap
             CROSS JOIN AggNeg an
             """,
-        // Reemplaza %s (la tabla fuente) con 'tablaReglasEspecificas' (?)
-        // y la tabla destino con 'tablaMedidasICLD'
-        tablaReglasEspecificas, // %s en el WITH Base
-        tablaMedidasICLD // %s en el INSERT
-    );
+        "SPECIFIC_RULES_DATA",
+        "MEDIDAS_ICLD");
 
-    // 4) Ejecutar la consulta de inserción
     jdbcTemplate.execute(insertQuery);
   }
 
