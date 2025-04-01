@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,7 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.access.service.accessManagement;
+import com.cgr.base.application.logs.service.LogGeneralService;
+import static com.cgr.base.infrastructure.persistence.entity.log.LogType.PARAMETER;
+import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.cgr.base.presentation.controller.AbstractController;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/v1/access")
@@ -23,6 +29,11 @@ public class accessController extends AbstractController {
 
     @Autowired
     accessManagement Access;
+        @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private LogGeneralService logGeneralService;
 
     @GetMapping("/module/list")
     public ResponseEntity<?> getAvailableMenus() {
@@ -39,11 +50,19 @@ public class accessController extends AbstractController {
 
     @PreAuthorize("hasAuthority('MENU_1')")
     @PutMapping("/config")
-    public ResponseEntity<?> updateRoleModules(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> updateRoleModules(@RequestBody Map<String, Object> request, HttpServletRequest httpRequest) {
+
+        String header = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = header.split(" ")[1];
+
+        Long userId = jwtService.extractUserIdFromToken(token);
 
         if (!request.containsKey("roleId") || !request.containsKey("moduleIds")) {
             return requestResponse(null, "El roleId y la lista de módulos son obligatorios.", HttpStatus.BAD_REQUEST,
                     false);
+        }
+        if (userId == null) {
+            return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
         try {
@@ -53,6 +72,10 @@ public class accessController extends AbstractController {
                     .collect(Collectors.toList());
 
             boolean updated = Access.updateRoleModules(roleId, moduleIds);
+
+            logGeneralService.createLog(userId, PARAMETER,
+                    "Modificación de rol id " + roleId + " con los módulos " + moduleIds + " asignados.");
+                            
             return updated ? requestResponse(null, "Módulos actualizados correctamente.", HttpStatus.OK, true)
                     : requestResponse(null, "Error al actualizar los módulos.", HttpStatus.INTERNAL_SERVER_ERROR,
                             false);
