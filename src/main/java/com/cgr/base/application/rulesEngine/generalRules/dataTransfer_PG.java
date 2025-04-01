@@ -20,6 +20,9 @@ public class dataTransfer_PG {
     @Value("${TABLA_PROG_GASTOS}")
     private String progGastos;
 
+    @Value("${DATASOURCE_NAME}")
+    private String DATASOURCE_NAME;
+
     public void applyGeneralRule7() {
         List<String> requiredColumns = Arrays.asList(
                 "CUMPLE_STATUS_7", "ALERTA_7", "AMBITO_CODIGOS_NO_CUMPLE_7", "COD_SECCION_PRESUPUESTAL_NO_CUMPLE_7");
@@ -124,55 +127,57 @@ public class dataTransfer_PG {
             }
         }
 
-        String countQuery = """
-                WITH ComparacionTablas AS (
-                    SELECT
-                        TRIMESTRE,
-                        FECHA,
-                        CODIGO_ENTIDAD,
-                        AMBITO_CODIGO
-                    FROM cuipo_dev.dbo.GENERAL_RULES_DATA
-                    EXCEPT
-                    SELECT
-                        TRIMESTRE,
-                        FECHA,
-                        CODIGO_ENTIDAD_INT AS CODIGO_ENTIDAD,
-                        AMBITO_CODIGO_STR AS AMBITO_CODIGO
-                    FROM cuipo_dev.dbo.VW_OPENDATA_C_PROGRAMACION_GASTOS
-                ),
-                DatosProcesados AS (
-                    SELECT
-                        g.[FECHA],
-                        g.[TRIMESTRE],
-                        g.[CODIGO_ENTIDAD],
-                        g.[AMBITO_CODIGO]
-                    FROM dbo.GENERAL_RULES_DATA g
-                    LEFT JOIN (
-                        SELECT
-                            v.CODIGO_ENTIDAD,
-                            v.AMBITO_CODIGO
-                        FROM dbo.VW_OPENDATA_C_PROGRAMACION_GASTOS v
-                        LEFT JOIN dbo.AMBITOS_CAPTURA a
-                            ON v.AMBITO_CODIGO = a.AMBITO_COD
-                        WHERE v.COD_VIGENCIA_DEL_GASTO NOT IN (a.VIGENCIA_AC, a.RESERVAS, a.CXP, a.VF_VA, a.VF_RESERVA, a.VF_CXP)
-                            AND v.COD_VIGENCIA_DEL_GASTO IS NOT NULL
-                        GROUP BY v.CODIGO_ENTIDAD, v.AMBITO_CODIGO
-                    ) t
-                    ON g.CODIGO_ENTIDAD = t.CODIGO_ENTIDAD
-                    AND g.AMBITO_CODIGO = t.AMBITO_CODIGO
-                    LEFT JOIN ComparacionTablas ct
-                        ON g.CODIGO_ENTIDAD = ct.CODIGO_ENTIDAD
-                        AND g.AMBITO_CODIGO = ct.AMBITO_CODIGO
-                        AND g.TRIMESTRE = ct.TRIMESTRE
-                        AND g.FECHA = ct.FECHA
-                    WHERE t.CODIGO_ENTIDAD IS NOT NULL OR ct.CODIGO_ENTIDAD IS NOT NULL
-                )
-                SELECT COUNT(*) AS TotalRegistros
-                FROM (
-                    SELECT DISTINCT FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO
-                    FROM DatosProcesados
-                ) AS Resultados;
-                """;
+        String countQuery = String.format(
+                """
+                        WITH ComparacionTablas AS (
+                            SELECT
+                                TRIMESTRE,
+                                FECHA,
+                                CODIGO_ENTIDAD,
+                                AMBITO_CODIGO
+                            FROM %s.dbo.GENERAL_RULES_DATA
+                            EXCEPT
+                            SELECT
+                                TRIMESTRE,
+                                FECHA,
+                                CODIGO_ENTIDAD_INT AS CODIGO_ENTIDAD,
+                                AMBITO_CODIGO_STR AS AMBITO_CODIGO
+                            FROM %s.dbo.VW_OPENDATA_C_PROGRAMACION_GASTOS
+                        ),
+                        DatosProcesados AS (
+                            SELECT
+                                g.[FECHA],
+                                g.[TRIMESTRE],
+                                g.[CODIGO_ENTIDAD],
+                                g.[AMBITO_CODIGO]
+                            FROM dbo.GENERAL_RULES_DATA g
+                            LEFT JOIN (
+                                SELECT
+                                    v.CODIGO_ENTIDAD,
+                                    v.AMBITO_CODIGO
+                                FROM dbo.VW_OPENDATA_C_PROGRAMACION_GASTOS v
+                                LEFT JOIN dbo.AMBITOS_CAPTURA a
+                                    ON v.AMBITO_CODIGO = a.AMBITO_COD
+                                WHERE v.COD_VIGENCIA_DEL_GASTO NOT IN (a.VIGENCIA_AC, a.RESERVAS, a.CXP, a.VF_VA, a.VF_RESERVA, a.VF_CXP)
+                                    AND v.COD_VIGENCIA_DEL_GASTO IS NOT NULL
+                                GROUP BY v.CODIGO_ENTIDAD, v.AMBITO_CODIGO
+                            ) t
+                            ON g.CODIGO_ENTIDAD = t.CODIGO_ENTIDAD
+                            AND g.AMBITO_CODIGO = t.AMBITO_CODIGO
+                            LEFT JOIN ComparacionTablas ct
+                                ON g.CODIGO_ENTIDAD = ct.CODIGO_ENTIDAD
+                                AND g.AMBITO_CODIGO = ct.AMBITO_CODIGO
+                                AND g.TRIMESTRE = ct.TRIMESTRE
+                                AND g.FECHA = ct.FECHA
+                            WHERE t.CODIGO_ENTIDAD IS NOT NULL OR ct.CODIGO_ENTIDAD IS NOT NULL
+                        )
+                        SELECT COUNT(*) AS TotalRegistros
+                        FROM (
+                            SELECT DISTINCT FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO
+                            FROM DatosProcesados
+                        ) AS Resultados;
+                        """,
+                DATASOURCE_NAME, DATASOURCE_NAME);
 
         int recordCount = jdbcTemplate.queryForObject(countQuery, Integer.class);
 
@@ -198,14 +203,14 @@ public class dataTransfer_PG {
                                 FECHA,
                                 CODIGO_ENTIDAD,
                                 AMBITO_CODIGO
-                            FROM cuipo_dev.dbo.GENERAL_RULES_DATA
+                            FROM %s.dbo.GENERAL_RULES_DATA
                             EXCEPT
                             SELECT
                                 TRIMESTRE,
                                 FECHA,
                                 CODIGO_ENTIDAD_INT AS CODIGO_ENTIDAD,
                                 AMBITO_CODIGO_STR AS AMBITO_CODIGO
-                            FROM cuipo_dev.dbo.VW_OPENDATA_C_PROGRAMACION_GASTOS
+                            FROM %s.dbo.VW_OPENDATA_C_PROGRAMACION_GASTOS
                         ),
                         DatosProcesados AS (
                             -- Parte 1: Todos los registros de GENERAL_RULES_DATA con validación
@@ -297,7 +302,7 @@ public class dataTransfer_PG {
                             AND r.CODIGO_ENTIDAD = dp.CODIGO_ENTIDAD
                             AND r.AMBITO_CODIGO = dp.AMBITO_CODIGO;
                         """,
-                tablaReglas);
+                DATASOURCE_NAME, DATASOURCE_NAME, tablaReglas);
 
         jdbcTemplate.execute(updateQuery);
     }

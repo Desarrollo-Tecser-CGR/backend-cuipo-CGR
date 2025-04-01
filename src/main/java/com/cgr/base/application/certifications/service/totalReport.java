@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityManager;
@@ -17,6 +18,9 @@ public class totalReport {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Value("${DATASOURCE_NAME}")
+    private String DATASOURCE_NAME;
+
     public List<Map<String, Object>> getCertificationStats() {
         String sql = "SELECT " +
                 "FECHA, " +
@@ -24,7 +28,7 @@ public class totalReport {
                 "SUM(CASE WHEN ESTADO_CALIDAD = 'NO CERTIFICA' THEN 1 ELSE 0 END) AS CALIDAD_NO_CUMPLE, " +
                 "SUM(CASE WHEN ESTADO_L617 = 'CERTIFICA' THEN 1 ELSE 0 END) AS L617_CUMPLE, " +
                 "SUM(CASE WHEN ESTADO_L617 = 'NO CERTIFICA' THEN 1 ELSE 0 END) AS L617_NO_CUMPLE " +
-                "FROM cuipo_dev.dbo.CONTROL_CERTIFICACION " +
+                "FROM " + DATASOURCE_NAME + ".dbo.CONTROL_CERTIFICACION " +
                 "GROUP BY FECHA " +
                 "ORDER BY FECHA DESC";
 

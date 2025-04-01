@@ -19,6 +19,9 @@ public class dataTransfer_23 {
         @Value("${TABLA_EJEC_INGRESOS}")
         private String tablaEjecIngresos;
 
+        @Value("${DATASOURCE_NAME}")
+        private String DATASOURCE_NAME;
+
         @Transactional
         public void applySpecificRule23() {
 
@@ -40,7 +43,7 @@ public class dataTransfer_23 {
                                 "AND COLUMN_NAME = 'REGLA_ESPECIFICA_23A'" +
                                 ") " +
                                 "BEGIN " +
-                                "ALTER TABLE [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] " +
+                                "ALTER TABLE [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] " +
                                 "ADD REGLA_ESPECIFICA_23A VARCHAR(255); " +
                                 "END; ";
                 entityManager.createNativeQuery(createColumnCA0086).executeUpdate();
@@ -89,7 +92,7 @@ public class dataTransfer_23 {
                                 "AND COLUMN_NAME = 'ALERTA_CA0087'" +
                                 ") " +
                                 "BEGIN " +
-                                "ALTER TABLE [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] " +
+                                "ALTER TABLE [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] " +
                                 "ADD ALERTA_CA0087 VARCHAR(255); " +
                                 "END; ";
                 entityManager.createNativeQuery(createColumnCA0087).executeUpdate();
@@ -139,7 +142,7 @@ public class dataTransfer_23 {
                                 "AND COLUMN_NAME = 'ALERTA_CA0088'" +
                                 ") " +
                                 "BEGIN " +
-                                "ALTER TABLE [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] " +
+                                "ALTER TABLE [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] " +
                                 "ADD ALERTA_CA0088 VARCHAR(255); " +
                                 "END; ";
 
@@ -175,7 +178,7 @@ public class dataTransfer_23 {
                                 "AND COLUMN_NAME = 'REGLA_ESPECIFICA_23B'" +
                                 ") " +
                                 "BEGIN " +
-                                "ALTER TABLE [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] " +
+                                "ALTER TABLE [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] " +
                                 "ADD REGLA_ESPECIFICA_23B VARCHAR(255); " +
                                 "END; ";
 
@@ -218,7 +221,7 @@ public class dataTransfer_23 {
                                 "AND TABLE_SCHEMA = 'dbo'" +
                                 ") " +
                                 "BEGIN " +
-                                "ALTER TABLE [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] " +
+                                "ALTER TABLE [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] " +
                                 "ADD ALERTA_CA0090 VARCHAR(255); " +
                                 "END; ";
 
@@ -261,7 +264,7 @@ public class dataTransfer_23 {
                                 "AND COLUMN_NAME = 'REGLA_ESPECIFICA_23C'" +
                                 ") " +
                                 "BEGIN " +
-                                "ALTER TABLE [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] " +
+                                "ALTER TABLE [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] " +
                                 "ADD REGLA_ESPECIFICA_23C VARCHAR(255); " +
                                 "END; ";
                 entityManager.createNativeQuery(createColumnCA0091).executeUpdate();
@@ -302,7 +305,7 @@ public class dataTransfer_23 {
                                 "AND COLUMN_NAME = 'ALERTA_CA0092'" +
                                 ") " +
                                 "BEGIN " +
-                                "ALTER TABLE [cuipo_dev].[dbo].[SPECIFIC_RULES_DATA] " +
+                                "ALTER TABLE [" + DATASOURCE_NAME + "].[dbo].[SPECIFIC_RULES_DATA] " +
                                 "ADD ALERTA_CA0092 VARCHAR(255); " +
                                 "END; ";
 

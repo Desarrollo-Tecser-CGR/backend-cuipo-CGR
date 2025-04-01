@@ -29,6 +29,9 @@ public class dataTransfer_EI {
     @Value("${TABLA_PROG_INGRESOS}")
     private String progIngresos;
 
+    @Value("${DATASOURCE_NAME}")
+    private String DATASOURCE_NAME;
+
     @Autowired
     private dataBaseUtils UtilsDB;
 
@@ -393,13 +396,13 @@ public class dataTransfer_EI {
                                 CASE WHEN FUENTE = 'E' THEN 1 ELSE 0 END AS ES_EJE
                             FROM (
                                 SELECT TRIMESTRE, FECHA, CODIGO_ENTIDAD, AMBITO_CODIGO, CUENTA, 'P' AS FUENTE
-                                FROM [cuipo_dev].[dbo].[%s]
+                                FROM [%s].[dbo].[%s]
                                 WHERE CUENTA IN ('1.0', '1.1', '1.2')
 
                                 UNION ALL
 
                                 SELECT TRIMESTRE, FECHA, CODIGO_ENTIDAD, AMBITO_CODIGO, CUENTA, 'E' AS FUENTE
-                                FROM [cuipo_dev].[dbo].[%s]
+                                FROM [%s].[dbo].[%s]
                                 WHERE CUENTA IN ('1.0', '1.1', '1.2')
                             ) AS SUBQUERY
                         ),
@@ -508,7 +511,9 @@ public class dataTransfer_EI {
                                            AND r.CODIGO_ENTIDAD = v.CODIGO_ENTIDAD
                                            AND r.AMBITO_CODIGO = v.AMBITO_CODIGO;
                         """,
+                DATASOURCE_NAME,
                 progIngresos,
+                DATASOURCE_NAME,
                 ejecIngresos,
                 tablaReglas);
 
