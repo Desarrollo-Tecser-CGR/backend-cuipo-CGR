@@ -10,10 +10,10 @@ spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE}
   datasource:
-    username: ${DATASOURCE_USERNAME}
-    password: ${DATASOURCE_PASSWORD}
+    username: USR_DB_CUIPO
+    password: 5GJdwDBag7L%
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: ${DATASOURCE_URL}
+    url: jdbc:sqlserver://192.168.27.99:1433;databaseName=DB_CUIPO;encrypt=true;trustServerCertificate=true;loginTimeout=3600;queryTimeout=7200
     hikari:
       connection-timeout: 3600000
       max-lifetime: 7200000

@@ -16,7 +16,7 @@ import java.net.http.HttpResponse;
 public class ExternalAuthService {
 
     @Value("${external.auth.url}")
-    private String externalAuthUrl = "https://serviciosint.contraloria.gov.co/directorio/usuarios/autenticar";
+    private String externalAuthUrl;
 
     public boolean authenticateWithExternalService(String username, String password) {
 
