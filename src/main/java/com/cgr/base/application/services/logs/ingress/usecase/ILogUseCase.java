@@ -10,6 +10,6 @@ public interface ILogUseCase {
 
     public List<LogDto> logFindAll();
 
-    public LogEntity createLog(AuthRequestDto userRequest);
+   public LogEntity createLog(AuthRequestDto userRequest);
 
 }

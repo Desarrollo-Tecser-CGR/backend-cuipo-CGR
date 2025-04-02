@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +26,7 @@ import com.cgr.base.domain.models.entity.Logs.UserEntity;
 import com.cgr.base.infrastructure.utilities.DtoMapper;
 
 import lombok.AllArgsConstructor;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @AllArgsConstructor
@@ -70,9 +72,19 @@ public class UserServiceImpl implements IUserUseCase {
     }
 
     @Transactional
-    @Override
     public UserWithRolesResponseDto assignRolesToUser(UserWithRolesRequestDto requestDto) {
+        // 1. Obtener la lista de usuarios con el rol de administrador
+        List<UserEntity> adminUsers = userRoleRepository.findUsersByRoleName("administrador");
+
+
+        if (adminUsers.size() >= 3 && requestDto.getRoles().contains("administrador")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se pueden asignar más de tres administradores.");
+        }
+
+
         UserEntity userEntity = this.userRoleRepository.assignRolesToUser(requestDto);
+
+
         var userResponsive = new UserWithRolesResponseDto();
         userResponsive.setIdUser(userEntity.getId());
         userResponsive.setUserName(userEntity.getSAMAccountName());
@@ -83,6 +95,7 @@ public class UserServiceImpl implements IUserUseCase {
         userResponsive.setDateModify(userEntity.getDateModify());
         userResponsive.setCargo(userEntity.getCargo());
         userResponsive.addRole(userEntity.getRoles());
+
         return userResponsive;
     }
 

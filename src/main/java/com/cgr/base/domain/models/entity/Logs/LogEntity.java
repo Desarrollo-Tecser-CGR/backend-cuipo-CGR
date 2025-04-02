@@ -58,12 +58,11 @@ public class LogEntity {
     public LogEntity() {
     }
 
-    public LogEntity(String correo, Date data_session_start, boolean enable, String name_user, String tipe_of_income) {
-        this.correo = correo;
-        this.data_session_start = data_session_start;
-        this.enable = enable;
-        this.name_user = name_user;
-        this.tipe_of_income = tipe_of_income;
+    public LogEntity(String email, Date date, boolean b, String samAccountName, String tipeOfIncome) {
     }
 
+    public LogEntity(String email, Date date, boolean b, String samAccountName) {
+    }
 }
+
+

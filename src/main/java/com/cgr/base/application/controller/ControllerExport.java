@@ -20,12 +20,19 @@ public class ControllerExport extends AbstractController {
     private ExportService exportService;
 
     @GetMapping()
-    public ResponseEntity<?> generatePdf() throws IOException {
+    public ResponseEntity<?> generateCSV() throws IOException {
         String csv = this.exportService.generateCSV();
-        if (csv != "") {
+        if (csv != null && !csv.isEmpty()) {
+            this.exportService.incrementExportCount();
             return requestResponse(csv, "Excel creado", HttpStatus.OK, true);
         } else {
             return requestResponse("Error a", "Error al crear el excel", HttpStatus.OK, true);
         }
+    }
+
+    @GetMapping("/totalCount")
+    public ResponseEntity<Long> getTotalExportCount() {
+        long totalCount = exportService.getTotalExportCount();
+        return ResponseEntity.ok(totalCount);
     }
 }

@@ -3,6 +3,7 @@ package com.cgr.base.application.services.logs.service;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,14 +15,18 @@ import com.cgr.base.domain.models.entity.Logs.LogEntity;
 import com.cgr.base.infrastructure.utilities.DtoMapper;
 
 import lombok.AllArgsConstructor;
-
+/*
 @Service
-@AllArgsConstructor
 public class LogService implements ILogUseCase {
 
-    private final ILogRepository adapterLogRepository;
+    private  ILogRepository adapterLogRepository;
 
-    private final DtoMapper dtoMapper;
+    private  DtoMapper dtoMapper;
+
+    public LogService(ILogRepository adapterLogRepository, DtoMapper dtoMapper) {
+        this.adapterLogRepository = adapterLogRepository;
+        this.dtoMapper = dtoMapper;
+    }
 
     @Override
     @Transactional
@@ -37,4 +42,4 @@ public class LogService implements ILogUseCase {
         return this.adapterLogRepository.createLog(logEntity, userRequest.getSAMAccountName());
     }
 
-}
+}*/

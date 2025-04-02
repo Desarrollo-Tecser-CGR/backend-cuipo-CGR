@@ -10,4 +10,6 @@ public interface ILogUseCase {
     public abstract List<LogDto> logFindAll();
 
     public abstract LogEntity createLog(AuthRequestDto userRequest);
+
+
 }

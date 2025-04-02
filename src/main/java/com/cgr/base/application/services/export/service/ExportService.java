@@ -1,11 +1,14 @@
 package com.cgr.base.application.services.export.service;
 
 import com.cgr.base.domain.models.entity.EntityNotification;
+import com.cgr.base.domain.models.entity.ExportCount;
+import com.cgr.base.infrastructure.repositories.repositories.RepositoryExportCount;
 import com.cgr.base.infrastructure.repositories.repositories.repositoryNotification.RepositoryNotification;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -13,6 +16,10 @@ public class ExportService {
 
     @Autowired
     private RepositoryNotification repositoryNotification;
+    @Autowired
+    private RepositoryExportCount repositoryExportCount;
+
+
 
     public String generateCSV() {
         StringBuilder csvBuilder = new StringBuilder();
@@ -38,4 +45,17 @@ public class ExportService {
 
         return csvBuilder.toString();
     }
+
+    public void incrementExportCount() {
+        ExportCount exportCount = new ExportCount();
+        exportCount.setExportDate(new Date());
+        exportCount.setExportCount(1); // Incrementa el conteo en 1
+        exportCount.setExportType("CSV");
+        repositoryExportCount.save(exportCount);
+    }
+
+    public long getTotalExportCount() {
+        return repositoryExportCount.count();
+    }
+
 }
