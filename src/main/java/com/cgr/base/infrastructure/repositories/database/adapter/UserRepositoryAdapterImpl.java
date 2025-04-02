@@ -96,4 +96,9 @@ public class UserRepositoryAdapterImpl implements IUserRoleRepository {
         return null;
 
     }
+
+    @Override
+    public List<UserEntity> findUsersByRoleName(String administrador) {
+        return List.of();
+    }
 }

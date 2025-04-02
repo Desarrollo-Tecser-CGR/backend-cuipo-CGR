@@ -14,8 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -86,8 +85,7 @@ public class ServiceModule {
     }
 
 
-    // vista con la busqueda de la sumatoria de los contratos  por el nombre
-
+    // vista con la busqueda de la sumatoria de los contratos por el nombre
     public List<ContracViewDto> getContractsByEntityTotals(String entityName) {
         System.out.println("Buscando contratos para la entidad: " + entityName);
 

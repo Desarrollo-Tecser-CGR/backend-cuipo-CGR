@@ -17,4 +17,5 @@ public interface IUserRoleRepository {
 
     public abstract UserDto updateUser(Long id, UserDto userDto);
 
+    List<UserEntity> findUsersByRoleName(String administrador);
 }
