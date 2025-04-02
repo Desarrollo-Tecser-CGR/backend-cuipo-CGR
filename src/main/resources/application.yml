@@ -1,19 +1,19 @@
 # Configuración del servidor
 server:
-  port: 3056
-  address: "0.0.0.0"
+  port: ${SERVER_PORT:3056}  # Valor por defecto si no está definida en el .env
+  address: ${SERVER_ADDRESS:0.0.0.0}  # Valor por defecto si no está definida en el .env
 
-# Configuración de la aplicación
+# Configuración del entorno.
 spring:
   application:
     name: baseapp
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE}
+    active: ${SPRING_PROFILES_ACTIVE:dev}  # Valor por defecto si no está definida en el .env
   datasource:
-    username: USR_DB_CUIPO
-    password: 5GJdwDBag7L%
+    username: ${DATASOURCE_USERNAME:USR_DB_CUIPO}  # Valor por defecto si no está definida en el .env
+    password: ${DATASOURCE_PASSWORD:2kXU3634S@BB}  # Valor por defecto si no está definida en el .env
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://192.168.27.99:1433;databaseName=DB_CUIPO;encrypt=true;trustServerCertificate=true;loginTimeout=3600;queryTimeout=7200
+    url: ${DATASOURCE_URL:jdbc:sqlserver://192.168.27.99:1433;databaseName=DB_CUIPO;encrypt=true;trustServerCertificate=true;loginTimeout=3600;queryTimeout=7200}  # Valor por defecto si no está definida en el .env
     hikari:
       connection-timeout: 3600000
       max-lifetime: 7200000
@@ -23,7 +23,7 @@ spring:
     database-platform: org.hibernate.dialect.SQLServer2012Dialect
     show-sql: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     open-in-view: false
     properties:
       hibernate:
@@ -37,22 +37,33 @@ spring:
   output:
     ansi:
       enabled: always
-  
+
 # Configuración Seguridad de la aplicación
 security:
   enable: false
   user:
-    name: ${SECURITY_USERNAME}
-    password: ${SECURITY_PASSWORD}
+    name: ${SECURITY_USERNAME:user}  # Valor por defecto si no está definida en el .env
+    password: ${SECURITY_PASSWORD:Colombia2024*}  # Valor por defecto si no está definida en el .env
 
 # Clave secreta para JWT
 jwt:
   secret:
-    key: ${JWT_SECRET_KEY}
+    key: ${JWT_SECRET_KEY:U6w3yjuQRNWNRG3IaajKZY8nyMPiu+wFLpj/7evdNEc=}  # Valor por defecto si no está definida en el .env
 
 # Configuración del logging
 logging:
   level:
     "[org.hibernate.SQL]": debug
 
-external.auth.url: https://serviciosint.contraloria.gov.co/directorio/usuarios/autenticar
+# URL para autenticación externa
+external:
+  auth:
+    url: ${external.auth.ur:https://serviciosint.contraloria.gov.co/directorio/usuarios/autenticar}  # Valor por defecto si no está definida en el .env
+
+# Otras configuraciones que no se encuentran en el .env (si se necesitaran en el futuro):
+TABLA_PROG_INGRESOS: ${TABLA_PROG_INGRESOS:VW_OPENDATA_A_PROGRAMACION_INGRESOS}  # Valor por defecto si no está definida en el .env
+TABLA_EJEC_INGRESOS: ${TABLA_EJEC_INGRESOS:VW_OPENDATA_B_EJECUCION_INGRESOS}  # Valor por defecto si no está definida en el .env
+TABLA_PROG_GASTOS: ${TABLA_PROG_GASTOS:VW_OPENDATA_C_PROGRAMACION_GASTOS}  # Valor por defecto si no está definida en el .env
+TABLA_EJEC_GASTOS: ${TABLA_EJEC_GASTOS:VW_OPENDATA_D_EJECUCION_GASTOS}  # Valor por defecto si no está definida en el .env
+
+# Si necesitas agregar más configuraciones, simplemente sigue este formato
