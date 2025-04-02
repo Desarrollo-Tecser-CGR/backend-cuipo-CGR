@@ -1,6 +1,7 @@
 package com.cgr.base.infrastructure.persistence.entity.log;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import jakarta.persistence.Column;
@@ -41,7 +42,7 @@ public class LogsEntityGeneral {
         this.userId = userId;
         this.logType = logType;
         this.detail = detail;
-        this.createdAt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        this.createdAt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("America/Bogota")));
     }
 
     public Long getId() {
