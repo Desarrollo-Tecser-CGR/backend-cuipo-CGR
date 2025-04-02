@@ -11,6 +11,7 @@ public class UserWithRolesRequestDto {
     @NotNull
     private Long idUser;
 
+    private String roles;
     @NotNull
     private List<Long> roleIds;
 }

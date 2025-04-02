@@ -47,23 +47,14 @@ public class SecurityConfig {
                                         auth.requestMatchers("/api/v1/log/**").hasAnyAuthority("administrador");
                                         auth.requestMatchers("/api/v1/menu/**").hasAnyAuthority("administrador");
                                         auth.requestMatchers("/api/v1/user/**").hasAnyAuthority("administrador");
-                                        auth.requestMatchers("/api/v1/EntitysProv/**").hasAnyAuthority("auditor",
-                                                        "administrador",
-                                                        "analista");
-                                        auth.requestMatchers("/api/v1/notification/**").hasAnyAuthority("auditor",
-                                                        "administrador",
-                                                        "analista");
-                                        auth.requestMatchers("/api/v1/createModule/**")
-                                                        .hasAnyAuthority("administrador");
-                                        auth.requestMatchers("/api/v1/contract/**").hasAnyAuthority("auditor",
-                                                        "administrador",
-                                                        "analista");
-                                        auth.requestMatchers("/api/v1/export/**").hasAnyAuthority("auditor",
-                                                        "administrador",
-                                                        "analista");
-                                        auth.requestMatchers("/api/v1/logsExit/**").hasAnyAuthority("auditor",
-                                                        "administrador",
-                                                        "analista");
+                                        auth.requestMatchers("/api/v1/EntitysProv/**").hasAnyAuthority("auditor", "administrador", "analista");
+                                        auth.requestMatchers("/api/v1/notification/**").hasAnyAuthority("auditor", "administrador","analista");
+                                        auth.requestMatchers("/api/v1/createModule/**").hasAnyAuthority("administrador");
+                                        auth.requestMatchers("/api/v1/contract/**").hasAnyAuthority("auditor", "administrador","analista");
+                                        auth.requestMatchers("/api/v1/export/**").hasAnyAuthority("auditor", "administrador", "analista");
+                                        auth.requestMatchers("/api/v1/logsExit/**").hasAnyAuthority("auditor", "administrador", "analista");
+                                        auth.requestMatchers("/api/v1/dinamic-menus/**").hasAnyAuthority("administrador");
+                                    auth.requestMatchers("/api/v1/auditEntry/**").hasAnyAuthority("administrador");
 
                                 });
 
