@@ -1,6 +1,7 @@
 package com.cgr.base.application.auth.service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -139,7 +140,7 @@ public class AuthService implements IAuthUseCase {
 
                 LogEntity log = new LogEntity();
 
-                log.setDateSessionStart(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                log.setDateSessionStart(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("America/Bogota"))));
                 log.setUserId(userId);
                 log.setRoles(user.getRoles().stream()
                         .map(RoleEntity::getName)
