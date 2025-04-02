@@ -55,6 +55,9 @@ public class SecurityConfig {
                                         auth.requestMatchers("/api/v1/logsExit/**").hasAnyAuthority("auditor", "administrador", "analista");
                                         auth.requestMatchers("/api/v1/dinamic-menus/**").hasAnyAuthority("auditor", "administrador", "analista");
                                     auth.requestMatchers("/api/v1/AuditEntry/**").hasAnyAuthority("auditor", "administrador", "analista");
+                                    auth.requestMatchers("/api/v1/logs/**").hasAnyAuthority("auditor", "administrador", "analista");
+
+
 
                                 });
 
