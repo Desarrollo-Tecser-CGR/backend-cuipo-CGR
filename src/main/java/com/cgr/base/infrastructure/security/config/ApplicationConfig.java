@@ -1,8 +1,6 @@
-<<<<<<<< HEAD:src/main/java/com/cgr/base/infrastructure/config/configuracionMapper/ApplicationConfig.java
-package com.cgr.base.infrastructure.config.configuracionMapper;
-========
+
 package com.cgr.base.infrastructure.security.config;
->>>>>>>> origin/dev-santiago:src/main/java/com/cgr/base/infrastructure/security/config/ApplicationConfig.java
+
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;

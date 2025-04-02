@@ -87,7 +87,7 @@ public class AuthService implements IAuthUseCase {
             } else {
                 // Contraseña incorrecta, registrar intento fallido
                 userRequest.setTipe_of_income("Fracaso");
-                this.logService.createLog(userRequest);
+             //  this.logService.createLog(userRequest);
                 response.put("message", "Invalid username or password");
                 response.put("statusCode", 401);
                 response.put("status", "error");
