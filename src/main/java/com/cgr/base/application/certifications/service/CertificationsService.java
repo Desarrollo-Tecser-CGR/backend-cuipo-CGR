@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cgr.base.infrastructure.persistence.repository.certifications.certificationsRepo;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class CertificationsService {
 
@@ -38,21 +40,27 @@ public class CertificationsService {
 
     @Transactional
     public String updateCertification(Map<String, String> requestBody, Long userId, String tipo) {
-        LocalDateTime fechaAct = LocalDateTime.now(); // Se usa LocalDateTime en lugar de String
+        LocalDateTime fechaAct = LocalDateTime.now();
         String codigoEntidad = requestBody.get("codigoEntidad");
         int fecha = Integer.parseInt(requestBody.get("fecha"));
         String estado = requestBody.get("estado");
         String observacion = requestBody.get("observacion");
 
+        int updatedRows = 0;
+
         if ("calidad".equalsIgnoreCase(tipo)) {
-            int updatedRows = repository.updateCalidad(codigoEntidad, fecha, estado, observacion, fechaAct, userId);
-            return updatedRows > 0 ? "Actualización exitosa." : "No se encontró un registro para actualizar.";
+            updatedRows = repository.updateCalidad(codigoEntidad, fecha, estado, observacion, fechaAct, userId);
         } else if ("L617".equalsIgnoreCase(tipo)) {
-            int updatedRows = repository.updateL617(codigoEntidad, fecha, estado, observacion, fechaAct, userId);
-            return updatedRows > 0 ? "Actualización exitosa." : "No se encontró un registro para actualizar.";
+            updatedRows = repository.updateL617(codigoEntidad, fecha, estado, observacion, fechaAct, userId);
         } else {
-            return "Tipo inválido. Debe ser 'calidad' o 'L617'.";
+            throw new IllegalArgumentException("Tipo inválido. Debe ser 'calidad' o 'L617'.");
         }
+
+        if (updatedRows == 0) {
+            throw new EntityNotFoundException("No se encontró un registro para actualizar.");
+        }
+
+        return "Actualización exitosa.";
     }
 
 }
