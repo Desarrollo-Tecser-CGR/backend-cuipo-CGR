@@ -1,8 +1,15 @@
 package com.cgr.base.application.services.logs.ingress.service;
 
+import com.cgr.base.application.services.logs.ingress.usecase.ILogUseCase;
+import com.cgr.base.domain.dto.dtoAuth.AuthRequestDto;
+
 import com.cgr.base.domain.dto.dtoLogs.MonthlyLoginCounts; // Import del DTO correcto
+
+import com.cgr.base.domain.dto.dtoLogs.logsIngress.LogDto;
 import com.cgr.base.domain.models.entity.Logs.LogEntity;
 import com.cgr.base.infrastructure.repositories.repositories.repositoryActiveDirectory.ILogRepository;
+import com.cgr.base.infrastructure.utilities.DtoMapper;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +21,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class LogService {
+public class LogService  implements ILogUseCase {
 
     @Autowired
     private ILogRepository adapterLogRepository;
+   @Autowired
+    private DtoMapper dtoMapper;
 
     public MonthlyLoginCounts countSuccessfulAndFailedLogins() {
         List<LogEntity> logs = adapterLogRepository.logFindAll();
@@ -93,5 +102,32 @@ public class LogService {
         }
 
         return new MonthlyLoginCounts(year, 0, successCount, failureCount); // Usando MonthlyLoginCounts
+
+
     }
+
+    @Override
+    @Transactional
+    public List<LogDto> logFindAll() {
+        List<LogDto> logsDto = this.dtoMapper.convertToListDto(this.adapterLogRepository.logFindAll(), LogDto.class);
+
+        return logsDto;
+    }
+
+    @Override
+    public LogEntity createLog(AuthRequestDto userRequest) {
+
+        LogEntity logEntity = new LogEntity();
+        logEntity.setCorreo(userRequest.getEmail());
+        logEntity.setData_session_start(new Date());
+        logEntity.setEnable(true);
+        logEntity.setName_user(userRequest.getSAMAccountName());
+        logEntity.setTipe_of_income(userRequest.getTipe_of_income());
+
+        return this.adapterLogRepository.createLog(logEntity, userRequest.getSAMAccountName());
+    }
+
+
+
 }
+
