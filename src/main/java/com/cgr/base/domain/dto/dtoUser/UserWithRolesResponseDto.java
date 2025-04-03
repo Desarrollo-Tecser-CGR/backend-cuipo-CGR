@@ -33,6 +33,8 @@ public class UserWithRolesResponseDto {
 
     private List<LogDto> logs = new ArrayList<>();
 
+    private String imageProfile;
+
     public void addRole(List<RoleEntity> rolesEntity) {
         rolesEntity.forEach(role -> {
             var role2 = new RoleRequestDto();
