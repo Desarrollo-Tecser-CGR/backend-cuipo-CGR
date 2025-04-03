@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.cgr.base.application.certifications.service.initTablaCertifications;
 import com.cgr.base.application.parameterization.generalParameter;
 import com.cgr.base.application.parameterization.specificParameter;
+import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_1;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_17;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EG;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EI;
@@ -52,6 +53,9 @@ public class initDependencies {
 
     @Autowired
     private dataTransfer_PG RulesPG;
+
+    @Autowired
+    private dataTransfer_1 Rule1;
 
     @Autowired
     private dataTransfer_17 Rule17;
@@ -119,7 +123,7 @@ public class initDependencies {
     @Async
     public void transferGeneralRules(String rule) {
         switch (rule.toUpperCase()) {
-            case "1" -> RulesPI.applyGeneralRule1();
+            case "1" -> Rule1.applyGeneralRule1();
             case "2" -> RulesPI.applyGeneralRule2();
             case "3" -> RulesPI.applyGeneralRule3();
             case "4" -> RulesPI.applyGeneralRule4();
