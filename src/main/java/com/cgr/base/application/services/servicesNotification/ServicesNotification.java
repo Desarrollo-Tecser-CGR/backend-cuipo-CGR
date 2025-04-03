@@ -1,10 +1,7 @@
 package com.cgr.base.application.services.servicesNotification;
 
 import com.cgr.base.application.services.logs.exit.LogExitService;
-import com.cgr.base.domain.dto.dtoEntityProvitionalPlan.EntityProvitionalPlanDto;
 import com.cgr.base.domain.dto.dtoLogs.logsExit.LogExitDto;
-import com.cgr.base.domain.dto.dtoUser.UserDto;
-import com.cgr.base.domain.dto.dtoUser.UserWithRolesResponseDto;
 import com.cgr.base.domain.dto.dtoWebSocket.EntityNotificationDto;
 import com.cgr.base.domain.models.entity.EntityNotification;
 import com.cgr.base.domain.models.entity.EntityProvitionalPlan;
@@ -26,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class  ServicesNotification {
+public class ServicesNotification {
 
         @Autowired
         private RepositoryNotification repositoryNotification;
@@ -46,7 +43,7 @@ public class  ServicesNotification {
         public EntityNotificationDto saveNotification(WsChatMessage notification) {
 
                 List<EntityProvitionalPlan> entityProvitionalPlan = this.repositoryEntityProvitionalPlan
-                                .findByName(notification.getEntity().toLowerCase());
+                                .findByEntityName(notification.getEntity().toLowerCase());
 
                 Optional<UserEntity> userEntity = this.repositoryUser
                                 .findBySAMAccountName(notification.getSAMAccountName());
@@ -85,7 +82,7 @@ public class  ServicesNotification {
 
         public List<EntityNotificationDto> getNotificationsByEntity(Integer entity) {
 
-                List<EntityNotification> entityNotifications = repositoryNotification.findByEntityId(entity);
+                List<EntityNotification> entityNotifications = repositoryNotification.findByEntity_Id(entity);
 
                 List<EntityNotificationDto> entityNotificationsDto = this.dtoMapper.convertToListDto(
                                 entityNotifications,
@@ -117,8 +114,8 @@ public class  ServicesNotification {
                 // Agrupar por entidad y contar cuántas notificaciones hay por cada una
                 Map<Object, Long> notificationsByEntity = newNotifications.stream()
                                 .collect(Collectors.groupingBy(
-                                                notification -> notification.getEntity().getEntity_name(), // Nombre de
-                                                                                                           // la entidad
+                                                notification -> notification.getEntity().getEntityName(), // Nombre de
+                                                                                                          // la entidad
                                                 Collectors.counting()));
 
                 return Map.of(
