@@ -46,8 +46,7 @@ public class SecurityConfig {
                                                         "administrador");
                                         auth.requestMatchers("/api/v1/log/**").hasAnyAuthority("administrador");
                                         auth.requestMatchers("/api/v1/menu/**").hasAnyAuthority("administrador");
-                                        auth.requestMatchers("/api/v1/user/**").hasAnyAuthority("administrador",
-                                                        "analista", "auditor");
+                                        auth.requestMatchers("/api/v1/user/**").hasAnyAuthority("administrador");
                                         auth.requestMatchers("/api/v1/EntitysProv/**").hasAnyAuthority("auditor",
                                                         "administrador", "analista");
                                         auth.requestMatchers("/api/v1/notification/**").hasAnyAuthority("auditor",
@@ -60,9 +59,12 @@ public class SecurityConfig {
                                                         "administrador", "analista");
                                         auth.requestMatchers("/api/v1/logsExit/**").hasAnyAuthority("auditor",
                                                         "administrador", "analista");
-                                        auth.requestMatchers("/api/v1/dinamic-menus/**")
-                                                        .hasAnyAuthority("administrador");
-                                        auth.requestMatchers("/api/v1/AuditEntry/**").hasAnyAuthority("administrador");
+                                        auth.requestMatchers("/api/v1/dinamic-menus/**").hasAnyAuthority("auditor",
+                                                        "administrador", "analista");
+                                        auth.requestMatchers("/api/v1/AuditEntry/**").hasAnyAuthority("auditor",
+                                                        "administrador", "analista");
+                                        auth.requestMatchers("/api/v1/logs/**").hasAnyAuthority("auditor",
+                                                        "administrador", "analista");
 
                                 });
 
