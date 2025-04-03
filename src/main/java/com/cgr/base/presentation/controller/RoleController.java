@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.logs.service.LogGeneralService;
 import com.cgr.base.application.role.usecase.IRoleService;
-import static com.cgr.base.infrastructure.persistence.entity.log.LogType.PERMISSION;
+import static com.cgr.base.infrastructure.persistence.entity.log.LogType.USUARIOS;
 import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 
@@ -85,7 +85,7 @@ public class RoleController extends AbstractController {
 
         try {
 
-            logGeneralService.createLog(userId, PERMISSION,
+            logGeneralService.createLog(userId, USUARIOS,
                     "Creación de rol id : " + createdRole.getId() +" nombre: " + createdRole.getName() + "con descripción: " + createdRole.getDescription()
                             + " y estado: " + createdRole.isEnable() + ".");
 
@@ -120,7 +120,7 @@ public class RoleController extends AbstractController {
 
         try {
 
-            logGeneralService.createLog(userId, PERMISSION,
+            logGeneralService.createLog(userId, USUARIOS,
                     "Modificación de rol id: " + id + " a: " + updatedRole.getName() + " con descripción: "
                             + updatedRole.getDescription() + ".");
 
@@ -147,7 +147,7 @@ public class RoleController extends AbstractController {
 
         try {
 
-            logGeneralService.createLog(userId, PERMISSION,
+            logGeneralService.createLog(userId, USUARIOS,
                     "Modificación de rol id: " + id + " a: " + message + ".");
 
             return requestResponse(Map.of("message", message, "enabled", isEnabled), "Update operation completed.",
@@ -173,7 +173,7 @@ public class RoleController extends AbstractController {
         }
 
         try {
-            logGeneralService.createLog(userId, PERMISSION,
+            logGeneralService.createLog(userId, USUARIOS,
                     "Eliminación de rol id: " + id + ".");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);

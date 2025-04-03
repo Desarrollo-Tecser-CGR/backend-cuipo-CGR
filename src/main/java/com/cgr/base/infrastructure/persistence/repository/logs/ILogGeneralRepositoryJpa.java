@@ -13,18 +13,16 @@ import com.cgr.base.infrastructure.persistence.entity.log.LogsEntityGeneral;
 public interface ILogGeneralRepositoryJpa extends JpaRepository<LogsEntityGeneral, Long> {
 
        @Query(value = "SELECT l.*, u.full_name " +
-       "FROM logs_general l " +
-       "LEFT JOIN users u ON l.user_id = u.id " +
-       "WHERE (:userId IS NULL OR l.user_id = :userId) " +
-       "AND (:logType IS NULL OR l.log_type = :logType) " +
-       "AND (:detail IS NULL OR l.detail LIKE CONCAT('%', :detail, '%')) " +
-       "AND (:createdAt IS NULL OR l.create_date = :createdAt)",
-nativeQuery = true)
-List<Object[]> findLogsWithUserFullNameByFiltersNative(
-@Param("userId") Long userId,
-@Param("logType") String logType,
-@Param("detail") String detail,
-@Param("createdAt") String create_date);
+                     "FROM logs_general l " +
+                     "LEFT JOIN users u ON l.user_id = u.id " +
+                     "WHERE (:userId IS NULL OR l.user_id = :userId) " +
+                     "AND (:logType IS NULL OR l.log_type = :logType) " +
+                     "AND (:detail IS NULL OR l.detail LIKE CONCAT('%', :detail, '%')) " +
+                     "AND (:createdAt IS NULL OR l.create_date = :createdAt)", nativeQuery = true)
+       List<Object[]> findLogsWithUserFullNameByFiltersNative(
+                     @Param("userId") Long userId,
+                     @Param("logType") String logType,
+                     @Param("detail") String detail,
+                     @Param("createdAt") String create_date);
 
-            
 }

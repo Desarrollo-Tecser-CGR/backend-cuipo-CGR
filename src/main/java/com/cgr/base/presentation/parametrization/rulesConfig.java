@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cgr.base.application.logs.service.LogGeneralService;
 import com.cgr.base.application.parameterization.generalParameter;
 import com.cgr.base.application.parameterization.specificParameter;
-import static com.cgr.base.infrastructure.persistence.entity.log.LogType.PARAMETER;
+import static com.cgr.base.infrastructure.persistence.entity.log.LogType.PARAMETRIZACION;
 import com.cgr.base.infrastructure.persistence.entity.parametrization.GeneralRulesNames;
 import com.cgr.base.infrastructure.persistence.entity.parametrization.SpecificRulesNames;
 import com.cgr.base.infrastructure.persistence.entity.parametrization.SpecificRulesTables;
@@ -70,7 +70,7 @@ public class rulesConfig extends AbstractController {
 
             GeneralRulesNames updatedRule = serviceGR.updateRuleName(codigoRegla, nuevoNombre);
 
-            logGeneralService.createLog(userId, PARAMETER,
+            logGeneralService.createLog(userId, PARAMETRIZACION,
                     "Modificación de regla general code " + codigoRegla + " to " + request.get("nuevoNombre"));
 
             return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
@@ -108,7 +108,7 @@ public class rulesConfig extends AbstractController {
 
             SpecificRulesTables updatedRule = serviceSR.updateReportName(codigoReporte, nuevoNombre);
 
-            logGeneralService.createLog(userId, PARAMETER,
+            logGeneralService.createLog(userId, PARAMETRIZACION,
                     "Modificación de reporte específico code " + codigoReporte + " to " + request.get("nuevoNombre"));
 
             return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
@@ -148,7 +148,7 @@ public class rulesConfig extends AbstractController {
 
             SpecificRulesNames updatedRule = serviceSR.updateRuleName(codigoRegla, nuevoNombre);
 
-            logGeneralService.createLog(userId, PARAMETER,
+            logGeneralService.createLog(userId, PARAMETRIZACION,
                     "Modificación de regla específica code " + codigoRegla + " to " + request.get("nuevoNombre"));
 
             return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);

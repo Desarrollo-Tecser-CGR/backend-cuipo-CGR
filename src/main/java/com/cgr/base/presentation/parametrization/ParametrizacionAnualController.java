@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.logs.service.LogGeneralService;
 import com.cgr.base.application.parameterization.ParametrizacionAnualService;
-import static com.cgr.base.infrastructure.persistence.entity.log.LogType.PARAMETER;
+import static com.cgr.base.infrastructure.persistence.entity.log.LogType.PARAMETRIZACION;
 import com.cgr.base.infrastructure.persistence.entity.parametrization.ParametrizacionAnual;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.cgr.base.presentation.controller.AbstractController;
@@ -66,7 +66,7 @@ public class ParametrizacionAnualController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
         try {
-            logGeneralService.createLog(userId, PARAMETER,
+            logGeneralService.createLog(userId, PARAMETRIZACION,
                     "Creación de parametrización anual año " + parametrizacionAnual.getFecha() + " with values "
                             + parametrizacionAnual);
 
@@ -92,7 +92,7 @@ public class ParametrizacionAnualController extends AbstractController {
 
         try {
 
-            logGeneralService.createLog(userId, PARAMETER,
+            logGeneralService.createLog(userId, PARAMETRIZACION,
                     "Modificación de parametrización anual año " + parametrizacionAnual.getFecha() + " to "
                             + parametrizacionAnual);
 
