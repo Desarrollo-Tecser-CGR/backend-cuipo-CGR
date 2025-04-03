@@ -59,6 +59,7 @@ public class UserServiceImpl implements IUserUseCase {
             userResponsive.setDateModify(user.getDateModify());
             userResponsive.setCargo(user.getCargo());
             userResponsive.setUserType(user.getUserType());
+            userResponsive.setImageProfile(user.getImageProfile());
 
             List<LogEntity> logs = this.logRepository.findLogByUserEntityId(user.getId());
             List<LogDto> logDtos = this.dtoMapper.convertToListDto(logs, LogDto.class);
@@ -76,14 +77,12 @@ public class UserServiceImpl implements IUserUseCase {
         // 1. Obtener la lista de usuarios con el rol de administrador
         List<UserEntity> adminUsers = userRoleRepository.findUsersByRoleName("administrador");
 
-
         if (adminUsers.size() >= 3 && requestDto.getRoles().contains("administrador")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se pueden asignar más de tres administradores.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "No se pueden asignar más de tres administradores.");
         }
 
-
         UserEntity userEntity = this.userRoleRepository.assignRolesToUser(requestDto);
-
 
         var userResponsive = new UserWithRolesResponseDto();
         userResponsive.setIdUser(userEntity.getId());

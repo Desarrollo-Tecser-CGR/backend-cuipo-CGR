@@ -31,5 +31,5 @@ public class UserDto {
     private Date dateModify;
     private String cargo;
     private List<Long> roleIds;
-    private String userType;
+    private String imageProfile;
 }
