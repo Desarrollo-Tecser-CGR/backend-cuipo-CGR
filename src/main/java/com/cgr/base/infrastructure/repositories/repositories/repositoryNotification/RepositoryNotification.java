@@ -13,8 +13,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RepositoryNotification extends JpaRepository<EntityNotification, Integer> {
 
-    @Query("SELECT n FROM EntityNotification n WHERE n.entity.entity_id = :entityId")
-    List<EntityNotification> findByEntityId(@Param("entityId") Integer entityId);
+    List<EntityNotification> findByEntity_Id(Integer entityId);
 
     @Query("SELECT n FROM EntityNotification n WHERE n.date > :lastLogoutDate")
     List<EntityNotification> findByUserAndDateAfter(@Param("lastLogoutDate") Date lastLogoutDate);

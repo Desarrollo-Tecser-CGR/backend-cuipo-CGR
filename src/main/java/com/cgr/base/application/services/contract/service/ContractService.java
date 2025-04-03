@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.cgr.base.application.services.contract.useCase.IContractUseCase;
 import com.cgr.base.domain.dto.dtoContract.ContractDto;
-import com.cgr.base.domain.models.entity.Contract;
+import com.cgr.base.domain.models.entity.LegalAct;
 import com.cgr.base.domain.models.entity.EntityProvitionalPlan;
 import com.cgr.base.infrastructure.repositories.repositories.contract.IContractRepositoryJpa;
 import com.cgr.base.infrastructure.repositories.repositories.repositoryEntityProvitionalPlan.IEntityProvitionalPlanJpa;
@@ -34,7 +34,7 @@ public class ContractService implements IContractUseCase {
             return null;
         }
 
-        List<Contract> contracts = this.contractRepositoryJpa.findContractsByEntityProvisionalPlan(entityId);
+        List<LegalAct> contracts = this.contractRepositoryJpa.findContractsByEntityProvisionalPlan(entityId);
 
         List<ContractDto> contractDtos = this.dtoMapper.convertToListDto(contracts, ContractDto.class);
 

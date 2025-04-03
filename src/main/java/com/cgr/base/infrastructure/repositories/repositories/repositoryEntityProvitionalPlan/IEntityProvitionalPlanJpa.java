@@ -10,7 +10,6 @@ import com.cgr.base.domain.models.entity.EntityProvitionalPlan;
 
 public interface IEntityProvitionalPlanJpa extends JpaRepository<EntityProvitionalPlan, Integer> {
 
-    @Query("SELECT e FROM EntityProvitionalPlan e WHERE LOWER(e.entity_name) LIKE LOWER(CONCAT('%', :name, '%'))")
-    List<EntityProvitionalPlan> findByName(@Param("name") String name);
+    List<EntityProvitionalPlan> findByEntityName(String entityName);
 
 }
