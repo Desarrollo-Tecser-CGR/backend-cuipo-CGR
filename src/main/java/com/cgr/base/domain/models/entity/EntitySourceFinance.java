@@ -23,5 +23,5 @@ public class EntitySourceFinance {
     private String source_financing_name;
 
     @ManyToMany(mappedBy = "sourcesFinance")
-    private Set<Contract> contracts;
+    private Set<LegalAct> contracts;
 }

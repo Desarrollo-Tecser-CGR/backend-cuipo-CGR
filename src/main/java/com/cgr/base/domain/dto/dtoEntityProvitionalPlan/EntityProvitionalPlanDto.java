@@ -5,8 +5,8 @@ import lombok.Data;
 @Data
 public class EntityProvitionalPlanDto {
 
-    private Long entity_id;
-    private String entity_nit;
-    private String entity_name;
+    private Long id;
+    private String entityNit;
+    private String entityName;
 
 }

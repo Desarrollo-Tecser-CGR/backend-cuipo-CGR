@@ -7,6 +7,6 @@ public class ContractDto {
 
     private Long id;
 
-    private String contractNo;
+    private String legalActNo;
 
 }

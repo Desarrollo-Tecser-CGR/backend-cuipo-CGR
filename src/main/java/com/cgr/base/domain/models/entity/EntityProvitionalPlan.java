@@ -18,18 +18,16 @@ public class EntityProvitionalPlan {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer entity_id;
+    @Column(name = "entity_id") // Especificamos explícitamente el nombre en la base de datos
+    private Integer id;
+
     @Column(name = "entity_nit")
-    private String entity_nit;
+    private String entityNit;
+
     @Column(name = "entity_name")
-    private String entity_name;
+    private String entityName;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "entityProvisionalPlans")
     @JsonIgnore
-    @JoinTable(name = "entities_indicators", joinColumns = @JoinColumn(name = "entity_id"), inverseJoinColumns = @JoinColumn(name = "indicator_id"))
     private Set<EntityIndicator> indicators;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "entity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<EntityNotification> notifications;
 }

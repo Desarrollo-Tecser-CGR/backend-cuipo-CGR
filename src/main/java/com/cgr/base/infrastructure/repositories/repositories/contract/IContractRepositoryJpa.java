@@ -6,14 +6,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.cgr.base.domain.models.entity.Contract;
+import com.cgr.base.domain.models.entity.LegalAct;
 
-public interface IContractRepositoryJpa extends JpaRepository<Contract, Long> {
+public interface IContractRepositoryJpa extends JpaRepository<LegalAct, Long> {
 
-    @Query("SELECT DISTINCT c FROM Contract c " +
-            "JOIN c.indicators i " +
+    @Query("SELECT DISTINCT l FROM LegalAct l " +
+            "JOIN l.indicators i " +
             "JOIN i.entityProvisionalPlans ep " +
             "WHERE ep.id = :entityId")
-    List<Contract> findContractsByEntityProvisionalPlan(@Param("entityId") Integer entityId);
+    List<LegalAct> findContractsByEntityProvisionalPlan(@Param("entityId") Integer entityId);
 
 }
