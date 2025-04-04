@@ -11,6 +11,6 @@ import com.cgr.base.infrastructure.persistence.entity.notifications.Notification
 public interface INotificationUserRepositoryJpa extends JpaRepository<NotificationUserEntity, Long> {
     NotificationUserEntity findByUserIdAndNotificationId(Long userId, Long notificationId);
     List<NotificationUserEntity> findByNotificationId(Long notificationId);
-    List<NotificationUserEntity> findByUserId(Long userId);
+    List<NotificationUserEntity> findByUserIdAndIsReadFalse(Long userId);
 
 }

@@ -32,7 +32,7 @@ public class NotificationsService { // Renombrado de NotificationsService a Noti
     }
 
     public List<NotificationUserEntity> getNotificationsForUser(Long userId) {
-        return notificationUserRepository.findByUserId(userId);
+        return notificationUserRepository.findByUserIdAndIsReadFalse(userId);
     }
 
     // Crea una notificación y la duplica para cada usuario
@@ -81,4 +81,18 @@ public class NotificationsService { // Renombrado de NotificationsService a Noti
             simpMessagingTemplate.convertAndSend("/topic/notifications", notificationId);
         }
     }
+
+    public void markAllNotificationsAsRead(Long userId) {
+
+        List<NotificationUserEntity> userNotifications = notificationUserRepository.findByUserIdAndIsReadFalse(userId);
+        if (userNotifications.isEmpty()) {
+            return;
+        }
+    
+        userNotifications.forEach(nu -> nu.setIsRead(true));
+    
+        notificationUserRepository.saveAll(userNotifications);
+    
+    }
+    
 }
