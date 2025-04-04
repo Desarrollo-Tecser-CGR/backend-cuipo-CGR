@@ -18,6 +18,8 @@ target/
 *.iws
 *.iml
 *.ipr
+*.jar
+*.tar
 
 ### NetBeans ###
 /nbproject/private/
@@ -31,3 +33,5 @@ build/
 
 ### VS Code ###
 .vscode/
+# Ignorar archivos .tar y .jar
+

@@ -35,7 +35,7 @@ public class LegalAct {
     private Set<EntitySourceFinance> sourcesFinance;
 
     @ManyToMany
-    @JoinTable(name = "indicators_legal_acts", joinColumns = @JoinColumn(name = "legal_act_id"), inverseJoinColumns = @JoinColumn(name = "indicator_id"))
+    @JoinTable(name = "indicators_legal_acts" , joinColumns = @JoinColumn(name = "legal_act_id"), inverseJoinColumns = @JoinColumn(name = "indicator_id"))
     private Set<EntityIndicator> indicators;
 
 }

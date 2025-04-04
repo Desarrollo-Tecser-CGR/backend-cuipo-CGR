@@ -14,6 +14,7 @@ public class ExportCount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = "integer")
     private Long id;
 
     @Column(name = "export_date")

@@ -29,6 +29,7 @@ public class EntityDepartments {
     private Integer dpto_vgnc;
     private Float shape_leng;
     private Float shape_area;
+    @Column(columnDefinition = "varchar(max)")
     private String geometry;
     private String image;
 

@@ -65,6 +65,10 @@ public class SecurityConfig {
                                         auth.requestMatchers("/api/v1/logs/**").hasAnyAuthority("auditor",
                                                         "administrador", "analista");
 
+                                    auth.requestMatchers("/api/v1/dimanic_role_menu/**").hasAnyAuthority("auditor",
+                                            "administrador", "analista");
+
+
                                 });
 
                 http.headers(headers -> headers
