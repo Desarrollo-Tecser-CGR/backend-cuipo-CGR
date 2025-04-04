@@ -39,8 +39,7 @@ public class SecurityConfig {
 
                                 .authorizeHttpRequests(auth -> {
                                         auth.requestMatchers("/v3/api-docs/", "/v3/api-docs/**").permitAll();
-                                        auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**", "/swagger-ui/**",
-                                                        "/api/v1/user/synchronize",
+                                        auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**", "/swagger-ui/**", "/api/v1/user/synchronize",
                                                         "/swagger-ui.html/", "/ws/**", "/api/v1/token").permitAll();
                                         auth.requestMatchers("/api/v1/role/**").hasAnyAuthority("analista",
                                                         "administrador");
@@ -84,7 +83,7 @@ public class SecurityConfig {
                                 config.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:4200",
                                                 "http://localhost:5173/", "http://192.168.0.220/",
                                                 "http://localhost:8000/", "http://localhost:8000",
-                                                "http://localhost:48496",
+                                                "http://localhost:48496","http://192.168.2.63:8005/","http://192.168.2.63:8005",
                                                 "https://665922d5497f3aaadbaaf8b0--melodic-halva-c4b1b1.netlify.app/",
                                                 "https://665922d5497f3aaadbaaf8b0--melodic-halva-c4b1b1.netlify.app",
                                                 "https://bovid.site/", "https://bovid.site", "http://bovid.site/",

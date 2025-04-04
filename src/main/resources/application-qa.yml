@@ -1,7 +1,7 @@
 # Configuración de la base de datos MySQL
 spring:
   datasource:
-    url: jdbc:sqlserver://192.168.2.56:1433;databaseName=cuipo_qa;encrypt=true;trustServerCertificate=true;
+    url: jdbc:sqlserver://192.168.2.62:1433;databaseName=cuipo_qa;encrypt=true;trustServerCertificate=true;
 
    
    
