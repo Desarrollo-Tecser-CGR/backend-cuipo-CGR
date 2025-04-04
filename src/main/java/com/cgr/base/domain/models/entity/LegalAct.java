@@ -31,7 +31,7 @@ public class LegalAct {
     private Date legalActEndDate;
 
     @ManyToMany
-    @JoinTable(name = "legal_act_source_financing", joinColumns = @JoinColumn(name = "legal_act_id"), inverseJoinColumns = @JoinColumn(name = "source_financing_id"))
+    @JoinTable(name = "legal_acts_sources_financing", joinColumns = @JoinColumn(name = "legal_act_id"), inverseJoinColumns = @JoinColumn(name = "source_financing_id"))
     private Set<EntitySourceFinance> sourcesFinance;
 
     @ManyToMany
