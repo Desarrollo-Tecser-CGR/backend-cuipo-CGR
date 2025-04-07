@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.certifications.service.CertificationsService;
 import com.cgr.base.application.logs.service.LogGeneralService;
-import static com.cgr.base.infrastructure.persistence.entity.log.LogType.CERTIFICATE;
+import static com.cgr.base.infrastructure.persistence.entity.log.LogType.CERTIFICACIONES;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.cgr.base.presentation.controller.AbstractController;
 
@@ -63,7 +63,7 @@ public class certificationsController extends AbstractController {
 
         try {
             String response = Certification.updateCertification(requestBody, userId, "calidad");
-            logGeneralService.createLog(userId, CERTIFICATE, "Modificación de certificación de calidad " + requestBody);
+            logGeneralService.createLog(userId, CERTIFICACIONES, "Modificación de certificación de calidad " + requestBody);
             return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
 
         } catch (EntityNotFoundException e) {
@@ -90,7 +90,7 @@ public class certificationsController extends AbstractController {
 
         try {
             String response = Certification.updateCertification(requestBody, userId, "L617");
-            logGeneralService.createLog(userId, CERTIFICATE, "Modificación de certificación L617 " + requestBody);
+            logGeneralService.createLog(userId, CERTIFICACIONES, "Modificación de certificación L617 " + requestBody);
             return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
 
         } catch (EntityNotFoundException e) {

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.access.service.accessManagement;
 import com.cgr.base.application.logs.service.LogGeneralService;
-import static com.cgr.base.infrastructure.persistence.entity.log.LogType.PERMISSION;
+import static com.cgr.base.infrastructure.persistence.entity.log.LogType.USUARIOS;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.cgr.base.presentation.controller.AbstractController;
 
@@ -73,7 +73,7 @@ public class accessController extends AbstractController {
 
             boolean updated = Access.updateRoleModules(roleId, moduleIds);
 
-            logGeneralService.createLog(userId, PERMISSION,
+            logGeneralService.createLog(userId, USUARIOS,
                     "Modificación de rol id " + roleId + " con los módulos " + moduleIds + " asignados.");
                             
             return updated ? requestResponse(null, "Módulos actualizados correctamente.", HttpStatus.OK, true)
