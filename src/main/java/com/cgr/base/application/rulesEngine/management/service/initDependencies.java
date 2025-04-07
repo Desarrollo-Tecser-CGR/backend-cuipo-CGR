@@ -109,10 +109,9 @@ public class initDependencies {
 
         // MotorReglas.processTablesRules();
         Parametria.processTablesSource();
-        // Categorias.initCategoryTable();
-        // ParameterRG.tableGeneralRulesName();
-        // ParameterRE.tableSpecificRulesName();
-        // Certificator.generateControlTable();
+        Categorias.initCategoryTable();
+        ParameterRG.tableGeneralRulesName();
+        ParameterRE.tableSpecificRulesName();
 
     }
 
@@ -172,6 +171,7 @@ public class initDependencies {
             case "30" -> Rules30.applySpecificRule30();
             case "31" -> Rules31.applySpecificRule31();
             case "32" -> Rules32.applySpecificRule32();
+            case "Certificar" -> Certificator.generateControlTable();
             default -> throw new IllegalArgumentException("Invalid Rule.");
         }
     }

@@ -7,7 +7,7 @@ services:
     env_file:
       - .env  # Asegúrate de que el archivo .env esté en el mismo directorio
     ports:
-      - "8001:8001"
+      - "3056:3056"
     networks:
       - cuipo-net
  

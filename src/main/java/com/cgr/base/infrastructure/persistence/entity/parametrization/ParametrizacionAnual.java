@@ -9,11 +9,16 @@ import lombok.NoArgsConstructor;
 import jakarta.persistence.Column;
 import java.math.BigDecimal;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 @Entity
 @Table(name = "PARAMETRIZACION_ANUAL")
 @NoArgsConstructor
 @Data
 @AllArgsConstructor
+@DynamicInsert
+@DynamicUpdate
 public class ParametrizacionAnual {
 
     @Id
