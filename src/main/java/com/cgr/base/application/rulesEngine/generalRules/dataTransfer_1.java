@@ -25,7 +25,7 @@ public class dataTransfer_1 {
         UtilsDB.ensureColumnsExist("GENERAL_RULES_DATA",
                 "REGLA_GENERAL_1:NVARCHAR(10)",
                 "ALERTA_1:NVARCHAR(10)",
-                "VAL_PptoDef_C1_PI_1:DECIMAL(18,0)");
+                "VAL_PptoDef_ProgIng_Cta1_1:DECIMAL(18,0)");
 
         String updateNoDataQuery = String.format(
                 """
@@ -58,7 +58,7 @@ public class dataTransfer_1 {
                                 WHEN CAST(a.PRESUPUESTO_DEFINITIVO AS DECIMAL(18,2)) >= 100000000 THEN 'OK'
                                 ELSE 'CA_0021'
                             END,
-                            d.VAL_PptoDef_C1_PI_1 = a.PRESUPUESTO_DEFINITIVO
+                            d.VAL_PptoDef_ProgIng_Cta1_1 = a.PRESUPUESTO_DEFINITIVO
                         FROM GENERAL_RULES_DATA d
                         LEFT JOIN %s a WITH (INDEX(IDX_%s_COMPUTED))
                             ON a.FECHA = d.FECHA
