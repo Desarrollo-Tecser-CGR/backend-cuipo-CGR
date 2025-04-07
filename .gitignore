@@ -18,8 +18,8 @@ target/
 *.iws
 *.iml
 *.ipr
-*.jar
-*.tar
+#*.jar
+#*.tar
 
 ### NetBeans ###
 /nbproject/private/
