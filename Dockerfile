@@ -1,15 +1,21 @@
-# Usar la imagen base con Java 17
-FROM openjdk:17-jdk-slim
+FROM nginx:1.25-alpine
 
-# Establecer el directorio de trabajo dentro del contenedor
-WORKDIR /app
+# Copiar los archivos de Nginx
+COPY nginx.conf /etc/nginx/conf.d/
 
-# Copiar el archivo .jar generado al contenedor
-COPY ./target/*.jar /app/app.jar
+# Copiar los certificados SSL (ubicados en la carpeta nginx de la raíz del proyecto)
+COPY ssl/mycertificate.pem /etc/ssl/certs/mycertificate.pem
+COPY ssl/myprivatekey.pem /etc/ssl/private/myprivatekey.pem
 
-# Exponer el puerto 8001 (puerto de tu aplicación)
-EXPOSE 8001
+# Eliminar configuración por defecto y deshabilitar scripts de entrada
+RUN rm -rf /etc/nginx/conf.d/default.conf && \
+    rm -rf /docker-entrypoint.d/*
 
-# Comando para ejecutar la aplicación
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Asignar permisos a los archivos estáticos
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html
 
+# Exponer puertos 80 y 443
+EXPOSE 80 443
+
+CMD ["nginx", "-g", "daemon off;"]
