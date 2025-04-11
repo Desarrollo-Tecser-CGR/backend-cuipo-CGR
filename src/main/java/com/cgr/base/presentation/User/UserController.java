@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cgr.base.application.user.dto.UserFilterRequestDto;
-import com.cgr.base.application.user.dto.UserWithRolesRequestDto;
-import com.cgr.base.application.user.usecase.IUserSynchronizerUseCase;
-import com.cgr.base.application.user.usecase.IUserUseCase;
 import com.cgr.base.config.abstractResponse.AbstractController;
+import com.cgr.base.dto.user.UserFilterRequestDto;
+import com.cgr.base.dto.user.UserWithRolesRequestDto;
+import com.cgr.base.service.user.IUserSynchronizerUseCase;
+import com.cgr.base.service.user.IUserUseCase;
 
 import jakarta.validation.Valid;
 

@@ -1,4 +1,4 @@
-package com.cgr.base.infrastructure.externar.repository;
+package com.cgr.base.external.LDAP;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

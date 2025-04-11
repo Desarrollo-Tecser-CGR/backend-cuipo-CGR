@@ -1,4 +1,4 @@
-package com.cgr.base.application.auth.service;
+package com.cgr.base.service.menu;
 
 import java.util.HashMap;
 import java.util.List;

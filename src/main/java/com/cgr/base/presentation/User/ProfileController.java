@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.cgr.base.application.user.dto.UserProfileDto;
-import com.cgr.base.application.user.service.UserProfile;
+import com.cgr.base.dto.user.UserProfileDto;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
+import com.cgr.base.service.user.UserProfile;
 
 import jakarta.servlet.http.HttpServletRequest;
 

@@ -1,9 +1,9 @@
-package com.cgr.base.application.auth.mapper;
+package com.cgr.base.mapper.auth;
 
 import java.util.function.Function;
 
-import com.cgr.base.application.auth.dto.AuthRequestDto;
 import com.cgr.base.domain.models.UserModel;
+import com.cgr.base.dto.auth.AuthRequestDto;
 import com.cgr.base.entity.user.UserEntity;
 
 public enum UserMapper implements Function<UserEntity, AuthRequestDto> {

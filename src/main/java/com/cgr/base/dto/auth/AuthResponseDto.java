@@ -1,4 +1,4 @@
-package com.cgr.base.application.auth.dto;
+package com.cgr.base.dto.auth;
 
 import java.util.List;
 

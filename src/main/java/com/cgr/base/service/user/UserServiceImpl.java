@@ -1,4 +1,4 @@
-package com.cgr.base.application.user.service;
+package com.cgr.base.service.user;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,15 +8,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cgr.base.application.user.dto.UserFilterRequestDto;
-import com.cgr.base.application.user.dto.UserWithRolesRequestDto;
-import com.cgr.base.application.user.dto.UserWithRolesResponseDto;
-import com.cgr.base.application.user.mapper.UserMapper;
-import com.cgr.base.application.user.usecase.IUserUseCase;
 import com.cgr.base.domain.repository.IUserRoleRepository;
+import com.cgr.base.dto.user.UserFilterRequestDto;
+import com.cgr.base.dto.user.UserWithRolesRequestDto;
+import com.cgr.base.dto.user.UserWithRolesResponseDto;
 import com.cgr.base.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.specification.filter.UserSpecification;
 import com.cgr.base.infrastructure.utilities.dto.PaginationResponse;
+import com.cgr.base.mapper.user.UserMapper;
 import com.cgr.base.repository.user.IUserRepositoryJpa;
 
 import lombok.AllArgsConstructor;

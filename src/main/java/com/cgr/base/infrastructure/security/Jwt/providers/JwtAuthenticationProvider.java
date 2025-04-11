@@ -13,8 +13,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.common.exception.exceptionCustom.InvalidVerificationTokenException;
+import com.cgr.base.dto.auth.AuthResponseDto;
 import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
 import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;

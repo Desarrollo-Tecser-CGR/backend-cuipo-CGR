@@ -1,15 +1,14 @@
-package com.cgr.base.application.auth.mapper;
+package com.cgr.base.mapper.auth;
 
 import java.util.function.Function;
 
-import com.cgr.base.application.auth.dto.AuthRequestDto;
-import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.domain.models.UserModel;
+import com.cgr.base.dto.auth.AuthRequestDto;
+import com.cgr.base.dto.auth.AuthResponseDto;
 
 public enum AuthMapper implements Function<UserModel, AuthRequestDto> {
     INSTANCE;
 
-    // Excepción de Método NO Implementado.
     @Override
     public AuthRequestDto apply(UserModel t) {
         throw new UnsupportedOperationException("Unimplemented method 'apply'");

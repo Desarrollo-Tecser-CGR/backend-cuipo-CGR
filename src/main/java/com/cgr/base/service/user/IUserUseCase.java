@@ -1,12 +1,12 @@
-package com.cgr.base.application.user.usecase;
+package com.cgr.base.service.user;
 
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 
-import com.cgr.base.application.user.dto.UserFilterRequestDto;
-import com.cgr.base.application.user.dto.UserWithRolesRequestDto;
-import com.cgr.base.application.user.dto.UserWithRolesResponseDto;
+import com.cgr.base.dto.user.UserFilterRequestDto;
+import com.cgr.base.dto.user.UserWithRolesRequestDto;
+import com.cgr.base.dto.user.UserWithRolesResponseDto;
 import com.cgr.base.infrastructure.utilities.dto.PaginationResponse;
 
 public interface IUserUseCase {

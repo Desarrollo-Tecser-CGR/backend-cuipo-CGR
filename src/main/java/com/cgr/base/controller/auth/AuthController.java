@@ -1,4 +1,4 @@
-package com.cgr.base.presentation.controller;
+package com.cgr.base.controller.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,10 +9,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cgr.base.application.auth.dto.AuthRequestDto;
-import com.cgr.base.application.auth.service.AuthService;
 import com.cgr.base.config.abstractResponse.AbstractController;
-
+import com.cgr.base.dto.auth.AuthRequestDto;
+import com.cgr.base.service.auth.AuthService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.servlet.http.HttpServletRequest;

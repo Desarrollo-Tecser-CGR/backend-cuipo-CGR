@@ -1,4 +1,4 @@
-package com.cgr.base.application.user.usecase;
+package com.cgr.base.service.user;
 
 public interface IUserSynchronizerUseCase {
 

@@ -1,4 +1,4 @@
-package com.cgr.base.application.auth.dto;
+package com.cgr.base.dto.auth;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,11 +12,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthRequestDto {
-    
+
     @JsonProperty("sAMAccountName")
     private String sAMAccountName;
-    private String password; 
-    private String email;  
-  
+    private String password;
+    private String email;
 
 }

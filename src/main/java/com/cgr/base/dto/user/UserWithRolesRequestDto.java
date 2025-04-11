@@ -1,4 +1,4 @@
-package com.cgr.base.application.user.dto;
+package com.cgr.base.dto.user;
 
 import java.util.List;
 

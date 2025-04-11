@@ -1,4 +1,4 @@
-package com.cgr.base.application.user.service;
+package com.cgr.base.service.user;
 
 import java.util.Arrays;
 import java.util.Base64;
@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cgr.base.application.user.dto.UserProfileDto;
+import com.cgr.base.dto.user.UserProfileDto;
 import com.cgr.base.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.entity.user.ProfileEntity;
 import com.cgr.base.infrastructure.persistence.repository.user.ProfileRepo;

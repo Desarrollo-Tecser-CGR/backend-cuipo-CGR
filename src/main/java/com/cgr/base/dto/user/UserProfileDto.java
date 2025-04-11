@@ -1,4 +1,5 @@
-package com.cgr.base.application.user.dto;
+package com.cgr.base.dto.user;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,4 +10,3 @@ public class UserProfileDto {
     private String fullName;
     private String phone;
 }
-

@@ -1,4 +1,4 @@
-package com.cgr.base.application.user.dto;
+package com.cgr.base.dto.user;
 
 import java.sql.Date;
 
@@ -18,13 +18,13 @@ public class UserFilterRequestDto {
     private String email;
 
     private String phone;
-    
+
     private Boolean enabled;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "America/Bogota")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
     private Date startDate;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "America/Bogota")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
     private Date endDate;
 
 }
