@@ -6,11 +6,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import com.cgr.base.entity.user.UserEntity;
+import com.cgr.base.external.CGR.ExternalAuthService;
 import com.cgr.base.repository.auth.IActiveDirectoryUserRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unboundid.ldap.sdk.LDAPBindException;
 import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPException;
@@ -40,21 +47,40 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
     @Value("${LDAP_SERVICE_PASSWORD}")
     private String servicePassword;
 
+    @Autowired
+    ExternalAuthService externalAuthService;
+
+    @Value("${external.auth.mode}")
+    private String authMode;
+
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    private String externalUserInfoUrl = "https://serviciosint.contraloria.gov.co/directorio/usuarios/consultar/";
+
     // Verificar credenciales en Active Directory
     @Override
     public Boolean checkAccount(String samAccountName, String password) {
 
+        if ("ldap".equalsIgnoreCase(authMode)) {
+            return authenticateWithLDAP(samAccountName, password);
+        } else if ("cgr".equalsIgnoreCase(authMode)) {
+            return authenticateWithExternalCGR(samAccountName, password);
+        } else {
+            throw new IllegalStateException("Unknown authentication mode: " + authMode);
+        }
+    }
+
+    private boolean authenticateWithLDAP(String samAccountName, String password) {
         try (LDAPConnection connection = new LDAPConnection(ldapHost, ldapPort)) {
             String userPrincipalName = samAccountName + "@" + domain;
             connection.bind(userPrincipalName, password);
 
-            SearchResultEntry usuario = buscarUsuarioPorSAMAccountName(connection, samAccountName, baseDN);
+            SearchResultEntry usuario = getUserDirectoryBySAMAccountName(connection, samAccountName, baseDN);
             if (usuario == null) {
                 throw new IllegalArgumentException("User not found in Active Directory: " + samAccountName);
             }
 
             return true;
-
         } catch (LDAPBindException e) {
             throw new IllegalArgumentException("Invalid credentials for user: " + samAccountName, e);
         } catch (LDAPException e) {
@@ -62,8 +88,57 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
         }
     }
 
+    private boolean authenticateWithExternalCGR(String samAccountName, String password) {
+        try {
+            boolean isAuthenticated = externalAuthService.authenticateWithExternalService(samAccountName, password);
+            if (!isAuthenticated) {
+                throw new IllegalArgumentException("Invalid credentials for user: " + samAccountName);
+            }
+
+            UserEntity userEntity = getUserDirectoryCGR(samAccountName);
+            if (userEntity != null) {
+                System.out.println("Información del usuario obtenida del endpoint de validación: " + userEntity);
+            }
+
+            return true;
+        } catch (Exception e) {
+            throw new IllegalStateException("Error authenticating via external service.", e);
+        }
+    }
+
+    private UserEntity getUserDirectoryCGR(String samAccountName) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("usuario", samAccountName);
+
+            ResponseEntity<String> response = restTemplate.getForEntity(externalUserInfoUrl + samAccountName,
+                    String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonNode = objectMapper.readTree(response.getBody());
+
+                UserEntity userEntity = new UserEntity();
+                userEntity.setSAMAccountName(jsonNode.get("usuario").asText());
+                userEntity.setFullName(jsonNode.get("nombreMostrar").asText());
+                userEntity.setEmail(jsonNode.get("usuario").asText() + "@");
+                userEntity.setPhone(jsonNode.get("numeroTelefono").asText());
+                userEntity.setCargo(jsonNode.get("descripcionCargo").asText());
+                userEntity.setEnabled(true);
+
+                return userEntity;
+            } else {
+                System.err.println("Error al obtener información del usuario desde el endpoint de validacion.");
+                return null;
+            }
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     // Buscar usuario por SAMAccountName en el directorio LDAP.
-    private SearchResultEntry buscarUsuarioPorSAMAccountName(
+    private SearchResultEntry getUserDirectoryBySAMAccountName(
             LDAPConnection connection, String samAccountName, String baseDN) throws LDAPException {
 
         String searchFilter = String.format("(sAMAccountName=%s)", samAccountName);
