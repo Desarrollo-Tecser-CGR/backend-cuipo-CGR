@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.logs.service.LogGeneralService;
 import com.cgr.base.application.parameterization.ParametrizacionAnualService;
+import com.cgr.base.config.abstractResponse.AbstractController;
 import static com.cgr.base.infrastructure.persistence.entity.log.LogType.PARAMETRIZACION;
 import com.cgr.base.infrastructure.persistence.entity.parametrization.ParametrizacionAnual;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
-import com.cgr.base.presentation.controller.AbstractController;
 
 import jakarta.servlet.http.HttpServletRequest;
 

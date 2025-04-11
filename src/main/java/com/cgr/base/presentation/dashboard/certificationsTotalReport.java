@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.certifications.service.totalReport;
-import com.cgr.base.presentation.controller.AbstractController;
+import com.cgr.base.config.abstractResponse.AbstractController;
 
 @RestController
 @RequestMapping("/api/v1/dashboard")

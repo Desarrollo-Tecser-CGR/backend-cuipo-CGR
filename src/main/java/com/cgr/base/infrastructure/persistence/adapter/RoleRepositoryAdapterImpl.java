@@ -6,8 +6,8 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
 import com.cgr.base.domain.repository.IRoleRepository;
-import com.cgr.base.infrastructure.exception.customException.ResourceNotFoundException;
 import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 import com.cgr.base.infrastructure.persistence.repository.role.IRoleRepositoryJpa;
 

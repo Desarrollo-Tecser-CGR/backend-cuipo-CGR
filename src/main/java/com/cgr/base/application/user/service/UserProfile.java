@@ -16,8 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cgr.base.application.user.dto.UserProfileDto;
 import com.cgr.base.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.entity.user.ProfileEntity;
-import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.persistence.repository.user.ProfileRepo;
+import com.cgr.base.repository.user.IUserRepositoryJpa;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

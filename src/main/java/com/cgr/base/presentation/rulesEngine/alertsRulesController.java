@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.rulesEngine.alertsRules.alertsRules;
-import com.cgr.base.presentation.controller.AbstractController;
+import com.cgr.base.config.abstractResponse.AbstractController;
 
 @RestController
 @PreAuthorize("hasAuthority('MENU_2')")

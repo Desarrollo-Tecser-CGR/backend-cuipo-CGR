@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.notifications.NotificationsService;
+import com.cgr.base.config.abstractResponse.AbstractController;
 import com.cgr.base.infrastructure.persistence.entity.notifications.NotificationUserEntity;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
-import com.cgr.base.presentation.controller.AbstractController;
 
 import jakarta.servlet.http.HttpServletRequest;
 

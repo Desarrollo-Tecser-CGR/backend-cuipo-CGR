@@ -13,7 +13,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import com.cgr.base.infrastructure.exception.component.AccessDeniedHandlerException;
+import com.cgr.base.common.exception.component.AccessDeniedHandlerException;
 import com.cgr.base.infrastructure.security.Jwt.filters.JwtAuthFilter;
 
 import jakarta.servlet.http.HttpServletRequest;

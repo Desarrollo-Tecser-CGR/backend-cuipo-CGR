@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.application.certifications.service.CertificationsService;
 import com.cgr.base.application.logs.service.LogGeneralService;
+import com.cgr.base.config.abstractResponse.AbstractController;
 import static com.cgr.base.infrastructure.persistence.entity.log.LogType.CERTIFICACIONES;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
-import com.cgr.base.presentation.controller.AbstractController;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;

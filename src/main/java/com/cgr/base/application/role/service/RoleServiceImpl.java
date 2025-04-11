@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cgr.base.application.role.dto.RoleRequestDto;
 import com.cgr.base.application.role.usecase.IRoleService;
+import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
 import com.cgr.base.domain.repository.IRoleRepository;
-import com.cgr.base.infrastructure.exception.customException.ResourceNotFoundException;
 import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 import com.cgr.base.infrastructure.utilities.DtoMapper;
 

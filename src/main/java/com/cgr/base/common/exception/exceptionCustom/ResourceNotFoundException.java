@@ -1,4 +1,4 @@
-package com.cgr.base.infrastructure.exception.customException;
+package com.cgr.base.common.exception.exceptionCustom;
 
 public class ResourceNotFoundException extends RuntimeException {
 

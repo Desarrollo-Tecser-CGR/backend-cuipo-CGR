@@ -16,9 +16,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
-import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
+import com.cgr.base.repository.user.IUserRepositoryJpa;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

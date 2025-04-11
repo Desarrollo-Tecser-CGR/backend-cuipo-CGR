@@ -1,4 +1,4 @@
-package com.cgr.base.presentation.controller;
+package com.cgr.base.config.abstractResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +20,10 @@ public abstract class AbstractController {
 
     protected ResponseEntity<?> requestResponse(Object data, String message, HttpStatus status, boolean successful) {
         return buildResponse(data, message, status, successful);
+    }
+
+    protected ResponseEntity<?> requestError(String errorMessage, HttpStatus status) {
+        return buildResponse(null, errorMessage, status, false);
     }
 
     private ResponseEntity<?> buildResponse(Object data, String message, HttpStatus status, boolean successful) {

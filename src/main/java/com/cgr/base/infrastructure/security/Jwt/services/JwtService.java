@@ -18,7 +18,7 @@ import com.auth0.jwt.interfaces.JWTVerifier;
 import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
-import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
+import com.cgr.base.repository.user.IUserRepositoryJpa;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import lombok.extern.slf4j.Slf4j;

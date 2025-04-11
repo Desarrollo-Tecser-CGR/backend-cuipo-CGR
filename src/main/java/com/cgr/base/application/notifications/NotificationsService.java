@@ -10,7 +10,7 @@ import com.cgr.base.infrastructure.persistence.entity.notifications.Notification
 import com.cgr.base.infrastructure.persistence.entity.notifications.NotificationUserEntity;
 import com.cgr.base.infrastructure.persistence.repository.notifications.INotificationRepositoryJpa;
 import com.cgr.base.infrastructure.persistence.repository.notifications.INotificationUserRepositoryJpa;
-import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
+import com.cgr.base.repository.user.IUserRepositoryJpa;
 
 @Service
 public class NotificationsService { // Renombrado de NotificationsService a NotificationService

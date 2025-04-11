@@ -1,5 +1,5 @@
 
-package com.cgr.base.infrastructure.persistence.repository.user;
+package com.cgr.base.repository.user;
 
 import java.util.List;
 import java.util.Optional;

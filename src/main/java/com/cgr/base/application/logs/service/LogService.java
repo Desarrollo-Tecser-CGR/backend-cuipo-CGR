@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.cgr.base.infrastructure.persistence.entity.log.LogEntity;
 import com.cgr.base.infrastructure.persistence.repository.logs.ILogsRepositoryJpa;
-import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
+import com.cgr.base.repository.user.IUserRepositoryJpa;
 
 @Service
 

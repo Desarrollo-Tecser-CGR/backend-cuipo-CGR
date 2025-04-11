@@ -14,12 +14,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import com.cgr.base.application.auth.dto.AuthResponseDto;
-import com.cgr.base.infrastructure.exception.customException.InvalidVerificationTokenException;
+import com.cgr.base.common.exception.exceptionCustom.InvalidVerificationTokenException;
+import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
 import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
+import com.cgr.base.repository.user.IUserRepositoryJpa;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
-import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
 
 import lombok.extern.slf4j.Slf4j;
 

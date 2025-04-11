@@ -3,7 +3,6 @@ package com.cgr.base.application.auth.service;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,23 +10,20 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.cgr.base.application.auth.dto.AuthRequestDto;
 import com.cgr.base.application.auth.dto.AuthResponseDto;
 import com.cgr.base.application.auth.mapper.AuthMapper;
-import com.cgr.base.application.auth.usecase.IAuthUseCase;
 import com.cgr.base.application.logs.service.LogService;
-import com.cgr.base.domain.models.UserModel;
+import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
 import com.cgr.base.domain.repository.IActiveDirectoryUserRepository;
-import com.cgr.base.domain.repository.IUserRepository;
 import com.cgr.base.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
 import com.cgr.base.infrastructure.persistence.entity.log.LogEntity;
 import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
-import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
+import com.cgr.base.repository.user.IUserRepositoryJpa;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,13 +31,10 @@ import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
-public class AuthService implements IAuthUseCase {
+public class AuthService {
 
     @Autowired
     private final LogService LogService;
-
-    @Autowired
-    private final IUserRepository userRepository;
 
     @Autowired
     private final IUserRepositoryJpa userRepositoryFull;
@@ -55,114 +48,60 @@ public class AuthService implements IAuthUseCase {
     @Autowired
     private final JwtService jwtService;
 
-    // Autenticación utilizando SAMAccountName y contraseña.
-    @Transactional
-    @Override
-    public Map<String, Object> signIn(AuthRequestDto userRequest, HttpServletRequest servletRequest)
-            throws JsonProcessingException {
-
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-
-            UserModel userModel = userRepository.findBySAMAccountName(userRequest.getSAMAccountName());
-
-            System.err.println("userModel: " + userModel);
-            if (userModel != null && userModel.getPassword().equals(userRequest.getPassword())) {
-
-                Optional<UserEntity> userOptional = this.userRepositoryFull
-                        .findBySAMAccountName(userRequest.getSAMAccountName());
-                AuthResponseDto userDto = AuthMapper.INSTANCE.toAuthResponDto(userModel);
-
-                String token = jwtAuthenticationProvider.createToken(userDto, userOptional.get().getRoles());
-
-                userDto.setToken(token);
-                userDto.setIsEnable(true);
-
-                response.put("user", userDto);
-                response.put("message", "User Authenticated Successfully.");
-                response.put("statusCode", 200);
-                response.put("status", "success");
-                return response;
-
-            }
-
-        } catch (Exception e) {
-            response.put("errormsj", e.getMessage());
-            response.put("message", "Error Authenticating User.");
-            response.put("statusCode", 500);
-            response.put("status", "error");
-        }
-        return response;
-
-    }
-
-    // Autenticación en el Active Directory mediante LDAP
-    @Transactional
-    @Override
+    // Autenticación en el Active Directory
     public Map<String, Object> authWithLDAPActiveDirectory(AuthRequestDto userRequest,
-            HttpServletRequest servletRequest)
-            throws JsonProcessingException {
+            HttpServletRequest servletRequest) throws JsonProcessingException {
 
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-
-            Boolean isAccountValid = activeDirectoryUserRepository.checkAccount(
-                    userRequest.getSAMAccountName(),
-                    userRequest.getPassword());
-
-            if (isAccountValid) {
-
-                UserEntity user = this.userRepositoryFull
-                        .findBySAMAccountNameWithRoles(userRequest.getSAMAccountName()).get();
-                AuthResponseDto userRequestDto = AuthMapper.INSTANCE.toAuthResponDto(userRequest);
-
-                List<AuthResponseDto.RoleDto> rolesDto = user.getRoles().stream()
-                        .map(role -> new AuthResponseDto.RoleDto(role.getId(), role.getName()))
-                        .toList();
-
-                userRequestDto.setRoles(rolesDto);
-
-                String token = jwtAuthenticationProvider.createToken(userRequestDto, user.getRoles());
-
-                List<Menu> menus = this.userRepositoryFull
-                        .findMenusByRoleNames(user.getRoles().stream().map(RoleEntity::getName).toList());
-
-                userRequestDto.setMenus(menus);
-
-                userRequestDto.setToken(token);
-                userRequestDto.setIsEnable(true);
-
-                userRequest.setEmail(user.getEmail());
-
-                Long userId = jwtService.extractUserIdFromToken(token);
-
-                LogEntity log = new LogEntity();
-
-                log.setDateSessionStart(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("America/Bogota"))));
-                log.setUserId(userId);
-                log.setRoles(user.getRoles().stream()
-                        .map(RoleEntity::getName)
-                        .collect(Collectors.joining(",")));
-                LogService.saveLog(log);
-
-                response.put("user", userRequestDto);
-                response.put("message", "User Authenticated Successfully.");
-                response.put("statusCode", 200);
-                response.put("status", "success");
-                return response;
-            } else {
-                throw new SecurityException("Invalid credentials for user: " + userRequest.getSAMAccountName());
-            }
-
-        } catch (SecurityException e) {
-            throw new RuntimeException("Unauthorized: " + e.getMessage(), e);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Bad Request: " + e.getMessage(), e);
-        } catch (Exception e) {
-            throw new RuntimeException("Internal Server Error: " + e.getMessage(), e);
+        if (userRequest.getSAMAccountName() == null || userRequest.getSAMAccountName().isBlank()) {
+            throw new IllegalArgumentException("SAMAccountName is required");
         }
+
+        if (userRequest.getPassword() == null || userRequest.getPassword().isBlank()) {
+            throw new IllegalArgumentException("Password is required");
+        }
+
+        Optional<UserEntity> userOpt = userRepositoryFull
+                .findBySAMAccountNameWithRoles(userRequest.getSAMAccountName());
+        if (userOpt.isEmpty()) {
+            throw new ResourceNotFoundException("User not found");
+        }
+
+        UserEntity user = userOpt.get();
+
+        boolean isAccountValid = activeDirectoryUserRepository.checkAccount(
+                userRequest.getSAMAccountName(),
+                userRequest.getPassword());
+
+        if (!isAccountValid) {
+            throw new SecurityException("Credenciales inválidas");
+        }
+
+        AuthResponseDto userRequestDto = AuthMapper.INSTANCE.toAuthResponDto(userRequest);
+
+        List<AuthResponseDto.RoleDto> rolesDto = user.getRoles().stream()
+                .map(role -> new AuthResponseDto.RoleDto(role.getId(), role.getName()))
+                .toList();
+        userRequestDto.setRoles(rolesDto);
+
+        String token = jwtAuthenticationProvider.createToken(userRequestDto, user.getRoles());
+        userRequestDto.setToken(token);
+        userRequestDto.setIsEnable(true);
+
+        List<Menu> menus = userRepositoryFull.findMenusByRoleNames(
+                user.getRoles().stream().map(RoleEntity::getName).toList());
+        userRequestDto.setMenus(menus);
+
+        userRequest.setEmail(user.getEmail());
+
+        Long userId = jwtService.extractUserIdFromToken(token);
+        LogEntity log = new LogEntity();
+        log.setDateSessionStart(LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("America/Bogota"))));
+        log.setUserId(userId);
+        log.setRoles(user.getRoles().stream().map(RoleEntity::getName).collect(Collectors.joining(",")));
+        LogService.saveLog(log);
+
+        return Map.of("user", userRequestDto);
     }
 
 }

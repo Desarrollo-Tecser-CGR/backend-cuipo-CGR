@@ -1,4 +1,4 @@
-package com.cgr.base.infrastructure.exception.dto;
+package com.cgr.base.common.exception.dto;
 
 import java.util.Date;
 

@@ -25,7 +25,7 @@ import com.cgr.base.application.rulesEngine.management.service.exportCSVgeneral;
 import com.cgr.base.application.rulesEngine.management.service.exportCSVspecific;
 import com.cgr.base.application.rulesEngine.management.service.queryFilters;
 import com.cgr.base.application.rulesEngine.specificRules.detailsInfo;
-import com.cgr.base.presentation.controller.AbstractController;
+import com.cgr.base.config.abstractResponse.AbstractController;
 
 @RestController
 @RequestMapping("/api/v1/rules")

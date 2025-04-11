@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cgr.base.application.logs.service.LogGeneralService;
 import com.cgr.base.application.parameterization.generalParameter;
 import com.cgr.base.application.parameterization.specificParameter;
+import com.cgr.base.config.abstractResponse.AbstractController;
 import static com.cgr.base.infrastructure.persistence.entity.log.LogType.PARAMETRIZACION;
 import com.cgr.base.infrastructure.persistence.entity.parametrization.GeneralRulesNames;
 import com.cgr.base.infrastructure.persistence.entity.parametrization.SpecificRulesNames;
 import com.cgr.base.infrastructure.persistence.entity.parametrization.SpecificRulesTables;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
-import com.cgr.base.presentation.controller.AbstractController;
 
 import jakarta.servlet.http.HttpServletRequest;
 

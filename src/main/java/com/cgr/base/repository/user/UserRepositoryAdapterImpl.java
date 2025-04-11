@@ -1,4 +1,4 @@
-package com.cgr.base.infrastructure.persistence.adapter;
+package com.cgr.base.repository.user;
 
 import java.util.List;
 
@@ -6,12 +6,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cgr.base.application.user.dto.UserWithRolesRequestDto;
+import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
 import com.cgr.base.domain.repository.IUserRoleRepository;
 import com.cgr.base.entity.user.UserEntity;
-import com.cgr.base.infrastructure.exception.customException.ResourceNotFoundException;
 import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 import com.cgr.base.infrastructure.persistence.repository.role.IRoleRepositoryJpa;
-import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 
 @Component
 public class UserRepositoryAdapterImpl implements IUserRoleRepository {

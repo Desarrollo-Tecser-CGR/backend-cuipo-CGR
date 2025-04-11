@@ -1,4 +1,4 @@
-package com.cgr.base.infrastructure.exception.component;
+package com.cgr.base.common.exception.component;
 
 import java.io.IOException;
 

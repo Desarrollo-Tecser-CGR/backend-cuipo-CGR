@@ -16,7 +16,7 @@ import com.cgr.base.infrastructure.persistence.entity.log.LogType;
 import com.cgr.base.infrastructure.persistence.entity.log.LogsEntityGeneral;
 import com.cgr.base.infrastructure.persistence.entity.notifications.NotificationEntity;
 import com.cgr.base.infrastructure.persistence.repository.logs.ILogGeneralRepositoryJpa;
-import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
+import com.cgr.base.repository.user.IUserRepositoryJpa;
 
 @Service
 public class LogGeneralService {
