@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import com.cgr.base.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.entity.notifications.NotificationEntity;
 import com.cgr.base.infrastructure.persistence.entity.notifications.NotificationUserEntity;
-import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.repository.notifications.INotificationRepositoryJpa;
 import com.cgr.base.infrastructure.persistence.repository.notifications.INotificationUserRepositoryJpa;
 import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;

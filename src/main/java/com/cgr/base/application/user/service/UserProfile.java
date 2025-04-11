@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cgr.base.application.user.dto.UserProfileDto;
+import com.cgr.base.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.entity.user.ProfileEntity;
-import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.persistence.repository.user.ProfileRepo;
 

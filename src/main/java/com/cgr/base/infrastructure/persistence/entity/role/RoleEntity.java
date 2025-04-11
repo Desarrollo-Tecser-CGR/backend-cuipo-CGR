@@ -7,9 +7,9 @@ import java.util.Set;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.cgr.base.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
 import com.cgr.base.infrastructure.persistence.entity.Menu.SubMenuEntity;
-import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

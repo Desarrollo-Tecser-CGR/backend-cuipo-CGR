@@ -14,7 +14,7 @@ import com.cgr.base.application.user.dto.UserWithRolesResponseDto;
 import com.cgr.base.application.user.mapper.UserMapper;
 import com.cgr.base.application.user.usecase.IUserUseCase;
 import com.cgr.base.domain.repository.IUserRoleRepository;
-import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
+import com.cgr.base.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 import com.cgr.base.infrastructure.persistence.specification.filter.UserSpecification;
 import com.cgr.base.infrastructure.utilities.dto.PaginationResponse;

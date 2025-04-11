@@ -10,9 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.cgr.base.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
 import com.cgr.base.infrastructure.persistence.entity.Menu.SubMenuEntity;
-import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
 
 @Repository
 public interface IUserRepositoryJpa extends JpaRepository<UserEntity, Long>, JpaSpecificationExecutor<UserEntity> {

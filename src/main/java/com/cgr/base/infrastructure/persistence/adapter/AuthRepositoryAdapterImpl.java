@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import com.cgr.base.application.auth.mapper.UserMapper;
 import com.cgr.base.domain.models.UserModel;
 import com.cgr.base.domain.repository.IUserRepository;
-import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
+import com.cgr.base.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.repository.auth.IAuthRepositoryJpa;
 
 @Component

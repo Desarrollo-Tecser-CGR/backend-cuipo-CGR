@@ -11,10 +11,10 @@ import org.springframework.stereotype.Service;
 
 import com.cgr.base.application.logs.dto.LogWithUserFullNameDTO;
 import com.cgr.base.application.notifications.NotificationsService;
+import com.cgr.base.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.entity.log.LogType;
 import com.cgr.base.infrastructure.persistence.entity.log.LogsEntityGeneral;
 import com.cgr.base.infrastructure.persistence.entity.notifications.NotificationEntity;
-import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
 import com.cgr.base.infrastructure.persistence.repository.logs.ILogGeneralRepositoryJpa;
 import com.cgr.base.infrastructure.persistence.repository.user.IUserRepositoryJpa;
 

@@ -1,4 +1,4 @@
-package com.cgr.base.infrastructure.persistence.entity.user;
+package com.cgr.base.entity.user;
 
 import java.util.Date;
 import java.util.List;
@@ -31,23 +31,24 @@ public class UserEntity {
     @Column(name = "sAMAccountName")
     private String sAMAccountName;
 
-    private String password;
+    @Column(name = "enabled")
+    private Boolean enabled;
 
     @Column(name = "full_name")
     private String fullName;
 
+    @Column(name = "email")
     private String email;
 
+    @Column(name = "phone")
     private String phone;
 
-    @Column(name = "enabled")
-    private Boolean enabled;
+    @Column(name = "cargo")
+    private String cargo;
 
     @Column(name = "date_modify")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "America/Bogota")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "UTC")
     private Date dateModify;
-
-    private String cargo;
 
     @ManyToMany
     @JsonIgnoreProperties({ "users", "handler", "hibernateLazyInitializer" })
@@ -61,12 +62,20 @@ public class UserEntity {
     }
 
     public void mapActiveDirectoryUser(UserEntity userAD) {
-        this.fullName = userAD.getFullName();
-        this.email = userAD.getEmail();
-        this.phone = userAD.getPhone();
-        this.enabled = userAD.getEnabled();
-        this.dateModify = userAD.getDateModify();
+        if (this.fullName == null) {
+            this.fullName = userAD.getFullName();
+        }
+        if (this.email == null) {
+            this.email = userAD.getEmail();
+        }
+        if (this.phone == null) {
+            this.phone = userAD.getPhone();
+        }
+        if (this.dateModify == null) {
+            this.dateModify = userAD.getDateModify();
+        }
         this.cargo = userAD.getCargo();
+        this.enabled = userAD.getEnabled();
     }
 
 }

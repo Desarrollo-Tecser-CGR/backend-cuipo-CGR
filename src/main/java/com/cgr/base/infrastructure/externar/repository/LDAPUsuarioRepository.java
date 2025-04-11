@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cgr.base.domain.repository.IActiveDirectoryUserRepository;
-import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
+import com.cgr.base.entity.user.UserEntity;
 import com.unboundid.ldap.sdk.LDAPBindException;
 import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPException;

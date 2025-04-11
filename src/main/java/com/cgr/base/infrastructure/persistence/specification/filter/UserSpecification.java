@@ -5,7 +5,7 @@ import java.util.Date;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.cgr.base.application.user.dto.UserFilterRequestDto;
-import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
+import com.cgr.base.entity.user.UserEntity;
 
 import jakarta.persistence.criteria.Predicate;
 

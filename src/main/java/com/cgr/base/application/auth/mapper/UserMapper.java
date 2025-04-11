@@ -4,7 +4,7 @@ import java.util.function.Function;
 
 import com.cgr.base.application.auth.dto.AuthRequestDto;
 import com.cgr.base.domain.models.UserModel;
-import com.cgr.base.infrastructure.persistence.entity.user.UserEntity;
+import com.cgr.base.entity.user.UserEntity;
 
 public enum UserMapper implements Function<UserEntity, AuthRequestDto> {
     INSTANCE;
@@ -15,7 +15,6 @@ public enum UserMapper implements Function<UserEntity, AuthRequestDto> {
         if (userEntity != null) {
             AuthRequestDto userRequestDto = new AuthRequestDto();
             userRequestDto.setSAMAccountName(userEntity.getSAMAccountName());
-            userRequestDto.setPassword(userEntity.getPassword());
             return userRequestDto;
         }
         return null;
@@ -26,7 +25,6 @@ public enum UserMapper implements Function<UserEntity, AuthRequestDto> {
 
         userModel.setId(userREntity.getId());
         userModel.setSAMAccountName(userREntity.getSAMAccountName());
-        userModel.setPassword(userREntity.getPassword());
 
         return userModel;
     }
