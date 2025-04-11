@@ -1,4 +1,4 @@
-package com.cgr.base.domain.repository;
+package com.cgr.base.repository.auth;
 
 import java.util.List;
 

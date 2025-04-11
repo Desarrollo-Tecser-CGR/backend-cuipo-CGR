@@ -1,4 +1,4 @@
-package com.cgr.base.infrastructure.persistence.entity.user;
+package com.cgr.base.entity.user;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

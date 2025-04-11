@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cgr.base.dto.user.UserProfileDto;
+import com.cgr.base.entity.user.ProfileEntity;
 import com.cgr.base.entity.user.UserEntity;
-import com.cgr.base.infrastructure.persistence.entity.user.ProfileEntity;
-import com.cgr.base.infrastructure.persistence.repository.user.ProfileRepo;
 import com.cgr.base.repository.user.IUserRepositoryJpa;
+import com.cgr.base.repository.user.ProfileRepo;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

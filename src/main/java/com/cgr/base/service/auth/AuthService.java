@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import com.cgr.base.application.logs.service.LogService;
 import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
-import com.cgr.base.domain.repository.IActiveDirectoryUserRepository;
 import com.cgr.base.dto.auth.AuthRequestDto;
 import com.cgr.base.dto.auth.AuthResponseDto;
 import com.cgr.base.entity.user.UserEntity;
@@ -23,6 +22,7 @@ import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
 import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.cgr.base.mapper.auth.AuthMapper;
+import com.cgr.base.repository.auth.IActiveDirectoryUserRepository;
 import com.cgr.base.repository.user.IUserRepositoryJpa;
 import com.fasterxml.jackson.core.JsonProcessingException;
 

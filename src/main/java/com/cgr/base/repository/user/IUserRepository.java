@@ -1,6 +1,6 @@
-package com.cgr.base.domain.repository;
+package com.cgr.base.repository.user;
 
-import com.cgr.base.domain.models.UserModel;
+import com.cgr.base.entity.user.UserModel;
 
 public interface IUserRepository {
      

@@ -1,4 +1,4 @@
-package com.cgr.base.infrastructure.persistence.specification.filter;
+package com.cgr.base.service.user;
 
 import java.util.Date;
 

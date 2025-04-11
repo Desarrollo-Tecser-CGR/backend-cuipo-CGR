@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cgr.base.domain.repository.IActiveDirectoryUserRepository;
 import com.cgr.base.entity.user.UserEntity;
+import com.cgr.base.repository.auth.IActiveDirectoryUserRepository;
 import com.cgr.base.repository.user.IUserRepositoryJpa;
 
 @Service

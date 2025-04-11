@@ -1,4 +1,4 @@
-package com.cgr.base.domain.models;
+package com.cgr.base.entity.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

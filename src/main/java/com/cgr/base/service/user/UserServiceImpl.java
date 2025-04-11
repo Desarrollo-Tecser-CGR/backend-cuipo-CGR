@@ -13,7 +13,6 @@ import com.cgr.base.dto.user.UserFilterRequestDto;
 import com.cgr.base.dto.user.UserWithRolesRequestDto;
 import com.cgr.base.dto.user.UserWithRolesResponseDto;
 import com.cgr.base.entity.user.UserEntity;
-import com.cgr.base.infrastructure.persistence.specification.filter.UserSpecification;
 import com.cgr.base.infrastructure.utilities.dto.PaginationResponse;
 import com.cgr.base.mapper.user.UserMapper;
 import com.cgr.base.repository.user.IUserRepositoryJpa;
