@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.application.logs.service.LogService;
 import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
 import com.cgr.base.dto.auth.AuthRequestDto;
 import com.cgr.base.dto.auth.AuthResponseDto;
@@ -24,6 +23,7 @@ import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.cgr.base.mapper.auth.AuthMapper;
 import com.cgr.base.repository.auth.IActiveDirectoryUserRepository;
 import com.cgr.base.repository.user.IUserRepositoryJpa;
+import com.cgr.base.service.logs.LogService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.servlet.http.HttpServletRequest;

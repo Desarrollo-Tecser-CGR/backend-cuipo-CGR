@@ -5,13 +5,13 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.application.certifications.service.initTablaCertifications;
 import com.cgr.base.application.parameterization.generalParameter;
 import com.cgr.base.application.parameterization.specificParameter;
 import com.cgr.base.application.rulesEngine.initTables.dataCategoryInit;
 import com.cgr.base.application.rulesEngine.initTables.dataParameterInit;
 import com.cgr.base.application.rulesEngine.initTables.dataSourceInit;
 import com.cgr.base.application.rulesEngine.specificRules.columnsER;
+import com.cgr.base.service.certifications.initTablaCertifications;
 
 @Service
 public class ruleScheduler {
