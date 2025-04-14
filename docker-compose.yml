@@ -1,3 +1,4 @@
+version: '3.8'
 services:
   backend_cuipo:
     image: cuipo-backend:1.0
@@ -5,12 +6,12 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file:
-      - .env  # Asegúrate de que el archivo .env esté en el mismo directorio
+      - .env
     ports:
-      - "3056:3056"
+      - "8001:8001"  # Aquí expone el puerto 3056 del contenedor en el puerto 80 del host (ajustado al puerto adecuado)
     networks:
       - cuipo-net
- 
+
 networks:
   cuipo-net:
     driver: bridge

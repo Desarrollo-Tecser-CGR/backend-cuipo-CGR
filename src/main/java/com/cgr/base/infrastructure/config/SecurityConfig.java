@@ -70,7 +70,8 @@ public class SecurityConfig {
                         "http://bovid.site", "https://strong-toffee-1046b5.netlify.app/",
                         "https://strong-toffee-1046b5.netlify.app", "http://192.168.2.63:8001/",
                         "http://192.168.2.63:8001", "http://192.168.27.112:3056",
-                        "http://192.168.27.112:3056/"));
+                        "http://192.168.27.112:3056/", "http://192.168.27.112:8001/", "http://192.168.27.112:8001",
+                        "http://192.168.27.112:8002/", "http://192.168.27.112:8002"));
                 config.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
                 config.setAllowedHeaders(Arrays.asList("*"));
                 config.setAllowCredentials(true);

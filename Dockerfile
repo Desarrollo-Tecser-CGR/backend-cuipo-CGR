@@ -7,9 +7,9 @@ WORKDIR /app
 # Copiar el archivo .jar generado al contenedor
 COPY ./target/*.jar /app/app.jar
 
-# Exponer el puerto 8001 (puerto de tu aplicación)
-EXPOSE 3056
+# Exponer el puerto 8001 (puerto de la aplicación Spring Boot)
+EXPOSE 8001
 
-# Comando para ejecutar la aplicación
+# Comando para ejecutar la aplicación Spring Boot
 ENTRYPOINT ["java", "-jar", "app.jar"]
 

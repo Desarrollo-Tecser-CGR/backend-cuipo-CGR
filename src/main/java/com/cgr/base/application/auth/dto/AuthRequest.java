@@ -5,7 +5,6 @@ public class AuthRequest {
     private String sAMAccountName;
     private String password;
 
-    // Getters y setters
     public String getsAMAccountName() {
         return sAMAccountName;
     }
