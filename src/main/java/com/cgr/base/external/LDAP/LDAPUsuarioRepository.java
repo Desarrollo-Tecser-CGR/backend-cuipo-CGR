@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
 import com.cgr.base.entity.user.UserEntity;
 import com.cgr.base.external.CGR.ExternalAuthService;
 import com.cgr.base.repository.auth.IActiveDirectoryUserRepository;
@@ -77,14 +78,14 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
 
             SearchResultEntry usuario = getUserDirectoryBySAMAccountName(connection, samAccountName, baseDN);
             if (usuario == null) {
-                throw new IllegalArgumentException("User not found in Active Directory: " + samAccountName);
+                throw new ResourceNotFoundException("User not found in Active Directory: " + samAccountName);
             }
 
             return true;
         } catch (LDAPBindException e) {
-            throw new IllegalArgumentException("Invalid credentials for user: " + samAccountName, e);
+            throw new SecurityException("Invalid credentials for user: " + samAccountName);
         } catch (LDAPException e) {
-            throw new IllegalStateException("Error connecting to LDAP server.", e);
+            throw new SecurityException("Error connecting to LDAP server.");
         }
     }
 
@@ -92,18 +93,19 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
         try {
             boolean isAuthenticated = externalAuthService.authenticateWithExternalService(samAccountName, password);
             if (!isAuthenticated) {
-                throw new IllegalArgumentException("Invalid credentials for user: " + samAccountName);
+                throw new SecurityException("Invalid credentials for user: " + samAccountName);
             }
 
             UserEntity userEntity = getUserDirectoryCGR(samAccountName);
-            if (userEntity != null) {
-                System.out.println("Información del usuario obtenida del endpoint de validación: " + userEntity);
+            if (userEntity == null) {
+                throw new ResourceNotFoundException("User not found in external CGR directory: " + samAccountName);
             }
 
             return true;
-        } catch (Exception e) {
-            throw new IllegalStateException("Error authenticating via external service.", e);
-        }
+
+        } catch (SecurityException | ResourceNotFoundException e) {
+            throw e;
+        } 
     }
 
     private UserEntity getUserDirectoryCGR(String samAccountName) {

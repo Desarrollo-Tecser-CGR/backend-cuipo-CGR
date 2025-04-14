@@ -3,7 +3,7 @@ package com.cgr.base.entity.user;
 import java.util.Date;
 import java.util.List;
 
-import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
+import com.cgr.base.entity.role.RoleEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

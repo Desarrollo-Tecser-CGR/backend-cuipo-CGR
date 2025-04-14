@@ -18,8 +18,6 @@ public class ExternalAuthService {
 
     public boolean authenticateWithExternalService(String username, String password) {
 
-        System.out.println(username + " " + password);
-
         String requestBody = String.format("{\"Username\": \"%s\", \"Password\": \"%s\"}", username, password);
 
         try {

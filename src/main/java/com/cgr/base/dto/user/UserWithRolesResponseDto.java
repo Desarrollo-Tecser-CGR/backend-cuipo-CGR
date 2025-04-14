@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.cgr.base.application.role.dto.RoleRequestDto;
-import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
+import com.cgr.base.dto.role.RoleRequestDto;
+import com.cgr.base.entity.role.RoleEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;

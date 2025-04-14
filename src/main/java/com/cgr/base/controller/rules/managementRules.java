@@ -19,13 +19,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cgr.base.application.rulesEngine.management.dto.listOptionsEG;
-import com.cgr.base.application.rulesEngine.management.dto.listOptionsRG;
-import com.cgr.base.application.rulesEngine.management.service.exportCSVgeneral;
-import com.cgr.base.application.rulesEngine.management.service.exportCSVspecific;
-import com.cgr.base.application.rulesEngine.management.service.queryFilters;
-import com.cgr.base.application.rulesEngine.specificRules.detailsInfo;
 import com.cgr.base.config.abstractResponse.AbstractController;
+import com.cgr.base.dto.rules.listOptionsEG;
+import com.cgr.base.dto.rules.listOptionsRG;
+import com.cgr.base.service.rules.exportCSVgeneral;
+import com.cgr.base.service.rules.exportCSVspecific;
+import com.cgr.base.service.rules.queryFilters;
+import com.cgr.base.service.rules.dataTransfer.detailsInfo;
 
 @RestController
 @RequestMapping("/api/v1/rules")

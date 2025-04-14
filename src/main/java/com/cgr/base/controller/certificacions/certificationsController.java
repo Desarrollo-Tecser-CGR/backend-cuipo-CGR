@@ -1,5 +1,7 @@
 package com.cgr.base.controller.certificacions;
 
+import static com.cgr.base.entity.logs.LogType.CERTIFICACIONES;
+
 import java.util.List;
 import java.util.Map;
 
@@ -16,8 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.config.abstractResponse.AbstractController;
-import static com.cgr.base.infrastructure.persistence.entity.log.LogType.CERTIFICACIONES;
-import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
+import com.cgr.base.config.jwt.JwtService;
 import com.cgr.base.service.certifications.CertificationsService;
 import com.cgr.base.service.logs.LogGeneralService;
 

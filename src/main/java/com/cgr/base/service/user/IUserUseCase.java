@@ -4,10 +4,10 @@ import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 
+import com.cgr.base.common.pagination.PaginationResponse;
 import com.cgr.base.dto.user.UserFilterRequestDto;
 import com.cgr.base.dto.user.UserWithRolesRequestDto;
 import com.cgr.base.dto.user.UserWithRolesResponseDto;
-import com.cgr.base.infrastructure.utilities.dto.PaginationResponse;
 
 public interface IUserUseCase {
 

@@ -1,6 +1,5 @@
 package com.cgr.base.common.exception.exceptionREST;
 
-import org.apache.coyote.BadRequestException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,23 +23,11 @@ import jakarta.persistence.EntityNotFoundException;
 @RestControllerAdvice
 public class GlobalRegistrationExceptionHandler extends AbstractController {
 
-    // 401 - UNAUTHORIZED
-    @ExceptionHandler({
-            SecurityException.class,
-            InvalidVerificationTokenException.class,
-            IllegalArgumentException.class
-    })
-    public ResponseEntity<?> handleUnauthorized(Exception ex) {
+    @ExceptionHandler(InvalidVerificationTokenException.class)
+    public ResponseEntity<?> handleInvalidToken(InvalidVerificationTokenException ex) {
         return requestResponse(null, ex.getMessage(), HttpStatus.UNAUTHORIZED, false);
     }
 
-    // 403 - FORBIDDEN
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<?> handleAccessDenied(AccessDeniedException ex) {
-        return requestResponse(null, "Access denied: " + ex.getMessage(), HttpStatus.FORBIDDEN, false);
-    }
-
-    // 404 - NOT FOUND
     @ExceptionHandler({
             ResourceNotFoundException.class,
             EntityNotFoundException.class,
@@ -50,26 +37,8 @@ public class GlobalRegistrationExceptionHandler extends AbstractController {
         return requestResponse(null, ex.getMessage(), HttpStatus.NOT_FOUND, false);
     }
 
-    // 405 - METHOD NOT ALLOWED
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<?> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
-        return requestResponse(null, ex.getMessage(), HttpStatus.METHOD_NOT_ALLOWED, false);
-    }
-
-    // 415 - UNSUPPORTED MEDIA TYPE
-    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    public ResponseEntity<?> handleUnsupportedMediaType(HttpMediaTypeNotSupportedException ex) {
-        return requestResponse(null, ex.getMessage(), HttpStatus.UNSUPPORTED_MEDIA_TYPE, false);
-    }
-
-    // 500 - INTERNAL SERVER ERROR (Database)
-    @ExceptionHandler(DataAccessException.class)
-    public ResponseEntity<?> handleDatabaseError(DataAccessException ex) {
-        return requestResponse(null, "Database error: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, false);
-    }
-
     @ExceptionHandler({
-            BadRequestException.class,
+            IllegalArgumentException.class,
             HttpMessageNotReadableException.class,
             MethodArgumentTypeMismatchException.class,
             MissingServletRequestParameterException.class,
@@ -79,7 +48,31 @@ public class GlobalRegistrationExceptionHandler extends AbstractController {
         return requestResponse(null, ex.getMessage(), HttpStatus.BAD_REQUEST, false);
     }
 
-    // 500 - INTERNAL SERVER ERROR (Generic)
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<?> handleUnauthorized(SecurityException ex) {
+        return requestResponse(null, ex.getMessage(), HttpStatus.UNAUTHORIZED, false);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDenied(AccessDeniedException ex) {
+        return requestResponse(null, "Access denied: " + ex.getMessage(), HttpStatus.FORBIDDEN, false);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<?> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
+        return requestResponse(null, ex.getMessage(), HttpStatus.METHOD_NOT_ALLOWED, false);
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<?> handleUnsupportedMediaType(HttpMediaTypeNotSupportedException ex) {
+        return requestResponse(null, ex.getMessage(), HttpStatus.UNSUPPORTED_MEDIA_TYPE, false);
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<?> handleDatabaseError(DataAccessException ex) {
+        return requestResponse(null, "Database error: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, false);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleUnexpected(Exception ex) {
         return requestResponse(null, "Unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR, false);

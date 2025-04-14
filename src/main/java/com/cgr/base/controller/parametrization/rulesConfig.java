@@ -1,5 +1,7 @@
 package com.cgr.base.controller.parametrization;
 
+import static com.cgr.base.entity.logs.LogType.PARAMETRIZACION;
+
 import java.util.List;
 import java.util.Map;
 
@@ -15,15 +17,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cgr.base.application.parameterization.generalParameter;
-import com.cgr.base.application.parameterization.specificParameter;
 import com.cgr.base.config.abstractResponse.AbstractController;
-import static com.cgr.base.infrastructure.persistence.entity.log.LogType.PARAMETRIZACION;
-import com.cgr.base.infrastructure.persistence.entity.parametrization.GeneralRulesNames;
-import com.cgr.base.infrastructure.persistence.entity.parametrization.SpecificRulesNames;
-import com.cgr.base.infrastructure.persistence.entity.parametrization.SpecificRulesTables;
-import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
+import com.cgr.base.config.jwt.JwtService;
+import com.cgr.base.entity.parametrization.GeneralRulesNames;
+import com.cgr.base.entity.parametrization.SpecificRulesNames;
+import com.cgr.base.entity.parametrization.SpecificRulesTables;
 import com.cgr.base.service.logs.LogGeneralService;
+import com.cgr.base.service.parametrization.generalParameter;
+import com.cgr.base.service.parametrization.specificParameter;
 
 import jakarta.servlet.http.HttpServletRequest;
 

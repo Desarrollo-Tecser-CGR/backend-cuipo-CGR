@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cgr.base.infrastructure.persistence.repository.certifications.certificationsRepo;
+import com.cgr.base.repository.certifications.certificationsRepo;
 
 import jakarta.persistence.EntityNotFoundException;
 

@@ -8,13 +8,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cgr.base.domain.repository.IUserRoleRepository;
+import com.cgr.base.common.pagination.PaginationResponse;
 import com.cgr.base.dto.user.UserFilterRequestDto;
 import com.cgr.base.dto.user.UserWithRolesRequestDto;
 import com.cgr.base.dto.user.UserWithRolesResponseDto;
 import com.cgr.base.entity.user.UserEntity;
-import com.cgr.base.infrastructure.utilities.dto.PaginationResponse;
 import com.cgr.base.mapper.user.UserMapper;
+import com.cgr.base.repository.role.IUserRoleRepository;
 import com.cgr.base.repository.user.IUserRepositoryJpa;
 
 import lombok.AllArgsConstructor;

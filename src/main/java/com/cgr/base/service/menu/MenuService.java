@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
-import com.cgr.base.infrastructure.persistence.repository.menu.IMenuRepositoryJpa;
+import com.cgr.base.entity.menu.Menu;
+import com.cgr.base.repository.menu.IMenuRepositoryJpa;
 
 @Service
 public class MenuService {

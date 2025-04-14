@@ -9,14 +9,14 @@ import java.util.stream.Collectors;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.application.notifications.NotificationsService;
 import com.cgr.base.dto.logs.LogWithUserFullNameDTO;
+import com.cgr.base.entity.logs.LogType;
+import com.cgr.base.entity.logs.LogsEntityGeneral;
+import com.cgr.base.entity.notifications.NotificationEntity;
 import com.cgr.base.entity.user.UserEntity;
-import com.cgr.base.infrastructure.persistence.entity.log.LogType;
-import com.cgr.base.infrastructure.persistence.entity.log.LogsEntityGeneral;
-import com.cgr.base.infrastructure.persistence.entity.notifications.NotificationEntity;
-import com.cgr.base.infrastructure.persistence.repository.logs.ILogGeneralRepositoryJpa;
+import com.cgr.base.repository.logs.ILogGeneralRepositoryJpa;
 import com.cgr.base.repository.user.IUserRepositoryJpa;
+import com.cgr.base.service.notifications.NotificationsService;
 
 @Service
 public class LogGeneralService {

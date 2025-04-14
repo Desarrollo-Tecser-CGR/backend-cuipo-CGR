@@ -1,5 +1,7 @@
 package com.cgr.base.controller.parametrization;
 
+import static com.cgr.base.entity.logs.LogType.PARAMETRIZACION;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +20,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cgr.base.application.parameterization.ParametrizacionAnualService;
 import com.cgr.base.config.abstractResponse.AbstractController;
-import static com.cgr.base.infrastructure.persistence.entity.log.LogType.PARAMETRIZACION;
-import com.cgr.base.infrastructure.persistence.entity.parametrization.ParametrizacionAnual;
-import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
+import com.cgr.base.config.jwt.JwtService;
+import com.cgr.base.entity.parametrization.ParametrizacionAnual;
 import com.cgr.base.service.logs.LogGeneralService;
+import com.cgr.base.service.parametrization.ParametrizacionAnualService;
 
 import jakarta.servlet.http.HttpServletRequest;
 

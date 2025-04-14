@@ -12,14 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
+import com.cgr.base.config.jwt.JwtAuthenticationProvider;
+import com.cgr.base.config.jwt.JwtService;
 import com.cgr.base.dto.auth.AuthRequestDto;
 import com.cgr.base.dto.auth.AuthResponseDto;
+import com.cgr.base.entity.logs.LogEntity;
+import com.cgr.base.entity.menu.Menu;
+import com.cgr.base.entity.role.RoleEntity;
 import com.cgr.base.entity.user.UserEntity;
-import com.cgr.base.infrastructure.persistence.entity.Menu.Menu;
-import com.cgr.base.infrastructure.persistence.entity.log.LogEntity;
-import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
-import com.cgr.base.infrastructure.security.Jwt.providers.JwtAuthenticationProvider;
-import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.cgr.base.mapper.auth.AuthMapper;
 import com.cgr.base.repository.auth.IActiveDirectoryUserRepository;
 import com.cgr.base.repository.user.IUserRepositoryJpa;
@@ -53,7 +53,7 @@ public class AuthService {
             HttpServletRequest servletRequest) throws JsonProcessingException {
 
         if (userRequest.getSAMAccountName() == null || userRequest.getSAMAccountName().isBlank()) {
-            throw new IllegalArgumentException("SAMAccountName is required");
+            throw new IllegalArgumentException("Missing required fields");
         }
 
         if (userRequest.getPassword() == null || userRequest.getPassword().isBlank()) {

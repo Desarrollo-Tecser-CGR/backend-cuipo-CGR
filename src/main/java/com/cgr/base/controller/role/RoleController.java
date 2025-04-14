@@ -1,5 +1,7 @@
 package com.cgr.base.controller.role;
 
+import static com.cgr.base.entity.logs.LogType.USUARIOS;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,12 +19,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cgr.base.application.role.usecase.IRoleService;
 import com.cgr.base.config.abstractResponse.AbstractController;
-import static com.cgr.base.infrastructure.persistence.entity.log.LogType.USUARIOS;
-import com.cgr.base.infrastructure.persistence.entity.role.RoleEntity;
-import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
+import com.cgr.base.config.jwt.JwtService;
+import com.cgr.base.entity.role.RoleEntity;
 import com.cgr.base.service.logs.LogGeneralService;
+import com.cgr.base.service.role.IRoleService;
 
 import jakarta.servlet.http.HttpServletRequest;
 

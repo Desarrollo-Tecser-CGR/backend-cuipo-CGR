@@ -1,6 +1,6 @@
 package com.cgr.base.dto.logs;
 
-import com.cgr.base.infrastructure.persistence.entity.log.LogType;
+import com.cgr.base.entity.logs.LogType;
 
 public class LogWithUserFullNameDTO {
     private Long id;

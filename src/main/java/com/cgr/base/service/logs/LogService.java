@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.infrastructure.persistence.entity.log.LogEntity;
-import com.cgr.base.infrastructure.persistence.repository.logs.ILogsRepositoryJpa;
+import com.cgr.base.entity.logs.LogEntity;
+import com.cgr.base.repository.logs.ILogsRepositoryJpa;
 import com.cgr.base.repository.user.IUserRepositoryJpa;
 
 @Service

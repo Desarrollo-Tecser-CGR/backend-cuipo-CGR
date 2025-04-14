@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cgr.base.application.rulesEngine.management.service.ruleScheduler;
 import com.cgr.base.config.abstractResponse.AbstractController;
+import com.cgr.base.service.rules.ruleScheduler;
 
 @PreAuthorize("hasAuthority('MENU_1')")
 @RestController

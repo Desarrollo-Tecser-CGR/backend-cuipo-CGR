@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.config.abstractResponse.AbstractController;
 import com.cgr.base.dto.logs.LogWithUserFullNameDTO;
-import com.cgr.base.infrastructure.persistence.entity.log.LogType;
+import com.cgr.base.entity.logs.LogType;
 import com.cgr.base.service.logs.LogGeneralService;
 
 // Asegúrate de importar tus clases y métodos auxiliares, por ejemplo, requestResponse(...)
