@@ -43,48 +43,92 @@ public class ruleScheduler {
     @Async
     @Scheduled(cron = "0 0 0 1 * ?")
     public void scheduleRulesExecution() {
-        MotorReglas.processTablesRules();
-        Parametria.processTablesSource();
-        Categorias.initCategoryTable();
-        ParameterRG.tableGeneralRulesName();
-        ParameterRE.tableSpecificRulesName();
-        ApplyRules.initializeDependencies();
+        executeRuleFlow();
+    }
 
+    @Async
+    public void launchRulesManually() {
+        executeRuleFlow();
+    }
+
+    public void executeRuleFlow() {
+        // Tareas iniciales, con diferencia de 10 min entre cada una
+        System.out.println("[INIT] Ejecutando processTablesRules...");
+        executeWithDelay(() -> MotorReglas.processTablesRules(), 1);
+
+        System.out.println("[INIT] Ejecutando processTablesSource...");
+        executeWithDelay(() -> Parametria.processTablesSource(), 7);
+
+        System.out.println("[INIT] Ejecutando initCategoryTable...");
+        executeWithDelay(() -> Categorias.initCategoryTable(), 2);
+
+        System.out.println("[INIT] Ejecutando tableGeneralRulesName...");
+        executeWithDelay(() -> ParameterRG.tableGeneralRulesName(), 2);
+
+        System.out.println("[INIT] Ejecutando tableSpecificRulesName...");
+        executeWithDelay(() -> ParameterRE.tableSpecificRulesName(), 2);
+
+        String[] rules = {
+                // Reglas generales
+                "1", "2", "3", "4", "5", "6", "7", "8", "9A", "9B",
+                "10", "11", "12", "13A", "13B", "14A", "14B", "15",
+                "16A", "16B", "17",
+
+                // Reglas específicas
+                "22A", "22_A", "22B", "22C", "22_C", "22D", "22_D",
+                "22E", "22_E", "23", "24", "25A", "25_A", "25B", "25_B",
+                "GF", "26", "27", "28", "29A", "29B", "29C", "30", "31", "32"
+        };
+
+        System.out.println("[RULES] Ejecutando reglas con delays progresivos...");
+        executeRulesWithDelay(rules); // Delay progresivo de 20 min entre reglas
+
+        int totalRuleDelay = 15 * (rules.length - 1) + 5; // +15 min extra de margen
+
+        System.out.println("[WAIT] Esperando " + totalRuleDelay + " minutos para tareas finales...");
         try {
-            Thread.sleep(20 * 60000L);
+            Thread.sleep(totalRuleDelay * 60000L);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
 
-        String[] generalRules = { "1", "2", "3", "4", "5", "6", "7", "8", "9A", "9B", "10", "11", "12", "13A", "13B",
-                "14A", "14B", "15", "16A", "16B", "17" };
-        executeRulesWithDelay(generalRules, true);
+        System.out.println("[FINAL] Ejecutando actualizarSpecificRulesData...");
+        executeWithDelay(() -> ER.actualizarSpecificRulesData(), 5);
 
-        String[] specificRules = { "22A", "22B", "22C", "22D", "22E", "24", "25A", "25B", "GF", "26", "27", "28", "29A",
-                "29B", "29C", "30", "31", "32" };
-        executeRulesWithDelay(specificRules, false);
-
-        ER.actualizarSpecificRulesData();
-        Certificator.generateControlTable();
+        System.out.println("[FINAL] Ejecutando generateControlTable...");
+        executeWithDelay(() -> Certificator.generateControlTable(), 5);
     }
 
-    private void executeRulesWithDelay(String[] rules, boolean isGeneral) {
+    private void executeRulesWithDelay(String[] rules) {
         int delay = 0;
         for (String rule : rules) {
             int finalDelay = delay;
             new Thread(() -> {
                 try {
                     Thread.sleep(finalDelay * 60000L);
-                    if (isGeneral) {
-                        ApplyRules.transferGeneralRules(rule);
-                    } else {
-                        ApplyRules.transferSpecificRules(rule);
-                    }
-                } catch (InterruptedException e) {
+                    ApplyRules.transferRule(rule);
+                } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
+                    System.err.println("Hilo interrumpido para la regla: " + rule);
+                } catch (Exception e) {
+                    System.err.println("Error al ejecutar la regla: " + rule);
+                    e.printStackTrace();
                 }
             }).start();
-            delay += 35;
+            delay += 15;
+        }
+    }
+
+    private void executeWithDelay(Runnable task, int delayInMinutes) {
+        try {
+            Thread.sleep(delayInMinutes * 60000L);
+            task.run();
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt(); // Respetar interrupción del hilo
+            System.err.println("Hilo interrumpido al ejecutar tarea con delay.");
+        } catch (Exception e) {
+            System.err.println("Error al ejecutar tarea con delay.");
+            e.printStackTrace();
         }
     }
 

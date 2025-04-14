@@ -4,19 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.application.certifications.service.initTablaCertifications;
-import com.cgr.base.application.parameterization.generalParameter;
-import com.cgr.base.application.parameterization.specificParameter;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_1;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_17;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EG;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_EI;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_PG;
 import com.cgr.base.application.rulesEngine.generalRules.dataTransfer_PI;
-import com.cgr.base.application.rulesEngine.initTables.dataCategoryInit;
-import com.cgr.base.application.rulesEngine.initTables.dataParameterInit;
-import com.cgr.base.application.rulesEngine.initTables.dataSourceInit;
-import com.cgr.base.application.rulesEngine.specificRules.columnsER;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_22;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_23;
 import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_24;
@@ -32,15 +25,6 @@ import com.cgr.base.application.rulesEngine.specificRules.dataTransfer_GF;
 
 @Service
 public class initDependencies {
-
-    @Autowired
-    private dataCategoryInit Categorias;
-
-    @Autowired
-    private dataParameterInit Parametria;
-
-    @Autowired
-    private dataSourceInit MotorReglas;
 
     @Autowired
     private dataTransfer_PI RulesPI;
@@ -93,36 +77,15 @@ public class initDependencies {
     @Autowired
     private dataTransfer_32 Rules32;
 
-    @Autowired
-    private columnsER ER;
 
     @Autowired
     private dataTransfer_GF RulesGF;
 
-    @Autowired
-    private generalParameter ParameterRG;
-
-    @Autowired
-    private specificParameter ParameterRE;
-
-    @Autowired
-    private initTablaCertifications Certificator;
-
     @Async
-    public void initializeDependencies() {
-
-        // MotorReglas.processTablesRules();
-        Parametria.processTablesSource();
-        // Categorias.initCategoryTable();
-        // ParameterRG.tableGeneralRulesName();
-        // ParameterRE.tableSpecificRulesName();
-        // Certificator.generateControlTable();
-
-    }
-
-    @Async
-    public void transferGeneralRules(String rule) {
+    public void transferRule(String rule) {
         switch (rule.toUpperCase()) {
+
+            // Reglas generales
             case "1" -> Rule1.applyGeneralRule1();
             case "2" -> RulesPI.applyGeneralRule2();
             case "3" -> RulesPI.applyGeneralRule3();
@@ -144,28 +107,23 @@ public class initDependencies {
             case "16A" -> RulesEG.applyGeneralRule16A();
             case "16B" -> RulesEG.applyGeneralRule16B();
             case "17" -> Rule17.applyGeneralRule17();
-            default -> throw new IllegalArgumentException("Invalid Rule.");
-        }
-    }
 
-    @Async
-    public void transferSpecificRules(String rule) {
-        switch (rule.toUpperCase()) {
+            // Reglas específicas
             case "22A" -> Rules22.applyGeneralRule22A();
-            case "22_A" -> Rules22.applyGeneralRule22_A(); // nueva lógica para la regla 22 ICLD
+            case "22_A" -> Rules22.applyGeneralRule22_A();
             case "22B" -> Rules22.applyGeneralRule22B();
             case "22C" -> Rules22.applyGeneralRule22C();
-            case "22_C" -> Rules22.applyGeneralRule22_C(); // nueva lógica para la regla 22 ICLD
+            case "22_C" -> Rules22.applyGeneralRule22_C();
             case "22D" -> Rules22.applyGeneralRule22D();
-            case "22_D" -> Rules22.applyGeneralRule22_D(); // nueva lógica para la regla 22 ICLD
+            case "22_D" -> Rules22.applyGeneralRule22_D();
             case "22E" -> Rules22.applyGeneralRule22E();
-            case "22_E" -> Rules22.applyGeneralRule22_E(); // nueva lógica para la regla 22 ICLD
+            case "22_E" -> Rules22.applyGeneralRule22_E();
             case "23" -> Rules23.applySpecificRule23();
             case "24" -> Rules24.applySpecificRule24();
             case "25A" -> Rules25.applySpecificRule25A();
-            case "25_A" -> Rules25.applySpecificRule25_A(); // nueva lógica para la regla 25 GF
+            case "25_A" -> Rules25.applySpecificRule25_A();
             case "25B" -> Rules25.applySpecificRule25B();
-            case "25_B" -> Rules25.applySpecificRule25_B(); // nueva lógica para la regla 25 GF
+            case "25_B" -> Rules25.applySpecificRule25_B();
             case "GF" -> RulesGF.applySpecificRuleGF27();
             case "26" -> Rules26.applySpecificRule26();
             case "27" -> Rules27.applySpecificRule27();
@@ -176,7 +134,8 @@ public class initDependencies {
             case "30" -> Rules30.applySpecificRule30();
             case "31" -> Rules31.applySpecificRule31();
             case "32" -> Rules32.applySpecificRule32();
-            default -> throw new IllegalArgumentException("Invalid Rule.");
+
+            default -> throw new IllegalArgumentException("Invalid Rule: " + rule);
         }
     }
 

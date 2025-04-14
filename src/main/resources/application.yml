@@ -59,5 +59,4 @@ external:
   auth:
     url: ${external.auth.ur:https://serviciosint.contraloria.gov.co/directorio/usuarios/autenticar}
     # Configuración auth cgr o ldap
-    mode: cgr
-    #mode: ldap
+    mode: ${MODE_AUTH}
