@@ -13,7 +13,6 @@ public class dataTransfer_GF {
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Async
     @Transactional
     public void applySpecificRuleGF27() {
 

@@ -23,7 +23,6 @@ public class generalParameter {
     @Autowired
     generalRulesRepo GeneralRepo;
 
-    @Async
     @Transactional
     public void tableGeneralRulesName() {
 

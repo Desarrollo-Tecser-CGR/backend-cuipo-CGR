@@ -13,7 +13,6 @@ import com.cgr.base.repository.logs.ILogsRepositoryJpa;
 import com.cgr.base.repository.user.IUserRepositoryJpa;
 
 @Service
-
 public class LogService {
 
     @Autowired
@@ -22,8 +21,8 @@ public class LogService {
     @Autowired
     private IUserRepositoryJpa UserRepo;
 
+    // Método para obtener logs en orden descendente
     public List<Map<String, Object>> getAllLogsDesc() {
-
         List<LogEntity> logs = LogRepo.findAllByOrderByDateSessionStartDesc();
         List<Map<String, Object>> result = logs.stream()
                 .map(log -> {
@@ -34,6 +33,7 @@ public class LogService {
                     logMap.put("userId", log.getUserId());
                     logMap.put("fullName", fullName != null ? fullName : null);
                     logMap.put("roles", log.getRoles());
+                    logMap.put("status", log.getStatus());
                     return logMap;
                 })
                 .collect(Collectors.toList());
@@ -41,8 +41,25 @@ public class LogService {
         return result;
     }
 
-    public LogEntity saveLog(LogEntity log) {
+    // Método para guardar los logs de inicio de sesión
+    public LogEntity saveLog(LogEntity log, String status) {
+        log.setStatus(status);
         return LogRepo.save(log);
     }
 
+    public void logFailedAttempt(Long userId, String roles) {
+        LogEntity log = new LogEntity();
+        log.setDateSessionStart(java.time.LocalDateTime.now().toString());
+        log.setUserId(userId);
+        log.setRoles(roles);
+        saveLog(log, "FAILURE");
+    }
+
+    public void logSuccessfulAttempt(Long userId, String roles) {
+        LogEntity log = new LogEntity();
+        log.setDateSessionStart(java.time.LocalDateTime.now().toString());
+        log.setUserId(userId);
+        log.setRoles(roles);
+        saveLog(log, "SUCCESS");
+    }
 }

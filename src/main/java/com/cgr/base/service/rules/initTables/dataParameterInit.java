@@ -105,7 +105,6 @@ public class dataParameterInit {
         }
     }
 
-    @Async
     @Transactional
     public void tableParametrosAnuales() {
 
@@ -554,7 +553,6 @@ public class dataParameterInit {
         }
     }
 
-    @Async
     @Transactional
     public void tableLimites() {
 
@@ -618,7 +616,6 @@ public class dataParameterInit {
         }
     }
 
-    @Async
     @Transactional
     public void tableCuentaICLD() {
         String checkTableQuery = """

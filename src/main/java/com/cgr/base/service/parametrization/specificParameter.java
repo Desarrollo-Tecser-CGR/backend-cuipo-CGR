@@ -28,7 +28,6 @@ public class specificParameter {
     @Autowired
     specificNamesRepo specificNamesRepo;
 
-    @Async
     @Transactional
     public void tableSpecificRulesName() {
 

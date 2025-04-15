@@ -81,7 +81,6 @@ public class initDependencies {
     @Autowired
     private dataTransfer_GF RulesGF;
 
-    @Async
     public void transferRule(String rule) {
         switch (rule.toUpperCase()) {
 

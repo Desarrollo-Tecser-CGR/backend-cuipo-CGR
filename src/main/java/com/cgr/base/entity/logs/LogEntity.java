@@ -22,4 +22,6 @@ public class LogEntity {
 
     private String roles;
 
+    private String status;
+
 }

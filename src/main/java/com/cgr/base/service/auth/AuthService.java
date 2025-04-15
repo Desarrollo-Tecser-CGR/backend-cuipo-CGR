@@ -1,8 +1,5 @@
 package com.cgr.base.service.auth;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,10 +10,8 @@ import org.springframework.stereotype.Service;
 
 import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
 import com.cgr.base.config.jwt.JwtAuthenticationProvider;
-import com.cgr.base.config.jwt.JwtService;
 import com.cgr.base.dto.auth.AuthRequestDto;
 import com.cgr.base.dto.auth.AuthResponseDto;
-import com.cgr.base.entity.logs.LogEntity;
 import com.cgr.base.entity.menu.Menu;
 import com.cgr.base.entity.role.RoleEntity;
 import com.cgr.base.entity.user.UserEntity;
@@ -45,15 +40,12 @@ public class AuthService {
     @Autowired
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
-    @Autowired
-    private final JwtService jwtService;
-
     // Autenticación en el Active Directory
     public Map<String, Object> authWithLDAPActiveDirectory(AuthRequestDto userRequest,
             HttpServletRequest servletRequest) throws JsonProcessingException {
 
         if (userRequest.getSAMAccountName() == null || userRequest.getSAMAccountName().isBlank()) {
-            throw new IllegalArgumentException("Missing required fields");
+            throw new IllegalArgumentException("SAMAccountName is required");
         }
 
         if (userRequest.getPassword() == null || userRequest.getPassword().isBlank()) {
@@ -73,8 +65,12 @@ public class AuthService {
                 userRequest.getPassword());
 
         if (!isAccountValid) {
+
+            logFailedAttempt(userRequest.getSAMAccountName());
             throw new SecurityException("Invalid credentials");
         }
+
+        logSuccessfulAttempt(user);
 
         AuthResponseDto userRequestDto = AuthMapper.INSTANCE.toAuthResponDto(userRequest);
 
@@ -93,15 +89,24 @@ public class AuthService {
 
         userRequest.setEmail(user.getEmail());
 
-        Long userId = jwtService.extractUserIdFromToken(token);
-        LogEntity log = new LogEntity();
-        log.setDateSessionStart(LocalDateTime.now()
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("America/Bogota"))));
-        log.setUserId(userId);
-        log.setRoles(user.getRoles().stream().map(RoleEntity::getName).collect(Collectors.joining(",")));
-        LogService.saveLog(log);
-
         return Map.of("user", userRequestDto);
+    }
+
+    // Método para registrar intento fallido
+    private void logFailedAttempt(String samAccountName) {
+
+        Optional<UserEntity> userOpt = userRepositoryFull.findBySAMAccountNameWithRoles(samAccountName);
+        if (userOpt.isPresent()) {
+            UserEntity user = userOpt.get();
+            LogService.logFailedAttempt(user.getId(),
+                    user.getRoles().stream().map(RoleEntity::getName).collect(Collectors.joining(",")));
+        }
+    }
+
+    // Método para registrar intento exitoso
+    private void logSuccessfulAttempt(UserEntity user) {
+        LogService.logSuccessfulAttempt(user.getId(),
+                user.getRoles().stream().map(RoleEntity::getName).collect(Collectors.joining(",")));
     }
 
 }

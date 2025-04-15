@@ -78,14 +78,15 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
 
             SearchResultEntry usuario = getUserDirectoryBySAMAccountName(connection, samAccountName, baseDN);
             if (usuario == null) {
-                throw new ResourceNotFoundException("User not found in Active Directory: " + samAccountName);
+                return false;
             }
 
             return true;
+
         } catch (LDAPBindException e) {
-            throw new SecurityException("Invalid credentials for user: " + samAccountName);
+            return false;
         } catch (LDAPException e) {
-            throw new SecurityException("Error connecting to LDAP server.");
+            throw new SecurityException("Error connecting to LDAP server.", e);
         }
     }
 
@@ -93,22 +94,22 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
         try {
             boolean isAuthenticated = externalAuthService.authenticateWithExternalService(samAccountName, password);
             if (!isAuthenticated) {
-                throw new SecurityException("Invalid credentials for user: " + samAccountName);
+                return false;
             }
 
             UserEntity userEntity = getUserDirectoryCGR(samAccountName);
             if (userEntity == null) {
-                throw new ResourceNotFoundException("User not found in external CGR directory: " + samAccountName);
+                return false;
             }
 
             return true;
 
-        } catch (SecurityException | ResourceNotFoundException e) {
-            throw e;
-        } 
+        } catch (Exception e) {
+            throw new SecurityException("Error connecting to external CGR service.", e);
+        }
     }
 
-    private UserEntity getUserDirectoryCGR(String samAccountName) {
+    public UserEntity getUserDirectoryCGR(String samAccountName) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.set("usuario", samAccountName);

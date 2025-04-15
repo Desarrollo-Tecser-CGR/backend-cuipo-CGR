@@ -31,10 +31,8 @@ public class dataTransfer_EG {
                         FROM INFORMATION_SCHEMA.COLUMNS
                         WHERE TABLE_NAME = '%s'
                         AND COLUMN_NAME IN (
-                            'REGLA_GENERAL_12A', 'ALERTA_12A', 'CUENTAS_NO_CUMPLE_12A', 'PORCENTAJE_NO_CUMPLE_12A',
-                            'CUENTAS_NO_DATA_12A', 'PORCENTAJE_NO_DATA_12A',
-                            'REGLA_GENERAL_12B', 'ALERTA_12B', 'CUENTAS_NO_CUMPLE_12B', 'PORCENTAJE_NO_CUMPLE_12B',
-                            'CUENTAS_NO_DATA_12B', 'PORCENTAJE_NO_DATA_12B'
+                            'REGLA_GENERAL_12A', 'ALERTA_12A', 'CUENTAS_NO_CUMPLE_12A', 'PORCENTAJE_NO_CUMPLE_12A', 'CUENTAS_NO_DATA_12A', 'PORCENTAJE_NO_DATA_12A',
+                            'REGLA_GENERAL_12B', 'ALERTA_12B', 'CUENTAS_NO_CUMPLE_12B', 'PORCENTAJE_NO_CUMPLE_12B', 'CUENTAS_NO_DATA_12B', 'PORCENTAJE_NO_DATA_12B'
                         )
                         """,
                 "GENERAL_RULES_DATA");
@@ -42,7 +40,7 @@ public class dataTransfer_EG {
         List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
         Set<String> existingColumnSet = new HashSet<>(existingColumns);
 
-        // Crear columnas faltantes como NVARCHAR(MAX)
+        // Crear columnas faltantes en un solo batch si es posible
         StringBuilder alterTableQuery = new StringBuilder();
         List<String> requiredColumns = Arrays.asList(
                 "REGLA_GENERAL_12A", "ALERTA_12A", "CUENTAS_NO_CUMPLE_12A", "PORCENTAJE_NO_CUMPLE_12A",
@@ -52,9 +50,12 @@ public class dataTransfer_EG {
 
         for (String column : requiredColumns) {
             if (!existingColumnSet.contains(column)) {
-                alterTableQuery.append(String.format(
-                        "ALTER TABLE %s ADD %s NVARCHAR(MAX) NULL; ",
-                        "GENERAL_RULES_DATA", column));
+                String columnType = column.startsWith("PORCENTAJE_") ? "VARCHAR(MAX)"
+                        : column.startsWith("CUENTAS_") ? "NVARCHAR(MAX)" : "VARCHAR(MAX)";
+
+                alterTableQuery
+                        .append(String.format("ALTER TABLE %s ADD %s %s NULL; ", "GENERAL_RULES_DATA", column,
+                                columnType));
             }
         }
 
@@ -77,16 +78,14 @@ public class dataTransfer_EG {
         // directamente
         String updateQuery = String.format(
                 """
+
                         WITH Validacion12 AS (
                             SELECT
                                 FECHA,
                                 TRIMESTRE,
-                                CODIGO_ENTIDAD,
-                                AMBITO_CODIGO,
-                                CASE
-                                    WHEN AMBITO_CODIGO IN ('A447', 'A448', 'A449', 'A450', 'A451', 'A453', 'A454') THEN 1
-                                    ELSE 0
-                                END AS NO_APLICA_A,
+                                CODIGO_ENTIDAD AS CODIGO_ENTIDAD,
+                                AMBITO_CODIGO AS AMBITO_CODIGO,
+                                CASE WHEN AMBITO_CODIGO IN ('A447', 'A448', 'A449', 'A450', 'A451', 'A453', 'A454') THEN 1 ELSE 0 END AS NO_APLICA_A,
 
                                 -- Parte A
                                 (
@@ -105,9 +104,7 @@ public class dataTransfer_EG {
                                         CONVERT(NVARCHAR(MAX),
                                             CASE
                                                 WHEN g.COMPROMISOS = 0 THEN 'null'
-                                                ELSE CONVERT(NVARCHAR(MAX),
-                                                    1 - TRY_CAST(g.OBLIGACIONES AS DECIMAL(18,6))
-                                                      / NULLIF(TRY_CAST(g.COMPROMISOS AS DECIMAL(18,6)), 0))
+                                                ELSE CONVERT(NVARCHAR(MAX), 1 - (g.OBLIGACIONES / NULLIF(g.COMPROMISOS, 0)))
                                             END), ',')
                                     FROM %s g
                                     WHERE g.FECHA = d.FECHA
@@ -135,9 +132,7 @@ public class dataTransfer_EG {
                                         CONVERT(NVARCHAR(MAX),
                                             CASE
                                                 WHEN g.OBLIGACIONES = 0 THEN 'null'
-                                                ELSE CONVERT(NVARCHAR(MAX),
-                                                    1 - TRY_CAST(g.PAGOS AS DECIMAL(18,6))
-                                                      / NULLIF(TRY_CAST(g.OBLIGACIONES AS DECIMAL(18,6)), 0))
+                                                ELSE CONVERT(NVARCHAR(MAX), 1 - (g.PAGOS / NULLIF(g.OBLIGACIONES, 0)))
                                             END), ',')
                                     FROM %s g
                                     WHERE g.FECHA = d.FECHA

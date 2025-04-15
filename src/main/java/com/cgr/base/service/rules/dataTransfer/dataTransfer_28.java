@@ -24,7 +24,6 @@ public class dataTransfer_28 {
     @Value("${TABLA_EJEC_GASTOS}")
     private String TABLA_EJEC_GASTOS;
 
-    @Async
     @Transactional
     public void applySpecificRule28() {
 
