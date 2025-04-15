@@ -40,6 +40,9 @@ public class AuthService {
     @Autowired
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
+    @Autowired
+    private final UserBlockService userBlockService;
+
     // Autenticación en el Active Directory
     public Map<String, Object> authWithLDAPActiveDirectory(AuthRequestDto userRequest,
             HttpServletRequest servletRequest) throws JsonProcessingException {
@@ -60,6 +63,10 @@ public class AuthService {
 
         UserEntity user = userOpt.get();
 
+        if (userBlockService.isUserBlocked(user.getId())) {
+            throw new SecurityException("User is blocked due to too many failed login attempts");
+        }
+
         boolean isAccountValid = activeDirectoryUserRepository.checkAccount(
                 userRequest.getSAMAccountName(),
                 userRequest.getPassword());
@@ -67,6 +74,7 @@ public class AuthService {
         if (!isAccountValid) {
 
             logFailedAttempt(userRequest.getSAMAccountName());
+            userBlockService.checkAndBlockUser(user.getId());
             throw new SecurityException("Invalid credentials");
         }
 
@@ -108,5 +116,4 @@ public class AuthService {
         LogService.logSuccessfulAttempt(user.getId(),
                 user.getRoles().stream().map(RoleEntity::getName).collect(Collectors.joining(",")));
     }
-
 }

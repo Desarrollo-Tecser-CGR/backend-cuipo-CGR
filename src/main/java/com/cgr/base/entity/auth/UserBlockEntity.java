@@ -1,4 +1,4 @@
-package com.cgr.base.entity.logs;
+package com.cgr.base.entity.auth;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,24 +10,17 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "logs_login")
-public class LogEntity {
+@Table(name = "user_block_history")
+public class UserBlockEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
-
-    @Column(name = "date_session_start")
-    private String dateSessionStart;
 
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "roles")
-    private String roles;
-
-    @Column(name = "status")
-    private String status;
+    @Column(name = "blocked_until")
+    private String blockedUntil;
 
 }

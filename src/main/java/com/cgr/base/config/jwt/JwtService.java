@@ -38,7 +38,7 @@ public class JwtService {
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
 
         Date now = new Date();
-        Date validity = new Date(now.getTime() + 3600000 * 2);
+        Date validity = new Date(now.getTime() + 3600000 * 24);
 
         String tokenCreated = JWT.create()
                 .withClaim("userName", customerJwt.getSAMAccountName())      
