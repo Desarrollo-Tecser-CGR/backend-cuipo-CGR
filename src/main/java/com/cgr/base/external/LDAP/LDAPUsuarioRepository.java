@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
 import com.cgr.base.entity.user.UserEntity;
 import com.cgr.base.external.CGR.ExternalAuthService;
 import com.cgr.base.repository.auth.IActiveDirectoryUserRepository;

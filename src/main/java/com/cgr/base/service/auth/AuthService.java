@@ -48,7 +48,7 @@ public class AuthService {
             HttpServletRequest servletRequest) throws JsonProcessingException {
 
         if (userRequest.getSAMAccountName() == null || userRequest.getSAMAccountName().isBlank()) {
-            throw new IllegalArgumentException("SAMAccountName is required");
+            throw new IllegalArgumentException("Required Fields Missing");
         }
 
         if (userRequest.getPassword() == null || userRequest.getPassword().isBlank()) {
@@ -58,7 +58,7 @@ public class AuthService {
         Optional<UserEntity> userOpt = userRepositoryFull
                 .findBySAMAccountNameWithRoles(userRequest.getSAMAccountName());
         if (userOpt.isEmpty()) {
-            throw new ResourceNotFoundException("User not found");
+            throw new SecurityException("User not found");
         }
 
         UserEntity user = userOpt.get();
