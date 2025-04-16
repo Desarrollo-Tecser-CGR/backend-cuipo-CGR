@@ -1,20 +1,16 @@
 package com.cgr.base.controller.user;
 
 import java.io.IOException;
-import java.util.Base64;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.cgr.base.config.abstractResponse.AbstractController;
 import com.cgr.base.config.jwt.JwtService;
 import com.cgr.base.dto.user.UserProfileDto;
 import com.cgr.base.service.user.UserProfile;
@@ -23,10 +19,10 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/v1/user/profile")
-public class ProfileController {
+public class ProfileController extends AbstractController {
 
     @Autowired
-    private UserProfile ProfileService;
+    private UserProfile profileService;
 
     @Autowired
     private JwtService jwtService;
@@ -36,96 +32,59 @@ public class ProfileController {
         return "data:" + image.getContentType() + ";base64," + Base64.getEncoder().encodeToString(bytes);
     }
 
+    private String getToken(HttpServletRequest request) {
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (header == null || !header.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Token is Required.");
+        }
+        return header.split(" ")[1];
+    }
+
+    private Long getUserIdFromRequest(HttpServletRequest request) {
+        String token = getToken(request);
+        Long userId = jwtService.extractUserIdFromToken(token);
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID not Found.");
+        }
+        return userId;
+    }
+
     @PostMapping("/upload_image")
-    public ResponseEntity<String> uploadProfileImage(
+    public ResponseEntity<?> uploadProfileImage(
             @RequestParam("image") MultipartFile image,
             HttpServletRequest request) throws IOException {
 
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        String token = header.split(" ")[1];
-
-        Long userId = jwtService.extractUserIdFromToken(token);
-        if (userId == null) {
-            return new ResponseEntity<>("User ID not Found.", HttpStatus.FORBIDDEN);
-        }
-
+        Long userId = getUserIdFromRequest(request);
         String base64Image = convertToBase64(image);
-        try {
 
-            ProfileService.uploadProfileImage(userId, base64Image);
-            return new ResponseEntity<>("Profile Image Uploaded Successfully.", HttpStatus.OK);
+        profileService.uploadProfileImage(userId, base64Image);
 
-        } catch (IllegalArgumentException e) {
-
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+        return requestResponse(null, "Profile Image Uploaded Successfully.", HttpStatus.OK, true);
     }
 
     @GetMapping("/image")
-    public ResponseEntity<String> getProfileImage(HttpServletRequest request) {
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith("Bearer ")) {
-            return new ResponseEntity<>("Token is Required.", HttpStatus.FORBIDDEN);
-        }
+    public ResponseEntity<?> getProfileImage(HttpServletRequest request) {
+        Long userId = getUserIdFromRequest(request);
+        String base64Image = profileService.getProfileImage(userId);
 
-        String token = header.split(" ")[1];
-        Long userId = jwtService.extractUserIdFromToken(token);
-        if (userId == null) {
-            return new ResponseEntity<>("User ID not Found.", HttpStatus.FORBIDDEN);
-        }
-
-        try {
-            String base64Image = ProfileService.getProfileImage(userId);
-            return new ResponseEntity<>(base64Image, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
+        return requestResponse(base64Image, "Image Retrieved Successfully.", HttpStatus.OK, true);
     }
 
     @PostMapping("/update")
-    public ResponseEntity<String> updateUserProfile(
+    public ResponseEntity<?> updateUserProfile(
             @RequestBody UserProfileDto userDto,
             HttpServletRequest request) {
 
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        String token = header.split(" ")[1];
-
-        Long userId = jwtService.extractUserIdFromToken(token);
-
-        if (userId == null) {
-            return new ResponseEntity<>("User ID not Found.", HttpStatus.FORBIDDEN);
-        }
-
-        try {
-
-            ProfileService.updateUserProfile(userId, userDto);
-            return new ResponseEntity<>("User Profile Updated.", HttpStatus.OK);
-
-        } catch (IllegalArgumentException e) {
-
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+        Long userId = getUserIdFromRequest(request);
+        Map<String, Object> updatedUser = profileService.updateUserProfile(userId, userDto);
+        return requestResponse(updatedUser, "User Profile Updated.", HttpStatus.OK, true);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<Object> getUserInfo(HttpServletRequest request) {
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith("Bearer ")) {
-            return new ResponseEntity<>("Token is Required.", HttpStatus.FORBIDDEN);
-        }
+    public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
+        Long userId = getUserIdFromRequest(request);
+        Object userData = profileService.getUserById(userId);
 
-        String token = header.split(" ")[1];
-        Long userId = jwtService.extractUserIdFromToken(token);
-        if (userId == null) {
-            return new ResponseEntity<>("User ID not Found.", HttpStatus.FORBIDDEN);
-        }
-
-        try {
-            Object userData = ProfileService.getUserById(userId);
-            return new ResponseEntity<>(userData, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
+        return requestResponse(userData, "User Data Retrieved.", HttpStatus.OK, true);
     }
-
 }

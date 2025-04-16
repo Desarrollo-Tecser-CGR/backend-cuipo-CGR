@@ -1,11 +1,6 @@
 package com.cgr.base.service.user;
 
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -110,9 +105,8 @@ public class UserProfile {
         }
     }
 
-    // Actualizar Información de Perfil del Usuario.
     @Transactional
-    public UserEntity updateUserProfile(Long userId, UserProfileDto userDto) {
+    public Map<String, Object> updateUserProfile(Long userId, UserProfileDto userDto) {
         Optional<UserEntity> optionalUser = userRepo.findById(userId);
 
         if (optionalUser.isEmpty()) {
@@ -120,21 +114,49 @@ public class UserProfile {
         }
 
         UserEntity user = optionalUser.get();
+        boolean modified = false;
 
-        if (userDto.getEmail() != null) {
-            user.setEmail(userDto.getEmail());
+        if (userDto.getEmail() != null && !userDto.getEmail().trim().isEmpty()) {
+            String email = userDto.getEmail().trim();
+            if (!isValidEmail(email)) {
+                throw new IllegalArgumentException("Invalid email format.");
+            }
+            user.setEmail(email);
+            modified = true;
         }
 
-        if (userDto.getFullName() != null) {
-            user.setFullName(userDto.getFullName());
+        if (userDto.getPhone() != null && !userDto.getPhone().trim().isEmpty()) {
+            String phone = userDto.getPhone().trim();
+            if (!phone.matches("\\d+")) {
+                throw new IllegalArgumentException("Phone number must contain only digits.");
+            }
+            user.setPhone(phone);
+            modified = true;
         }
 
-        if (userDto.getPhone() != null) {
-            user.setPhone(userDto.getPhone());
+        if (userDto.getFullName() != null && !userDto.getFullName().trim().isEmpty()) {
+            user.setFullName(userDto.getFullName().trim());
+            modified = true;
         }
 
-        user.setDateModify(new Date());
-        return userRepo.save(user);
+        if (modified) {
+            user.setDateModify(new Date());
+            userRepo.save(user);
+        }
+
+        // Devolver un mapa con los datos del usuario actualizado
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", user.getId());
+        response.put("fullName", user.getFullName());
+        response.put("email", user.getEmail());
+        response.put("phone", user.getPhone());
+
+        return response;
+    }
+
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        return Pattern.matches(emailRegex, email);
     }
 
     public Map<String, Object> getUserById(Long userId) {
