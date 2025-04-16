@@ -135,7 +135,7 @@ public class dataTransfer_31 {
                 "    SELECT SUM(CAST(COMPROMISOS AS FLOAT)) " +
                 "    FROM [" + TABLA_EJEC_GASTOS + "] " +
                 "    WHERE " +
-                "        COD_SECCION_PRESUPUESTAL = 17 " +
+                "        CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) = 17 " +
                 "        AND (COD_VIGENCIA_DEL_GASTO = 1 OR COD_VIGENCIA_DEL_GASTO = 4) " +
                 "        AND CUENTA = '2' " +
                 "        AND TRIMESTRE = '12' " +
@@ -148,7 +148,7 @@ public class dataTransfer_31 {
                 "    SELECT 1 " +
                 "    FROM [" + TABLA_EJEC_GASTOS + "] " +
                 "    WHERE " +
-                "        COD_SECCION_PRESUPUESTAL = 17 " +
+                "        CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) = 17 " +
                 "        AND (COD_VIGENCIA_DEL_GASTO = 1 OR COD_VIGENCIA_DEL_GASTO = 4) " +
                 "        AND CUENTA = '2' " +
                 "        AND TRIMESTRE = '12' " +

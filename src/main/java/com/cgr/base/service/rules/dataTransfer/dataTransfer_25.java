@@ -65,25 +65,25 @@ public class dataTransfer_25 {
                             WHERE
                                 (
                                     (AMBITO_CODIGO = 'A438'
-                                        AND (COD_SECCION_PRESUPUESTAL <> '17'
-                                             AND COD_SECCION_PRESUPUESTAL <> '19')
+                                        AND (CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 17
+                                             AND CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 19)
                                     )
                                     OR
                                     (AMBITO_CODIGO = 'A439'
-                                        AND (COD_SECCION_PRESUPUESTAL <> '18'
-                                             AND COD_SECCION_PRESUPUESTAL <> '20'
-                                             AND COD_SECCION_PRESUPUESTAL <> '17')
+                                        AND (CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 18
+                                             AND CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 20
+                                             AND CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 17)
                                         AND CUENTA NOT IN ('2.1.1.01.03.125','2.1.1.01.02.020.02')
                                     )
                                     OR
                                     (AMBITO_CODIGO = 'A440'
-                                        AND (COD_SECCION_PRESUPUESTAL <> '18'
-                                             AND COD_SECCION_PRESUPUESTAL <> '17')
+                                        AND (CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 18
+                                             AND CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 17)
                                     )
                                     OR
                                     (AMBITO_CODIGO = 'A441'
-                                        AND (COD_SECCION_PRESUPUESTAL <> '17'
-                                             AND COD_SECCION_PRESUPUESTAL <> '19')
+                                        AND (CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 17
+                                             AND CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 19)
                                     )
                                 )
                                 AND (COD_VIGENCIA_DEL_GASTO = '1' OR COD_VIGENCIA_DEL_GASTO = '4')
@@ -190,25 +190,25 @@ public class dataTransfer_25 {
                             WHEN (
                                 (
                                     (AMBITO_CODIGO = 'A438'
-                                        AND (COD_SECCION_PRESUPUESTAL <> '17'
-                                             AND COD_SECCION_PRESUPUESTAL <> '19')
+                                        AND (CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 17
+                                             AND CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 19)
                                     )
                                     OR
                                     (AMBITO_CODIGO = 'A439'
-                                        AND (COD_SECCION_PRESUPUESTAL <> '18'
-                                             AND COD_SECCION_PRESUPUESTAL <> '20'
-                                             AND COD_SECCION_PRESUPUESTAL <> '17')
+                                        AND ( CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 18
+                                             AND CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 20
+                                             AND CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 17)
                                         AND CUENTA NOT IN ('2.1.1.01.03.125','2.1.1.01.02.020.02')
                                     )
                                     OR
                                     (AMBITO_CODIGO = 'A440'
-                                        AND (COD_SECCION_PRESUPUESTAL <> '18'
-                                             AND COD_SECCION_PRESUPUESTAL <> '17')
+                                        AND (CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 18
+                                             AND CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 17)
                                     )
                                     OR
                                     (AMBITO_CODIGO = 'A441'
-                                        AND (COD_SECCION_PRESUPUESTAL <> '17'
-                                             AND COD_SECCION_PRESUPUESTAL <> '19')
+                                        AND (CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 17
+                                             AND CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) <> 19)
                                     )
                                 )
                                 AND (COD_VIGENCIA_DEL_GASTO = '1' OR COD_VIGENCIA_DEL_GASTO = '4')
