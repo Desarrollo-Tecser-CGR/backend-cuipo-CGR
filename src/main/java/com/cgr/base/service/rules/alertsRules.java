@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,9 @@ public class alertsRules {
 
     @Autowired
     private dataBaseUtils UtilsDB;
+
+    @Value("${DATASOURCE_NAME}")
+    private String DATASOURCE_NAME;
 
     // Obtener listado de ALERTAS de GENERAL_RULES_DATA
     public List<Map<String, Object>> getFilteredAlertsGR(Map<String, String> filters) {
@@ -178,10 +182,10 @@ public class alertsRules {
 
     // Obtener los Mensajes y Referencias para las ALERTAS
     private Map<String, Map<String, String>> obtenerTablaRef() {
-        String sql = """
-                    SELECT alert, message, column_ref
-                    FROM cuipo_dev.dbo.RULES_ALERTS
-                """;
+        String sql = String.format("""
+                            SELECT alert, message, column_ref
+                            FROM %s.dbo.RULES_ALERTS
+                        """, DATASOURCE_NAME);
 
         List<Map<String, Object>> datos = jdbcTemplate.queryForList(sql);
 

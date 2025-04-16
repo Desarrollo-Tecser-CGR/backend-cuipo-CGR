@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cgr.base.config.abstractResponse.AbstractController;
 import com.cgr.base.service.logs.LogService;
 
-@PreAuthorize("hasAuthority('MENU_7')")
+@PreAuthorize("hasAuthority('MENU_Logs')")
 @RestController
 @RequestMapping("/api/v1/log")
 public class loginLogs extends AbstractController {

@@ -64,7 +64,7 @@ public class JwtAuthenticationProvider {
 
             // Obtener menús asociados a los roles
             List<Menu> menus = userRepositoryJpa.findMenusByRoleNames(roleNames);
-            menus.forEach(menu -> rolesAndAuthorities.add(new SimpleGrantedAuthority("MENU_" + menu.getId())));
+            menus.forEach(menu -> rolesAndAuthorities.add(new SimpleGrantedAuthority("MENU_" + menu.getTitle())));
 
             return new UsernamePasswordAuthenticationToken(exists, token, rolesAndAuthorities);
 

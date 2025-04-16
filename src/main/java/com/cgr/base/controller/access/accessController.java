@@ -1,7 +1,5 @@
 package com.cgr.base.controller.access;
 
-import static com.cgr.base.entity.logs.LogType.USUARIOS;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.config.abstractResponse.AbstractController;
 import com.cgr.base.config.jwt.JwtService;
+import static com.cgr.base.entity.logs.LogType.USUARIOS;
 import com.cgr.base.service.access.accessManagement;
 import com.cgr.base.service.logs.LogGeneralService;
 
@@ -49,7 +48,7 @@ public class accessController extends AbstractController {
                 true);
     }
 
-    @PreAuthorize("hasAuthority('MENU_1')")
+    @PreAuthorize("hasAuthority('MENU_Gestor de Usuarios')")
     @PutMapping("/config")
     public ResponseEntity<?> updateRoleModules(@RequestBody Map<String, Object> request, HttpServletRequest httpRequest) {
 

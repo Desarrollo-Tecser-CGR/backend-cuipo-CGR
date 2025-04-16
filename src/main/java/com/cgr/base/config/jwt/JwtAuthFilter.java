@@ -129,7 +129,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 .collect(Collectors.toList());
 
         // Agregar menús como authorities
-        menus.forEach(menu -> authorities.add(new SimpleGrantedAuthority("MENU_" + menu.getId())));
+        menus.forEach(menu -> authorities.add(new SimpleGrantedAuthority("MENU_" + menu.getTitle())));
 
         try {
 

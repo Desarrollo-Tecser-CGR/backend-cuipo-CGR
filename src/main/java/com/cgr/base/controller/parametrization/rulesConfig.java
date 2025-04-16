@@ -28,7 +28,7 @@ import com.cgr.base.service.parametrization.specificParameter;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-@PreAuthorize("hasAuthority('MENU_3')")
+@PreAuthorize("hasAuthority('MENU_Parametrización')")
 @RestController
 @RequestMapping("/api/v1/parametrization/rules")
 public class rulesConfig extends AbstractController {

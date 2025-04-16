@@ -1,7 +1,5 @@
 package com.cgr.base.controller.role;
 
-import static com.cgr.base.entity.logs.LogType.USUARIOS;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.config.abstractResponse.AbstractController;
 import com.cgr.base.config.jwt.JwtService;
+import static com.cgr.base.entity.logs.LogType.USUARIOS;
 import com.cgr.base.entity.role.RoleEntity;
 import com.cgr.base.service.logs.LogGeneralService;
 import com.cgr.base.service.role.IRoleService;
@@ -28,7 +27,7 @@ import com.cgr.base.service.role.IRoleService;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@PreAuthorize("hasAuthority('MENU_1')")
+@PreAuthorize("hasAuthority('MENU_Gestor de Usuarios')")
 @RequestMapping("/api/v1/role")
 public class RoleController extends AbstractController {
 
