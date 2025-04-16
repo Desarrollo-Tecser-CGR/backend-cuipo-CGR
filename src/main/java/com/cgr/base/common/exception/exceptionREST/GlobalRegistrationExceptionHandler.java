@@ -39,6 +39,7 @@ public class GlobalRegistrationExceptionHandler extends AbstractController {
 
     @ExceptionHandler({
             IllegalArgumentException.class,
+            IllegalStateException.class,
             HttpMessageNotReadableException.class,
             MethodArgumentTypeMismatchException.class,
             MissingServletRequestParameterException.class,

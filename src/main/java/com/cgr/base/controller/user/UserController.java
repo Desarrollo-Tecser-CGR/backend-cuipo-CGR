@@ -24,9 +24,9 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1/user")
 public class UserController extends AbstractController {
 
-    private IUserUseCase userService;
+    private final IUserUseCase userService;
 
-    private IUserSynchronizerUseCase synchronizerUsers;
+    private final IUserSynchronizerUseCase synchronizerUsers;
 
     public UserController(IUserUseCase userService, IUserSynchronizerUseCase synchronizerUsers) {
         this.userService = userService;

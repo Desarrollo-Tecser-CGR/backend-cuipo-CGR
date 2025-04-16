@@ -31,28 +31,23 @@ public class SyncActiveDirectoryUsers implements IUserSynchronizerUseCase {
     @Transactional
     @Override
     public Boolean synchronizeUsers() {
-        try {
-            if ("ldap".equalsIgnoreCase(authMode)) {
-                synchronizeLdapUsers();
-            } else if ("cgr".equalsIgnoreCase(authMode)) {
-                synchronizeCGRUsers();
-            } else {
-                throw new IllegalStateException("Unknown authentication mode: " + authMode);
-            }
-    
-            return true;
-        } catch (Exception ex) {
-            // log.error("Error en sincronización de usuarios", ex);
-            return false;
+        if ("ldap".equalsIgnoreCase(authMode)) {
+            synchronizeLdapUsers();
+        } else if ("cgr".equalsIgnoreCase(authMode)) {
+            synchronizeCGRUsers();
+        } else {
+            throw new IllegalStateException("Unknown authentication mode: " + authMode);
         }
+
+        return true;
     }
 
     private void synchronizeLdapUsers() {
         List<UserEntity> usersAD = directoryUserRepository.getAllUsers();
-    
+
         usersAD.forEach(userAD -> {
             Optional<UserEntity> optionalUserDB = userRepositoryDB.findBySAMAccountName(userAD.getSAMAccountName());
-    
+
             if (optionalUserDB.isPresent()) {
                 UserEntity userDB = optionalUserDB.get();
                 if (!userDB.getDateModify().equals(userAD.getDateModify())) {
@@ -67,11 +62,11 @@ public class SyncActiveDirectoryUsers implements IUserSynchronizerUseCase {
 
     private void synchronizeCGRUsers() {
         List<UserEntity> usersInDB = userRepositoryDB.findAll();
-    
+
         usersInDB.forEach(userDB -> {
             String samAccountName = userDB.getSAMAccountName();
             UserEntity userCGR = ldapUsuarioRepository.getUserDirectoryCGR(samAccountName);
-    
+
             if (userCGR != null) {
                 if (userCGR.getFullName() != null) {
                     userDB.setFullName(userCGR.getFullName());
@@ -83,19 +78,14 @@ public class SyncActiveDirectoryUsers implements IUserSynchronizerUseCase {
                     userDB.setPhone(userCGR.getPhone());
                 }
                 userDB.setCargo(userCGR.getCargo());
-    
+
             } else {
 
                 userDB.setEnabled(false);
             }
-    
+
             userRepositoryDB.save(userDB);
         });
     }
-    
-    
-    
-
-
 
 }
