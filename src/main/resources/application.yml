@@ -54,7 +54,7 @@ logging:
 
 external:
   auth:
-    url: ${external.auth.ur:https://serviciosint.contraloria.gov.co/directorio/usuarios/autenticar}  
+    url: ${external.auth.ur:https://serviciosint.contraloria.gov.co/directorio/usuarios/autenticar}
 
 
 TABLA_PROG_INGRESOS: ${TABLA_PROG_INGRESOS:VW_OPENDATA_A_PROGRAMACION_INGRESOS} 
