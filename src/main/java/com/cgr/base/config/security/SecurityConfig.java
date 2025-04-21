@@ -39,7 +39,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .exceptionHandling(t -> t.accessDeniedHandler(accessDeniedHandlerException))
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**", "/swagger-ui/**", "/v3/api-docs/**", "/ws-endpoint", "/ws-endpoint/**",
+                    auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**", "/swagger-ui/**", "/v3/api-docs/**",
+                            "/ws-endpoint", "/ws-endpoint/**",
                             "/api/v1/access/module/**").permitAll();
                     auth.anyRequest().authenticated();
                 }).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -65,7 +66,7 @@ public class SecurityConfig {
                         "https://bovid.site/", "https://bovid.site", "http://bovid.site/",
                         "http://bovid.site", "https://strong-toffee-1046b5.netlify.app/",
                         "https://strong-toffee-1046b5.netlify.app", "http://192.168.2.63:8001/",
-                        "http://192.168.2.63:8001"));
+                        "http://192.168.2.63:8001", "http://192.168.27.112:8001/", "http://192.168.27.112:8001"));
                 config.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
                 config.setAllowedHeaders(Arrays.asList("*"));
                 config.setAllowCredentials(true);
