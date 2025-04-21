@@ -58,14 +58,4 @@ public class ExportService {
         return repositoryExportCount.count();
     }
 
-
-    public List<Object[]> getDistinctMonthsAndYears() {
-        return repositoryExportCount.findDistinctMonthsAndYears();
-    }
-
-    public List<Object[]> getExportCountsByMonthAndYear() {
-        return repositoryExportCount.countExportsByMonthAndYear();
-    }
-
-
 }

@@ -21,7 +21,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @RequestMapping("api/v1/logsExit")
 public class LogsExitController extends AbstractController {
-//
+
     private LogExitService logExitService;
 
     @GetMapping("/{user}")

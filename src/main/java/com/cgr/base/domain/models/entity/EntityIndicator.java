@@ -19,10 +19,9 @@ public class EntityIndicator {
     private Integer indicator_id;
 
     private Integer indicator_action_id;
-    @Column(columnDefinition = "varchar(max)")
+
     private String indicator_name;
 
-    @Column(columnDefinition = "float")
     private Integer total_indicator_budget;
 
     @ManyToMany(mappedBy = "indicators")

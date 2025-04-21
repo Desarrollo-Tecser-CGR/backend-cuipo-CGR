@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cgr.base.application.services.export.service.ExportService;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/export")
@@ -36,17 +35,4 @@ public class ControllerExport extends AbstractController {
         long totalCount = exportService.getTotalExportCount();
         return ResponseEntity.ok(totalCount);
     }
-
-
-    @GetMapping("/counts-by-month-year")
-    public ResponseEntity<List<Object[]>> getExportCountsByMonthAndYear() {
-        List<Object[]> counts = exportService.getExportCountsByMonthAndYear();
-        if (counts.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(counts, HttpStatus.OK);
-    }
-
-
-
 }
