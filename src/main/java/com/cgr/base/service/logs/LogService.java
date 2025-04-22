@@ -1,5 +1,8 @@
 package com.cgr.base.service.logs;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +52,9 @@ public class LogService {
 
     public void logFailedAttempt(Long userId, String roles) {
         LogEntity log = new LogEntity();
-        log.setDateSessionStart(java.time.LocalDateTime.now().toString());
+        ZonedDateTime colombianTime = ZonedDateTime.now(ZoneId.of("America/Bogota"));
+        String formattedDate = colombianTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSXXX"));
+        log.setDateSessionStart(formattedDate);
         log.setUserId(userId);
         log.setRoles(roles);
         saveLog(log, "FAILURE");
@@ -57,7 +62,9 @@ public class LogService {
 
     public void logSuccessfulAttempt(Long userId, String roles) {
         LogEntity log = new LogEntity();
-        log.setDateSessionStart(java.time.LocalDateTime.now().toString());
+        ZonedDateTime colombianTime = ZonedDateTime.now(ZoneId.of("America/Bogota"));
+        String formattedDate = colombianTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSXXX"));
+        log.setDateSessionStart(formattedDate);
         log.setUserId(userId);
         log.setRoles(roles);
         saveLog(log, "SUCCESS");
