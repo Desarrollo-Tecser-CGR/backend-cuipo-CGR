@@ -66,6 +66,9 @@ public class SecurityConfig {
                                         auth.requestMatchers("/api/v1/logs/**").hasAnyAuthority("auditor",
                                                         "administrador", "analista");
 
+                                        auth.requestMatchers("/api/v1/dimanic_role_menu/**").hasAnyAuthority("auditor",
+                                                        "administrador", "analista");
+
                                 });
 
                 http.headers(headers -> headers
@@ -84,7 +87,8 @@ public class SecurityConfig {
                                 config.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:4200",
                                                 "http://localhost:5173/", "http://192.168.0.220/",
                                                 "http://localhost:8000/", "http://localhost:8000",
-                                                "http://localhost:48496",
+                                                "http://localhost:48496", "http://192.168.2.63:8005/",
+                                                "http://192.168.2.63:8005",
                                                 "https://665922d5497f3aaadbaaf8b0--melodic-halva-c4b1b1.netlify.app/",
                                                 "https://665922d5497f3aaadbaaf8b0--melodic-halva-c4b1b1.netlify.app",
                                                 "https://bovid.site/", "https://bovid.site", "http://bovid.site/",

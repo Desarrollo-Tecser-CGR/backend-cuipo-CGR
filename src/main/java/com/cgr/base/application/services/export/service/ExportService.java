@@ -19,8 +19,6 @@ public class ExportService {
     @Autowired
     private RepositoryExportCount repositoryExportCount;
 
-
-
     public String generateCSV() {
         StringBuilder csvBuilder = new StringBuilder();
 
@@ -56,6 +54,14 @@ public class ExportService {
 
     public long getTotalExportCount() {
         return repositoryExportCount.count();
+    }
+
+    public List<Object[]> getDistinctMonthsAndYears() {
+        return repositoryExportCount.findDistinctMonthsAndYears();
+    }
+
+    public List<Object[]> getExportCountsByMonthAndYear() {
+        return repositoryExportCount.countExportsByMonthAndYear();
     }
 
 }
