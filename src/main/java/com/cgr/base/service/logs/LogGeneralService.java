@@ -22,7 +22,6 @@ import com.cgr.base.service.notifications.NotificationsService;
 public class LogGeneralService {
 
     private final ILogGeneralRepositoryJpa logRepository;
-    private final SimpMessagingTemplate simpMessagingTemplate;
     private final IUserRepositoryJpa userRepository;
     private final NotificationsService notificationsService;
 
@@ -30,29 +29,24 @@ public class LogGeneralService {
             ILogGeneralRepositoryJpa logRepository,
             SimpMessagingTemplate simpMessagingTemplate,
             IUserRepositoryJpa userRepository,
-            NotificationsService notificationsService // inyección del servicio de notificaciones
-    ) {
+            NotificationsService notificationsService) {
         this.logRepository = logRepository;
-        this.simpMessagingTemplate = simpMessagingTemplate;
         this.userRepository = userRepository;
         this.notificationsService = notificationsService;
     }
 
     public LogsEntityGeneral createLog(Long userId, LogType logType, String detail) {
-        // Verificar que el usuario exista en el sistema
         Optional<UserEntity> userOptional = userRepository.findById(userId);
         if (!userOptional.isPresent()) {
             throw new RuntimeException("No existe un usuario con id: " + userId);
         }
 
         try {
-            // Crear log
             LogsEntityGeneral log = new LogsEntityGeneral(userId, logType, detail);
             LogsEntityGeneral savedLog = logRepository.save(log);
 
-            // Crear notificación a partir del log
             NotificationEntity notification = new NotificationEntity("Tienes una notificación de " + logType, detail);
-            NotificationEntity savedNotification = notificationsService.sendNotification(notification);
+            notificationsService.sendNotification(notification);
 
             return savedLog;
         } catch (Exception e) {
@@ -77,7 +71,7 @@ public class LogGeneralService {
                     String createdAtVal = obj[4] instanceof Timestamp
                             ? ((Timestamp) obj[4]).toLocalDateTime()
                                     .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                            : obj[4].toString(); // fallback por si viene como otro tipo
+                            : obj[4].toString();
 
                     String fullName = (String) obj[obj.length - 1];
 
