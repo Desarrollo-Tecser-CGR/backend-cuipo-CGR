@@ -1,4 +1,4 @@
-package com.cgr.base.application.exception.component;
+package com.cgr.base.domain.exception.component;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cgr.base.infrastructure.repositories.repositories.repositoryActiveDirectory.ILogRepository;
-import com.cgr.base.application.exception.customException.ResourceNotFoundException;
+import com.cgr.base.domain.exception.customException.ResourceNotFoundException;
 import com.cgr.base.domain.models.entity.Logs.LogEntity;
 import com.cgr.base.domain.models.entity.Logs.UserEntity;
 import com.cgr.base.infrastructure.repositories.repositories.logs.ILogsRepositoryJpa;

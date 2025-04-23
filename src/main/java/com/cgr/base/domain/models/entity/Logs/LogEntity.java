@@ -3,6 +3,7 @@ package com.cgr.base.domain.models.entity.Logs;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore; // Importa JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
@@ -39,7 +40,6 @@ public class LogEntity {
     @Column(name = "email", nullable = false, length = 100)
     private String correo;
 
-
     @Column(name = "tipe_of_income")
     private String tipe_of_income;
 
@@ -53,6 +53,7 @@ public class LogEntity {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore // Agrega esta anotación
     private UserEntity user;
 
     public LogEntity() {
@@ -64,5 +65,3 @@ public class LogEntity {
     public LogEntity(String email, Date date, boolean b, String samAccountName) {
     }
 }
-
-

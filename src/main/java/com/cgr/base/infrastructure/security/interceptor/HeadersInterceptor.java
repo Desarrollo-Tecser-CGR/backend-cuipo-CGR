@@ -1,75 +1,71 @@
 package com.cgr.base.infrastructure.security.interceptor;
 
-import java.io.IOException;
-import java.util.Enumeration;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 @Component
 public class HeadersInterceptor implements HandlerInterceptor {
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+
+    private String loadHtmlTemplate(String templateName) throws IOException {
         try {
-            // Validar Content-Type
-            String contentType = request.getHeader("Content-Type");
-            if (contentType == null || !contentType.equals("application/json")) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"error\": \"Invalid Content-Type, expected application/json\"}");
-                response.getWriter().flush();
-                return false;
-            }
-
-            // Validar Host
-            String host = request.getHeader("Host");
-            if (host == null || host.isEmpty()) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"error\": \"Host header is required\"}");
-                response.getWriter().flush();
-                return false;
-            }
-
-            // Validar Accept (Opcional, pero recomendado)
-            String accept = request.getHeader("Accept");
-            if (accept == null) {
-                response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"error\": \"Invalid Accept header, expected application/json\"}");
-                response.getWriter().flush();
-                return false;
-            }
-
-            // Validar Origin (Opcional, útil para CORS)
-            // String origin = request.getHeader("Origin");
-            // if (origin != null && !origin.matches("https?://(.*)")) { // Validar que sea
-            // un dominio válido
-            // response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            // response.setContentType("application/json");
-            // response.getWriter().write("{\"error\": \"Invalid Origin\"}");
-            // response.getWriter().flush();
-            // return false;
-            // }
-
-            // Validar User-Agent (Opcional, útil para auditoría y seguridad)
-            String userAgent = request.getHeader("User-Agent");
-            if (userAgent == null || userAgent.isEmpty()) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"error\": \"User-Agent header is required\"}");
-                response.getWriter().flush();
-                return false;
-            }
-
+            Path path = Paths.get("src/main/resources/templates/" + templateName);
+            return Files.readString(path);
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
+            return "<h1>Error al cargar la página de error</h1>";
+        }
+    }
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+        String contentType = request.getHeader("Content-Type");
+        String acceptHeader = request.getHeader("Accept");
+
+        boolean errorOccurred = false;
+        String errorMessage = null;
+        int errorCode = HttpStatus.BAD_REQUEST.value();
+        String responseContentType = MediaType.APPLICATION_JSON_VALUE;
+        String responseBody = null;
+
+        if (!request.getMethod().equalsIgnoreCase("GET") && (contentType == null || !contentType.equals("application/json"))) {
+            errorMessage = "Error 400: Invalid Content-Type, expected application/json";
+            errorOccurred = true;
+        } else if (request.getHeader("Host") == null || request.getHeader("Host").isEmpty()) {
+            errorMessage = "Error 400: Host header is required";
+            errorOccurred = true;
+        } else if (acceptHeader == null) {
+            errorMessage = "Error 406: Invalid Accept header, expected application/json";
+            errorCode = HttpStatus.NOT_ACCEPTABLE.value();
+            errorOccurred = true;
+        } else if (request.getHeader("User-Agent") == null || request.getHeader("User-Agent").isEmpty()) {
+            errorMessage = "Error 400: User-Agent header is required";
+            errorOccurred = true;
         }
 
-        return true; // Continuar con la petición si pasa todas las validaciones
+        if (errorOccurred) {
+            response.setStatus(errorCode);
+            if (acceptHeader != null && acceptHeader.contains(MediaType.TEXT_HTML_VALUE)) {
+                responseContentType = MediaType.TEXT_HTML_VALUE;
+                responseBody = loadHtmlTemplate("error.html");
+            } else {
+                responseBody = String.format("{\"error\": \"%s\"}", errorMessage);
+            }
+            response.setContentType(responseContentType);
+            response.getWriter().write(responseBody);
+            response.getWriter().flush(); // Asegúrate de que se envíe
+            return false; // Interrumpe la petición
+        }
+
+        return true;
     }
 }
