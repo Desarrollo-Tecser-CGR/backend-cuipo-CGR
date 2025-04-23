@@ -41,11 +41,6 @@ public class SubMenuEntity {
     private String link;
 
     @JsonBackReference
-    @JsonIgnoreProperties({ "submenus", "handler", "hibernateLazyInitializer" })
-    @ManyToMany(mappedBy = "subMenus")
-    private List<RoleEntity> roles;
-
-    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "menu_id", nullable = false)
     private Menu menu;

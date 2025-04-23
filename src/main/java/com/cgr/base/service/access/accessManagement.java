@@ -92,43 +92,18 @@ public class accessManagement {
                 }
             }
 
-            String sql = "SELECT id FROM " + DATASOURCE_NAME + ".dbo.submenus WHERE menu_id IN (:moduleIds)";
-            Query query = entityManager.createNativeQuery(sql);
-            query.setParameter("moduleIds", moduleIds);
-
-            @SuppressWarnings("unchecked")
-            List<Object> result = query.getResultList();
-
-            List<Integer> submoduleIds = result.stream()
-                    .map(o -> ((Number) o).intValue())
-                    .collect(Collectors.toList());
-
-            entityManager.createNativeQuery("DELETE FROM " + DATASOURCE_NAME + ".dbo.menu_roles WHERE role_id = :roleId")
-                    .setParameter("roleId", roleId)
-                    .executeUpdate();
-
-            entityManager.createNativeQuery("DELETE FROM " + DATASOURCE_NAME + ".dbo.roles_submenu WHERE role_id = :roleId")
+            entityManager
+                    .createNativeQuery("DELETE FROM " + DATASOURCE_NAME + ".dbo.menu_roles WHERE role_id = :roleId")
                     .setParameter("roleId", roleId)
                     .executeUpdate();
 
             if (!moduleIds.isEmpty()) {
                 for (Integer moduleId : moduleIds) {
                     entityManager.createNativeQuery(
-                            "INSERT INTO " + DATASOURCE_NAME + ".dbo.menu_roles (role_id, menu_id) VALUES (:roleId, :moduleId)")
+                            "INSERT INTO " + DATASOURCE_NAME
+                                    + ".dbo.menu_roles (role_id, menu_id) VALUES (:roleId, :moduleId)")
                             .setParameter("roleId", roleId)
                             .setParameter("moduleId", moduleId)
-                            .executeUpdate();
-                }
-            }
-
-            if (!submoduleIds.isEmpty()) {
-
-                for (Integer submoduleId : submoduleIds) {
-
-                    entityManager.createNativeQuery(
-                            "INSERT INTO " + DATASOURCE_NAME + ".dbo.roles_submenu (role_id, submenu_id) VALUES (:roleId, :submenuId)")
-                            .setParameter("roleId", roleId)
-                            .setParameter("submenuId", submoduleId)
                             .executeUpdate();
                 }
             }
