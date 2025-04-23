@@ -19,7 +19,7 @@ import com.cgr.base.service.user.IUserUseCase;
 
 import jakarta.validation.Valid;
 
-@PreAuthorize("hasAuthority('MENU_Gestor de Usuarios')")
+@PreAuthorize("hasAuthority('MENU_ACCESS')")
 @RestController
 @RequestMapping("/api/v1/user")
 public class UserController extends AbstractController {

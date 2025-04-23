@@ -122,9 +122,6 @@ public class RoleServiceImpl implements IRoleService {
         String deleteUsersRoles = "DELETE FROM users_roles WHERE role_id = ?";
         jdbcTemplate.update(deleteUsersRoles, idRole);
 
-        String deleteRolesSubmenu = "DELETE FROM roles_submenu WHERE role_id = ?";
-        jdbcTemplate.update(deleteRolesSubmenu, idRole);
-
         String deleteMenuRoles = "DELETE FROM menu_roles WHERE role_id = ?";
         jdbcTemplate.update(deleteMenuRoles, idRole);
 

@@ -27,7 +27,7 @@ import com.cgr.base.service.parametrization.ParametrizacionAnualService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-@PreAuthorize("hasAuthority('MENU_Parametrización')")
+@PreAuthorize("hasAuthority('MENU_PARAMETER')")
 @RestController
 @RequestMapping("/api/v1/parametrization/annual")
 public class ParametrizacionAnualController extends AbstractController {

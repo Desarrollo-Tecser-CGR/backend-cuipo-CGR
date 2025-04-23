@@ -48,7 +48,7 @@ public class accessController extends AbstractController {
                 true);
     }
 
-    @PreAuthorize("hasAuthority('MENU_Gestor de Usuarios')")
+    @PreAuthorize("hasAuthority('MENU_ACCESS')")
     @PutMapping("/config")
     public ResponseEntity<?> updateRoleModules(@RequestBody Map<String, Object> request, HttpServletRequest httpRequest) {
 
