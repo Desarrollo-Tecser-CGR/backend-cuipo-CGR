@@ -17,6 +17,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import com.cgr.base.common.exception.exceptionCustom.InvalidVerificationTokenException;
 import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
 import com.cgr.base.config.abstractResponse.AbstractController;
+import com.cgr.base.service.role.RoleServiceImpl.RoleConflictException;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -35,6 +36,11 @@ public class GlobalRegistrationExceptionHandler extends AbstractController {
     })
     public ResponseEntity<?> handleNotFound(Exception ex) {
         return requestResponse(null, ex.getMessage(), HttpStatus.NOT_FOUND, false);
+    }
+
+    @ExceptionHandler(RoleConflictException.class)
+    public ResponseEntity<?> handleRoleConflict(RoleConflictException ex) {
+        return requestResponse(null, ex.getMessage(), HttpStatus.CONFLICT, false);
     }
 
     @ExceptionHandler({
