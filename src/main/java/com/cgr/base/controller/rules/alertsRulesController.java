@@ -16,7 +16,7 @@ import com.cgr.base.config.abstractResponse.AbstractController;
 import com.cgr.base.service.rules.alertsRules;
 
 @RestController
-@PreAuthorize("hasAuthority('MENU_Motor de Reglas')")
+@PreAuthorize("hasAuthority('MENU_RULES')")
 @RequestMapping("/api/v1/rules")
 
 public class alertsRulesController extends AbstractController {

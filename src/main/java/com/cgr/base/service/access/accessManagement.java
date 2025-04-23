@@ -40,7 +40,8 @@ public class accessManagement {
     }
 
     public List<Map<String, Object>> getRolesWithMenus() {
-        String sql = "SELECT r.id AS role_id, r.name AS role_name, m.id AS menu_id, m.title AS menu_title " +
+        String sql = "SELECT r.id AS role_id, r.name AS role_name, m.id AS menu_id, m.title AS menu_title, m.description "
+                +
                 "FROM " + DATASOURCE_NAME + ".dbo.roles r " +
                 "LEFT JOIN " + DATASOURCE_NAME + ".dbo.menu_roles mr ON r.id = mr.role_id " +
                 "LEFT JOIN " + DATASOURCE_NAME + ".dbo.menus m ON mr.menu_id = m.id " +
@@ -59,6 +60,7 @@ public class accessManagement {
             String roleName = (String) row[1];
             Long menuId = row[2] != null ? ((Number) row[2]).longValue() : null;
             String menuTitle = row[3] != null ? (String) row[3] : null;
+            String description = (String) row[4];
 
             rolesMap.putIfAbsent(roleId, new HashMap<>(Map.of(
                     "role_id", roleId,
@@ -68,7 +70,7 @@ public class accessManagement {
             List<Map<String, Object>> modules = (List<Map<String, Object>>) rolesMap.get(roleId).get("modules");
 
             if (menuId != null && menuTitle != null) {
-                modules.add(Map.of("id", menuId, "title", menuTitle));
+                modules.add(Map.of("id", menuId, "title", menuTitle, "description", description));
             }
         }
 
