@@ -1,5 +1,7 @@
 package com.cgr.base.application.controller;
 
+import com.cgr.base.domain.exception.customException.MessageException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,9 +15,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1/auth")
-public class AuthController {
+public class AuthController extends AbstractController {
 
     private final IAuthUseCase authUseCase;
 
@@ -38,9 +42,13 @@ public class AuthController {
 
     @PostMapping("/loginActiveDirectory")
     public ResponseEntity<?> loginActiveDirectory(@RequestBody AuthRequestDto request,
-            final HttpServletRequest servletRequest) throws JsonProcessingException {
-        return ResponseEntity.ok(authUseCase.authWithLDAPActiveDirectory(request, servletRequest));
-
+                                                  final HttpServletRequest servletRequest) throws JsonProcessingException {
+        try {
+            Map<String, Object> serviceResponse = authUseCase.authWithLDAPActiveDirectory(request, servletRequest);
+            return ResponseEntity.ok(serviceResponse); // Respuesta exitosa
+        } catch (MessageException ex) { // Captura MessageException
+            return buildResponse(null, ex.getMessage(), HttpStatus.BAD_REQUEST, false);
+        }
     }
 
     @PostMapping("/tokenEmail")

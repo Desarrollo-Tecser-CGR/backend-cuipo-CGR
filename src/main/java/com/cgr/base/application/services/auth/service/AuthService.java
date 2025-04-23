@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import com.cgr.base.application.services.logs.ingress.usecase.ILogUseCase;
-import com.cgr.base.domain.models.entity.Logs.LogEntity;
-import org.apache.catalina.User;
+
+import com.cgr.base.domain.exception.customException.MessageException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +19,7 @@ import com.cgr.base.domain.dto.dtoUser.UserDto;
 import com.cgr.base.domain.models.UserModel;
 import com.cgr.base.infrastructure.repositories.repositories.repositoryActiveDirectory.IActiveDirectoryUserRepository;
 import com.cgr.base.infrastructure.repositories.repositories.repositoryActiveDirectory.IUserRepository;
-import com.cgr.base.application.exception.customException.ResourceNotFoundException;
+import com.cgr.base.domain.exception.customException.ResourceNotFoundException;
 import com.cgr.base.domain.models.entity.Menu.Menu;
 import com.cgr.base.domain.models.entity.Logs.RoleEntity;
 import com.cgr.base.domain.models.entity.Logs.UserEntity;
@@ -102,35 +102,41 @@ public class AuthService implements IAuthUseCase {
     }
 
     public Map<String, Object> authWithLDAPActiveDirectory(AuthRequestDto userRequest,
-            HttpServletRequest servletRequest)
-            throws JsonProcessingException {
+                                                           HttpServletRequest servletRequest) throws JsonProcessingException {
 
         Map<String, Object> response = new HashMap<>();
 
+
+
         try {
+
+            AuthValidator.validateLoginRequest(userRequest);
+
+            // Validación con LDAP
             Boolean isAccountValid = activeDirectoryUserRepository.checkAccount(
                     userRequest.getSAMAccountName(), userRequest.getPassword());
 
+            // Buscar el usuario en la base de datos
             UserEntity user = this.userRepositoryFull.findBySAMAccountNameWithRoles(userRequest.getSAMAccountName())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "El usuario " + userRequest.getSAMAccountName() + " no existe"));
 
+            // Verificar si el usuario está bloqueado
             if (isUserLocked(user)) {
                 response.put("message", "Se han superado los 3 intentos fallidos de inicio de sesión. " +
-                        "Tu cuenta ha sido bloqueada temporalmente por razones de seguridad. Por favor," +
-                        " intenta nuevamente en 15 minutos o contacta con el soporte técnico si necesitas asistencia.");
+                        "Tu cuenta ha sido bloqueada temporalmente por razones de seguridad.");
                 response.put("statusCode", 403);
                 response.put("status", "error");
                 return response;
             }
 
+            // Si la cuenta es válida
             if (isAccountValid) {
                 if (user.getEnabled()) {
                     // Restablecer intentos fallidos si el inicio de sesión es exitoso
                     resetFailedAttempts(user);
 
-                    userRequest.setTipe_of_income("Éxito");
-
+                    // Creación del DTO de respuesta
                     AuthResponseDto userRequestDto = new AuthResponseDto();
                     UserDto userDto = this.dtoMapper.convertToDto(user, UserDto.class);
                     userRequestDto.setUser(userDto);
@@ -138,12 +144,12 @@ public class AuthService implements IAuthUseCase {
                     userRequestDto.setRoles(user.getRoles().stream().map(RoleEntity::getName).toList());
 
                     String token = jwtAuthenticationProvider.createToken(userRequestDto, user.getRoles(), 3600000);
-                    List<Menu> menus = this.userRepositoryFull
-                            .findMenusByRoleNames(user.getRoles().stream().map(RoleEntity::getName).toList());
+                    List<Menu> menus = this.userRepositoryFull.findMenusByRoleNames(user.getRoles().stream().map(RoleEntity::getName).toList());
 
                     userRequestDto.setMenus(menus);
                     userRequestDto.setToken(token);
 
+                    // Registrar el log
                     userRequest.setEmail(user.getEmail());
                     this.logService.createLog(userRequest);
 
@@ -164,28 +170,21 @@ public class AuthService implements IAuthUseCase {
                 // Incrementar intentos fallidos si la contraseña es incorrecta
                 increaseFailedAttempts(user);
 
-                userRequest.setTipe_of_income("Fracaso");
-
-                Optional<UserEntity> userOptional = this.userRepositoryFull
-                        .findBySAMAccountName(userRequest.getSAMAccountName());
-                String email = userOptional.map(UserEntity::getEmail).orElse("desconocido@dominio.com");
-                userRequest.setEmail(email);
-
-                this.logService.createLog(userRequest);
-
                 response.put("message", "Invalid username or password");
                 response.put("statusCode", 401);
                 response.put("status", "error");
                 return response;
             }
 
-        } catch (Exception e) {
-            System.err.println("Error en la capa de aplicación en service: " + e.getMessage());
-        }
+        } catch (MessageException e) {
 
-        response.put("message", "User not authenticated");
-        return response;
+            throw e;
+        } catch (Exception e) {
+
+            throw new RuntimeException("Error inesperado en el proceso de autenticación", e);
+        }
     }
+
 
     // jhon
     private void increaseFailedAttempts(UserEntity user) {

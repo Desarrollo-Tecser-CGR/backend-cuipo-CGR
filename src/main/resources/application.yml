@@ -2,9 +2,29 @@
 server:
   port: 8001
   address: 0.0.0.0
+  error:
+    whitelabel:
+      enabled: false  # Desactiva la página de error predeterminada
+    include-message: always
+    include-binding-errors: always
+    path: /error  # Ruta de manejo de errores
+  servlet:
+    context-path: /  # Contexto de la aplicación
 
 # Configuración de la aplicación
 spring:
+  # Permitir que Spring Boot lance una excepción cuando no encuentre un manejador
+  mvc:
+    throw-exception-if-no-handler-found: true
+
+  # Configuración de Thymeleaf
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false  # Habilitar el caché en producción (puedes cambiarlo a 'true' en producción)
+
   # Configuración de correo electrónico
   mail:
     host: smtp.gmail.com
@@ -25,7 +45,6 @@ spring:
     active: dev  # Cambia esto según el entorno: dev, qa, prod
 
   # Configuración de la base de datos MySQL
-  spring:
   datasource:
     username: sa
     password: Tecs2024*
@@ -54,21 +73,24 @@ jwt:
 logging:
   level:
     "[org.hibernate.SQL]": debug
+    org.springframework.web.servlet.view: DEBUG
+    org.thymeleaf: DEBUG
 
-#Configuracion imagenes
+# Configuración imágenes
 web:
   resources:
     static-locations: classpath:/static/,classpath:/public/
+
 # Configuración de Swagger OpenAPI
-    springdoc:
-      api-docs:
-        enabled: true
-        path: /v3/api-docs
-      swagger-ui:
-        enabled: true
-        path: /swagger-ui
-        operationsSorter: method
-        tagsSorter: alpha
-        disable-swagger-default-url: true
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui
+    operationsSorter: method
+    tagsSorter: alpha
+    disable-swagger-default-url: true
 
 

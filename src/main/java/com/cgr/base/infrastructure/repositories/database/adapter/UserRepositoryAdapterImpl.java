@@ -3,14 +3,13 @@ package com.cgr.base.infrastructure.repositories.database.adapter;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.xmlbeans.impl.xb.xsdschema.Attribute.Use;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cgr.base.domain.dto.dtoUser.UserDto;
 import com.cgr.base.domain.dto.dtoUser.UserWithRolesRequestDto;
 import com.cgr.base.infrastructure.repositories.repositories.repositoryActiveDirectory.IUserRoleRepository;
-import com.cgr.base.application.exception.customException.ResourceNotFoundException;
+import com.cgr.base.domain.exception.customException.ResourceNotFoundException;
 import com.cgr.base.domain.models.entity.Logs.RoleEntity;
 import com.cgr.base.domain.models.entity.Logs.UserEntity;
 import com.cgr.base.infrastructure.repositories.repositories.role.IRoleRepositoryJpa;

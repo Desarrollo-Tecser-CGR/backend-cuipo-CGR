@@ -22,12 +22,13 @@ public abstract class AbstractController {
         return buildResponse(data, message, status, successful);
     }
 
-    private ResponseEntity<?> buildResponse(Object data, String message, HttpStatus status, boolean successful) {
+    public ResponseEntity<?> buildResponse(Object data, String message, HttpStatus status, boolean successful) {
         Map<String, Object> response = new HashMap<>();
         response.put("data", data);
         response.put("status", status.value());
         response.put("successful", successful);
         response.put(successful ? "message" : "error", message);
+
         return ResponseEntity.status(status).body(response);
     }
 

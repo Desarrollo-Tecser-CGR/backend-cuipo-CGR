@@ -16,8 +16,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.Authentication;
 import com.cgr.base.domain.dto.dtoAuth.AuthResponseDto;
 
-import com.cgr.base.domain.dto.dtoAuth.AuthResponseDto;
-import com.cgr.base.application.exception.customException.InvalidVerificationTokenException;
+import com.cgr.base.domain.exception.customException.InvalidVerificationTokenException;
 import com.cgr.base.domain.models.entity.Logs.RoleEntity;
 import com.cgr.base.infrastructure.security.Jwt.services.JwtService;
 import com.fasterxml.jackson.core.JsonProcessingException;
