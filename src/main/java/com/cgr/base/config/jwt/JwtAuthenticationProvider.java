@@ -22,7 +22,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import lombok.extern.slf4j.Slf4j;
 
-
 @Slf4j
 @Component
 public class JwtAuthenticationProvider {
@@ -35,7 +34,6 @@ public class JwtAuthenticationProvider {
 
     private HashMap<String, AuthResponseDto> listToken = new HashMap<>();
 
-
     public String createToken(AuthResponseDto customerJwt, List<RoleEntity> roles) throws JsonProcessingException {
 
         String tokenCreated = jwtService.createToken(customerJwt, roles);
@@ -44,7 +42,6 @@ public class JwtAuthenticationProvider {
 
         return tokenCreated;
     }
-
 
     public Authentication createAuthentication(String token) throws AuthenticationException {
 
@@ -64,7 +61,7 @@ public class JwtAuthenticationProvider {
 
             // Obtener menús asociados a los roles
             List<Menu> menus = userRepositoryJpa.findMenusByRoleNames(roleNames);
-            menus.forEach(menu -> rolesAndAuthorities.add(new SimpleGrantedAuthority("MENU_" + menu.getTitle())));
+            menus.forEach(menu -> rolesAndAuthorities.add(new SimpleGrantedAuthority("MENU_" + menu.getCode())));
 
             return new UsernamePasswordAuthenticationToken(exists, token, rolesAndAuthorities);
 

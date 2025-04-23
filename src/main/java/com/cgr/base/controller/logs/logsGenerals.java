@@ -18,7 +18,7 @@ import com.cgr.base.service.logs.LogGeneralService;
 
 // Asegúrate de importar tus clases y métodos auxiliares, por ejemplo, requestResponse(...)
 
-@PreAuthorize("hasAuthority('MENU_Logs')")
+@PreAuthorize("hasAuthority('MENU_LOGS')")
 @RestController
 @RequestMapping("/api/v1/logs")
 public class logsGenerals extends AbstractController {

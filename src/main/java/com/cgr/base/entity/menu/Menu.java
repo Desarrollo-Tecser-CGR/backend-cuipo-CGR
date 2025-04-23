@@ -25,7 +25,6 @@ import lombok.Data;
 @Table(name = "menus")
 public class Menu {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -42,6 +41,12 @@ public class Menu {
     @Column(nullable = false)
     private String icon;
 
+    @Column(nullable = false)
+    private String description;
+
+    @Column(nullable = false, unique = true)
+    private String code;
+
     // Relación 1:N con SubMenuEntity
     @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -49,11 +54,7 @@ public class Menu {
 
     // ManyToMany con roles (tabla intermedia menu_roles)
     @ManyToMany
-    @JoinTable(
-        name = "menu_roles",
-        joinColumns = @JoinColumn(name = "menu_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
+    @JoinTable(name = "menu_roles", joinColumns = @JoinColumn(name = "menu_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     @JsonIgnore
     private Set<RoleEntity> roles = new HashSet<>();
 
@@ -61,11 +62,11 @@ public class Menu {
     }
 
     public Menu(Long id,
-                String title,
-                String subtitle,
-                String type,
-                String icon,
-                Set<SubMenuEntity> children) {
+            String title,
+            String subtitle,
+            String type,
+            String icon,
+            Set<SubMenuEntity> children) {
         this.id = id;
         this.title = title;
         this.subtitle = subtitle;
@@ -103,24 +104,15 @@ public class Menu {
                 return false;
         } else if (!children.equals(other.children))
             return false;
-        // Si quieres comparar roles, hazlo aquí (aunque a veces puede causar
-        // recursión).
-        // if (roles == null) {
-        // if (other.roles != null)
-        // return false;
-        // } else if (!roles.equals(other.roles))
-        // return false;
         return true;
     }
 
     @Override
     public int hashCode() {
-        // Genera tu hashCode, típicamente en base a 'id'.
         final int prime = 31;
         int result = 1;
         result = prime * result + ((id == null) ? 0 : id.hashCode());
         result = prime * result + ((children == null) ? 0 : children.hashCode());
-        // Si quisieras incluir roles, hazlo aquí.
         return result;
     }
 

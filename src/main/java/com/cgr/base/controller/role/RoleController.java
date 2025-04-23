@@ -27,7 +27,7 @@ import com.cgr.base.service.role.IRoleService;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@PreAuthorize("hasAuthority('MENU_Gestor de Usuarios')")
+@PreAuthorize("hasAuthority('MENU_ACCESS')")
 @RequestMapping("/api/v1/role")
 public class RoleController extends AbstractController {
 
