@@ -11,7 +11,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.cgr.base.entity.menu.Menu;
-import com.cgr.base.entity.menu.SubMenuEntity;
 import com.cgr.base.entity.user.UserEntity;
 
 @Repository

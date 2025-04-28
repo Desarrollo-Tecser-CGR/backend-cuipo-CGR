@@ -71,7 +71,7 @@ public class ParametrizacionAnualController extends AbstractController {
                             + parametrizacionAnual);
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
         return requestResponse(parametrizacionAnualService.save(parametrizacionAnual), "Create operation completed.",
                 HttpStatus.OK, true);

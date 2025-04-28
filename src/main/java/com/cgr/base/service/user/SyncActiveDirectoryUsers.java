@@ -1,5 +1,7 @@
 package com.cgr.base.service.user;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,13 +50,18 @@ public class SyncActiveDirectoryUsers implements IUserSynchronizerUseCase {
         usersAD.forEach(userAD -> {
             Optional<UserEntity> optionalUserDB = userRepositoryDB.findBySAMAccountName(userAD.getSAMAccountName());
 
+            ZonedDateTime colombiaTime = ZonedDateTime.now(ZoneId.of("America/Bogota"));
+            Date dateModify = Date.from(colombiaTime.toInstant());
+
             if (optionalUserDB.isPresent()) {
                 UserEntity userDB = optionalUserDB.get();
                 if (!userDB.getDateModify().equals(userAD.getDateModify())) {
                     userDB.mapActiveDirectoryUser(userAD);
+                    userDB.setDateModify(dateModify);
                     userRepositoryDB.save(userDB);
                 }
             } else {
+                userAD.setDateModify(dateModify);
                 userRepositoryDB.save(userAD);
             }
         });
@@ -84,6 +91,9 @@ public class SyncActiveDirectoryUsers implements IUserSynchronizerUseCase {
                 userDB.setEnabled(false);
             }
 
+            ZonedDateTime colombiaTime = ZonedDateTime.now(ZoneId.of("America/Bogota"));
+            Date dateModify = Date.from(colombiaTime.toInstant());
+            userDB.setDateModify(dateModify);
             userRepositoryDB.save(userDB);
         });
     }

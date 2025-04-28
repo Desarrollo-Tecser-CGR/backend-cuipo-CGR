@@ -124,9 +124,22 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
                 UserEntity userEntity = new UserEntity();
                 userEntity.setSAMAccountName(jsonNode.get("usuario").asText());
                 userEntity.setFullName(jsonNode.get("nombreMostrar").asText());
-                userEntity.setEmail(jsonNode.get("usuario").asText() + "@");
-                userEntity.setPhone(jsonNode.get("numeroTelefono").asText());
-                userEntity.setCargo(jsonNode.get("descripcionCargo").asText());
+
+                String correoElectronico = jsonNode.path("correoElectronico").asText(null);
+                if (correoElectronico != null) {
+                    userEntity.setEmail(correoElectronico);
+                }
+
+                String numeroTelefono = jsonNode.path("numeroTelefono").asText(null);
+                if (numeroTelefono != null) {
+                    userEntity.setPhone(numeroTelefono);
+                }
+
+                String descripcionCargo = jsonNode.path("descripcionCargo").asText(null);
+                if (descripcionCargo != null) {
+                    userEntity.setCargo(descripcionCargo);
+                }
+
                 userEntity.setEnabled(true);
 
                 return userEntity;

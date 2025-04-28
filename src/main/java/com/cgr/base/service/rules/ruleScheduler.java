@@ -68,9 +68,9 @@ public class ruleScheduler {
         // runStep(() -> parameterRE.tableSpecificRulesName(), "tableSpecificRulesName");
 
         String[] rules = {
-            // "1", 
-            "2", 
-            // "3", "4", "5", "6",  "7", 
+            // "1", "2", 
+            "3",
+            //  "4", "5", "6",  "7", 
             // "8", "9A", "9B", "10", "11", "12",
             // "13A", "13B", "14A", "14B", "15", "16A", "16B", 
             // "17", "22A", "22_A", "22B", "22C", "22_C", "22D", "22_D",
