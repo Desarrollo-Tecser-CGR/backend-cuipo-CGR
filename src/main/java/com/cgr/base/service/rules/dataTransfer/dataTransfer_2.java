@@ -19,17 +19,14 @@ public class dataTransfer_2 {
     @Autowired
     private dataBaseUtils UtilsDB;
 
-    // Regla2: Presupuesto Inicial VS Presupuesto Definitivo.
     public void applyGeneralRule2() {
 
-        // Asegurarse de que la columna CA0027 existe
-        UtilsDB.ensureColumnsExist(TABLA_PROG_INGRESOS, "CA0027:INT");
+        UtilsDB.ensureColumnsExist(TABLA_PROG_INGRESOS, "CA0027_RG_2:INT");
 
-        // Actualizar CA0027 en la tabla de origen, donde ambos campos son 0
         String updateCA0027Query = String.format(
                 """
                         UPDATE %s
-                        SET CA0027 = CASE
+                        SET CA0027_RG_2 = CASE
                             WHEN (PRESUPUESTO_INICIAL = '0' OR PRESUPUESTO_INICIAL IS NULL OR PRESUPUESTO_INICIAL = '')
                               AND (PRESUPUESTO_DEFINITIVO = '0' OR PRESUPUESTO_DEFINITIVO IS NULL OR PRESUPUESTO_DEFINITIVO = '')
                             THEN 1
@@ -39,29 +36,10 @@ public class dataTransfer_2 {
                 TABLA_PROG_INGRESOS);
         jdbcTemplate.execute(updateCA0027Query);
 
-        // Asegurarse de que las columnas necesarias existan en GENERAL_RULES_DATA
         UtilsDB.ensureColumnsExist("GENERAL_RULES_DATA",
                 "REGLA_GENERAL_2:NVARCHAR(10)",
                 "ALERTA_2:NVARCHAR(10)");
 
-        String updateNoDataQuery = String.format(
-                """
-                        UPDATE d
-                        SET d.REGLA_GENERAL_2 = 'NO DATA',
-                            d.ALERTA_2 = 'NO_PI'
-                        FROM GENERAL_RULES_DATA d
-                        WHERE NOT EXISTS (
-                            SELECT 1
-                            FROM %s a
-                            WHERE a.FECHA = d.FECHA
-                              AND a.TRIMESTRE = d.TRIMESTRE
-                              AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
-                              AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                        )
-                        """, TABLA_PROG_INGRESOS);
-        jdbcTemplate.execute(updateNoDataQuery);
-
-        // Actualizar entidades que NO CUMPLEN
         String updateNoCumpleQuery = String.format(
                 """
                         UPDATE d
@@ -75,14 +53,13 @@ public class dataTransfer_2 {
                               AND a.TRIMESTRE = d.TRIMESTRE
                               AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
                               AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                              AND a.CA0027 = 1
+                              AND a.CA0027_RG_2 = 1
                         )
                         """,
                 TABLA_PROG_INGRESOS);
 
         jdbcTemplate.execute(updateNoCumpleQuery);
 
-        // Actualizar entidades que SÍ CUMPLEN
         String updateCumpleQuery = String.format(
                 """
                         UPDATE d
@@ -103,5 +80,23 @@ public class dataTransfer_2 {
                 TABLA_PROG_INGRESOS, TABLA_PROG_INGRESOS);
 
         jdbcTemplate.execute(updateCumpleQuery);
+
+        String updateNoDataQuery = String.format(
+                """
+                        UPDATE GENERAL_RULES_DATA
+                        SET REGLA_GENERAL_2 = 'SIN DATOS',
+                            ALERTA_2 = 'NO_PI'
+                        WHERE NOT EXISTS (
+                            SELECT 1
+                            FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE a.FECHA = GENERAL_RULES_DATA.FECHA
+                            AND a.TRIMESTRE = GENERAL_RULES_DATA.TRIMESTRE
+                            AND a.CODIGO_ENTIDAD_INT = GENERAL_RULES_DATA.CODIGO_ENTIDAD
+                            AND a.AMBITO_CODIGO_STR = GENERAL_RULES_DATA.AMBITO_CODIGO
+                        )
+                        """, TABLA_PROG_INGRESOS, TABLA_PROG_INGRESOS);
+
+        jdbcTemplate.update(updateNoDataQuery);
+
     }
 }
