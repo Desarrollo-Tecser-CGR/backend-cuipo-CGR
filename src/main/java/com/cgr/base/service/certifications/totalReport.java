@@ -106,7 +106,7 @@ public class totalReport {
 
     private String getComplianceLevel(Double percentage) {
         if (percentage == null) {
-            return "BAJO"; // Asumimos lo más bajo si viene nulo
+            return "BAJO";
         }
         for (ComplianceLevel level : COMPLIANCE_LEVELS) {
             if (percentage >= level.getMin() && percentage <= level.getMax()) {
