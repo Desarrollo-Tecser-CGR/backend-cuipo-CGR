@@ -1,7 +1,4 @@
-package com.cgr.base.service.rules.dataTransfer;
-
-import java.util.Arrays;
-import java.util.List;
+package com.cgr.base.service.rules.generalRules;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,4 +1,4 @@
-package com.cgr.base.service.rules.dataTransfer;
+package com.cgr.base.service.rules.generalRules;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
