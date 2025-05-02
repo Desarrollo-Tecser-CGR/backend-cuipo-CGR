@@ -18,11 +18,19 @@ import com.cgr.base.common.exception.exceptionCustom.InvalidVerificationTokenExc
 import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
 import com.cgr.base.config.abstractResponse.AbstractController;
 import com.cgr.base.service.role.RoleServiceImpl.RoleConflictException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @RestControllerAdvice
 public class GlobalRegistrationExceptionHandler extends AbstractController {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleValidationErrors(MethodArgumentNotValidException ex) {
+        String errorMessage = ex.getBindingResult().getFieldError().getDefaultMessage();
+
+        return requestResponse(null, errorMessage, HttpStatus.BAD_REQUEST, false);
+    }
 
     @ExceptionHandler(InvalidVerificationTokenException.class)
     public ResponseEntity<?> handleInvalidToken(InvalidVerificationTokenException ex) {
