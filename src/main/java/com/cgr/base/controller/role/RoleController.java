@@ -168,6 +168,10 @@ public class RoleController extends AbstractController {
 
     @DeleteMapping("/config/{id}")
     public ResponseEntity<?> deleteRole(@PathVariable Long id, HttpServletRequest request) {
+        if (id == 1) {
+            return requestResponse(null, "El rol Administrador no puede ser eliminado.", HttpStatus.FORBIDDEN, false);
+        }
+
         roleService.delete(id);
 
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
