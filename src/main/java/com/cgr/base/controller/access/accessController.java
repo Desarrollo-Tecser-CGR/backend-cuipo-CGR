@@ -74,6 +74,18 @@ public class accessController extends AbstractController {
                     .map(o -> ((Number) o).intValue())
                     .collect(Collectors.toList());
 
+            // Validate if the role exists
+            if (!Access.roleExists(roleId)) {
+                return requestResponse(null, "El rol especificado no existe.", HttpStatus.NOT_FOUND, false);
+            }
+
+            // Validate if all modules exist
+            List<Integer> invalidModules = Access.getInvalidModules(moduleIds);
+            if (!invalidModules.isEmpty()) {
+                return requestResponse(null, "Los siguientes módulos no existen: " + invalidModules,
+                        HttpStatus.BAD_REQUEST, false);
+            }
+
             boolean updated = Access.updateRoleModules(roleId, moduleIds);
 
             logGeneralService.createLog(userId, USUARIOS,
