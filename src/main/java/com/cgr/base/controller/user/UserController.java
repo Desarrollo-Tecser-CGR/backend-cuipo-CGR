@@ -1,6 +1,7 @@
 package com.cgr.base.controller.user;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +18,7 @@ import com.cgr.base.dto.user.UserWithRolesRequestDto;
 import com.cgr.base.service.user.IUserSynchronizerUseCase;
 import com.cgr.base.service.user.IUserUseCase;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @PreAuthorize("hasAuthority('MENU_ACCESS')")
@@ -34,7 +36,11 @@ public class UserController extends AbstractController {
     }
 
     @GetMapping("/info/list")
-    public ResponseEntity<?> getAll() {
+    public ResponseEntity<?> getAll(HttpServletRequest request) {
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (header == null || !header.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication token is required.");
+        }
         return requestResponse(this.userService.findAll(), "System Users.", HttpStatus.OK, true);
     }
 
