@@ -55,6 +55,13 @@ public class RoleController extends AbstractController {
 
     @PostMapping("/config")
     public ResponseEntity<?> createRole(@RequestBody Map<String, Object> roleData, HttpServletRequest request) {
+        // Validate required fields
+        if (!roleData.containsKey("name")) {
+            return requestResponse(null, "El nombre del rol es obligatorio.", HttpStatus.BAD_REQUEST, false);
+        }
+        if (!roleData.containsKey("description")) {
+            return requestResponse(null, "La descripción es obligatoria.", HttpStatus.BAD_REQUEST, false);
+        }
 
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         String token = header.split(" ")[1];
@@ -85,11 +92,10 @@ public class RoleController extends AbstractController {
         response.put("enable", createdRole.isEnable());
 
         try {
-
             logGeneralService.createLog(userId, USUARIOS,
-                    "Creación de rol id : " + createdRole.getId() +" nombre: " + createdRole.getName() + "con descripción: " + createdRole.getDescription()
-                            + " y estado: " + createdRole.isEnable() + ".");
-
+                    "Creación de rol id : " + createdRole.getId() + " nombre: " + createdRole.getName()
+                            + " con descripción: " + createdRole.getDescription() + " y estado: "
+                            + createdRole.isEnable() + ".");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
@@ -162,6 +168,10 @@ public class RoleController extends AbstractController {
 
     @DeleteMapping("/config/{id}")
     public ResponseEntity<?> deleteRole(@PathVariable Long id, HttpServletRequest request) {
+        if (id == 1) {
+            return requestResponse(null, "El rol Administrador no puede ser eliminado.", HttpStatus.FORBIDDEN, false);
+        }
+
         roleService.delete(id);
 
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
