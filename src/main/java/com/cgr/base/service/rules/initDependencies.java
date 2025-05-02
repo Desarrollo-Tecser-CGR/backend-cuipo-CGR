@@ -16,7 +16,6 @@ import com.cgr.base.service.rules.dataTransfer.dataTransfer_29;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_30;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_31;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_32;
-import com.cgr.base.service.rules.dataTransfer.dataTransfer_7;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_EG;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_EI;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_GF;
@@ -27,6 +26,7 @@ import com.cgr.base.service.rules.generalRules.dataTransfer_3;
 import com.cgr.base.service.rules.generalRules.dataTransfer_4;
 import com.cgr.base.service.rules.generalRules.dataTransfer_5;
 import com.cgr.base.service.rules.generalRules.dataTransfer_6;
+import com.cgr.base.service.rules.generalRules.dataTransfer_7;
 
 @Service
 public class initDependencies {
