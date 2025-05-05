@@ -219,6 +219,10 @@ public class queryFilters {
 
         return result.stream()
                 .map(row -> {
+
+                    row.remove("CODIGO_ENTIDAD");
+                    row.remove("AMBITO_CODIGO");
+
                     if (row.containsKey("TRIMESTRE")) {
                         int trimestreBDValue = Integer.parseInt(row.get("TRIMESTRE").toString());
                         row.put("TRIMESTRE", trimestreBDValue / 3);

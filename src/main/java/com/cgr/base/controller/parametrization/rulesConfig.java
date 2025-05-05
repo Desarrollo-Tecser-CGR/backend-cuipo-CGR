@@ -46,12 +46,14 @@ public class rulesConfig extends AbstractController {
     private LogGeneralService logGeneralService;
 
     @GetMapping("/general/details")
-    public List<GeneralRulesNames> getAllRulesGeneral() {
-        return serviceGR.getAllRules();
+    public ResponseEntity<?> getAllRulesGeneral() {
+        List<SpecificRulesTables> result = serviceSR.getAllSpecificRules();
+        return requestResponse(result, "Specific Rules successfully retrieved.", HttpStatus.OK, true);
     }
 
     @PostMapping("/general/rename/{codigoRegla}")
-    public ResponseEntity<?> updateRuleNameGeneral(@PathVariable String codigoRegla, @RequestBody Map<String, String> request, HttpServletRequest request1) {
+    public ResponseEntity<?> updateRuleNameGeneral(@PathVariable String codigoRegla,
+            @RequestBody Map<String, String> request, HttpServletRequest request1) {
         String header = request1.getHeader(HttpHeaders.AUTHORIZATION);
         String token = header.split(" ")[1];
 
@@ -67,23 +69,18 @@ public class rulesConfig extends AbstractController {
         if (codigoRegla == null || codigoRegla.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("El codigo de reporte es obligatorio y no puede estar vacío.");
         }
-        try {
+        GeneralRulesNames updatedRule = serviceGR.updateRuleName(codigoRegla, nuevoNombre);
 
-            GeneralRulesNames updatedRule = serviceGR.updateRuleName(codigoRegla, nuevoNombre);
+        logGeneralService.createLog(userId, PARAMETRIZACION,
+                "Modificación de regla general code " + codigoRegla + " to " + request.get("nuevoNombre"));
 
-            logGeneralService.createLog(userId, PARAMETRIZACION,
-                    "Modificación de regla general code " + codigoRegla + " to " + request.get("nuevoNombre"));
-
-            return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
+        return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
     }
 
     @GetMapping("/specific/reports/details")
-    public List<SpecificRulesTables> getAllSpecificRules() {
-        return serviceSR.getAllSpecificRules();
+    public ResponseEntity<?> getAllSpecificRules() {
+        List<SpecificRulesTables> result = serviceSR.getAllSpecificRules();
+        return requestResponse(result, "Specific Rules successfully retrieved.", HttpStatus.OK, true);
     }
 
     @PostMapping("/specific/reports/rename/{codigoReporte}")
@@ -105,24 +102,19 @@ public class rulesConfig extends AbstractController {
         if (codigoReporte == null || codigoReporte.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("El codigo de reporte es obligatorio y no puede estar vacío.");
         }
-        try {
+        SpecificRulesTables updatedRule = serviceSR.updateReportName(codigoReporte, nuevoNombre);
 
-            SpecificRulesTables updatedRule = serviceSR.updateReportName(codigoReporte, nuevoNombre);
+        logGeneralService.createLog(userId, PARAMETRIZACION,
+                "Modificación de reporte específico code " + codigoReporte + " to " + request.get("nuevoNombre"));
 
-            logGeneralService.createLog(userId, PARAMETRIZACION,
-                    "Modificación de reporte específico code " + codigoReporte + " to " + request.get("nuevoNombre"));
-
-            return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
+        return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
 
     }
 
     @GetMapping("/specific/details")
-    public List<SpecificRulesNames> getAllRulesSpecific() {
-        return serviceSR.getAllRules();
+    public ResponseEntity<?> getAllRulesSpecific() {
+        List<SpecificRulesTables> result = serviceSR.getAllSpecificRules();
+        return requestResponse(result, "Specific Rules successfully retrieved.", HttpStatus.OK, true);
     }
 
     @PostMapping("/specific/rename/{codigoRegla}")
@@ -145,18 +137,12 @@ public class rulesConfig extends AbstractController {
             return ResponseEntity.badRequest().body("El codigo de regla es obligatorio y no puede estar vacío.");
         }
 
-        try {
+        SpecificRulesNames updatedRule = serviceSR.updateRuleName(codigoRegla, nuevoNombre);
 
-            SpecificRulesNames updatedRule = serviceSR.updateRuleName(codigoRegla, nuevoNombre);
+        logGeneralService.createLog(userId, PARAMETRIZACION,
+                "Modificación de regla específica code " + codigoRegla + " to " + request.get("nuevoNombre"));
 
-            logGeneralService.createLog(userId, PARAMETRIZACION,
-                    "Modificación de regla específica code " + codigoRegla + " to " + request.get("nuevoNombre"));
-
-            return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
+        return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
 
     }
 

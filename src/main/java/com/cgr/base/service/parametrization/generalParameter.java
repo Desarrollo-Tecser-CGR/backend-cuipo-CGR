@@ -1,9 +1,9 @@
 package com.cgr.base.service.parametrization;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.cgr.base.entity.parametrization.GeneralRulesNames;
@@ -146,8 +146,19 @@ public class generalParameter {
 
     }
 
-    public List<GeneralRulesNames> getAllRules() {
-        return GeneralRepo.findAll();
+    public List<Map<String, Object>> getAllRules() {
+        List<GeneralRulesNames> rules = GeneralRepo.findAll();
+
+        return rules.stream().map(rule -> {
+            Map<String, Object> ruleMap = new LinkedHashMap<>();
+            ruleMap.put("codigoRegla", rule.getCodigoRegla());
+            ruleMap.put("nombreRegla", rule.getNombreRegla());
+            ruleMap.put("descripcionRegla", rule.getDescripcionRegla());
+            ruleMap.put("orden", rule.getOrden());
+            ruleMap.put("regla", rule.getRegla());
+            ruleMap.put("codigo", rule.getCodigo());
+            return ruleMap;
+        }).collect(Collectors.toList());
     }
 
     public GeneralRulesNames updateRuleName(String codigoRegla, String nuevoNombre) {
