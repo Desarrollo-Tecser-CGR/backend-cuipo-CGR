@@ -234,7 +234,7 @@ public class queryFilters {
             return Map.of();
         }
 
-        String sql = "SELECT CODIGO_REGLA, NOMBRE_REGLA FROM SPECIFIC_RULES_NAMES WHERE CODIGO_REGLA IN (" +
+        String sql = "SELECT CODIGO_REGLA, NOMBRE_REGLA, ORDEN FROM SPECIFIC_RULES_NAMES WHERE CODIGO_REGLA IN (" +
                 codigosRegla.stream().map(c -> "'" + c + "'").collect(Collectors.joining(", ")) + ")";
 
         List<Map<String, Object>> resultados = jdbcTemplate.queryForList(sql);
@@ -242,7 +242,7 @@ public class queryFilters {
         return resultados.stream()
                 .collect(Collectors.toMap(
                         r -> (String) r.get("CODIGO_REGLA"),
-                        r -> (String) r.get("NOMBRE_REGLA")));
+                        r -> r.get("ORDEN") + "_" + r.get("CODIGO_REGLA") + "_" + r.get("NOMBRE_REGLA")));
     }
 
     private Map<String, Object> cambiarNombresSR(Map<String, Object> row, Map<String, String> mapaColumnas) {
@@ -317,7 +317,7 @@ public class queryFilters {
             return Map.of();
         }
 
-        String sql = "SELECT CODIGO_REGLA, NOMBRE_REGLA FROM GENERAL_RULES_NAMES WHERE CODIGO_REGLA IN ("
+        String sql = "SELECT CODIGO_REGLA, NOMBRE_REGLA, ORDEN FROM GENERAL_RULES_NAMES WHERE CODIGO_REGLA IN ("
                 + codigosRegla.stream().map(c -> "'" + c + "'").collect(Collectors.joining(", ")) + ")";
 
         List<Map<String, Object>> resultados = jdbcTemplate.queryForList(sql);
@@ -325,7 +325,7 @@ public class queryFilters {
         return resultados.stream()
                 .collect(Collectors.toMap(
                         r -> (String) r.get("CODIGO_REGLA"),
-                        r -> (String) r.get("NOMBRE_REGLA")));
+                        r -> r.get("ORDEN") + "_" + r.get("CODIGO_REGLA") + "_" + r.get("NOMBRE_REGLA")));
     }
 
     private Map<String, Object> cambiarNombresRG(Map<String, Object> row, Map<String, String> mapaColumnas) {
