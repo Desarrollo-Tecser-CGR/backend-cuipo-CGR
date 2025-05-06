@@ -4,11 +4,13 @@ import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -33,22 +35,32 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        http.csrf(csrf -> csrf.disable())
+        http
+                // Sin estado
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // CSRF, CORS
+                .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .exceptionHandling(t -> t.accessDeniedHandler(accessDeniedHandlerException))
+                // Manejo de errores: primero entry point (401), luego access denied (403)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        .accessDeniedHandler(accessDeniedHandlerException))
+                // Reglas de autorización
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**", "/swagger-ui/**", "/v3/api-docs/**",
+                    auth.requestMatchers(
+                            "/auth/**", "/api/v1/auth/**", "/auth**",
+                            "/swagger-ui/**", "/v3/api-docs/**",
                             "/ws-endpoint", "/ws-endpoint/**",
                             "/api/v1/access/module/**").permitAll();
                     auth.anyRequest().authenticated();
-                }).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
-        http.headers(headers -> headers
-                .httpStrictTransportSecurity(hsts -> hsts
-                        .includeSubDomains(true)
-                        .maxAgeInSeconds(31536000)));
+                })
+                // Filtro JWT antes del filtro de usuario/password
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                // HSTS
+                .headers(headers -> headers
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(31_536_000)));
 
         return http.build();
     }
