@@ -47,7 +47,7 @@ public class rulesConfig extends AbstractController {
 
     @GetMapping("/general/details")
     public ResponseEntity<?> getAllRulesGeneral() {
-        List<SpecificRulesTables> result = serviceSR.getAllSpecificRules();
+        List<Map<String, Object>> result = serviceGR.getAllRules();
         return requestResponse(result, "Specific Rules successfully retrieved.", HttpStatus.OK, true);
     }
 
@@ -113,7 +113,7 @@ public class rulesConfig extends AbstractController {
 
     @GetMapping("/specific/details")
     public ResponseEntity<?> getAllRulesSpecific() {
-        List<SpecificRulesTables> result = serviceSR.getAllSpecificRules();
+        List<Map<String, Object>> result = serviceSR.getAllRules();
         return requestResponse(result, "Specific Rules successfully retrieved.", HttpStatus.OK, true);
     }
 

@@ -123,10 +123,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // Obtener menús asociados a los roles
         List<Menu> menus = userRepositoryJpa.findMenusByRoleNames(roles);
+        
+        roles = userRepositoryJpa.findBySAMAccountNameWithRoles(username)
+        .map(user -> user.getRoles().stream().map(role -> "ROL_"+role.getId()).collect(Collectors.toList()))
+        .orElseThrow(() -> new RuntimeException("User not found or roles not assigned."));
 
         List<SimpleGrantedAuthority> authorities = roles.stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
+
+        
 
         // Agregar menús como authorities
         menus.forEach(menu -> authorities.add(new SimpleGrantedAuthority("MENU_" + menu.getCode())));
