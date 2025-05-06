@@ -1,7 +1,5 @@
 package com.cgr.base.controller.parametrization;
 
-import static com.cgr.base.entity.logs.LogType.PARAMETRIZACION;
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.config.abstractResponse.AbstractController;
 import com.cgr.base.config.jwt.JwtService;
+import static com.cgr.base.entity.logs.LogType.PARAMETRIZACION;
 import com.cgr.base.entity.parametrization.ParametrizacionAnual;
 import com.cgr.base.service.logs.LogGeneralService;
 import com.cgr.base.service.parametrization.ParametrizacionAnualService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-@PreAuthorize("hasAuthority('MENU_3')")
+@PreAuthorize("hasAuthority('MENU_PARAMETER')")
 @RestController
 @RequestMapping("/api/v1/parametrization/annual")
 public class ParametrizacionAnualController extends AbstractController {
@@ -72,7 +71,7 @@ public class ParametrizacionAnualController extends AbstractController {
                             + parametrizacionAnual);
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
         return requestResponse(parametrizacionAnualService.save(parametrizacionAnual), "Create operation completed.",
                 HttpStatus.OK, true);

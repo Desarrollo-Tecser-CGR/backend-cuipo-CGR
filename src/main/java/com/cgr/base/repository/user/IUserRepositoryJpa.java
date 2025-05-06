@@ -11,7 +11,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.cgr.base.entity.menu.Menu;
-import com.cgr.base.entity.menu.SubMenuEntity;
 import com.cgr.base.entity.user.UserEntity;
 
 @Repository
@@ -31,16 +30,9 @@ public interface IUserRepositoryJpa extends JpaRepository<UserEntity, Long>, Jpa
                             FROM Menu m
                                  LEFT JOIN FETCH m.roles mr
                                  LEFT JOIN FETCH m.children c
-                                 LEFT JOIN FETCH c.roles cr
                             WHERE mr.name IN :roleNames
-                               OR cr.name IN :roleNames
                         """)
         List<Menu> findMenusByRoleNames(@Param("roleNames") List<String> roleNames);
-
-        @Query("SELECT DISTINCT sm FROM RoleEntity r " +
-                        "JOIN r.subMenus sm " +
-                        "WHERE r.name IN :roleNames")
-        List<SubMenuEntity> findDistinctSubMenusByRoleNames(@Param("roleNames") List<String> roleNames);
 
         @Query("SELECT u.fullName FROM UserEntity u WHERE u.id = :id")
         String findFullNameById(@Param("id") Long id);

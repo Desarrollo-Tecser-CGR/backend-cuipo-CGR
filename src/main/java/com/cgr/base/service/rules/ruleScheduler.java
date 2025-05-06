@@ -1,5 +1,12 @@
 package com.cgr.base.service.rules;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -39,6 +46,8 @@ public class ruleScheduler {
     @Autowired
     private initTablaCertifications certificator;
 
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+
     // CRON: Primer día del mes a la medianoche
     @Scheduled(cron = "0 0 0 1 * ?")
     public void scheduleRulesExecution() {
@@ -51,31 +60,30 @@ public class ruleScheduler {
     }
 
     private void executeRuleFlow() {
-        // // Inicialización
-        // System.out.println("[INIT] Ejecutando tareas iniciales...");
+
         // runStep(() -> motorReglas.processTablesRules(), "processTablesRules");
         // runStep(() -> parametria.processTablesSource(), "processTablesSource");
         // runStep(() -> categorias.initCategoryTable(), "initCategoryTable");
         // runStep(() -> parameterRG.tableGeneralRulesName(), "tableGeneralRulesName");
-        // runStep(() -> parameterRE.tableSpecificRulesName(), "tableSpecificRulesName");
+        // runStep(() -> parameterRE.tableSpecificRulesName(),
+        // "tableSpecificRulesName");
 
-        // Reglas
         String[] rules = {
-            // "1", "2", "3", "4", "5", "6", "7", "8", "9A", "9B", "10", 
-            // "11", "12", "13A", "13B", "14A", "14B", "15", "16A", "16B", 
-            // "17", "22A", "22_A", "22B", "24", "25A", "25_A", "25B", "25_B", "22C", "22_C", "22D","22_D", "22_E", "26", "27", "29A", "29B", "29C"
-            //  "30", "31", "32"
-            // ERROR: 25B
-            // ERROR TIPO DE DATO: "27" - Corregida, "28"
-            // TARDA: "22E", "27"
-            // "23"
-            //"GF"
-            //SEGUNDA VALIDACIÓN: 
-            // "22A","22B","22C","22D","22E" - corre sin errores
-            // "22_A","22_C","22_D", "22_E" - corre sin errores
-            // "24" - corre sin errores
-            // "25A", "25_A"
-             "25B", "25_B"
+                // // Programación de Ingresos
+                // "1", "2", "3", "4",
+
+                // // Programación de Gastos
+                // "5", "6", 
+
+                // // Ejecución de Ingresos
+                // "7",
+                "8", // "9", "10",
+                // "8", "9A", "9B", "10", "11", "12",
+                // "13A", "13B", "14A", "14B", "15", "16A", "16B",
+                // "17", "22A", "22_A", "22B", "22C", "22_C", "22D", "22_D",
+                // "22E", "22_E", "23", "24",
+                // "25A", "25_A", "25B", "25_B",
+                // "GF", "26", "27", "28", "29A", "29B", "29C", "30", "31", "32"
         };
 
         System.out.println("[RULES] Ejecutando reglas secuencialmente...");
@@ -85,18 +93,33 @@ public class ruleScheduler {
 
         // Finales
         System.out.println("[FINAL] Ejecutando tareas finales...");
-        runStep(() -> er.actualizarSpecificRulesData(), "actualizarSpecificRulesData");
-        //runStep(() -> certificator.generateControlTable(), "generateControlTable");
+        // runStep(() -> er.actualizarSpecificRulesData(),
+        // "actualizarSpecificRulesData");
+        // runStep(() -> certificator.generateControlTable(), "generateControlTable");
 
         System.out.println("[FINISHED] Flujo de reglas ejecutado completamente.");
     }
 
     private void runStep(Runnable task, String stepName) {
+        Future<?> future = executor.submit(task);
         try {
-            task.run();
-        } catch (Exception e) {
-            System.out.println("[ERROR] Error al ejecutar paso: " + stepName);
-            e.printStackTrace();
+            // Esperamos hasta 30 minutos
+            future.get(30, TimeUnit.MINUTES);
+        } catch (TimeoutException te) {
+            System.out.println("[TIMEOUT] : " + stepName + te.getMessage());
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            System.out.println("[INTERRUPTED] : " + stepName + ie.getMessage());
+        } catch (ExecutionException ee) {
+            System.out.println("[ERROR] : " + stepName + ee.getCause().getMessage());
+        }
+
+        // Delay de 1 minuto entre pasos
+        try {
+            Thread.sleep(60_000);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            System.out.println("[WARN] : " + stepName + ie.getMessage());
         }
     }
 }

@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
 import com.cgr.base.entity.user.UserEntity;
 import com.cgr.base.external.CGR.ExternalAuthService;
 import com.cgr.base.repository.auth.IActiveDirectoryUserRepository;
@@ -56,7 +55,7 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private String externalUserInfoUrl = "https://serviciosint.contraloria.gov.co/directorio/usuarios/consultar/";
+    private final String externalUserInfoUrl = "https://serviciosint.contraloria.gov.co/directorio/usuarios/consultar/";
 
     // Verificar credenciales en Active Directory
     @Override
@@ -125,9 +124,22 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
                 UserEntity userEntity = new UserEntity();
                 userEntity.setSAMAccountName(jsonNode.get("usuario").asText());
                 userEntity.setFullName(jsonNode.get("nombreMostrar").asText());
-                userEntity.setEmail(jsonNode.get("usuario").asText() + "@");
-                userEntity.setPhone(jsonNode.get("numeroTelefono").asText());
-                userEntity.setCargo(jsonNode.get("descripcionCargo").asText());
+
+                String correoElectronico = jsonNode.path("correoElectronico").asText(null);
+                if (correoElectronico != null) {
+                    userEntity.setEmail(correoElectronico);
+                }
+
+                String numeroTelefono = jsonNode.path("numeroTelefono").asText(null);
+                if (numeroTelefono != null) {
+                    userEntity.setPhone(numeroTelefono);
+                }
+
+                String descripcionCargo = jsonNode.path("descripcionCargo").asText(null);
+                if (descripcionCargo != null) {
+                    userEntity.setCargo(descripcionCargo);
+                }
+
                 userEntity.setEnabled(true);
 
                 return userEntity;

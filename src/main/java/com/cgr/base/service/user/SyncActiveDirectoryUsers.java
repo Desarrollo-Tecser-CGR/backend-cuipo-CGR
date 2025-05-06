@@ -1,5 +1,7 @@
 package com.cgr.base.service.user;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,35 +33,35 @@ public class SyncActiveDirectoryUsers implements IUserSynchronizerUseCase {
     @Transactional
     @Override
     public Boolean synchronizeUsers() {
-        try {
-            if ("ldap".equalsIgnoreCase(authMode)) {
-                synchronizeLdapUsers();
-            } else if ("cgr".equalsIgnoreCase(authMode)) {
-                synchronizeCGRUsers();
-            } else {
-                throw new IllegalStateException("Unknown authentication mode: " + authMode);
-            }
-    
-            return true;
-        } catch (Exception ex) {
-            // log.error("Error en sincronización de usuarios", ex);
-            return false;
+        if ("ldap".equalsIgnoreCase(authMode)) {
+            synchronizeLdapUsers();
+        } else if ("cgr".equalsIgnoreCase(authMode)) {
+            synchronizeCGRUsers();
+        } else {
+            throw new IllegalStateException("Unknown authentication mode: " + authMode);
         }
+
+        return true;
     }
 
     private void synchronizeLdapUsers() {
         List<UserEntity> usersAD = directoryUserRepository.getAllUsers();
-    
+
         usersAD.forEach(userAD -> {
             Optional<UserEntity> optionalUserDB = userRepositoryDB.findBySAMAccountName(userAD.getSAMAccountName());
-    
+
+            ZonedDateTime colombiaTime = ZonedDateTime.now(ZoneId.of("America/Bogota"));
+            Date dateModify = Date.from(colombiaTime.toInstant());
+
             if (optionalUserDB.isPresent()) {
                 UserEntity userDB = optionalUserDB.get();
                 if (!userDB.getDateModify().equals(userAD.getDateModify())) {
                     userDB.mapActiveDirectoryUser(userAD);
+                    userDB.setDateModify(dateModify);
                     userRepositoryDB.save(userDB);
                 }
             } else {
+                userAD.setDateModify(dateModify);
                 userRepositoryDB.save(userAD);
             }
         });
@@ -67,11 +69,11 @@ public class SyncActiveDirectoryUsers implements IUserSynchronizerUseCase {
 
     private void synchronizeCGRUsers() {
         List<UserEntity> usersInDB = userRepositoryDB.findAll();
-    
+
         usersInDB.forEach(userDB -> {
             String samAccountName = userDB.getSAMAccountName();
             UserEntity userCGR = ldapUsuarioRepository.getUserDirectoryCGR(samAccountName);
-    
+
             if (userCGR != null) {
                 if (userCGR.getFullName() != null) {
                     userDB.setFullName(userCGR.getFullName());
@@ -83,19 +85,17 @@ public class SyncActiveDirectoryUsers implements IUserSynchronizerUseCase {
                     userDB.setPhone(userCGR.getPhone());
                 }
                 userDB.setCargo(userCGR.getCargo());
-    
+
             } else {
 
                 userDB.setEnabled(false);
             }
-    
+
+            ZonedDateTime colombiaTime = ZonedDateTime.now(ZoneId.of("America/Bogota"));
+            Date dateModify = Date.from(colombiaTime.toInstant());
+            userDB.setDateModify(dateModify);
             userRepositoryDB.save(userDB);
         });
     }
-    
-    
-    
-
-
 
 }

@@ -25,7 +25,7 @@ import com.cgr.base.service.logs.LogGeneralService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
-@PreAuthorize("hasAuthority('MENU_8')")
+@PreAuthorize("hasAuthority('MENU_CERTIFY')")
 @RestController
 @RequestMapping("/api/v1/certifications")
 public class certificationsController extends AbstractController {

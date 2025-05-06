@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cgr.base.config.abstractResponse.AbstractController;
 import com.cgr.base.service.rules.ruleScheduler;
 
-@PreAuthorize("hasAuthority('MENU_1')")
+@PreAuthorize("hasAuthority('MENU_ACCESS')")
 @RestController
 @RequestMapping("/api/v1/init/rules")
 public class initRulesEngine extends AbstractController {

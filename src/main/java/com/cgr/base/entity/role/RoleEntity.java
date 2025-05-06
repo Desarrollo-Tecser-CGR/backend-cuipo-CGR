@@ -8,7 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.cgr.base.entity.menu.Menu;
-import com.cgr.base.entity.menu.SubMenuEntity;
 import com.cgr.base.entity.user.UserEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -19,11 +18,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -60,26 +56,12 @@ public class RoleEntity {
     private Date dateModify;
 
     @ManyToMany(mappedBy = "roles")
-    @JsonIgnore  // Evitas recursión o lazy initialization
+    @JsonIgnore
     private Set<UserEntity> users;
-
-    // Relación con SubMenu (tabla roles_submenu)
-    @ManyToMany
-    @JoinTable(
-        name = "roles_submenu",
-        joinColumns = @JoinColumn(name = "role_id"),
-        inverseJoinColumns = @JoinColumn(name = "submenu_id"),
-        uniqueConstraints = { 
-            @UniqueConstraint(columnNames = { "role_id", "submenu_id" })
-        }
-    )
-    @JsonIgnore // Si no quieres que en el JSON aparezcan los submenús
-    private Set<SubMenuEntity> subMenus;
 
     // Relación inversa con Menu (tabla menu_roles)
     @ManyToMany(mappedBy = "roles")
-    @JsonIgnoreProperties({"roles", "children"})
+    @JsonIgnoreProperties({ "roles", "children" })
     private Set<Menu> menus;
 
 }
-

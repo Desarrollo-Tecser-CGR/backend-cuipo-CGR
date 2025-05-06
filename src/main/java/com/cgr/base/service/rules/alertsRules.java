@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,9 @@ public class alertsRules {
 
     @Autowired
     private dataBaseUtils UtilsDB;
+
+    @Value("${DATASOURCE_NAME}")
+    private String DATASOURCE_NAME;
 
     // Obtener listado de ALERTAS de GENERAL_RULES_DATA
     public List<Map<String, Object>> getFilteredAlertsGR(Map<String, String> filters) {
@@ -52,7 +56,7 @@ public class alertsRules {
                 int trimestreInt = Integer.parseInt(trimestre);
                 trimestreBD = String.valueOf(trimestreInt * 3);
             } catch (NumberFormatException e) {
-                System.err.println("⚠️ Error al convertir trimestre: " + trimestre);
+                // Manejo silencioso del error
             }
         }
 
@@ -67,8 +71,14 @@ public class alertsRules {
 
         for (Map<String, String> ref : referenciaAlertas.values()) {
             String columnRef = ref.get("column_ref");
-            if (!"0".equals(columnRef) && columnasExistentes.contains(columnRef)) {
-                columnasQuery.add(columnRef); // solo se agrega si existe en la tabla
+            if (columnRef != null && !columnRef.isBlank() && !"0".equals(columnRef)) {
+                String[] columnasRef = columnRef.split(",");
+                for (String colRef : columnasRef) {
+                    colRef = colRef.trim();
+                    if (columnasExistentes.contains(colRef)) {
+                        columnasQuery.add(colRef);
+                    }
+                }
             }
         }
 
@@ -83,7 +93,7 @@ public class alertsRules {
                 sql.append(" AND FECHA = :fecha");
                 params.put("fecha", fechaInt);
             } catch (NumberFormatException e) {
-                System.err.println("⚠️ Error al convertir fecha: " + fecha);
+                // Manejo silencioso del error
             }
         }
 
@@ -96,6 +106,7 @@ public class alertsRules {
             sql.append(" AND CODIGO_ENTIDAD = :entidad");
             params.put("entidad", entidadCodigo);
         }
+
         List<Map<String, Object>> resultados = namedParameterJdbcTemplate.queryForList(sql.toString(), params);
 
         for (Map<String, Object> fila : resultados) {
@@ -106,8 +117,9 @@ public class alertsRules {
                 Object valor = fila.get(columna);
                 if (valor != null) {
                     String textoAlerta = valor.toString().trim();
-                    if ("OK".equalsIgnoreCase(textoAlerta))
+                    if ("OK".equalsIgnoreCase(textoAlerta)) {
                         continue;
+                    }
 
                     String mensajeFinal = textoAlerta;
                     Map<String, String> referencia = referenciaAlertas.get(textoAlerta);
@@ -116,11 +128,17 @@ public class alertsRules {
                         String message = referencia.get("message");
                         String columnRef = referencia.get("column_ref");
 
-                        if (!"0".equals(columnRef) && fila.containsKey(columnRef)) {
-                            Object extra = fila.get(columnRef);
-                            if (extra != null) {
-                                message += " " + limpiarNombreColumna(columnRef) + ": " + extra + ".";
-                                columnasUsadasEnAlertas.add(columnRef);
+                        if (columnRef != null && !columnRef.isBlank()) {
+                            String[] columnasRef = columnRef.split(",");
+                            for (String colRef : columnasRef) {
+                                colRef = colRef.trim();
+                                if (!"0".equals(colRef) && fila.containsKey(colRef)) {
+                                    Object extra = fila.get(colRef);
+                                    if (extra != null) {
+                                        message += " " + limpiarNombreColumna(colRef) + ": " + extra + ".";
+                                        columnasUsadasEnAlertas.add(colRef);
+                                    }
+                                }
                             }
                         }
 
@@ -178,10 +196,10 @@ public class alertsRules {
 
     // Obtener los Mensajes y Referencias para las ALERTAS
     private Map<String, Map<String, String>> obtenerTablaRef() {
-        String sql = """
+        String sql = String.format("""
                     SELECT alert, message, column_ref
-                    FROM cuipo_dev.dbo.RULES_ALERTS
-                """;
+                    FROM %s.dbo.RULES_ALERTS
+                """, DATASOURCE_NAME);
 
         List<Map<String, Object>> datos = jdbcTemplate.queryForList(sql);
 

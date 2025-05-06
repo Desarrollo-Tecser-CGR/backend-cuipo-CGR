@@ -1,4 +1,7 @@
 package com.cgr.base.entity.parametrization;
+
+import jakarta.persistence.Transient;
+
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -26,5 +29,24 @@ public class SpecificRulesNames {
 
     @Column(name = "DESCRIPCION_REGLA")
     private String descripcionRegla;
-    
+
+    @Column(name = "ORDEN")
+    private Integer orden;
+
+    @Column(name = "DETALLES")
+    private Integer detalles;
+
+    @Transient
+    public String getCodigo() {
+        if (codigoRegla != null && codigoRegla.startsWith("REGLA_ESPECIFICA_")) {
+            return codigoRegla.substring("REGLA_ESPECIFICA_".length());
+        }
+        return null;
+    }
+
+    @Transient
+    public String getRegla() {
+        return orden != null ? "Regla Especifica " + orden : null;
+    }
+
 }

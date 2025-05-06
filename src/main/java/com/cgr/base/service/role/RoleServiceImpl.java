@@ -2,9 +2,11 @@ package com.cgr.base.service.role;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
 import com.cgr.base.common.utils.DtoMapper;
@@ -49,7 +51,7 @@ public class RoleServiceImpl implements IRoleService {
                 .getSingleResult();
 
         if (count > 0) {
-            throw new IllegalArgumentException("A role with the name '" + roleEntity.getName() + "' already exists.");
+            throw new RoleConflictException("A role with the name '" + roleEntity.getName() + "' already exists.");
         }
 
         if (!roleEntity.isEnable()) {
@@ -82,7 +84,7 @@ public class RoleServiceImpl implements IRoleService {
                 .getSingleResult();
 
         if (count > 0) {
-            throw new IllegalArgumentException("A role with the name '" + name + "' already exists.");
+            throw new RoleConflictException("A role with the name '" + name + "' already exists.");
         }
 
         existingRole.setName(name);
@@ -122,15 +124,19 @@ public class RoleServiceImpl implements IRoleService {
         String deleteUsersRoles = "DELETE FROM users_roles WHERE role_id = ?";
         jdbcTemplate.update(deleteUsersRoles, idRole);
 
-        String deleteRolesSubmenu = "DELETE FROM roles_submenu WHERE role_id = ?";
-        jdbcTemplate.update(deleteRolesSubmenu, idRole);
-
         String deleteMenuRoles = "DELETE FROM menu_roles WHERE role_id = ?";
         jdbcTemplate.update(deleteMenuRoles, idRole);
 
         entityManager.remove(role);
 
         return true;
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public class RoleConflictException extends RuntimeException {
+        public RoleConflictException(String message) {
+            super(message);
+        }
     }
 
 }

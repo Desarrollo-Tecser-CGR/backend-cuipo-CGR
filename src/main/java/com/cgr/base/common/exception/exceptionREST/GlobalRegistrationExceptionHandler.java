@@ -17,11 +17,20 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import com.cgr.base.common.exception.exceptionCustom.InvalidVerificationTokenException;
 import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
 import com.cgr.base.config.abstractResponse.AbstractController;
+import com.cgr.base.service.role.RoleServiceImpl.RoleConflictException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @RestControllerAdvice
 public class GlobalRegistrationExceptionHandler extends AbstractController {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleValidationErrors(MethodArgumentNotValidException ex) {
+        String errorMessage = ex.getBindingResult().getFieldError().getDefaultMessage();
+
+        return requestResponse(null, errorMessage, HttpStatus.BAD_REQUEST, false);
+    }
 
     @ExceptionHandler(InvalidVerificationTokenException.class)
     public ResponseEntity<?> handleInvalidToken(InvalidVerificationTokenException ex) {
@@ -37,8 +46,14 @@ public class GlobalRegistrationExceptionHandler extends AbstractController {
         return requestResponse(null, ex.getMessage(), HttpStatus.NOT_FOUND, false);
     }
 
+    @ExceptionHandler(RoleConflictException.class)
+    public ResponseEntity<?> handleRoleConflict(RoleConflictException ex) {
+        return requestResponse(null, ex.getMessage(), HttpStatus.CONFLICT, false);
+    }
+
     @ExceptionHandler({
             IllegalArgumentException.class,
+            IllegalStateException.class,
             HttpMessageNotReadableException.class,
             MethodArgumentTypeMismatchException.class,
             MissingServletRequestParameterException.class,

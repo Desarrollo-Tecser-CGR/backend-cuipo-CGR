@@ -1,9 +1,6 @@
 package com.cgr.base.service.certifications;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,47 +18,150 @@ public class totalReport {
     @Value("${DATASOURCE_NAME}")
     private String DATASOURCE_NAME;
 
+    private static final List<ComplianceLevel> COMPLIANCE_LEVELS = buildComplianceLevels();
+
+    private static List<ComplianceLevel> buildComplianceLevels() {
+        List<ComplianceLevel> levels = new ArrayList<>();
+
+        // Definimos cortes y nombres
+        List<String> names = Arrays.asList("BAJO", "MEDIO", "ALTO", "EXCELENTE");
+        List<Double> cuts = Arrays.asList(0.0, 40.0, 60.0, 80.0, 100.0);
+
+        for (int i = 0; i < names.size(); i++) {
+            double min = cuts.get(i);
+            double max = (i == names.size() - 1) ? cuts.get(i + 1) : cuts.get(i + 1) - 0.01;
+            levels.add(new ComplianceLevel(names.get(i), min, max));
+        }
+
+        return levels;
+    }
+
     public List<Map<String, Object>> getCertificationStats() {
         String sql = "SELECT " +
-                "FECHA, " +
-                "SUM(CASE WHEN ESTADO_CALIDAD = 'CERTIFICA' THEN 1 ELSE 0 END) AS CALIDAD_CUMPLE, " +
-                "SUM(CASE WHEN ESTADO_CALIDAD = 'NO CERTIFICA' THEN 1 ELSE 0 END) AS CALIDAD_NO_CUMPLE, " +
-                "SUM(CASE WHEN ESTADO_L617 = 'CERTIFICA' THEN 1 ELSE 0 END) AS L617_CUMPLE, " +
-                "SUM(CASE WHEN ESTADO_L617 = 'NO CERTIFICA' THEN 1 ELSE 0 END) AS L617_NO_CUMPLE " +
+                "TRY_CAST(FECHA AS INT) AS FECHA, " +
+                "TRY_CAST(PORCENTAJE_CALIDAD AS DECIMAL(5,2)) AS PORCENTAJE_CALIDAD, " +
+                "TRY_CAST(PORCENTAJE_L617 AS DECIMAL(5,2)) AS PORCENTAJE_L617 " +
                 "FROM " + DATASOURCE_NAME + ".dbo.CONTROL_CERTIFICACION " +
-                "GROUP BY FECHA " +
-                "ORDER BY FECHA DESC";
+                "WHERE FECHA IS NOT NULL";
 
         Query query = entityManager.createNativeQuery(sql);
 
         @SuppressWarnings("unchecked")
         List<Object[]> results = (List<Object[]>) query.getResultList();
 
-        List<Map<String, Object>> certificationStats = new ArrayList<>();
+        Map<Integer, Map<String, Map<String, Integer>>> aggregatedData = new HashMap<>();
 
         for (Object[] row : results) {
-            Map<String, Object> yearData = new HashMap<>();
+            Integer year = toInteger(row[0]);
+            Double porcentajeCalidad = toDouble(row[1]);
+            Double porcentajeL617 = toDouble(row[2]);
 
-            // Extract the year
-            Integer year = (row[0] != null) ? ((Number) row[0]).intValue() : null;
-            yearData.put("FECHA", year);
+            if (year == null)
+                continue;
 
-            // Calidad details
-            Map<String, Object> calidadDetails = new HashMap<>();
-            calidadDetails.put("CUMPLE", row[1] != null ? ((Number) row[1]).intValue() : 0);
-            calidadDetails.put("NO_CUMPLE", row[2] != null ? ((Number) row[2]).intValue() : 0);
-            yearData.put("CALIDAD", calidadDetails);
+            aggregatedData.putIfAbsent(year, new HashMap<>());
 
-            // L617 details
-            Map<String, Object> l617Details = new HashMap<>();
-            l617Details.put("CUMPLE", row[3] != null ? ((Number) row[3]).intValue() : 0);
-            l617Details.put("NO_CUMPLE", row[4] != null ? ((Number) row[4]).intValue() : 0);
-            yearData.put("L617", l617Details);
+            Map<String, Map<String, Integer>> yearData = aggregatedData.get(year);
+            yearData.putIfAbsent("CALIDAD", new HashMap<>());
+            yearData.putIfAbsent("L617", new HashMap<>());
 
-            certificationStats.add(yearData);
+            String calidadLevel = getComplianceLevel(porcentajeCalidad);
+            String l617Level = getComplianceLevel(porcentajeL617);
+
+            yearData.get("CALIDAD").merge(calidadLevel, 1, Integer::sum);
+            yearData.get("L617").merge(l617Level, 1, Integer::sum);
         }
 
-        return certificationStats;
+        // Preparar la lista final
+        List<Map<String, Object>> dataList = new ArrayList<>();
+
+        for (Map.Entry<Integer, Map<String, Map<String, Integer>>> entry : aggregatedData.entrySet()) {
+            Map<String, Object> yearData = new HashMap<>();
+            yearData.put("FECHA", entry.getKey());
+            yearData.put("CALIDAD", new HashMap<>(entry.getValue().getOrDefault("CALIDAD", new HashMap<>())));
+            yearData.put("L617", new HashMap<>(entry.getValue().getOrDefault("L617", new HashMap<>())));
+            dataList.add(yearData);
+        }
+
+        // Armar etiquetas dinámicamente
+        Map<String, String> etiquetas = new HashMap<>();
+        for (ComplianceLevel level : COMPLIANCE_LEVELS) {
+            int minRounded = (int) level.getMin();
+            int maxRounded = (int) Math.floor(level.getMax());
+            etiquetas.put(
+                    level.getName(),
+                    String.format("%d%% - %d%%", minRounded, maxRounded));
+        }
+
+        // Armar respuesta final
+        Map<String, Object> result = new HashMap<>();
+        result.put("informacion", dataList);
+        result.put("etiquetas", etiquetas);
+
+        List<Map<String, Object>> response = new ArrayList<>();
+        response.add(result);
+
+        return response;
     }
 
+    private String getComplianceLevel(Double percentage) {
+        if (percentage == null) {
+            return "BAJO";
+        }
+        for (ComplianceLevel level : COMPLIANCE_LEVELS) {
+            if (percentage >= level.getMin() && percentage <= level.getMax()) {
+                return level.getName();
+            }
+        }
+        return "DESCONOCIDO";
+    }
+
+    private Integer toInteger(Object value) {
+        if (value == null)
+            return null;
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        if (value instanceof String) {
+            return Integer.parseInt((String) value);
+        }
+        throw new IllegalArgumentException("Cannot convert to Integer: " + value);
+    }
+
+    private Double toDouble(Object value) {
+        if (value == null)
+            return 0.0;
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        }
+        if (value instanceof String) {
+            return Double.parseDouble((String) value);
+        }
+        throw new IllegalArgumentException("Cannot convert to Double: " + value);
+    }
+
+    // Clase interna para definir los niveles de cumplimiento
+    public static class ComplianceLevel {
+        private String name;
+        private double min;
+        private double max;
+
+        public ComplianceLevel(String name, double min, double max) {
+            this.name = name;
+            this.min = min;
+            this.max = max;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public double getMin() {
+            return min;
+        }
+
+        public double getMax() {
+            return max;
+        }
+    }
 }

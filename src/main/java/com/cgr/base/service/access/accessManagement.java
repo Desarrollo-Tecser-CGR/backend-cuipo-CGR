@@ -40,7 +40,8 @@ public class accessManagement {
     }
 
     public List<Map<String, Object>> getRolesWithMenus() {
-        String sql = "SELECT r.id AS role_id, r.name AS role_name, m.id AS menu_id, m.title AS menu_title " +
+        String sql = "SELECT r.id AS role_id, r.name AS role_name, m.id AS menu_id, m.title AS menu_title, m.description "
+                +
                 "FROM " + DATASOURCE_NAME + ".dbo.roles r " +
                 "LEFT JOIN " + DATASOURCE_NAME + ".dbo.menu_roles mr ON r.id = mr.role_id " +
                 "LEFT JOIN " + DATASOURCE_NAME + ".dbo.menus m ON mr.menu_id = m.id " +
@@ -59,6 +60,7 @@ public class accessManagement {
             String roleName = (String) row[1];
             Long menuId = row[2] != null ? ((Number) row[2]).longValue() : null;
             String menuTitle = row[3] != null ? (String) row[3] : null;
+            String description = (String) row[4];
 
             rolesMap.putIfAbsent(roleId, new HashMap<>(Map.of(
                     "role_id", roleId,
@@ -68,7 +70,7 @@ public class accessManagement {
             List<Map<String, Object>> modules = (List<Map<String, Object>>) rolesMap.get(roleId).get("modules");
 
             if (menuId != null && menuTitle != null) {
-                modules.add(Map.of("id", menuId, "title", menuTitle));
+                modules.add(Map.of("id", menuId, "title", menuTitle, "description", description));
             }
         }
 
@@ -92,43 +94,18 @@ public class accessManagement {
                 }
             }
 
-            String sql = "SELECT id FROM " + DATASOURCE_NAME + ".dbo.submenus WHERE menu_id IN (:moduleIds)";
-            Query query = entityManager.createNativeQuery(sql);
-            query.setParameter("moduleIds", moduleIds);
-
-            @SuppressWarnings("unchecked")
-            List<Object> result = query.getResultList();
-
-            List<Integer> submoduleIds = result.stream()
-                    .map(o -> ((Number) o).intValue())
-                    .collect(Collectors.toList());
-
-            entityManager.createNativeQuery("DELETE FROM " + DATASOURCE_NAME + ".dbo.menu_roles WHERE role_id = :roleId")
-                    .setParameter("roleId", roleId)
-                    .executeUpdate();
-
-            entityManager.createNativeQuery("DELETE FROM " + DATASOURCE_NAME + ".dbo.roles_submenu WHERE role_id = :roleId")
+            entityManager
+                    .createNativeQuery("DELETE FROM " + DATASOURCE_NAME + ".dbo.menu_roles WHERE role_id = :roleId")
                     .setParameter("roleId", roleId)
                     .executeUpdate();
 
             if (!moduleIds.isEmpty()) {
                 for (Integer moduleId : moduleIds) {
                     entityManager.createNativeQuery(
-                            "INSERT INTO " + DATASOURCE_NAME + ".dbo.menu_roles (role_id, menu_id) VALUES (:roleId, :moduleId)")
+                            "INSERT INTO " + DATASOURCE_NAME
+                                    + ".dbo.menu_roles (role_id, menu_id) VALUES (:roleId, :moduleId)")
                             .setParameter("roleId", roleId)
                             .setParameter("moduleId", moduleId)
-                            .executeUpdate();
-                }
-            }
-
-            if (!submoduleIds.isEmpty()) {
-
-                for (Integer submoduleId : submoduleIds) {
-
-                    entityManager.createNativeQuery(
-                            "INSERT INTO " + DATASOURCE_NAME + ".dbo.roles_submenu (role_id, submenu_id) VALUES (:roleId, :submenuId)")
-                            .setParameter("roleId", roleId)
-                            .setParameter("submenuId", submoduleId)
                             .executeUpdate();
                 }
             }
@@ -138,6 +115,24 @@ public class accessManagement {
 
             throw new RuntimeException("Error al actualizar módulos del rol", e);
         }
+    }
+
+    public boolean roleExists(Long roleId) {
+        String sql = "SELECT COUNT(*) FROM " + DATASOURCE_NAME + ".dbo.roles WHERE id = :roleId";
+        Query query = entityManager.createNativeQuery(sql).setParameter("roleId", roleId);
+        return ((Number) query.getSingleResult()).intValue() > 0;
+    }
+
+    public List<Integer> getInvalidModules(List<Integer> moduleIds) {
+        String sql = "SELECT id FROM " + DATASOURCE_NAME + ".dbo.menus WHERE id IN :moduleIds";
+        Query query = entityManager.createNativeQuery(sql).setParameter("moduleIds", moduleIds);
+
+        @SuppressWarnings("unchecked")
+        List<Number> validModuleIds = query.getResultList();
+
+        return moduleIds.stream()
+                .filter(moduleId -> validModuleIds.stream().noneMatch(validId -> validId.intValue() == moduleId))
+                .collect(Collectors.toList());
     }
 
 }

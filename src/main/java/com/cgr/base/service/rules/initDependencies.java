@@ -1,10 +1,9 @@
 package com.cgr.base.service.rules;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.service.rules.dataTransfer.dataTransfer_1;
+import com.cgr.base.service.rules.dataTransfer.dataTransfer_12;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_17;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_22;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_23;
@@ -21,16 +20,17 @@ import com.cgr.base.service.rules.dataTransfer.dataTransfer_EG;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_EI;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_GF;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_PG;
-import com.cgr.base.service.rules.dataTransfer.dataTransfer_PI;
+import com.cgr.base.service.rules.generalRules.dataTransfer_1;
+import com.cgr.base.service.rules.generalRules.dataTransfer_2;
+import com.cgr.base.service.rules.generalRules.dataTransfer_3;
+import com.cgr.base.service.rules.generalRules.dataTransfer_4;
+import com.cgr.base.service.rules.generalRules.dataTransfer_5;
+import com.cgr.base.service.rules.generalRules.dataTransfer_6;
+import com.cgr.base.service.rules.generalRules.dataTransfer_7;
+import com.cgr.base.service.rules.generalRules.dataTransfer_8;
 
 @Service
 public class initDependencies {
-
-    @Autowired
-    private dataTransfer_PI RulesPI;
-
-    @Autowired
-    private dataTransfer_EI RulesEI;
 
     @Autowired
     private dataTransfer_EG RulesEG;
@@ -40,6 +40,30 @@ public class initDependencies {
 
     @Autowired
     private dataTransfer_1 Rule1;
+
+    @Autowired
+    private dataTransfer_2 Rule2;
+
+    @Autowired
+    private dataTransfer_3 Rule3;
+
+    @Autowired
+    private dataTransfer_4 Rule4;
+
+    @Autowired
+    private dataTransfer_5 Rule5;
+
+    @Autowired
+    private dataTransfer_6 Rule6;
+
+    @Autowired
+    private dataTransfer_7 Rule7;
+
+    @Autowired
+    private dataTransfer_8 Rule8;
+
+    @Autowired
+    private dataTransfer_12 Rule12;
 
     @Autowired
     private dataTransfer_17 Rule17;
@@ -77,7 +101,6 @@ public class initDependencies {
     @Autowired
     private dataTransfer_32 Rules32;
 
-
     @Autowired
     private dataTransfer_GF RulesGF;
 
@@ -86,18 +109,18 @@ public class initDependencies {
 
             // Reglas generales
             case "1" -> Rule1.applyGeneralRule1();
-            case "2" -> RulesPI.applyGeneralRule2();
-            case "3" -> RulesPI.applyGeneralRule3();
-            case "4" -> RulesPI.applyGeneralRule4();
-            case "5" -> RulesEI.applyGeneralRule5();
-            case "6" -> RulesEI.applyGeneralRule6();
-            case "7" -> RulesPG.applyGeneralRule7();
-            case "8" -> RulesPG.applyGeneralRule8();
+            case "2" -> Rule2.applyGeneralRule2();
+            case "3" -> Rule3.applyGeneralRule3();
+            case "4" -> Rule4.applyGeneralRule4();
+            case "5" -> Rule5.applyGeneralRule5();
+            case "6" -> Rule6.applyGeneralRule6();
+            case "7" -> Rule7.applyGeneralRule7();
+            case "8" -> Rule8.applyGeneralRule8();
             case "9A" -> RulesPG.applyGeneralRule9A();
             case "9B" -> RulesPG.applyGeneralRule9B();
             case "10" -> RulesPG.applyGeneralRule10();
             case "11" -> RulesPG.applyGeneralRule11();
-            case "12" -> RulesEG.applyGeneralRule12();
+            case "12" -> Rule12.applyGeneralRule12();
             case "13A" -> RulesEG.applyGeneralRule13A();
             case "13B" -> RulesEG.applyGeneralRule13B();
             case "14A" -> RulesEG.applyGeneralRule14A();
