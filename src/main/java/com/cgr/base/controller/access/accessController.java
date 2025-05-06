@@ -29,18 +29,20 @@ public class accessController extends AbstractController {
 
     @Autowired
     accessManagement Access;
-        @Autowired
+    @Autowired
     private JwtService jwtService;
 
     @Autowired
     private LogGeneralService logGeneralService;
 
+    @PreAuthorize("hasAuthority('Administrador')")
     @GetMapping("/module/list")
     public ResponseEntity<?> getAvailableMenus() {
         List<Map<String, Object>> menus = Access.getAvailableMenus();
         return requestResponse(menus, "Available menus successfully retrieved.", HttpStatus.OK, true);
     }
 
+    @PreAuthorize("hasAuthority('Administrador')")
     @GetMapping("/module/roles")
     public ResponseEntity<?> getRolesWithMenus() {
         List<Map<String, Object>> rolesWithMenus = Access.getRolesWithMenus();
@@ -50,7 +52,8 @@ public class accessController extends AbstractController {
 
     @PreAuthorize("hasAuthority('MENU_ACCESS')")
     @PutMapping("/config")
-    public ResponseEntity<?> updateRoleModules(@RequestBody Map<String, Object> request, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> updateRoleModules(@RequestBody Map<String, Object> request,
+            HttpServletRequest httpRequest) {
 
         String header = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
         String token = header.split(" ")[1];
@@ -71,11 +74,23 @@ public class accessController extends AbstractController {
                     .map(o -> ((Number) o).intValue())
                     .collect(Collectors.toList());
 
+            // Validate if the role exists
+            if (!Access.roleExists(roleId)) {
+                return requestResponse(null, "El rol especificado no existe.", HttpStatus.NOT_FOUND, false);
+            }
+
+            // Validate if all modules exist
+            List<Integer> invalidModules = Access.getInvalidModules(moduleIds);
+            if (!invalidModules.isEmpty()) {
+                return requestResponse(null, "Los siguientes módulos no existen: " + invalidModules,
+                        HttpStatus.BAD_REQUEST, false);
+            }
+
             boolean updated = Access.updateRoleModules(roleId, moduleIds);
 
             logGeneralService.createLog(userId, USUARIOS,
                     "Modificación de rol id " + roleId + " con los módulos " + moduleIds + " asignados.");
-                            
+
             return updated ? requestResponse(null, "Módulos actualizados correctamente.", HttpStatus.OK, true)
                     : requestResponse(null, "Error al actualizar los módulos.", HttpStatus.INTERNAL_SERVER_ERROR,
                             false);

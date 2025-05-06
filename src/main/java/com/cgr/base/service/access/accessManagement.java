@@ -117,4 +117,22 @@ public class accessManagement {
         }
     }
 
+    public boolean roleExists(Long roleId) {
+        String sql = "SELECT COUNT(*) FROM " + DATASOURCE_NAME + ".dbo.roles WHERE id = :roleId";
+        Query query = entityManager.createNativeQuery(sql).setParameter("roleId", roleId);
+        return ((Number) query.getSingleResult()).intValue() > 0;
+    }
+
+    public List<Integer> getInvalidModules(List<Integer> moduleIds) {
+        String sql = "SELECT id FROM " + DATASOURCE_NAME + ".dbo.menus WHERE id IN :moduleIds";
+        Query query = entityManager.createNativeQuery(sql).setParameter("moduleIds", moduleIds);
+
+        @SuppressWarnings("unchecked")
+        List<Number> validModuleIds = query.getResultList();
+
+        return moduleIds.stream()
+                .filter(moduleId -> validModuleIds.stream().noneMatch(validId -> validId.intValue() == moduleId))
+                .collect(Collectors.toList());
+    }
+
 }
