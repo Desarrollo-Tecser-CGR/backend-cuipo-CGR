@@ -22,7 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cgr.base.config.abstractResponse.AbstractController;
 import com.cgr.base.dto.rules.listOptionsEG;
 import com.cgr.base.dto.rules.listOptionsRG;
+import com.cgr.base.entity.parametrization.GeneralRulesNames;
 import com.cgr.base.service.rules.dataTransfer.detailsInfo;
+import com.cgr.base.service.rules.generalRules.detailsGeneralRules;
 import com.cgr.base.service.rules.exportCSVgeneral;
 import com.cgr.base.service.rules.exportCSVspecific;
 import com.cgr.base.service.rules.queryFilters;
@@ -42,6 +44,9 @@ public class managementRules extends AbstractController {
 
     @Autowired
     private detailsInfo FilterDetail;
+
+    @Autowired
+    private detailsGeneralRules FilterDetailGR;
 
     @PreAuthorize("hasAuthority('MENU_RULES') or hasAuthority('MENU_CERTIFY')")
     @PostMapping("/general/data")
@@ -120,69 +125,67 @@ public class managementRules extends AbstractController {
     @PreAuthorize("hasAuthority('MENU_RULES')")
     @PostMapping("/general/lastUpdate")
     public ResponseEntity<?> getLastUpdateGeneralRules(@RequestBody Map<String, String> request) {
-        try {
-            Map<String, String> response = Filter.processLastUpdateRequestG(request);
-            if (response == null) {
-                return requestResponse(null,
-                        "Invalid request: 'fecha' and 'trimestre' are required as numeric strings.",
-                        HttpStatus.BAD_REQUEST, false);
-            }
-            return requestResponse(response, "Last update for general rules retrieved successfully.", HttpStatus.OK,
-                    true);
-        } catch (NumberFormatException e) {
-            return requestResponse(null, "Invalid request: 'fecha' and 'trimestre' must be numeric strings.",
+        Map<String, String> response = Filter.processLastUpdateRequestG(request);
+        if (response == null) {
+            return requestResponse(null,
+                    "Invalid request: 'fecha' and 'trimestre' are required as numeric strings.",
                     HttpStatus.BAD_REQUEST, false);
         }
+        return requestResponse(response, "Last update for general rules retrieved successfully.", HttpStatus.OK,
+                true);
     }
 
     @PreAuthorize("hasAuthority('MENU_RULES')")
     @PostMapping("/specific/lastUpdate")
     public ResponseEntity<?> getLastUpdateSpecificRules(@RequestBody Map<String, String> request) {
-        try {
-            Map<String, String> response = Filter.processLastUpdateRequestE(request);
-            if (response == null) {
-                return requestResponse(null,
-                        "Invalid request: 'fecha' and 'trimestre' are required as numeric strings.",
-                        HttpStatus.BAD_REQUEST, false);
-            }
-            return requestResponse(response, "Last update for specific rules retrieved successfully.", HttpStatus.OK,
-                    true);
-        } catch (NumberFormatException e) {
-            return requestResponse(null, "Invalid request: 'fecha' and 'trimestre' must be numeric strings.",
+        Map<String, String> response = Filter.processLastUpdateRequestE(request);
+        if (response == null) {
+            return requestResponse(null,
+                    "Invalid request: 'fecha' and 'trimestre' are required as numeric strings.",
                     HttpStatus.BAD_REQUEST, false);
         }
+        return requestResponse(response, "Last update for specific rules retrieved successfully.", HttpStatus.OK,
+                true);
     }
 
     @PreAuthorize("hasAuthority('MENU_RULES')")
     @PostMapping("/specific/data/icld")
     public ResponseEntity<?> getSpecificDetailsICLD(@RequestBody Map<String, String> filters) {
-        try {
-            List<Map<String, Object>> result = FilterDetail.processICLDRequest(filters);
-            if (result == null) {
-                return requestResponse(null, "All fields (fecha, trimestre, ambito, entidad) are required.",
-                        HttpStatus.BAD_REQUEST, false);
-            }
-            return requestResponse(result, "ICLD data successfully retrieved.", HttpStatus.OK, true);
-        } catch (NumberFormatException e) {
-            return requestResponse(null, "Invalid input: 'fecha' and 'trimestre' must be numeric strings.",
+        List<Map<String, Object>> result = FilterDetail.processICLDRequest(filters);
+        if (result == null) {
+            return requestResponse(null, "All fields (fecha, trimestre, ambito, entidad) are required.",
                     HttpStatus.BAD_REQUEST, false);
         }
+        return requestResponse(result, "ICLD data successfully retrieved.", HttpStatus.OK, true);
     }
 
     @PreAuthorize("hasAuthority('MENU_RULES')")
     @PostMapping("/specific/data/gf")
     public ResponseEntity<?> getSpecificDetailsGF(@RequestBody Map<String, String> filters) {
-        try {
-            List<Map<String, Object>> result = FilterDetail.processGFRequest(filters);
-            if (result == null) {
-                return requestResponse(null, "All fields (fecha, trimestre, ambito, entidad) are required.",
-                        HttpStatus.BAD_REQUEST, false);
-            }
-            return requestResponse(result, "GF data successfully retrieved.", HttpStatus.OK, true);
-        } catch (NumberFormatException e) {
-            return requestResponse(null, "Invalid input: 'fecha' and 'trimestre' must be numeric strings.",
+        List<Map<String, Object>> result = FilterDetail.processGFRequest(filters);
+        if (result == null) {
+            return requestResponse(null, "All fields (fecha, trimestre, ambito, entidad) are required.",
                     HttpStatus.BAD_REQUEST, false);
         }
+        return requestResponse(result, "GF data successfully retrieved.", HttpStatus.OK, true);
+    }
+
+    @PreAuthorize("hasAuthority('MENU_RULES')")
+    @GetMapping("/general/data/info")
+    public ResponseEntity<?> getGeneralDataOptions() {
+        List<Map<String, Object>> options = FilterDetailGR.getGFInfoDetails();
+        return requestResponse(options, "Options retrieved successfully.", HttpStatus.OK, true);
+    }
+
+    @PreAuthorize("hasAuthority('MENU_RULES')")
+    @PostMapping("/general/data/detail")
+    public ResponseEntity<?> getGeneralDataDetail(@RequestBody Map<String, String> filters) {
+        GeneralRulesNames result = FilterDetailGR.detailsGeneralRequest(filters);
+        if (result == null) {
+            return requestResponse(null, "All fields (fecha, trimestre, ambito, entidad) are required.",
+                    HttpStatus.BAD_REQUEST, false);
+        }
+        return requestResponse(result, "GF data successfully retrieved.", HttpStatus.OK, true);
     }
 
 }
