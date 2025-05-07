@@ -3,7 +3,6 @@ package com.cgr.base.service.rules;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.service.rules.dataTransfer.dataTransfer_12;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_17;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_22;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_23;
@@ -21,6 +20,7 @@ import com.cgr.base.service.rules.dataTransfer.dataTransfer_EI;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_GF;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_PG;
 import com.cgr.base.service.rules.generalRules.dataTransfer_1;
+import com.cgr.base.service.rules.generalRules.dataTransfer_12;
 import com.cgr.base.service.rules.generalRules.dataTransfer_2;
 import com.cgr.base.service.rules.generalRules.dataTransfer_3;
 import com.cgr.base.service.rules.generalRules.dataTransfer_4;

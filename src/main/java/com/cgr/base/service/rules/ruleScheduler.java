@@ -77,8 +77,12 @@ public class ruleScheduler {
 
                 // // Ejecución de Ingresos
                 // "7",
-                "8", // "9", "10",
-                // "8", "9A", "9B", "10", "11", "12",
+
+                // // Ejecución de Gastos
+                
+               // "8", // "9", "10",
+                // "8", "9A", "9B", "10", "11", 
+                 "10",
                 // "13A", "13B", "14A", "14B", "15", "16A", "16B",
                 // "17", "22A", "22_A", "22B", "22C", "22_C", "22D", "22_D",
                 // "22E", "22_E", "23", "24",
@@ -95,7 +99,7 @@ public class ruleScheduler {
         System.out.println("[FINAL] Ejecutando tareas finales...");
         // runStep(() -> er.actualizarSpecificRulesData(),
         // "actualizarSpecificRulesData");
-        // runStep(() -> certificator.generateControlTable(), "generateControlTable");
+         // runStep(() -> certificator.generateControlTable(), "generateControlTable");
 
         System.out.println("[FINISHED] Flujo de reglas ejecutado completamente.");
     }
