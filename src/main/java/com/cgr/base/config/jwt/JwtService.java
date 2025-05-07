@@ -41,7 +41,7 @@ public class JwtService {
         Date validity = new Date(now.getTime() + 3600000 * 24);
 
         String tokenCreated = JWT.create()
-                .withClaim("userName", customerJwt.getSAMAccountName())      
+                .withClaim("userName", customerJwt.getSAMAccountName())
                 .withClaim("isEnabled", customerJwt.getIsEnable())
                 .withIssuedAt(now)
                 .withExpiresAt(validity)
@@ -135,17 +135,16 @@ public class JwtService {
     }
 
     public Long extractUserIdFromToken(String token) {
-        
+
         String userName = JWT.decode(token).getClaim("userName").asString();
         Optional<UserEntity> user = userRepo.findBySAMAccountName(userName);
-    
+
         if (!user.isPresent()) {
             return null;
         }
-    
+
         Long userId = user.get().getId();
         return userId;
     }
-    
 
 }

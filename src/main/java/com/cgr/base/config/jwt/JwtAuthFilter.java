@@ -48,6 +48,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/auth/",
             "/swagger-ui",
             "/v3/api-docs",
+            "/api/v1/access/module/list",
+            "/api/v1/access/module/roles",
             "/ws-endpoint");
 
     @Override
@@ -57,6 +59,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         return urlsToSkip.stream().anyMatch(uri -> requestUri.startsWith(uri));
     }
 
+    @SuppressWarnings("null")
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -64,8 +67,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (header == null) {
-            responseHandler(response, "Token is Required.", HttpServletResponse.SC_UNAUTHORIZED); // 401 for missing
-                                                                                                  // token
+            responseHandler(response, "Token is Required.", HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 
@@ -74,42 +76,66 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = header.split(" ")[1];
+        String isTokenExpiredException = "";
+        try {
+            isTokenExpiredException = jwtService.isTokenExpired(header.split(" ")[1]);
+        } catch (Exception e) {
+            responseHandler(response, "Invalid Token.", HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        if (isTokenExpiredException != null) {
+
+            responseHandler(response, isTokenExpiredException, HttpServletResponse.SC_FORBIDDEN);
+
+            return;
+        }
+
+        String isTokenInvalidateFirma = jwtService.validateFirma(header.split(" ")[1]);
+
+        if (isTokenInvalidateFirma != null) {
+            responseHandler(response, isTokenInvalidateFirma, HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        boolean isEnableEmail = validateIsEnableEmail(header.split(" ")[1]);
+
+        if (!isEnableEmail) {
+
+            responseHandler(response, "User is not Enabled.", HttpServletResponse.SC_FORBIDDEN);
+
+            return;
+        }
+
+        String validatetokeninlist = jwtAuthenticationProvider.validatetokenInlistToken(header.split(" ")[1]);
+        if (validatetokeninlist != null) {
+
+            responseHandler(response, validatetokeninlist, HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        String username = this.jwtService.getClaimUserName(header.split(" ")[1]);
+
+        // Fetch roles from the database
+        List<String> roles = userRepositoryJpa.findBySAMAccountNameWithRoles(username)
+                .map(user -> user.getRoles().stream().map(role -> role.getName()).collect(Collectors.toList()))
+                .orElseThrow(() -> new RuntimeException("User not found or roles not assigned."));
+
+        // Obtener menús asociados a los roles
+        List<Menu> menus = userRepositoryJpa.findMenusByRoleNames(roles);
+
+        roles = userRepositoryJpa.findBySAMAccountNameWithRoles(username)
+                .map(user -> user.getRoles().stream().map(role -> "ROL_" + role.getId()).collect(Collectors.toList()))
+                .orElseThrow(() -> new RuntimeException("User not found or roles not assigned."));
+
+        List<SimpleGrantedAuthority> authorities = roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+
+        // Agregar menús como authorities
+        menus.forEach(menu -> authorities.add(new SimpleGrantedAuthority("MENU_" + menu.getCode())));
 
         try {
-            if (jwtService.isTokenExpired(token) != null) {
-                responseHandler(response, "Token has expired.", HttpServletResponse.SC_UNAUTHORIZED); // 401 for expired
-                                                                                                      // token
-                return;
-            }
-
-            if (jwtService.validateFirma(token) != null) {
-                responseHandler(response, "Invalid Token Signature.", HttpServletResponse.SC_UNAUTHORIZED); // 401 for
-                                                                                                            // invalid
-                                                                                                            // signature
-                return;
-            }
-
-            if (!validateIsEnableEmail(token)) {
-                responseHandler(response, "User is not Enabled.", HttpServletResponse.SC_FORBIDDEN); // 403 for disabled
-                                                                                                     // user
-                return;
-            }
-
-            String username = jwtService.getClaimUserName(token);
-
-            // Fetch roles and permissions
-            List<String> roles = userRepositoryJpa.findBySAMAccountNameWithRoles(username)
-                    .map(user -> user.getRoles().stream().map(role -> role.getName()).collect(Collectors.toList()))
-                    .orElseThrow(() -> new RuntimeException("User not found or roles not assigned."));
-
-            List<Menu> menus = userRepositoryJpa.findMenusByRoleNames(roles);
-
-            List<SimpleGrantedAuthority> authorities = roles.stream()
-                    .map(SimpleGrantedAuthority::new)
-                    .collect(Collectors.toList());
-
-            menus.forEach(menu -> authorities.add(new SimpleGrantedAuthority("MENU_" + menu.getCode())));
 
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                     username, null, authorities);
@@ -118,8 +144,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         } catch (RuntimeException e) {
             SecurityContextHolder.clearContext();
-            responseHandler(response, "Access Denied.", HttpServletResponse.SC_FORBIDDEN); // 403 for access denied
-            return;
+            throw new RuntimeException(e);
         }
 
         filterChain.doFilter(request, response);
@@ -127,7 +152,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private void responseHandler(HttpServletResponse response, String exceptionHandler, int status) throws IOException {
 
-        String message = getResponseJson(exceptionHandler, status);
+        String message = getResponseJson(exceptionHandler);
 
         response.setContentType("application/json");
         response.setStatus(status);
@@ -135,16 +160,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         response.getWriter().flush();
     }
 
-    private String getResponseJson(String message, int status)
+    private String getResponseJson(String isTokenExpired)
             throws JsonProcessingException {
 
         Map<String, Object> jsonresponse = new HashMap<>();
 
-        jsonresponse.put("message", message);
-        jsonresponse.put("statusCode", status); // Ensure correct status code is set
-        jsonresponse.put("error", status == HttpServletResponse.SC_UNAUTHORIZED ? "Unauthorized" : "Forbidden");
+        jsonresponse.put("message", isTokenExpired);
+        jsonresponse.put("statusCode", HttpServletResponse.SC_FORBIDDEN);
+        jsonresponse.put("error", "Invalid Token.");
 
-        return getObjectMapper.writeValueAsString(jsonresponse);
+        String responseJson = getObjectMapper.writeValueAsString(jsonresponse);
+
+        return responseJson;
     }
 
     private boolean validateIsEnableEmail(String token) throws JsonProcessingException {
