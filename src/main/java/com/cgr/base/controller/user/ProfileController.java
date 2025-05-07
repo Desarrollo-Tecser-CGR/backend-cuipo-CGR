@@ -35,18 +35,22 @@ public class ProfileController extends AbstractController {
     private String getToken(HttpServletRequest request) {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (header == null || !header.startsWith("Bearer ")) {
-            throw new IllegalArgumentException("Token is Required.");
+            throw new SecurityException("Token is Required."); // Ensure SecurityException is thrown
         }
         return header.split(" ")[1];
     }
 
     private Long getUserIdFromRequest(HttpServletRequest request) {
-        String token = getToken(request);
-        Long userId = jwtService.extractUserIdFromToken(token);
-        if (userId == null) {
-            throw new IllegalArgumentException("User ID not Found.");
+        try {
+            String token = getToken(request);
+            Long userId = jwtService.extractUserIdFromToken(token);
+            if (userId == null) {
+                throw new SecurityException("User ID not Found."); // Ensure SecurityException is thrown
+            }
+            return userId;
+        } catch (Exception e) {
+            throw new SecurityException("Invalid or Expired Token."); // Ensure SecurityException is thrown
         }
-        return userId;
     }
 
     @PostMapping("/upload_image")
