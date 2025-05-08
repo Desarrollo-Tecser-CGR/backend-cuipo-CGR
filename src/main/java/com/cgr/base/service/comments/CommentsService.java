@@ -20,9 +20,9 @@ public class CommentsService {
         private EntityManager entityManager;
 
         @Transactional
-        public void createComment(Map<String, Object> commentData, Long userId, String userName, List<String> roles) {
+        public Map<String, Object> createComment(Map<String, Object> commentData, String userName, List<String> roles) {
                 logger.info("Creating comment with data: {}", commentData);
-                logger.info("User ID: {}, User Name: {}, Roles: {}", userId, userName, roles);
+                logger.info("User Name: {}, Roles: {}", userName, roles);
 
                 // Validate required fields
                 if (commentData.get("fecha") == null ||
@@ -63,9 +63,37 @@ public class CommentsService {
                                         .executeUpdate();
 
                         logger.info("Comment inserted successfully.");
+
+                        // Retrieve the created comment
+                        String fetchSql = """
+                                        SELECT TOP 1
+                                                                        c.ID AS ID,
+                                                                        u.FULL_NAME AS full_name,
+                                                                        cat.TEXTO_CATEGORIA AS categoria,
+                                                                        FORMAT(c.FECHA_HORA_COMENTARIO, 'yyyy-MM-dd HH:mm:ss') AS fecha_hora_comentario,
+                                                                        c.COMENTARIO AS comentario,
+                                                                        c.ROL_USUARIO AS rol_usuario,
+                                                                        c.NOMBRE_USUARIO AS nombre_usuario,
+                                                                        p.TEXTO_PRIORIDAD AS prioridad
+                                        FROM COMENTARIOS c
+                                        JOIN USERS u ON c.NOMBRE_USUARIO = u.samaccount_name
+                                        JOIN CATEGORIA cat ON c.CATEGORIA = cat.ID
+                                        JOIN PRIORIDADES p ON c.PRIORIDAD = p.ID
+                                        WHERE c.FECHA = :fecha
+                                                                  AND c.CODIGO_ENTIDAD = :codigoEntidad
+                                                                  AND c.TIPO_COMENT = :tipoComent
+                                        ORDER BY c.FECHA_HORA_COMENTARIO DESC
+                                        """;
+
+                        return (Map<String, Object>) entityManager.createNativeQuery(fetchSql, Map.class)
+                                        .setParameter("fecha", commentData.get("fecha"))
+                                        .setParameter("codigoEntidad", commentData.get("codigoEntidad"))
+                                        .setParameter("tipoComent", commentData.get("tipoComent"))
+                                        .getSingleResult();
+
                 } catch (Exception e) {
                         logger.error("Error executing SQL query: {}", e.getMessage(), e);
-                        // No lanzar excepción genérica aquí, solo registrar el error
+                        throw new RuntimeException("Error creating comment: " + e.getMessage(), e);
                 }
         }
 
@@ -75,15 +103,18 @@ public class CommentsService {
 
                 String sql = """
                                 SELECT
-                                    c.COMENTARIO,
-                                    p.TEXTO_PRIORIDAD AS PRIORIDAD,
-                                    cat.TEXTO_CATEGORIA AS CATEGORIA,
-                                    c.ROL_USUARIO,
-                                    c.NOMBRE_USUARIO,
-                                    FORMAT(c.FECHA_HORA_COMENTARIO, 'yyyy-MM-dd HH:mm:ss') AS FECHA_HORA_COMENTARIO
+                                        c.ID AS ID,
+                                        c.COMENTARIO,
+                                        p.TEXTO_PRIORIDAD AS PRIORIDAD,
+                                        cat.TEXTO_CATEGORIA AS CATEGORIA,
+                                        c.ROL_USUARIO,
+                                        c.NOMBRE_USUARIO,
+                                        u.FULL_NAME AS FULL_NAME,
+                                        FORMAT(c.FECHA_HORA_COMENTARIO, 'yyyy-MM-dd HH:mm:ss') AS FECHA_HORA_COMENTARIO
                                 FROM COMENTARIOS c
                                 JOIN PRIORIDADES p ON c.PRIORIDAD = p.ID
                                 JOIN CATEGORIA cat ON c.CATEGORIA = cat.ID
+                                JOIN USERS u ON c.NOMBRE_USUARIO = u.samaccount_name
                                 WHERE c.FECHA = :fecha
                                   AND c.CODIGO_ENTIDAD = :codigoEntidad
                                   AND c.TIPO_COMENT = :tipoComent
