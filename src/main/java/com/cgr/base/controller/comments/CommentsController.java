@@ -19,6 +19,8 @@ import com.cgr.base.service.comments.CommentsService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @RestController
 @RequestMapping("/api/v1/comments")
@@ -38,36 +40,21 @@ public class CommentsController extends AbstractController {
 
     @PostMapping
     public ResponseEntity<?> createComment(@RequestBody Map<String, Object> commentData, HttpServletRequest request) {
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
-                    "data", null,
-                    "error", "Authorization token is missing or invalid.",
-                    "status", HttpStatus.FORBIDDEN.value(),
-                    "successful", false));
-        }
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        String token = header.split(" ")[1];
-        Long userId = jwtService.extractUserIdFromToken(token);
-
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
-                    "data", null,
-                    "error", "User ID not found in token.",
-                    "status", HttpStatus.FORBIDDEN.value(),
-                    "successful", false));
-        }
-
-        String userName = jwtService.getClaimUserName(token);
-
-        List<String> roles = userRepositoryJpa.findBySAMAccountNameWithRoles(userName)
+            String userName = authentication.getName();
+            
+            List<String> roles = userRepositoryJpa.findBySAMAccountNameWithRoles(userName)
                 .map(user -> user.getRoles().stream().map(role -> role.getName()).collect(Collectors.toList()))
                 .orElseThrow(() -> new RuntimeException("User not found or roles not assigned."));
 
-        try {
-            commentsService.createComment(commentData, userId, userName, roles);
+            System.out.println(userName);
+            System.out.println(roles);
+
+            Map<String, Object> result = commentsService.createComment(commentData, userName, roles);
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
-                    "data", null,
+                    "data", result,
                     "message", "Comment created successfully.",
                     "status", HttpStatus.CREATED.value(),
                     "successful", true));
