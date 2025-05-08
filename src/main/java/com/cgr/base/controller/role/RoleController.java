@@ -165,11 +165,11 @@ public class RoleController extends AbstractController {
         }
 
     }
-
+    
     @DeleteMapping("/config/{id}")
     public ResponseEntity<?> deleteRole(@PathVariable Long id, HttpServletRequest request) {
         if (id == 1) {
-            return requestResponse(null, "El rol Administrador no puede ser eliminado.", HttpStatus.FORBIDDEN, false);
+            return requestResponse(null, "El rol Administrador no puede ser eliminado.", HttpStatus.BAD_REQUEST, false);
         }
 
         roleService.delete(id);
@@ -187,7 +187,7 @@ public class RoleController extends AbstractController {
             logGeneralService.createLog(userId, USUARIOS,
                     "Eliminación de rol id: " + id + ".");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
 
         Map<String, Object> response = new HashMap<>();
