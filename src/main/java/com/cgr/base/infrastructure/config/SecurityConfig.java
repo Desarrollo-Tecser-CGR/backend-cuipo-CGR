@@ -42,7 +42,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**", "/swagger-ui/**", "/v3/api-docs/**", "/ws-endpoint", "/ws-endpoint/**",
                             "/api/v1/access/module/**").permitAll();
                     auth.anyRequest().authenticated();
-                }).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                }).sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         http.headers(headers -> headers
                 .httpStrictTransportSecurity(hsts -> hsts
@@ -57,20 +57,42 @@ public class SecurityConfig {
             @Override
             public CorsConfiguration getCorsConfiguration(@NonNull HttpServletRequest request) {
                 CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:4200",
-                        "http://localhost:5173/", "http://192.168.0.220/", "http://192.168.0.220/",
-                        "http://localhost:8000/", "http://localhost:8000",
-                        "http://localhost:48496", "https://665922d5497f3aaadbaaf8b0--melodic-halva-c4b1b1.netlify.app/",
-                        "https://665922d5497f3aaadbaaf8b0--melodic-halva-c4b1b1.netlify.app",
-                        "https://bovid.site/", "https://bovid.site", "http://bovid.site/",
-                        "http://bovid.site", "https://strong-toffee-1046b5.netlify.app/",
-                        "https://strong-toffee-1046b5.netlify.app", "http://192.168.2.63:8001/",
-                        "http://192.168.2.63:8001"));
-                config.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
-                config.setAllowedHeaders(Arrays.asList("*"));
+                
+                // Lista de orígenes permitidos (añade los que necesites)
+                config.setAllowedOrigins(Arrays.asList(
+                    "http://localhost:4200",           // Angular dev server
+                    "http://127.0.0.1:4200",           // http-server default
+                    "http://192.168.2.64:4200",        // Si accedes por IP local
+                    "http://localhost:5173",           // Vite/React
+                    "https://tu-app-production.com",    // Dominio en producción
+                    "http://192.168.0.220",            // Otras IPs necesarias
+                    "http://192.168.2.63:8001"         // Backend local (si aplica)
+                ));
+    
+                // Métodos HTTP permitidos
+                config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+                
+                // Headers permitidos (usar "*" puede ser inseguro en producción)
+                config.setAllowedHeaders(Arrays.asList(
+                    "Authorization", 
+                    "Content-Type", 
+                    "Accept", 
+                    "X-Requested-With",
+                    "Cache-Control"
+                ));
+                
+                // Headers expuestos en la respuesta
+                config.setExposedHeaders(Arrays.asList(
+                    "Authorization", 
+                    "Content-Disposition"
+                ));
+                
+                // Permitir credenciales (cookies, auth headers)
                 config.setAllowCredentials(true);
-                config.setExposedHeaders(Arrays.asList("Authorization", "Content-Disposition"));
+                
+                // Tiempo de cache para preflight (1 hora)
                 config.setMaxAge(3600L);
+                
                 return config;
             }
         };
