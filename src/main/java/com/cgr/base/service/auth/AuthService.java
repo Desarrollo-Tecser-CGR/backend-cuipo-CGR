@@ -94,6 +94,8 @@ public class AuthService {
         List<Menu> menus = userRepositoryFull.findMenusByRoleNames(
                 user.getRoles().stream().map(RoleEntity::getName).toList());
         userRequestDto.setMenus(menus);
+        
+        userRequestDto.setFullName(user.getFullName());
 
         userRequest.setEmail(user.getEmail());
 

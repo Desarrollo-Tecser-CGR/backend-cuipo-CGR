@@ -135,4 +135,28 @@ public class accessManagement {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public void assignMenuCommentsPermissionToRole(Long roleId) {
+        String sqlCheckPermission = """
+                    SELECT COUNT(*) FROM menu_roles
+                    WHERE role_id = :roleId AND menu_id = (
+                        SELECT id FROM menus WHERE code = 'MENU_COMMENTS'
+                    )
+                """;
+
+        int count = ((Number) entityManager.createNativeQuery(sqlCheckPermission)
+                .setParameter("roleId", roleId)
+                .getSingleResult()).intValue();
+
+        if (count == 0) {
+            String sqlAssignPermission = """
+                        INSERT INTO menu_roles (role_id, menu_id)
+                        SELECT :roleId, id FROM menus WHERE code = 'MENU_COMMENTS'
+                    """;
+            entityManager.createNativeQuery(sqlAssignPermission)
+                    .setParameter("roleId", roleId)
+                    .executeUpdate();
+        }
+    }
+
 }

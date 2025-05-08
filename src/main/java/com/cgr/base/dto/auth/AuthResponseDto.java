@@ -20,6 +20,7 @@ public class AuthResponseDto {
     private Boolean isEnable;
     private List<RoleDto> roles;
     private List<Menu> menus;
+    private String fullName;
 
     @Data
     @NoArgsConstructor

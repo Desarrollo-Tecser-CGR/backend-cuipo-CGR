@@ -42,6 +42,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**", "/swagger-ui/**", "/v3/api-docs/**",
                             "/ws-endpoint", "/ws-endpoint/**",
                             "/api/v1/access/module/**").permitAll();
+                    auth.requestMatchers("/api/v1/comments/**").hasAuthority("MENU_CERTIFY"); // Cambiado a MENU_CERTIFY
                     auth.anyRequest().authenticated();
                 }).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

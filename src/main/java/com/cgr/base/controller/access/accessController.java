@@ -35,14 +35,14 @@ public class accessController extends AbstractController {
     @Autowired
     private LogGeneralService logGeneralService;
 
-    @PreAuthorize("hasAuthority('Administrador')")
+    @PreAuthorize("hasAuthority('ROL_1')")
     @GetMapping("/module/list")
     public ResponseEntity<?> getAvailableMenus() {
         List<Map<String, Object>> menus = Access.getAvailableMenus();
         return requestResponse(menus, "Available menus successfully retrieved.", HttpStatus.OK, true);
     }
 
-    @PreAuthorize("hasAuthority('Administrador')")
+    @PreAuthorize("hasAuthority('ROL_1')")
     @GetMapping("/module/roles")
     public ResponseEntity<?> getRolesWithMenus() {
         List<Map<String, Object>> rolesWithMenus = Access.getRolesWithMenus();

@@ -68,6 +68,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
  
         if (header == null) {
             responseHandler(response, "Token is Required.", HttpServletResponse.SC_FORBIDDEN);
+            responseHandler(response, "Token is Required.", HttpServletResponse.SC_FORBIDDEN);
             return;
         }
  
@@ -146,6 +147,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
  
         } catch (RuntimeException e) {
             SecurityContextHolder.clearContext();
+            throw new RuntimeException(e);
             throw new RuntimeException(e);
         }
  
