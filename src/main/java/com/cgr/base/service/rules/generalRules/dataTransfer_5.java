@@ -21,24 +21,26 @@ public class dataTransfer_5 {
 
     public void applyGeneralRule5() {
 
-        UtilsDB.ensureColumnsExist(TABLA_EJEC_INGRESOS, "TOTAL_RECAUDO_TRIMESTRE_03:NVARCHAR(50)",
+        UtilsDB.ensureColumnsExist(TABLA_EJEC_INGRESOS, "TOTAL_RECAUDO_TRIMESTRE_PREVIO:NVARCHAR(50)",
                 "CA0039_RG_5:NVARCHAR(5)", "DIFERENCIA_CA0039_RG_5:NVARCHAR(50)");
 
         String updateRecaudoTrimestre03Query = String.format(
                 """
                         UPDATE a
-                        SET a.TOTAL_RECAUDO_TRIMESTRE_03 =
-                        CASE
-                        WHEN b.TOTAL_RECAUDO IS NOT NULL THEN b.TOTAL_RECAUDO
-                        ELSE NULL
-                        END
-                        FROM %s a
-                        INNER JOIN %s b ON
-                        a.CODIGO_ENTIDAD_INT = b.CODIGO_ENTIDAD_INT
-                        AND a.AMBITO_CODIGO_STR = b.AMBITO_CODIGO_STR
-                        AND a.FECHA = b.FECHA
-                        AND b.TRIMESTRE = 3
-                        AND a.CUENTA = b.CUENTA
+                        SET a.TOTAL_RECAUDO_TRIMESTRE_PREVIO =
+                            CASE
+                                WHEN b.TOTAL_RECAUDO IS NOT NULL THEN b.TOTAL_RECAUDO
+                                ELSE NULL
+                            END
+                        FROM VW_OPENDATA_B_EJECUCION_INGRESOS a
+                        INNER JOIN VW_OPENDATA_B_EJECUCION_INGRESOS b ON
+                            a.CODIGO_ENTIDAD_INT = b.CODIGO_ENTIDAD_INT
+                            AND a.AMBITO_CODIGO_STR = b.AMBITO_CODIGO_STR
+                            AND a.FECHA = b.FECHA
+                            AND a.CUENTA = b.CUENTA
+                            AND b.TRIMESTRE = a.TRIMESTRE - 3
+                        WHERE a.TRIMESTRE IN (6, 9, 12)
+
                         """,
                 TABLA_EJEC_INGRESOS, TABLA_EJEC_INGRESOS);
 
@@ -50,8 +52,8 @@ public class dataTransfer_5 {
                         SET a.CA0039_RG_5 =
                             CASE
                                 WHEN LEN(a.CUENTA) - LEN(REPLACE(a.CUENTA, '.', '')) > 2 THEN 'N/A'
-                                WHEN a.TOTAL_RECAUDO IS NULL OR a.TOTAL_RECAUDO_TRIMESTRE_03 IS NULL THEN 'N/D'
-                                WHEN TRY_CAST(a.TOTAL_RECAUDO AS DECIMAL(18, 2)) > TRY_CAST(a.TOTAL_RECAUDO_TRIMESTRE_03 AS DECIMAL(18, 2)) THEN '0'
+                                WHEN a.TOTAL_RECAUDO IS NULL OR a.TOTAL_RECAUDO_TRIMESTRE_PREVIO IS NULL THEN 'N/D'
+                                WHEN TRY_CAST(a.TOTAL_RECAUDO AS DECIMAL(18, 2)) > TRY_CAST(a.TOTAL_RECAUDO_TRIMESTRE_PREVIO AS DECIMAL(18, 2)) THEN '0'
                                 ELSE '1'
                             END
                         FROM %s a
@@ -65,11 +67,11 @@ public class dataTransfer_5 {
                         UPDATE a
                         SET a.DIFERENCIA_CA0039_RG_5 =
                             CASE
-                                WHEN TRY_CAST(a.TOTAL_RECAUDO_TRIMESTRE_03 AS DECIMAL(18,2)) IS NULL
+                                WHEN TRY_CAST(a.TOTAL_RECAUDO_TRIMESTRE_PREVIO AS DECIMAL(18,2)) IS NULL
                                   OR TRY_CAST(a.TOTAL_RECAUDO AS DECIMAL(18,2)) IS NULL THEN NULL
                                 ELSE CAST(
-                                    TRY_CAST(a.TOTAL_RECAUDO_TRIMESTRE_03 AS DECIMAL(18,2))
-                                    - TRY_CAST(a.TOTAL_RECAUDO AS DECIMAL(18,2))
+                                    TRY_CAST(a.TOTAL_RECAUDO AS DECIMAL(18,2))
+                                    - TRY_CAST(a.TOTAL_RECAUDO_TRIMESTRE_PREVIO AS DECIMAL(18,2))
                                     AS NVARCHAR(50))
                             END
                         FROM %s a
