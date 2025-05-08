@@ -70,7 +70,7 @@ public class ruleScheduler {
 
         String[] rules = {
 
-            //REGLAS GENERALES:
+                // REGLAS GENERALES:
                 // // Programación de Ingresos
 
                 // // Programación de Gastos
@@ -78,8 +78,8 @@ public class ruleScheduler {
                 // // Ejecución de Ingresos
 
                 // // Ejecución de Gastos
-            
-            //REGLAS ESPECIFICAS:
+
+                // REGLAS ESPECIFICAS:
 
                 // REGLAS:
                 "1", "2", "3", "4", "5", "6", "7", "8", "9A", "9B", "10", "11", "12", "13A", "13B", "14", "15", "16A",
@@ -97,9 +97,8 @@ public class ruleScheduler {
 
         // Finales
         System.out.println("[FINAL] Ejecutando tareas finales...");
-        // runStep(() -> er.actualizarSpecificRulesData(),
-        // "actualizarSpecificRulesData");
-        // runStep(() -> certificator.generateControlTable(), "generateControlTable");
+        runStep(() -> er.actualizarSpecificRulesData(), "actualizarSpecificRulesData");
+        runStep(() -> certificator.generateControlTable(), "generateControlTable");
 
         System.out.println("[FINISHED] Flujo de reglas ejecutado completamente.");
     }
