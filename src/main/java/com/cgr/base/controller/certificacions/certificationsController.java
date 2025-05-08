@@ -50,6 +50,7 @@ public class certificationsController extends AbstractController {
         return requestResponse(records, "Records retrieved successfully.", HttpStatus.OK, true);
     }
 
+    @PreAuthorize("hasAuthority('ROL_2')")
     @PutMapping("/update/calidad")
     public ResponseEntity<?> updateCalidad(@RequestBody Map<String, String> requestBody,
             HttpServletRequest httpRequest) {
@@ -77,6 +78,7 @@ public class certificationsController extends AbstractController {
 
     }
 
+    @PreAuthorize("hasAuthority('ROL_2')")
     @PutMapping("/update/l617")
     public ResponseEntity<?> updateL617(@RequestBody Map<String, String> requestBody, HttpServletRequest httpRequest) {
 
