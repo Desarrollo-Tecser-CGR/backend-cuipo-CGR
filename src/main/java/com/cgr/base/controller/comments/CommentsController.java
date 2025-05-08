@@ -35,9 +35,6 @@ public class CommentsController extends AbstractController {
     @Autowired
     private IUserRepositoryJpa userRepositoryJpa;
 
-    @Autowired
-    private JwtService jwtService;
-
     @PostMapping
     public ResponseEntity<?> createComment(@RequestBody Map<String, Object> commentData, HttpServletRequest request) {
         try {
