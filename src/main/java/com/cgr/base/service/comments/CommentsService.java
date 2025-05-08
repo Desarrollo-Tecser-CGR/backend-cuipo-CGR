@@ -49,7 +49,7 @@ public class CommentsService {
                                         )
                                         """;
 
-                        String rolesString = String.join(",", roles);
+                        String rolesString = String.join(", ", roles);
 
                         entityManager.createNativeQuery(sql)
                                         .setParameter("fecha", commentData.get("fecha"))
