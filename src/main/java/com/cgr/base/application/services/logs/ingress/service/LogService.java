@@ -121,10 +121,10 @@ public class LogService  implements ILogUseCase {
         logEntity.setCorreo(userRequest.getEmail());
         logEntity.setData_session_start(new Date());
         logEntity.setEnable(true);
-        logEntity.setName_user(userRequest.getSAMAccountName());
+        logEntity.setName_user(userRequest.getUsername());
         logEntity.setTipe_of_income(userRequest.getTipe_of_income());
 
-        return this.adapterLogRepository.createLog(logEntity, userRequest.getSAMAccountName());
+        return this.adapterLogRepository.createLog(logEntity, userRequest.getUsername());
     }
 
 

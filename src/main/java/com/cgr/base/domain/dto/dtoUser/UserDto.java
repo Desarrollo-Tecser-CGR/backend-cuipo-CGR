@@ -32,4 +32,5 @@ public class UserDto {
     private String cargo;
     private List<Long> roleIds;
     private String imageProfile;
+    
 }

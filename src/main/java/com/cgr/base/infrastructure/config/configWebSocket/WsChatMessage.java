@@ -24,4 +24,5 @@ public class WsChatMessage {
     private String notification;
     private Date date;
     private WsChatMessageType Type;
+    private String senderUserName;
 }

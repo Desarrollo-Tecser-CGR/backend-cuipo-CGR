@@ -16,7 +16,7 @@ public enum AuthMapper implements Function<UserModel, AuthRequestDto> {
     }
 
     public AuthResponseDto toAuthResponDto(AuthRequestDto userRequestDto) {
-        return mapToAuthResponseDto(userRequestDto.getSAMAccountName());
+        return mapToAuthResponseDto(userRequestDto.getUsername());
     }
 
     public AuthResponseDto toAuthResponDto(UserModel userEntity) {

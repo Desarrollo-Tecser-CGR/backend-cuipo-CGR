@@ -13,9 +13,10 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthRequestDto {
     
-    @JsonProperty("sAMAccountName")
-    private String sAMAccountName;
-    private String password; 
+    @JsonProperty("Username")
+    private String Username;
+    @JsonProperty("Password")
+    private String Password;
     private String email;
     private String tipe_of_income;
 

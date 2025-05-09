@@ -25,7 +25,7 @@ public class WsChatController {
     @MessageMapping("chat.sendMessage") // Maps messages sent to "chat.sendMessage" WebSocket destination
     @SendTo("/topic/public") // Specifies that the return message will be sent to "/topic/public"
     public EntityNotificationDto sendMessage(@Payload WsChatMessage msg) {
-        EntityNotificationDto entityNotification = this.servicesNotification.saveNotification(msg);
+        EntityNotificationDto entityNotification = this.servicesNotification.saveAndSendNotification(msg);
         // Broadcast the message to all subscribers on the "/topic/public" topic
         return entityNotification;
     }

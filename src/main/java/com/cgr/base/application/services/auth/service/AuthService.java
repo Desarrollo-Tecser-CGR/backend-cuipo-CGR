@@ -63,14 +63,14 @@ public class AuthService implements IAuthUseCase {
 
         try {
 
-            UserModel userModel = userRepository.findBySAMAccountName(userRequest.getSAMAccountName());
+            UserModel userModel = userRepository.findBySAMAccountName(userRequest.getUsername());
 
             System.err.println("userModel: " + userModel);
 
             if (userModel != null && userModel.getPassword().equals(userRequest.getPassword())) {
 
                 Optional<UserEntity> userOptional = this.userRepositoryFull
-                        .findBySAMAccountName(userRequest.getSAMAccountName());
+                        .findBySAMAccountName(userRequest.getUsername());
                 AuthResponseDto userDto = AuthMapper.INSTANCE.toAuthResponDto(userModel);
 
                 String token = jwtAuthenticationProvider.createToken(userDto, userOptional.get().getRoles(), 3600000);
@@ -114,12 +114,12 @@ public class AuthService implements IAuthUseCase {
 
             // Validación con LDAP
             Boolean isAccountValid = activeDirectoryUserRepository.checkAccount(
-                    userRequest.getSAMAccountName(), userRequest.getPassword());
+                    userRequest.getUsername(), userRequest.getPassword());
 
             // Buscar el usuario en la base de datos
-            UserEntity user = this.userRepositoryFull.findBySAMAccountNameWithRoles(userRequest.getSAMAccountName())
+            UserEntity user = this.userRepositoryFull.findBySAMAccountNameWithRoles(userRequest.getUsername())
                     .orElseThrow(() -> new ResourceNotFoundException(
-                            "El usuario " + userRequest.getSAMAccountName() + " no existe"));
+                            "El usuario " + userRequest.getUsername() + " no existe"));
 
             // Verificar si el usuario está bloqueado
             if (isUserLocked(user)) {

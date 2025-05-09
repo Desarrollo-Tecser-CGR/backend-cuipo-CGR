@@ -9,7 +9,7 @@ public class AuthValidator {
 
     public static void validateLoginRequest(AuthRequestDto userRequest) {
         if (userRequest == null ||
-                StringUtils.isBlank(userRequest.getSAMAccountName()) ||
+                StringUtils.isBlank(userRequest.getUsername()) ||
                 StringUtils.isBlank(userRequest.getPassword())) {
             throw new MessageException(HttpStatus.BAD_REQUEST + " Por favor rellene todos los campos");
         }

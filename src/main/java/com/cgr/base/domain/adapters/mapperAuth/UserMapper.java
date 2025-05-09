@@ -14,7 +14,7 @@ public enum UserMapper implements Function<UserEntity, AuthRequestDto> {
 
         if (userEntity != null) {
             AuthRequestDto userRequestDto = new AuthRequestDto();
-            userRequestDto.setSAMAccountName(userEntity.getSAMAccountName());
+            userRequestDto.setUsername(userEntity.getSAMAccountName());
             userRequestDto.setPassword(userEntity.getPassword());
             return userRequestDto;
         }
@@ -33,7 +33,7 @@ public enum UserMapper implements Function<UserEntity, AuthRequestDto> {
 
     public AuthRequestDto toUserRequestDto(UserModel userModel) {
         AuthRequestDto userRequestDto = new AuthRequestDto();
-        userRequestDto.setSAMAccountName(userModel.getSAMAccountName());
+        userRequestDto.setUsername(userModel.getSAMAccountName());
         userRequestDto.setPassword(userModel.getPassword());
         return userRequestDto;
     }

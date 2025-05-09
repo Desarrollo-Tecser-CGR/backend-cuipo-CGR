@@ -26,6 +26,9 @@ public class EntityNotificationDto {
 
     private EntityProvitionalPlan entity;
 
-    private UserDto user;
+    private UserDto user; // Destinatario de la notificación
 
+    private String senderUserName; // quien la origino la notificaicon
+
+    private String type;
 }

@@ -2,6 +2,7 @@ package com.cgr.base.application.services.servicesNotification;
 
 import com.cgr.base.application.services.logs.exit.LogExitService;
 import com.cgr.base.domain.dto.dtoLogs.logsExit.LogExitDto;
+import com.cgr.base.domain.dto.dtoUser.UserDto;
 import com.cgr.base.domain.dto.dtoWebSocket.EntityNotificationDto;
 import com.cgr.base.domain.models.entity.EntityNotification;
 import com.cgr.base.domain.models.entity.EntityProvitionalPlan;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate; // Importa SimpMessagingTemplate
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,87 +42,91 @@ public class ServicesNotification {
         @Autowired
         private DtoMapper dtoMapper;
 
-        public EntityNotificationDto saveNotification(WsChatMessage notification) {
+        @Autowired
+        private SimpMessagingTemplate messagingTemplate; // Inyecta SimpMessagingTemplate
 
+        public EntityNotificationDto saveAndSendNotification(WsChatMessage notification) {
                 List<EntityProvitionalPlan> entityProvitionalPlan = this.repositoryEntityProvitionalPlan
-                                .findByEntityName(notification.getEntity().toLowerCase());
+                        .findByEntityName(notification.getEntity().toLowerCase());
 
-                Optional<UserEntity> userEntity = this.repositoryUser
-                                .findBySAMAccountName(notification.getSAMAccountName());
+                Optional<UserEntity> recipientUserEntity = this.repositoryUser
+                        .findBySAMAccountName(notification.getSAMAccountName());
 
-                if (entityProvitionalPlan.isEmpty() || !userEntity.isPresent()) {
+                if (entityProvitionalPlan.isEmpty() || !recipientUserEntity.isPresent()) {
                         return null;
                 }
 
                 EntityNotification entityNotification = this.dtoMapper.convertToDto(notification,
-                                EntityNotification.class);
+                        EntityNotification.class);
 
                 entityNotification.setEntity(entityProvitionalPlan.get(0));
-
-                entityNotification.setUser(userEntity.get());
-
+                entityNotification.setUser(recipientUserEntity.get());
                 entityNotification = repositoryNotification.save(entityNotification);
 
                 EntityNotificationDto entityNotificationDto = this.dtoMapper.convertToDto(entityNotification,
-                                EntityNotificationDto.class);
-
+                        EntityNotificationDto.class);
                 entityNotificationDto.setDate(entityNotification.getDate());
+                entityNotificationDto.setUser(this.dtoMapper.convertToDto(recipientUserEntity.get(), UserDto.class));
+
+                // Asignar el nombre del usuario que *envió* el mensaje (el remitente)
+                entityNotificationDto.setSenderUserName(notification.getSenderUserName());
+
+                // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                // ++++++++ ENVIAR LA NOTIFICACIÓN AL CANAL PÚBLICO  ++++++++
+                // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                entityNotificationDto.setType("NOTIFICATION"); // Asegúrate de establecer el tipo
+                this.messagingTemplate.convertAndSend("/topic/public", entityNotificationDto);
+                // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+                // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                // ++++++++ ELIMINA ESTA SECCIÓN - YA NO ENVIAMOS NOTIFICACIÓN PRIVADA ++++++++
+                // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                // messagingTemplate.convertAndSendToUser(
+                //         recipientUserEntity.get().getId().toString(), // ID del usuario como destino
+                //         "/queue/notifications", // El sub-destino para las notificaciones del usuario
+                //         entityNotificationDto // El payload de la notificación
+                // );
+                // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
                 return entityNotificationDto;
         }
 
+
+        // Los otros métodos (getAllNotifications, getNotificationsByEntity,
+        // getNotificationsSinceLastLogout) permanecen iguales
         public List<EntityNotificationDto> getAllNotifications() {
-
                 List<EntityNotification> entityNotifications = repositoryNotification.findAll();
-
                 List<EntityNotificationDto> entityNotificationsDto = this.dtoMapper.convertToListDto(
-                                entityNotifications,
-                                EntityNotificationDto.class);
-
+                        entityNotifications,
+                        EntityNotificationDto.class);
                 return entityNotificationsDto;
         }
 
         public List<EntityNotificationDto> getNotificationsByEntity(Integer entity) {
-
                 List<EntityNotification> entityNotifications = repositoryNotification.findByEntity_Id(entity);
-
                 List<EntityNotificationDto> entityNotificationsDto = this.dtoMapper.convertToListDto(
-                                entityNotifications,
-                                EntityNotificationDto.class);
-
+                        entityNotifications,
+                        EntityNotificationDto.class);
                 return entityNotificationsDto;
         }
 
         public Map<String, Object> getNotificationsSinceLastLogout(String samAccountName) {
-                // Obtener el último log de salida del usuario
                 LogExitDto lastLog = logExitService.getLastLog(samAccountName);
-
-                // Si no hay registro de cierre de sesión, devolvemos 0 notificaciones
                 if (lastLog == null) {
                         return Map.of(
-                                        "totalNotifications", 0,
-                                        "notificationsByEntity", Collections.emptyMap());
+                                "totalNotifications", 0,
+                                "notificationsByEntity", Collections.emptyMap());
                 }
-
                 Date lastLogoutDate = lastLog.getDataSessionEnd();
-
-                // Buscar notificaciones desde el último deslogueo
                 List<EntityNotification> newNotifications = repositoryNotification
-                                .findByUserAndDateAfter(lastLogoutDate);
-
-                // Total de notificaciones nuevas
+                        .findByUserAndDateAfter(lastLogoutDate);
                 int totalNotifications = newNotifications.size();
-
-                // Agrupar por entidad y contar cuántas notificaciones hay por cada una
                 Map<Object, Long> notificationsByEntity = newNotifications.stream()
-                                .collect(Collectors.groupingBy(
-                                                notification -> notification.getEntity().getEntityName(), // Nombre de
-                                                                                                          // la entidad
-                                                Collectors.counting()));
-
+                        .collect(Collectors.groupingBy(
+                                notification -> notification.getEntity().getEntityName(),
+                                Collectors.counting()));
                 return Map.of(
-                                "totalNotifications", totalNotifications,
-                                "notificationsByEntity", notificationsByEntity);
+                        "totalNotifications", totalNotifications,
+                        "notificationsByEntity", notificationsByEntity);
         }
-
 }
