@@ -19,7 +19,136 @@ public class dataTransfer_17 {
     @Value("${TABLA_EJEC_INGRESOS}")
     private String TABLA_EJEC_INGRESOS;
 
+    public void applyGeneralRule17x() {
+        applyGeneralRule17A();
+    }
+
     public void applyGeneralRule17() {
+    }
+
+    public void applyGeneralRule17A() {
+
+        UtilsDB.ensureColumnsExist("GENERAL_RULES_DATA",
+                "REGLA_GENERAL_17A:NVARCHAR(10)",
+                "ALERTA_17A:NVARCHAR(20)",
+                "VAL_RecaudoTotal_TrimVal_Cta1_17A:NVARCHAR(50)",
+                "VAL_RecaudoTotal_TrimPrev_Cta1_17A:NVARCHAR(50)",
+                "VAL_Variacion_Porcentual_Cta1_17A:NVARCHAR(50)",
+                "VAL_Variacion_Monetaria_Cta1_1A:NVARCHAR(50)");
+
+        String updateRecaudoTrimValQuery = String.format(
+                """
+                        UPDATE d
+                        SET d.VAL_RecaudoTotal_TrimVal_Cta1_17A = CAST(g.RECAUDO_TOTAL_SUM AS NVARCHAR(50))
+                        FROM GENERAL_RULES_DATA d
+                        LEFT JOIN (
+                            SELECT FECHA, TRIMESTRE, CODIGO_ENTIDAD_INT, AMBITO_CODIGO_STR,
+                                   SUM(TRY_CAST(TOTAL_RECAUDO AS DECIMAL(18,2))) AS RECAUDO_TOTAL_SUM
+                            FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE CUENTA = '1'
+                            GROUP BY FECHA, TRIMESTRE, CODIGO_ENTIDAD_INT, AMBITO_CODIGO_STR
+                        ) g ON g.FECHA = d.FECHA
+                             AND g.TRIMESTRE = d.TRIMESTRE
+                             AND g.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
+                             AND g.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
+                        """, TABLA_EJEC_INGRESOS, TABLA_EJEC_INGRESOS);
+
+        jdbcTemplate.update(updateRecaudoTrimValQuery);
+
+        String updateRecaudoTrimPrevQuery = String.format(
+                """
+                        UPDATE d
+                        SET d.VAL_RecaudoTotal_TrimPrev_Cta1_17A = CAST(g.RECAUDO_TOTAL_SUM AS NVARCHAR(50))
+                        FROM GENERAL_RULES_DATA d
+                        LEFT JOIN (
+                            SELECT FECHA, TRIMESTRE, CODIGO_ENTIDAD_INT, AMBITO_CODIGO_STR,
+                                   SUM(TRY_CAST(TOTAL_RECAUDO AS DECIMAL(18,2))) AS RECAUDO_TOTAL_SUM
+                            FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE CUENTA = '1'
+                            GROUP BY FECHA, TRIMESTRE, CODIGO_ENTIDAD_INT, AMBITO_CODIGO_STR
+                        ) g ON g.FECHA = d.FECHA
+                             AND g.TRIMESTRE = d.TRIMESTRE - 3
+                             AND g.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
+                             AND g.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
+                        """, TABLA_EJEC_INGRESOS, TABLA_EJEC_INGRESOS);
+
+        jdbcTemplate.update(updateRecaudoTrimPrevQuery);
+
+        String updateVariacionesQuery = """
+                UPDATE GENERAL_RULES_DATA
+                SET
+                    VAL_Variacion_Monetaria_Cta1_1A =
+                        CAST(
+                            TRY_CAST(VAL_RecaudoTotal_TrimVal_Cta1_17A AS DECIMAL(18,2))
+                            - TRY_CAST(VAL_RecaudoTotal_TrimPrev_Cta1_17A AS DECIMAL(18,2))
+                            AS NVARCHAR(50)
+                        ),
+                    VAL_Variacion_Porcentual_Cta1_17A =
+                        CASE
+                            WHEN TRY_CAST(VAL_RecaudoTotal_TrimPrev_Cta1_17A AS DECIMAL(18,2)) = 0
+                                 OR VAL_RecaudoTotal_TrimPrev_Cta1_17A IS NULL
+                                THEN NULL
+                            ELSE
+                                FORMAT(
+                                    ROUND(
+                                        ((TRY_CAST(VAL_RecaudoTotal_TrimVal_Cta1_17A AS DECIMAL(18,2))
+                                        / NULLIF(TRY_CAST(VAL_RecaudoTotal_TrimPrev_Cta1_17A AS DECIMAL(18,2)), 0)) - 1) * 100,
+                                        2
+                                    ),
+                                    'N2'
+                                )
+                        END
+                """;
+
+        jdbcTemplate.update(updateVariacionesQuery);
+
+        String updateEstadoRegla17A = """
+                    UPDATE GENERAL_RULES_DATA
+                    SET
+                        REGLA_GENERAL_17A = CASE
+                            WHEN VAL_Variacion_Porcentual_Cta1_17A IS NULL THEN 'SIN DATOS'
+                            WHEN TRY_CAST(VAL_Variacion_Porcentual_Cta1_17A AS DECIMAL(18,2)) BETWEEN -20 AND 30 THEN 'CUMPLE'
+                            ELSE 'NO CUMPLE'
+                        END,
+                        ALERTA_17A = CASE
+                            WHEN VAL_Variacion_Porcentual_Cta1_17A IS NULL THEN 'ND_CA0071'
+                            WHEN TRY_CAST(VAL_Variacion_Porcentual_Cta1_17A AS DECIMAL(18,2)) BETWEEN -20 AND 30 THEN 'OK'
+                            ELSE 'CA0071'
+                        END
+                """;
+
+        jdbcTemplate.update(updateEstadoRegla17A);
+
+        String updateNoDataRegla17A = String.format(
+                """
+                        UPDATE GENERAL_RULES_DATA
+                        SET REGLA_GENERAL_17A = 'SIN DATOS',
+                            ALERTA_17A = 'NO_EI'
+                        WHERE NOT EXISTS (
+                            SELECT 1
+                            FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE a.FECHA = GENERAL_RULES_DATA.FECHA
+                              AND a.TRIMESTRE = GENERAL_RULES_DATA.TRIMESTRE
+                              AND a.CODIGO_ENTIDAD_INT = GENERAL_RULES_DATA.CODIGO_ENTIDAD
+                              AND a.AMBITO_CODIGO_STR = GENERAL_RULES_DATA.AMBITO_CODIGO
+                        )
+                        """, TABLA_EJEC_INGRESOS, TABLA_EJEC_INGRESOS);
+
+        jdbcTemplate.update(updateNoDataRegla17A);
+
+        String updateNoAplicaRegla17A = """
+                    UPDATE GENERAL_RULES_DATA
+                    SET
+                        REGLA_GENERAL_17A = 'NO APLICA',
+                        ALERTA_17A = 'TRI_003'
+                    WHERE TRIMESTRE = 3
+                """;
+
+        jdbcTemplate.update(updateNoAplicaRegla17A);
+
+    }
+
+    public void applyGeneralRule17a() {
         ensureColumnsExist();
         actualizarValRtTv17();
         actualizarValRtTp17A();
