@@ -124,6 +124,33 @@ public class dataTransfer_16 {
 
         jdbcTemplate.update(updateEstadoRegla16A);
 
+        String updateNoDataRegla16A = String.format(
+                """
+                        UPDATE GENERAL_RULES_DATA
+                        SET REGLA_GENERAL_16A = 'SIN DATOS',
+                            ALERTA_16A = 'NO_EG'
+                        WHERE NOT EXISTS (
+                            SELECT 1
+                            FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE a.FECHA = GENERAL_RULES_DATA.FECHA
+                              AND a.TRIMESTRE = GENERAL_RULES_DATA.TRIMESTRE
+                              AND a.CODIGO_ENTIDAD_INT = GENERAL_RULES_DATA.CODIGO_ENTIDAD
+                              AND a.AMBITO_CODIGO_STR = GENERAL_RULES_DATA.AMBITO_CODIGO
+                        )
+                        """, TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS);
+
+        jdbcTemplate.update(updateNoDataRegla16A);
+
+        String updateNoAplicaRegla16A = """
+                    UPDATE GENERAL_RULES_DATA
+                    SET
+                        REGLA_GENERAL_16A = 'NO APLICA',
+                        ALERTA_16A = 'TRI_003'
+                    WHERE TRIMESTRE = 3
+                """;
+
+        jdbcTemplate.update(updateNoAplicaRegla16A);
+
     }
 
 }
