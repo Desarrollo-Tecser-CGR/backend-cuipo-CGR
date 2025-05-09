@@ -37,62 +37,33 @@ public class CommentsController extends AbstractController {
 
     @PostMapping
     public ResponseEntity<?> createComment(@RequestBody Map<String, Object> commentData, HttpServletRequest request) {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-            String userName = authentication.getName();
-            
-            List<String> roles = userRepositoryJpa.findBySAMAccountNameWithRoles(userName)
+        String userName = authentication.getName();
+
+        List<String> roles = userRepositoryJpa.findBySAMAccountNameWithRoles(userName)
                 .map(user -> user.getRoles().stream().map(role -> role.getName()).collect(Collectors.toList()))
                 .orElseThrow(() -> new RuntimeException("User not found or roles not assigned."));
 
-            System.out.println(userName);
-            System.out.println(roles);
+        System.out.println(userName);
+        System.out.println(roles);
 
-            Map<String, Object> result = commentsService.createComment(commentData, userName, roles);
-            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
-                    "data", result,
-                    "message", "Comment created successfully.",
-                    "status", HttpStatus.CREATED.value(),
-                    "successful", true));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
-                    "data", null,
-                    "error", e.getMessage(),
-                    "status", HttpStatus.BAD_REQUEST.value(),
-                    "successful", false));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                    "data", null,
-                    "error", "Unexpected error occurred: " + e.getMessage(),
-                    "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "successful", false));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                    "data", null,
-                    "error", "An unexpected error occurred.",
-                    "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "successful", false));
-        }
+        Map<String, Object> result = commentsService.createComment(commentData, userName, roles);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                "data", result,
+                "message", "Comment created successfully.",
+                "status", HttpStatus.CREATED.value(),
+                "successful", true));
     }
 
     @GetMapping("/{fecha}/{codigoEntidad}/{tipoComent}")
     public ResponseEntity<?> getComments(@PathVariable int fecha, @PathVariable String codigoEntidad,
             @PathVariable int tipoComent) {
-        try {
-            List<Map<String, Object>> comments = commentsService.getComments(fecha, codigoEntidad, tipoComent);
-            return ResponseEntity.ok(Map.of(
-                    "data", comments,
-                    "message", "Comments retrieved successfully.",
-                    "status", HttpStatus.OK.value(),
-                    "successful", true));
-        } catch (Exception e) {
-            logger.error("Error retrieving comments: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                    "data", null,
-                    "message", "Error retrieving comments: " + e.getMessage(),
-                    "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "successful", false));
-        }
+        List<Map<String, Object>> comments = commentsService.getComments(fecha, codigoEntidad, tipoComent);
+        return ResponseEntity.ok(Map.of(
+                "data", comments,
+                "message", "Comments retrieved successfully.",
+                "status", HttpStatus.OK.value(),
+                "successful", true));
     }
 }

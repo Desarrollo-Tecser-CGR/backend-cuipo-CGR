@@ -61,11 +61,7 @@ public class NotificationController extends AbstractController {
         if (userId == null) {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
-        try {
-            notificationService.markNotificationAsRead(userId, notificationId);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
+        notificationService.markNotificationAsRead(userId, notificationId);
 
         return ResponseEntity.ok().body(notificationId);
     }
@@ -84,11 +80,7 @@ public class NotificationController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
-        try {
-            notificationService.markAllNotificationsAsRead(userId);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al marcar notificaciones.");
-        }
+        notificationService.markAllNotificationsAsRead(userId);
 
         return ResponseEntity.ok().build();
     }
