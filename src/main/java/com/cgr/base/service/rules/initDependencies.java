@@ -3,7 +3,6 @@ package com.cgr.base.service.rules;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.cgr.base.service.rules.dataTransfer.dataTransfer_17;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_22;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_23;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_24;
@@ -23,6 +22,8 @@ import com.cgr.base.service.rules.generalRules.dataTransfer_1;
 import com.cgr.base.service.rules.generalRules.dataTransfer_10;
 import com.cgr.base.service.rules.generalRules.dataTransfer_12;
 import com.cgr.base.service.rules.generalRules.dataTransfer_14;
+import com.cgr.base.service.rules.generalRules.dataTransfer_16;
+import com.cgr.base.service.rules.generalRules.dataTransfer_17;
 import com.cgr.base.service.rules.generalRules.dataTransfer_2;
 import com.cgr.base.service.rules.generalRules.dataTransfer_3;
 import com.cgr.base.service.rules.generalRules.dataTransfer_4;
@@ -72,6 +73,9 @@ public class initDependencies {
 
     @Autowired
     private dataTransfer_14 Rule14;
+
+    @Autowired
+    private dataTransfer_16 Rule16;
 
     @Autowired
     private dataTransfer_17 Rule17;
@@ -133,8 +137,7 @@ public class initDependencies {
             case "13B" -> RulesEG.applyGeneralRule13B();
             case "14" -> Rule14.applyGeneralRule14();
             case "15" -> RulesEG.applyGeneralRule15();
-            case "16A" -> RulesEG.applyGeneralRule16A();
-            case "16B" -> RulesEG.applyGeneralRule16B();
+            case "16" -> Rule16.applyGeneralRule16();
             case "17" -> Rule17.applyGeneralRule17();
 
             // Reglas específicas
