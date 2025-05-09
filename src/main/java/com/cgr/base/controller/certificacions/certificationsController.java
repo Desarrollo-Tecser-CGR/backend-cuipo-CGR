@@ -63,18 +63,9 @@ public class certificationsController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
-        try {
-            String response = Certification.updateCertification(requestBody, userId, "calidad");
-            logGeneralService.createLog(userId, CERTIFICACIONES, "Modificación de certificación de calidad " + requestBody);
-            return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
-
-        } catch (EntityNotFoundException e) {
-            return requestResponse(null, e.getMessage(), HttpStatus.NOT_FOUND, false);
-        } catch (IllegalArgumentException e) {
-            return requestResponse(null, e.getMessage(), HttpStatus.BAD_REQUEST, false);
-        } catch (Exception e) {
-            return requestResponse(null, "Error inesperado.", HttpStatus.INTERNAL_SERVER_ERROR, false);
-        }
+        String response = Certification.updateCertification(requestBody, userId, "calidad");
+        logGeneralService.createLog(userId, CERTIFICACIONES, "Modificación de certificación de calidad " + requestBody);
+        return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
 
     }
 
@@ -91,18 +82,9 @@ public class certificationsController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
-        try {
-            String response = Certification.updateCertification(requestBody, userId, "L617");
-            logGeneralService.createLog(userId, CERTIFICACIONES, "Modificación de certificación L617 " + requestBody);
-            return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
-
-        } catch (EntityNotFoundException e) {
-            return requestResponse(null, e.getMessage(), HttpStatus.NOT_FOUND, false);
-        } catch (IllegalArgumentException e) {
-            return requestResponse(null, e.getMessage(), HttpStatus.BAD_REQUEST, false);
-        } catch (Exception e) {
-            return requestResponse(null, "Error inesperado.", HttpStatus.INTERNAL_SERVER_ERROR, false);
-        }
+        String response = Certification.updateCertification(requestBody, userId, "L617");
+        logGeneralService.createLog(userId, CERTIFICACIONES, "Modificación de certificación L617 " + requestBody);
+        return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
     }
 
 }

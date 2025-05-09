@@ -65,14 +65,9 @@ public class ParametrizacionAnualController extends AbstractController {
         if (userId == null) {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
-        try {
-            logGeneralService.createLog(userId, PARAMETRIZACION,
-                    "Creación de parametrización anual año " + parametrizacionAnual.getFecha() + " with values "
-                            + parametrizacionAnual);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        logGeneralService.createLog(userId, PARAMETRIZACION,
+                "Creación de parametrización anual año " + parametrizacionAnual.getFecha() + " with values "
+                        + parametrizacionAnual);
         return requestResponse(parametrizacionAnualService.save(parametrizacionAnual), "Create operation completed.",
                 HttpStatus.OK, true);
     }
@@ -90,18 +85,12 @@ public class ParametrizacionAnualController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
-        try {
+        logGeneralService.createLog(userId, PARAMETRIZACION,
+                "Modificación de parametrización anual año " + parametrizacionAnual.getFecha() + " to "
+                        + parametrizacionAnual);
 
-            logGeneralService.createLog(userId, PARAMETRIZACION,
-                    "Modificación de parametrización anual año " + parametrizacionAnual.getFecha() + " to "
-                            + parametrizacionAnual);
-
-            return requestResponse(parametrizacionAnualService.update(parametrizacionAnual),
-                    "Update operation completed.", HttpStatus.OK, true);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
+        return requestResponse(parametrizacionAnualService.update(parametrizacionAnual),
+                "Update operation completed.", HttpStatus.OK, true);
 
     }
 

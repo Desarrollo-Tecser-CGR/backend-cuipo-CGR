@@ -63,11 +63,9 @@ public class detailsGeneralRules {
 
         GeneralRulesNames regla = optionalRegla.get();
 
-        if (regla.getDetalles() == null || regla.getDetalles() == 0) {
+        if (regla.getDetalles() == null || "0".equals(regla.getDetalles().trim())) {
             throw new IllegalStateException("La regla seleccionada no tiene detalles asociados.");
         }
-
-        
 
         // A partir de aquí, trabajaremos con regla.getCodigoTabla(),
         // regla.getDetalles(), etc.

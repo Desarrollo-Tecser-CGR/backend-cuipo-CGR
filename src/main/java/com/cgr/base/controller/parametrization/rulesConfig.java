@@ -48,7 +48,7 @@ public class rulesConfig extends AbstractController {
     @GetMapping("/general/details")
     public ResponseEntity<?> getAllRulesGeneral() {
         List<Map<String, Object>> result = serviceGR.getAllRules();
-        return requestResponse(result, "Specific Rules successfully retrieved.", HttpStatus.OK, true);
+        return requestResponse(result, "Generals Rules successfully retrieved.", HttpStatus.OK, true);
     }
 
     @PostMapping("/general/rename/{codigoRegla}")

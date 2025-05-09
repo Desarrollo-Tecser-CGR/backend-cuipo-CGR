@@ -40,26 +40,16 @@ public class CommentsController extends AbstractController {
         List<String> roles = jwtService.getRolesToken(token);
         String userName = jwtService.getClaimUserName(token);
 
-        try {
-            commentsService.createComment(commentData, userId, userName, roles);
-            return requestResponse(null, "Comment created successfully.", HttpStatus.CREATED, true);
-        } catch (Exception e) {
-            return requestResponse(null, "Error creating comment: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR,
-                    false);
-        }
+        commentsService.createComment(commentData, userId, userName, roles);
+        return requestResponse(null, "Comment created successfully.", HttpStatus.CREATED, true);
     }
 
     @PreAuthorize("hasAuthority('MENU_COMMENTS')")
     @GetMapping("/{fecha}/{codigoEntidad}/{nombreEntidad}")
     public ResponseEntity<?> getComments(@PathVariable int fecha, @PathVariable String codigoEntidad,
             @PathVariable String nombreEntidad) {
-        try {
-            List<Map<String, Object>> comments = commentsService.getComments(fecha, codigoEntidad, nombreEntidad);
-            return requestResponse(comments, "Comments retrieved successfully.", HttpStatus.OK, true);
-        } catch (Exception e) {
-            return requestResponse(null, "Error retrieving comments: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR, false);
-        }
+        List<Map<String, Object>> comments = commentsService.getComments(fecha, codigoEntidad, nombreEntidad);
+        return requestResponse(comments, "Comments retrieved successfully.", HttpStatus.OK, true);
     }
 
     @PreAuthorize("hasAuthority('MENU_COMMENTS')")
@@ -73,24 +63,14 @@ public class CommentsController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
-        try {
-            commentsService.updateComment(commentData, userId);
-            return requestResponse(null, "Comment updated successfully.", HttpStatus.OK, true);
-        } catch (Exception e) {
-            return requestResponse(null, "Error updating comment: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR,
-                    false);
-        }
+        commentsService.updateComment(commentData, userId);
+        return requestResponse(null, "Comment updated successfully.", HttpStatus.OK, true);
     }
 
     @PreAuthorize("hasAuthority('MENU_COMMENTS')")
     @DeleteMapping
     public ResponseEntity<?> deleteComment(@RequestBody Map<String, Object> commentData) {
-        try {
-            commentsService.deleteComment(commentData);
-            return requestResponse(null, "Comment deleted successfully.", HttpStatus.OK, true);
-        } catch (Exception e) {
-            return requestResponse(null, "Error deleting comment: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR,
-                    false);
-        }
+        commentsService.deleteComment(commentData);
+        return requestResponse(null, "Comment deleted successfully.", HttpStatus.OK, true);
     }
 }

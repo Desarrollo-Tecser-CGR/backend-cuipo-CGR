@@ -34,10 +34,10 @@ public class GeneralRulesNames {
     private Integer orden;
 
     @Column(name = "DETALLES")
-    private Integer detalles;
+    private String  detalles;
 
     @Column(name = "CODIGO_TABLA")
-    private Integer codigoTabla;
+    private String  codigoTabla;
 
     @Transient
     public String getCodigo() {

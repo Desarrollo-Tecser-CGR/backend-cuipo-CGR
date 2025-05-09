@@ -22,13 +22,8 @@ public class certificationsTotalReport extends AbstractController {
 
     @GetMapping("/certifications")
     public ResponseEntity<?> getCertificationStats() {
-        try {
-            List<Map<String, Object>> stats = Report.getCertificationStats();
-            return requestResponse(stats, "Certification statistics successfully retrieved.", HttpStatus.OK, true);
-        } catch (Exception e) {
-            return requestResponse(null, "Error al recuperar estadísticas. Puede que la tabla no exista.",
-                    HttpStatus.INTERNAL_SERVER_ERROR, false);
-        }
+        List<Map<String, Object>> stats = Report.getCertificationStats();
+        return requestResponse(stats, "Certification statistics successfully retrieved.", HttpStatus.OK, true);
     }
 
 }
