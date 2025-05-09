@@ -90,7 +90,8 @@ public class GlobalRegistrationExceptionHandler extends AbstractController {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleUnexpected(Exception ex) {
-        return requestResponse(null, "Unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR, false);
+        return requestResponse(null, "Unexpected error occurred: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR,
+                false);
     }
 
 }

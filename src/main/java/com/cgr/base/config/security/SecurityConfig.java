@@ -42,8 +42,9 @@ public class SecurityConfig {
                     auth.requestMatchers("/auth/**", "/api/v1/auth/**", "/auth**", "/swagger-ui/**", "/v3/api-docs/**",
                             "/ws-endpoint", "/ws-endpoint/**",
                             "/api/v1/access/module/**").permitAll();
+                    auth.requestMatchers("/api/v1/comments/**").hasAuthority("MENU_CERTIFY"); // Cambiado a MENU_CERTIFY
                     auth.anyRequest().authenticated();
-                }).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                }).sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         http.headers(headers -> headers
                 .httpStrictTransportSecurity(hsts -> hsts
@@ -70,8 +71,10 @@ public class SecurityConfig {
                 config.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
                 config.setAllowedHeaders(Arrays.asList("*"));
                 config.setAllowCredentials(true);
-                config.setExposedHeaders(Arrays.asList("Authorization", "Content-Disposition"));
+                
+                // Tiempo de cache para preflight (1 hora)
                 config.setMaxAge(3600L);
+                
                 return config;
             }
         };
