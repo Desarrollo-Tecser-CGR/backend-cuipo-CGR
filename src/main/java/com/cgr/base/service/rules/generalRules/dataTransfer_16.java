@@ -30,7 +30,7 @@ public class dataTransfer_16 {
                 "COMP_OBLIG_PERIODO_PREV:NVARCHAR(50)",
                 "VAR_PORCENTUAL_COMP_OBLIG:NVARCHAR(50)",
                 "VAR_MONETARIA_COMP_OBLIG:NVARCHAR(50)",
-                "CA0068B_RG_16A:NVARCHAR(20)");
+                "CA0068B_RG_16B:NVARCHAR(20)");
 
         String updateCompObligPeriodoValQuery = String.format("""
                 UPDATE g
@@ -110,7 +110,7 @@ public class dataTransfer_16 {
 
         String updateEstadoReglaQuery = String.format("""
                 UPDATE %s
-                SET CA0068B_RG_16A =
+                SET CA0068B_RG_16B =
                     CASE
                         WHEN TRY_CAST(VAR_PORCENTUAL_COMP_OBLIG AS DECIMAL(18,2)) IS NULL THEN 'N/D'
                         WHEN TRY_CAST(VAR_PORCENTUAL_COMP_OBLIG AS DECIMAL(18,2)) < -20 THEN '0'
@@ -136,7 +136,7 @@ public class dataTransfer_16 {
                               AND a.TRIMESTRE = d.TRIMESTRE
                               AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
                               AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                              AND a.CA0068B_RG_16A = 'N/D'
+                              AND a.CA0068B_RG_16B = 'N/D'
                         ) THEN 'SIN DATOS'
                         WHEN EXISTS (
                             SELECT 1
@@ -145,7 +145,7 @@ public class dataTransfer_16 {
                               AND a.TRIMESTRE = d.TRIMESTRE
                               AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
                               AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                              AND a.CA0068B_RG_16A = '0'
+                              AND a.CA0068B_RG_16B = '0'
                         ) THEN 'NO CUMPLE'
                         ELSE 'CUMPLE'
                     END
@@ -165,7 +165,7 @@ public class dataTransfer_16 {
                               AND a.TRIMESTRE = d.TRIMESTRE
                               AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
                               AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                              AND a.CA0068B_RG_16A = 'N/D'
+                              AND a.CA0068B_RG_16B = 'N/D'
                         ) THEN 'ND_CA0068B'
                         WHEN EXISTS (
                             SELECT 1
@@ -174,7 +174,7 @@ public class dataTransfer_16 {
                               AND a.TRIMESTRE = d.TRIMESTRE
                               AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
                               AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                              AND a.CA0068B_RG_16A = '0'
+                              AND a.CA0068B_RG_16B = '0'
                         ) THEN 'CA0068B'
                         ELSE 'OK'
                     END
