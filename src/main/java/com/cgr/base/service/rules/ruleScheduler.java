@@ -72,8 +72,8 @@ public class ruleScheduler {
 
                 // REGLAS GENERALES:
 
-                // "1", "2", "16", 
-                "17" ,
+                // "1", "2", "16", "17",
+                "11",
 
 
                 // REGLAS ESPECIFICAS:
