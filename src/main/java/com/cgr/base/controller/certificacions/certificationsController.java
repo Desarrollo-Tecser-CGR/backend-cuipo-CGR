@@ -22,7 +22,6 @@ import com.cgr.base.config.jwt.JwtService;
 import com.cgr.base.service.certifications.CertificationsService;
 import com.cgr.base.service.logs.LogGeneralService;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @PreAuthorize("hasAuthority('MENU_CERTIFY')")
