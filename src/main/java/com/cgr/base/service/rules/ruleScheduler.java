@@ -72,7 +72,7 @@ public class ruleScheduler {
 
                 // REGLAS GENERALES:
 
-                "17", 
+                "16", 
 
 
                 // REGLAS ESPECIFICAS:
@@ -94,7 +94,7 @@ public class ruleScheduler {
         // Finales
         System.out.println("[FINAL] Ejecutando tareas finales...");
         //runStep(() -> er.actualizarSpecificRulesData(), "actualizarSpecificRulesData");
-        runStep(() -> certificator.generateControlTable(), "generateControlTable");
+        // runStep(() -> certificator.generateControlTable(), "generateControlTable");
 
         System.out.println("[FINISHED] Flujo de reglas ejecutado completamente.");
     }

@@ -148,7 +148,7 @@ public class dataTransfer_17 {
 
     }
 
-    public void applyGeneralRule17a() {
+    public void applyGeneralRule17as() {
         ensureColumnsExist();
         actualizarValRtTv17();
         actualizarValRtTp17A();
