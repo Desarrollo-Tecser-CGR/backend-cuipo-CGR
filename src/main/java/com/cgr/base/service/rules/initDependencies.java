@@ -15,7 +15,6 @@ import com.cgr.base.service.rules.dataTransfer.dataTransfer_30;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_31;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_32;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_EG;
-import com.cgr.base.service.rules.dataTransfer.dataTransfer_EI;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_GF;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_PG;
 import com.cgr.base.service.rules.generalRules.dataTransfer_1;

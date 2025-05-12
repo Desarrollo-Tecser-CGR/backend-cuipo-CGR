@@ -61,7 +61,7 @@ public class ruleScheduler {
 
     private void executeRuleFlow() {
 
-        runStep(() -> initParamerBD.executeInitTables(), "initDB_ParameterTables");
+        // runStep(() -> initParamerBD.executeInitTables(), "initDB_ParameterTables");
 
         // runStep(() -> motorReglas.processTablesRules(), "processTablesRules");
         // runStep(() -> parametria.processTablesSource(), "processTablesSource");
@@ -75,6 +75,7 @@ public class ruleScheduler {
 
                 // "1", "2", "16", "17",
                 //"11",
+                "3",
 
                 // REGLAS ESPECIFICAS:
 
