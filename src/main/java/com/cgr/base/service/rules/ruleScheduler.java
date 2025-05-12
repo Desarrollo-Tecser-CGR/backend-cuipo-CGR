@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
 
 import com.cgr.base.service.certifications.initTablaCertifications;
 import com.cgr.base.service.parametrization.generalParameter;
+import com.cgr.base.service.parametrization.initDB_ParameterTables;
 import com.cgr.base.service.parametrization.specificParameter;
 import com.cgr.base.service.rules.dataTransfer.columnsER;
-import com.cgr.base.service.rules.initTables.dataCategoryInit;
 import com.cgr.base.service.rules.initTables.dataParameterInit;
 import com.cgr.base.service.rules.initTables.dataSourceInit;
 
@@ -26,7 +26,7 @@ public class ruleScheduler {
     private initDependencies applyRules;
 
     @Autowired
-    private dataCategoryInit categorias;
+    private initDB_ParameterTables initParamerBD;
 
     @Autowired
     private dataParameterInit parametria;
@@ -61,9 +61,10 @@ public class ruleScheduler {
 
     private void executeRuleFlow() {
 
+        runStep(() -> initParamerBD.executeInitTables(), "initDB_ParameterTables");
+
         // runStep(() -> motorReglas.processTablesRules(), "processTablesRules");
         // runStep(() -> parametria.processTablesSource(), "processTablesSource");
-        // runStep(() -> categorias.initCategoryTable(), "initCategoryTable");
         // runStep(() -> parameterRG.tableGeneralRulesName(), "tableGeneralRulesName");
         // runStep(() -> parameterRE.tableSpecificRulesName(),
         // "tableSpecificRulesName");
@@ -73,15 +74,16 @@ public class ruleScheduler {
                 // REGLAS GENERALES:
 
                 // "1", "2", "16", "17",
-                "11",
-
+                //"11",
 
                 // REGLAS ESPECIFICAS:
 
                 // REGLAS:
-                // "1", "2", "3", "4", "5", "6", "7", "8", "9A", "9B", "10", "11", "12", "13A", "13B", "14", "15", "16A",
+                // "1", "2", "3", "4", "5", "6", "7", "8", "9A", "9B", "10", "11", "12", "13A",
+                // "13B", "14", "15", "16A",
                 // "16B", "17",
-                // "22A", "22_A", "22B", "22C", "22_C", "22D", "22_D", "22E", "22_E", "23", "24", "25A", "25_A", "25B",
+                // "22A", "22_A", "22B", "22C", "22_C", "22D", "22_D", "22E", "22_E", "23",
+                // "24", "25A", "25_A", "25B",
                 // "25_B", "GF",
                 // "26", "27", "28", "29A", "29B", "29C", "30", "31", "32"
 
@@ -94,7 +96,8 @@ public class ruleScheduler {
 
         // Finales
         System.out.println("[FINAL] Ejecutando tareas finales...");
-        //runStep(() -> er.actualizarSpecificRulesData(), "actualizarSpecificRulesData");
+        // runStep(() -> er.actualizarSpecificRulesData(),
+        // "actualizarSpecificRulesData");
         // runStep(() -> certificator.generateControlTable(), "generateControlTable");
 
         System.out.println("[FINISHED] Flujo de reglas ejecutado completamente.");
