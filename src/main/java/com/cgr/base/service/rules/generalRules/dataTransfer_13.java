@@ -22,13 +22,14 @@ public class dataTransfer_13 {
     @Autowired
     private dataBaseUtils UtilsDB;
 
-    public void applyGeneralRule13x() {
+    public void applyGeneralRule13() {
 
         applyGeneralRule13A();
         applyGeneralRule13B();
+        applyGeneralRule13C();
     }
 
-    public void applyGeneralRule13() {
+    public void applyGeneralRule13C() {
 
         UtilsDB.ensureColumnsExist(
                 "GENERAL_RULES_DATA",

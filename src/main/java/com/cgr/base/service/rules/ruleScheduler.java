@@ -79,8 +79,8 @@ public class ruleScheduler {
                 // Programación Gastos:
                 // "11",
                 // Ejecución Gastos:
-                //  "16",
-                "13",
+                //  "13", "16",
+                "5",
                 // REGLAS ESPECIFICAS:
 
                 // REGLAS:
