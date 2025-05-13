@@ -42,6 +42,8 @@ public class LogEntity {
 
     @Column(name = "tipe_of_income")
     private String tipe_of_income;
+   @Column(name = "loginFailureReason")
+    private String loginFailureReason;
 
     @NotNull
     @Column(name = "date_session_start", updatable = false)

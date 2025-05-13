@@ -2,6 +2,7 @@ package com.cgr.base.application.services.user.usecase;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,4 +29,5 @@ public interface IUserUseCase {
 
     public abstract String convertToBase64(MultipartFile image) throws IOException;
 
+    Optional<UserWithRolesResponseDto> findById(Long id);
 }

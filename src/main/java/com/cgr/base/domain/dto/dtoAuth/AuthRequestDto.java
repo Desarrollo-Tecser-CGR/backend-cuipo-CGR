@@ -18,6 +18,9 @@ public class AuthRequestDto {
     @JsonProperty("Password")
     private String Password;
     private String email;
+
     private String tipe_of_income;
+    @JsonProperty("loginFailureReason")
+    private String loginFailureReason;
 
 }

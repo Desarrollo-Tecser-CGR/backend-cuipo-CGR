@@ -105,38 +105,35 @@ public class AuthService implements IAuthUseCase {
                                                            HttpServletRequest servletRequest) throws JsonProcessingException {
 
         Map<String, Object> response = new HashMap<>();
-
-
+        String tipoIngreso = "Fracasado"; // Valor por defecto
 
         try {
-
             AuthValidator.validateLoginRequest(userRequest);
 
-            // Validación con LDAP
             Boolean isAccountValid = activeDirectoryUserRepository.checkAccount(
                     userRequest.getUsername(), userRequest.getPassword());
 
-            // Buscar el usuario en la base de datos
             UserEntity user = this.userRepositoryFull.findBySAMAccountNameWithRoles(userRequest.getUsername())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "El usuario " + userRequest.getUsername() + " no existe"));
 
-            // Verificar si el usuario está bloqueado
             if (isUserLocked(user)) {
-                response.put("message", "Se han superado los 3 intentos fallidos de inicio de sesión. " +
-                        "Tu cuenta ha sido bloqueada temporalmente por razones de seguridad.");
+                userRequest.setEmail(user.getEmail());
+                userRequest.setTipe_of_income(tipoIngreso);
+                userRequest.setLoginFailureReason("Cuenta bloqueada por intentos fallidos");
+                this.logService.createLog(userRequest);
+
+                response.put("message", "Se han superado los 3 intentos fallidos...");
                 response.put("statusCode", 403);
                 response.put("status", "error");
                 return response;
             }
 
-            // Si la cuenta es válida
             if (isAccountValid) {
                 if (user.getEnabled()) {
-                    // Restablecer intentos fallidos si el inicio de sesión es exitoso
+                    tipoIngreso = "Exitoso"; // Login correcto
                     resetFailedAttempts(user);
 
-                    // Creación del DTO de respuesta
                     AuthResponseDto userRequestDto = new AuthResponseDto();
                     UserDto userDto = this.dtoMapper.convertToDto(user, UserDto.class);
                     userRequestDto.setUser(userDto);
@@ -149,26 +146,35 @@ public class AuthService implements IAuthUseCase {
                     userRequestDto.setMenus(menus);
                     userRequestDto.setToken(token);
 
-                    // Registrar el log
                     userRequest.setEmail(user.getEmail());
+                    userRequest.setTipe_of_income(tipoIngreso);
+                    userRequest.setLoginFailureReason(null); // No hay fallo
                     this.logService.createLog(userRequest);
 
                     response.put("user", userRequestDto);
                     response.put("message", "User authenticated successfully");
                     response.put("statusCode", 200);
                     response.put("status", "success");
-
                     return response;
 
                 } else {
+                    userRequest.setEmail(user.getEmail());
+                    userRequest.setTipe_of_income(tipoIngreso);
+                    userRequest.setLoginFailureReason("Usuario no habilitado");
+                    this.logService.createLog(userRequest);
+
                     response.put("message", "User not enabled");
                     response.put("statusCode", 403);
                     response.put("status", "error");
                     return response;
                 }
             } else {
-                // Incrementar intentos fallidos si la contraseña es incorrecta
                 increaseFailedAttempts(user);
+
+                userRequest.setEmail(user.getEmail());
+                userRequest.setTipe_of_income(tipoIngreso);
+                userRequest.setLoginFailureReason("Credenciales inválidas");
+                this.logService.createLog(userRequest);
 
                 response.put("message", "Invalid username or password");
                 response.put("statusCode", 401);
@@ -177,13 +183,18 @@ public class AuthService implements IAuthUseCase {
             }
 
         } catch (MessageException e) {
-
             throw e;
         } catch (Exception e) {
+            // Puedes agregar log también aquí si deseas registrar excepciones no controladas
+            userRequest.setTipe_of_income("Fracasado");
+            userRequest.setLoginFailureReason("Error inesperado: " + e.getMessage());
+            this.logService.createLog(userRequest);
 
             throw new RuntimeException("Error inesperado en el proceso de autenticación", e);
         }
     }
+
+
 
 
     // jhon

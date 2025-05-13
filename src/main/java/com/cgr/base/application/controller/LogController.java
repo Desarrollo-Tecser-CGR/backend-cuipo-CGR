@@ -1,15 +1,16 @@
 package com.cgr.base.application.controller;
 
 import com.cgr.base.application.services.logs.ingress.service.LogService;
+import com.cgr.base.domain.dto.dtoAuth.AuthRequestDto;
+import com.cgr.base.domain.dto.dtoLogs.LoginCountDto;
 import com.cgr.base.domain.dto.dtoLogs.MonthlyLoginCounts; // Import del DTO correcto
+import com.cgr.base.domain.models.entity.Logs.LogEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/logs")
@@ -36,4 +37,15 @@ public class LogController {
         MonthlyLoginCounts counts = logService.countSuccessfulAndFailedLoginsByYear(year);
         return ResponseEntity.ok(counts);
     }
+
+
+
+
+    @GetMapping("/estadisticas/{correo}")
+    public ResponseEntity<LoginCountDto> getLoginStats(@PathVariable String correo) {
+        LoginCountDto stats = logService.countLoginsByCorreo(correo);
+        return ResponseEntity.ok(stats);
+    }
 }
+
+

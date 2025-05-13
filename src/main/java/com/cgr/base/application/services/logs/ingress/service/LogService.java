@@ -3,10 +3,12 @@ package com.cgr.base.application.services.logs.ingress.service;
 import com.cgr.base.application.services.logs.ingress.usecase.ILogUseCase;
 import com.cgr.base.domain.dto.dtoAuth.AuthRequestDto;
 
+import com.cgr.base.domain.dto.dtoLogs.LoginCountDto;
 import com.cgr.base.domain.dto.dtoLogs.MonthlyLoginCounts; // Import del DTO correcto
 
 import com.cgr.base.domain.dto.dtoLogs.logsIngress.LogDto;
 import com.cgr.base.domain.models.entity.Logs.LogEntity;
+import com.cgr.base.infrastructure.repositories.repositories.logs.ILogsRepositoryJpa;
 import com.cgr.base.infrastructure.repositories.repositories.repositoryActiveDirectory.ILogRepository;
 import com.cgr.base.infrastructure.utilities.DtoMapper;
 import jakarta.transaction.Transactional;
@@ -18,6 +20,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +30,8 @@ public class LogService  implements ILogUseCase {
     private ILogRepository adapterLogRepository;
    @Autowired
     private DtoMapper dtoMapper;
+    @Autowired
+   private ILogsRepositoryJpa iLogsRepositoryJpa;
 
     public MonthlyLoginCounts countSuccessfulAndFailedLogins() {
         List<LogEntity> logs = adapterLogRepository.logFindAll();
@@ -123,9 +128,26 @@ public class LogService  implements ILogUseCase {
         logEntity.setEnable(true);
         logEntity.setName_user(userRequest.getUsername());
         logEntity.setTipe_of_income(userRequest.getTipe_of_income());
+        logEntity.setLoginFailureReason(userRequest.getLoginFailureReason());
 
         return this.adapterLogRepository.createLog(logEntity, userRequest.getUsername());
     }
+    public Optional<LogEntity> findLastFailedLoginByCorreo(String correo) {
+        List<LogEntity> failedLogs = iLogsRepositoryJpa.findFailedLoginsByCorreo(correo);
+        return failedLogs.isEmpty() ? Optional.empty() : Optional.of(failedLogs.get(0));
+    }
+
+
+
+    public LoginCountDto countLoginsByCorreo(String correo) {
+        long failed = iLogsRepositoryJpa.countFailedLoginsByCorreo(correo);
+        long success = iLogsRepositoryJpa.countSuccessfulLoginsByCorreo(correo);
+
+        return new LoginCountDto(correo, success, failed);
+    }
+
+
+
 
 
 

@@ -1,8 +1,10 @@
 package com.cgr.base.application.controller;
 
+import com.cgr.base.domain.dto.dtoUser.UserWithRolesResponseDto;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -98,13 +100,24 @@ public class UserController extends AbstractController {
     }
 
     @GetMapping("/profile_image/{userId}")
-    public ResponseEntity<String> getProfileImage(@PathVariable Long userId) {
+    public ResponseEntity<String> getProfileImage(@PathVariable Long id) {
 
         try {
-            String base64Image = userService.getProfileImage(userId);
+            String base64Image = userService.getProfileImage(id);
             return new ResponseEntity<>(base64Image, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        Optional<UserWithRolesResponseDto> userOptional = this.userService.findById(id);
+        if (userOptional.isPresent()) {
+            return requestResponse(userOptional.get(), "Información del usuario", HttpStatus.OK, true);
+        } else {
+            return requestResponse("Usuario no encontrado", "No se encontró el usuario con el ID proporcionado", HttpStatus.NOT_FOUND, false);
         }
     }
 

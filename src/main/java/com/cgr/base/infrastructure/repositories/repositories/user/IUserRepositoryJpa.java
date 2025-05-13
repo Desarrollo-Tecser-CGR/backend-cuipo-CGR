@@ -35,4 +35,6 @@ public interface IUserRepositoryJpa extends JpaRepository<UserEntity, Long> {
                         "JOIN r.subMenus sm " +
                         "WHERE r.name IN :roleNames")
         List<SubMenuEntity> findDistinctSubMenusByRoleNames(@Param("roleNames") List<String> roleNames);
+
+        Optional<UserEntity> findById(Long id);
 }

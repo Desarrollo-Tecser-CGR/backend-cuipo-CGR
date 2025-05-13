@@ -179,4 +179,27 @@ public class UserServiceImpl implements IUserUseCase {
         byte[] bytes = image.getBytes();
         return "data:" + image.getContentType() + ";base64," + Base64.getEncoder().encodeToString(bytes);
     }
+
+    @Override
+    public Optional<UserWithRolesResponseDto> findById(Long id) {
+        Optional<UserEntity> userEntityOptional = userRepositoryJpa.findById(id);
+        if (userEntityOptional.isPresent()) {
+            UserEntity userEntity = userEntityOptional.get();
+            UserWithRolesResponseDto userResponse = new UserWithRolesResponseDto();
+            userResponse.setIdUser(userEntity.getId());
+            userResponse.setUserName(userEntity.getSAMAccountName());
+            userResponse.setFullName(userEntity.getFullName());
+            userResponse.setEmail(userEntity.getEmail());
+            userResponse.setPhone(userEntity.getPhone());
+            userResponse.setEnabled(userEntity.getEnabled());
+            userResponse.setDateModify(userEntity.getDateModify());
+            userResponse.setCargo(userEntity.getCargo());
+            userResponse.setUserType(userEntity.getUserType());
+            userResponse.setImageProfile(userEntity.getImageProfile());
+            userResponse.addRole(userEntity.getRoles());
+            return Optional.of(userResponse);
+        }
+        return Optional.empty();
+    }
+
 }

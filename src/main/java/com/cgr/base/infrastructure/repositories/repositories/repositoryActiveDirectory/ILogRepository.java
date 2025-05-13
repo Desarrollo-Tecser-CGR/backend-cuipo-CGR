@@ -12,4 +12,6 @@ public interface ILogRepository {
 
     public abstract List<LogEntity> findLogByUserEntityId(Long userId);
 
+
+
 }
