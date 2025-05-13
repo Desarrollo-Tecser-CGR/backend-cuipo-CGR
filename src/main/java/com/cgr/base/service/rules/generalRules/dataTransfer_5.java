@@ -22,7 +22,7 @@ public class dataTransfer_5 {
     public void applyGeneralRule5() {
 
         UtilsDB.ensureColumnsExist(TABLA_EJEC_INGRESOS, "TOTAL_RECAUDO_TRIMESTRE_PREVIO:NVARCHAR(50)",
-                "CA0039_RG_5:NVARCHAR(5)", "DIFERENCIA_CA0039_RG_5:NVARCHAR(50)");
+                "CA0039_RG_5:NVARCHAR(5)", "DIFERENCIA_RECAUDO_TOTAL:NVARCHAR(50)");
 
         String updateRecaudoTrimestre03Query = String.format(
                 """
@@ -53,8 +53,8 @@ public class dataTransfer_5 {
                             CASE
                                 WHEN LEN(a.CUENTA) - LEN(REPLACE(a.CUENTA, '.', '')) > 2 THEN 'N/A'
                                 WHEN a.TOTAL_RECAUDO IS NULL OR a.TOTAL_RECAUDO_TRIMESTRE_PREVIO IS NULL THEN 'N/D'
-                                WHEN TRY_CAST(a.TOTAL_RECAUDO AS DECIMAL(18, 2)) > TRY_CAST(a.TOTAL_RECAUDO_TRIMESTRE_PREVIO AS DECIMAL(18, 2)) THEN '0'
-                                ELSE '1'
+                                WHEN TRY_CAST(a.TOTAL_RECAUDO AS DECIMAL(18, 2)) > TRY_CAST(a.TOTAL_RECAUDO_TRIMESTRE_PREVIO AS DECIMAL(18, 2)) THEN '1'
+                                ELSE '0'
                             END
                         FROM %s a
                         """,
@@ -65,7 +65,7 @@ public class dataTransfer_5 {
         String updateDiferenciaQuery = String.format(
                 """
                         UPDATE a
-                        SET a.DIFERENCIA_CA0039_RG_5 =
+                        SET a.DIFERENCIA_RECAUDO_TOTAL =
                             CASE
                                 WHEN TRY_CAST(a.TOTAL_RECAUDO_TRIMESTRE_PREVIO AS DECIMAL(18,2)) IS NULL
                                   OR TRY_CAST(a.TOTAL_RECAUDO AS DECIMAL(18,2)) IS NULL THEN NULL
@@ -95,13 +95,13 @@ public class dataTransfer_5 {
                                 CASE
                                     WHEN COUNT(*) = 0 THEN 'SIN DATOS'
                                     WHEN SUM(CASE WHEN a.CA0039_RG_5 = 'N/D' THEN 1 ELSE 0 END) > 0 THEN 'SIN DATOS'
-                                    WHEN SUM(CASE WHEN a.CA0039_RG_5 = '1' THEN 1 ELSE 0 END) > 0 THEN 'NO CUMPLE'
+                                    WHEN SUM(CASE WHEN a.CA0039_RG_5 = '0' THEN 1 ELSE 0 END) > 0 THEN 'NO CUMPLE'
                                     ELSE 'CUMPLE'
                                 END AS REGLA_GENERAL_5,
                                 CASE
                                     WHEN COUNT(*) = 0 THEN 'NO_EI'
                                     WHEN SUM(CASE WHEN a.CA0039_RG_5 = 'N/D' THEN 1 ELSE 0 END) > 0 THEN 'NO_EI_CA0039'
-                                    WHEN SUM(CASE WHEN a.CA0039_RG_5 = '1' THEN 1 ELSE 0 END) > 0 THEN 'CA_0039'
+                                    WHEN SUM(CASE WHEN a.CA0039_RG_5 = '0' THEN 1 ELSE 0 END) > 0 THEN 'CA_0039'
                                     ELSE 'OK'
                                 END AS ALERTA_5
                             FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
