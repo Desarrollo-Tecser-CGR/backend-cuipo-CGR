@@ -72,11 +72,15 @@ public class ruleScheduler {
         String[] rules = {
 
                 // REGLAS GENERALES:
-
-                // "1", "2", "16", "17",
-                //"11",
-                "3",
-
+                // Programación Ingresos:
+                // "1", "2", "3", "4",
+                // Ejecución Ingresos:
+                // "6", "17",
+                // Programación Gastos:
+                // "11",
+                // Ejecución Gastos:
+                //  "16",
+                "13",
                 // REGLAS ESPECIFICAS:
 
                 // REGLAS:

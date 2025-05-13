@@ -82,25 +82,21 @@ public class dataTransfer_6 {
         jdbcTemplate.execute(updateCuentasProgIngQuery);
 
         String updateRegla6Query = """
-                    UPDATE d
-                    SET d.REGLA_GENERAL_6 = CASE
-                                                WHEN d.VAL_Ctas_EjecIng_6 IS NULL THEN 'SIN DATOS'
-                                                WHEN d.VAL_Ctas_ProgIng_6 IS NULL THEN 'NO CUMPLE'
-                                                WHEN d.VAL_Ctas_EjecIng_6 = d.VAL_Ctas_ProgIng_6 THEN 'CUMPLE'
-                                                ELSE 'NO CUMPLE'
-                                            END,
-                        d.ALERTA_6 = CASE
-                                        WHEN d.VAL_Ctas_EjecIng_6 IS NULL THEN 'NO_EI_CA0042'
-                                        WHEN d.VAL_Ctas_ProgIng_6 IS NULL THEN 'CA_0042'
-                                        WHEN d.VAL_Ctas_EjecIng_6 = d.VAL_Ctas_ProgIng_6 THEN 'OK'
-                                        ELSE 'CA_0042'
-                                     END
-                    FROM GENERAL_RULES_DATA d
-                    WHERE d.VAL_Ctas_EjecIng_6 IS NULL
-                       OR d.VAL_Ctas_ProgIng_6 IS NULL
-                       OR d.VAL_Ctas_EjecIng_6 <> d.VAL_Ctas_ProgIng_6;
+                UPDATE d
+                SET d.REGLA_GENERAL_6 = CASE
+                                            WHEN d.VAL_Ctas_EjecIng_6 IS NULL THEN 'SIN DATOS'
+                                            WHEN d.VAL_Ctas_ProgIng_6 IS NULL THEN 'NO CUMPLE'
+                                            WHEN d.VAL_Ctas_EjecIng_6 = d.VAL_Ctas_ProgIng_6 THEN 'CUMPLE'
+                                            ELSE 'NO CUMPLE'
+                                        END,
+                    d.ALERTA_6 = CASE
+                                    WHEN d.VAL_Ctas_EjecIng_6 IS NULL THEN 'NO_EI_CA0042'
+                                    WHEN d.VAL_Ctas_ProgIng_6 IS NULL THEN 'CA_0042'
+                                    WHEN d.VAL_Ctas_EjecIng_6 = d.VAL_Ctas_ProgIng_6 THEN 'OK'
+                                    ELSE 'CA_0042'
+                                 END
+                FROM GENERAL_RULES_DATA d
                 """;
-
         jdbcTemplate.execute(updateRegla6Query);
 
         String updateNoDataQuery = String.format(
