@@ -52,7 +52,7 @@ public class categoryParameter {
         System.out.println("Tabla creada: " + newTableName + " a partir de " + sourceTable);
     }
 
-    public void createRecordForYear(Map<String, Object> requestData) {
+    public Map<String, Object> createRecordForYear(Map<String, Object> requestData) {
 
         Object yearObj = requestData.get("year");
         if (yearObj == null) {
@@ -91,6 +91,10 @@ public class categoryParameter {
             throw new IllegalArgumentException("Todos los campos obligatorios deben estar presentes y no vacíos.");
         }
 
+        if (!categoria.matches("^[1-6E]$")) {
+            throw new IllegalArgumentException("El campo 'CATEGORIA' debe ser un número entre 1 y 6 o la letra 'E'.");
+        }
+
         String checkSql = String.format("""
                     SELECT COUNT(*) FROM %s WHERE CODIGO_ENTIDAD = ? AND AMBITO_CODIGO = ?
                 """, tableName);
@@ -101,9 +105,9 @@ public class categoryParameter {
         }
 
         String nombreFinal = nombreEntidad;
-        if (tableExists("SPECIFIC_RULES_DATA")) {
+        if (tableExists("GENERAL_RULES_DATA")) {
             String nameLookupSql = """
-                        SELECT TOP 1 NOMBRE_ENTIDAD FROM SPECIFIC_RULES_DATA
+                        SELECT TOP 1 NOMBRE_ENTIDAD FROM GENERAL_RULES_DATA
                         WHERE CODIGO_ENTIDAD = ? AND AMBITO_CODIGO = ?
                     """;
             List<String> names = jdbcTemplate.queryForList(nameLookupSql, String.class, codigoEntidad, ambitoCodigo);
@@ -120,6 +124,12 @@ public class categoryParameter {
                 tableName);
 
         jdbcTemplate.update(insertSql, codigoEntidad, ambitoCodigo, nombreFinal, categoria, noDiputados, noConcejales);
+
+        String selectSql = String.format("""
+                    SELECT * FROM %s WHERE CODIGO_ENTIDAD = ? AND AMBITO_CODIGO = ?
+                """, tableName);
+
+        return jdbcTemplate.queryForMap(selectSql, codigoEntidad, ambitoCodigo);
     }
 
     private Integer parseIntegerField(Object value, String fieldName) {
@@ -155,6 +165,10 @@ public class categoryParameter {
         if (codigoEntidad == null || ambitoCodigo == null || categoria == null
                 || noDiputados == null || noConcejales == null) {
             throw new IllegalArgumentException("Todos los campos obligatorios deben estar presentes y no vacíos.");
+        }
+
+        if (!categoria.matches("^[1-6E]$")) {
+            throw new IllegalArgumentException("El campo 'CATEGORIA' debe ser un número entre 1 y 6 o la letra 'E'.");
         }
 
         String checkSql = String.format("""

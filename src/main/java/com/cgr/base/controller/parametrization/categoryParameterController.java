@@ -69,14 +69,14 @@ public class categoryParameterController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
-        categoryParameter.createRecordForYear(requestData);
+        Map<String, Object> newRecord = categoryParameter.createRecordForYear(requestData);
 
         int year = Integer.parseInt(requestData.get("year").toString());
 
         logGeneralService.createLog(userId, PARAMETRIZACION,
-                "Creación de registro en tabla CATEGORIAS_ENTIDADES_" + year + " con datos: " + requestData);
+                "Creación de registro en tabla CATEGORIAS_ENTIDADES_" + year + " con datos: " + newRecord);
 
-        return requestResponse(null, "Registro creado exitosamente.", HttpStatus.CREATED, true);
+        return requestResponse(newRecord, "Registro creado exitosamente.", HttpStatus.CREATED, true);
     }
 
     @PostMapping("/update/record")
