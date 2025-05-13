@@ -31,8 +31,8 @@ public class dataTransfer_8 {
                         UPDATE g
                         SET g.CA0047_RG_8 =
                             CASE
-                                WHEN vigCol.valor = 1 THEN '0'
-                                WHEN vigCol.valor = 0 THEN '1'
+                                WHEN vigCol.valor = 1 THEN '1'
+                                WHEN vigCol.valor = 0 THEN '0'
                             END
                         FROM %s g
                         LEFT JOIN [DB_CUIPO].[dbo].[AMBITOS_CAPTURA] ac
@@ -67,7 +67,7 @@ public class dataTransfer_8 {
                           AND a.TRIMESTRE = d.TRIMESTRE
                           AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
                           AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                          AND (a.CA0047_RG_8 IS NULL OR a.CA0047_RG_8 = '1')
+                          AND (a.CA0047_RG_8 IS NULL OR a.CA0047_RG_8 = '0')
                     )
                 """, TABLA_PROG_GASTOS);
         jdbcTemplate.execute(cumpleQuery);
@@ -98,7 +98,7 @@ public class dataTransfer_8 {
                           AND a3.TRIMESTRE = d.TRIMESTRE
                           AND a3.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
                           AND a3.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                          AND a3.CA0047_RG_8 = '1'
+                          AND a3.CA0047_RG_8 = '0'
                     )
                 """, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS);
         jdbcTemplate.execute(noCumpleQuery);

@@ -30,13 +30,13 @@ public class dataTransfer_7 {
                             WHEN (LEFT(ISNULL(g.AMBITO_CODIGO, ''), 1) = 'A'
                                   AND TRY_CAST(SUBSTRING(ISNULL(g.AMBITO_CODIGO, 'A0'), 2, 3) AS INT) >= 442)
                                  AND TRY_CAST(TRY_CAST(g.COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) BETWEEN 1 AND 15
-                            THEN '0'
+                            THEN '1'
                             WHEN (LEFT(ISNULL(g.AMBITO_CODIGO, ''), 1) <> 'A'
                                   OR TRY_CAST(SUBSTRING(ISNULL(g.AMBITO_CODIGO, 'A0'), 2, 3) AS INT) < 442)
                                  AND TRY_CAST(TRY_CAST(g.COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) BETWEEN 16 AND 45
-                            THEN '0'
-                            WHEN TRY_CAST(TRY_CAST(g.COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) BETWEEN 1 AND 45
                             THEN '1'
+                            WHEN TRY_CAST(TRY_CAST(g.COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) BETWEEN 1 AND 45
+                            THEN '0'
                         END
                         FROM %s g
                         """, TABLA_PROG_GASTOS);
@@ -60,7 +60,7 @@ public class dataTransfer_7 {
                               AND a.TRIMESTRE = d.TRIMESTRE
                               AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
                               AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                              AND (a.CA0045_RG_7 IS NULL OR a.CA0045_RG_7 = '1')
+                              AND (a.CA0045_RG_7 IS NULL OR a.CA0045_RG_7 = '0')
                         )
                         """, TABLA_PROG_GASTOS);
         jdbcTemplate.execute(updateCumpleQuery);
@@ -92,7 +92,7 @@ public class dataTransfer_7 {
                               AND a3.TRIMESTRE = d.TRIMESTRE
                               AND a3.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
                               AND a3.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
-                              AND a3.CA0045_RG_7 = '1'
+                              AND a3.CA0045_RG_7 = '0'
                         )
                         """, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS);
         jdbcTemplate.execute(updateNoCumpleQuery);
