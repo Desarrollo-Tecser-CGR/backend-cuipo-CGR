@@ -29,6 +29,52 @@ public class dataTransfer_13 {
     }
 
     public void applyGeneralRule13() {
+
+        UtilsDB.ensureColumnsExist(
+                "GENERAL_RULES_DATA",
+                "REGLA_GENERAL_13C:NVARCHAR(15)",
+                "ALERTA_13C:NVARCHAR(20)");
+
+        String updateRegla13CQuery = String.format("""
+                    UPDATE d
+                    SET d.REGLA_GENERAL_13C = CASE
+                                                WHEN existe.CUENTA_299_EG = 1 THEN 'NO CUMPLE'
+                                                ELSE 'CUMPLE'
+                                              END,
+                        d.ALERTA_13C = CASE
+                                         WHEN existe.CUENTA_299_EG = 1 THEN 'CA0063'
+                                         ELSE 'OK'
+                                       END
+                    FROM GENERAL_RULES_DATA d
+                    OUTER APPLY (
+                        SELECT TOP 1 1 AS CUENTA_299_EG
+                        FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
+                        WHERE a.FECHA = d.FECHA
+                          AND a.TRIMESTRE = d.TRIMESTRE
+                          AND a.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
+                          AND a.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
+                          AND a.CUENTA = '2.99'
+                    ) AS existe
+                """, TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS);
+
+        jdbcTemplate.execute(updateRegla13CQuery);
+
+        String updateNoData13BQueryEG = String.format(
+                """
+                        UPDATE GENERAL_RULES_DATA
+                        SET REGLA_GENERAL_13C = 'SIN DATOS',
+                            ALERTA_13C = 'NO_EG'
+                        WHERE NOT EXISTS (
+                            SELECT 1
+                            FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE a.FECHA = GENERAL_RULES_DATA.FECHA
+                              AND a.TRIMESTRE = GENERAL_RULES_DATA.TRIMESTRE
+                              AND a.CODIGO_ENTIDAD_INT = GENERAL_RULES_DATA.CODIGO_ENTIDAD
+                              AND a.AMBITO_CODIGO_STR = GENERAL_RULES_DATA.AMBITO_CODIGO
+                        )
+                        """, TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS);
+        jdbcTemplate.update(updateNoData13BQueryEG);
+
     }
 
     public void applyGeneralRule13B() {
