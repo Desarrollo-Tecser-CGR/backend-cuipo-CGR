@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.time.Year;
 import java.util.*;
 
 @Service
@@ -23,21 +24,55 @@ public class categoryParameter {
     }
 
     public void createYearlyTable(int year) {
-        String tableName = "CATEGORIAS_ENTIDADES_" + year;
+        int currentYear = Year.now().getValue();
+        int maxYear = currentYear + 2;
 
-        if (tableExists(tableName)) {
-            throw new IllegalArgumentException("La tabla '" + tableName + "' ya existe.");
+        if (year < 2000 || year > maxYear) {
+            throw new IllegalArgumentException(
+                    "El año proporcionado no es válido. Debe estar entre 2000 y " + maxYear + ".");
+        }
+
+        String newTableName = "CATEGORIAS_ENTIDADES_" + year;
+        String previousTableName = "CATEGORIAS_ENTIDADES_" + (year - 1);
+        String sourceTable = "CATEGORIAS_ENTIDADES";
+
+        if (tableExists(newTableName)) {
+            throw new IllegalArgumentException("La tabla '" + newTableName + "' ya existe.");
+        }
+
+        if (tableExists(previousTableName)) {
+            sourceTable = previousTableName;
         }
 
         String sql = String.format("""
-                    SELECT * INTO %s FROM CATEGORIAS_ENTIDADES
-                """, tableName);
+                    SELECT * INTO %s FROM %s
+                """, newTableName, sourceTable);
 
         jdbcTemplate.execute(sql);
-        System.out.println("Tabla creada: " + tableName);
+        System.out.println("Tabla creada: " + newTableName + " a partir de " + sourceTable);
     }
 
-    public void createRecordForYear(int year, Map<String, Object> requestData) {
+    public void createRecordForYear(Map<String, Object> requestData) {
+
+        Object yearObj = requestData.get("year");
+        if (yearObj == null) {
+            throw new IllegalArgumentException("El campo 'year' es obligatorio.");
+        }
+
+        int year;
+        try {
+            year = Integer.parseInt(yearObj.toString());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("El campo 'year' debe ser un número válido.");
+        }
+
+        int currentYear = Year.now().getValue();
+        int maxYear = currentYear + 1;
+        if (year < 2000 || year > maxYear) {
+            throw new IllegalArgumentException(
+                    "El año proporcionado no es válido. Debe estar entre 2000 y " + maxYear + ".");
+        }
+
         String tableName = "CATEGORIAS_ENTIDADES_" + year;
 
         if (!tableExists(tableName)) {
@@ -48,12 +83,8 @@ public class categoryParameter {
         String ambitoCodigo = String.valueOf(requestData.get("AMBITO_CODIGO"));
         String nombreEntidad = String.valueOf(requestData.get("NOMBRE_ENTIDAD")).trim();
         String categoria = String.valueOf(requestData.get("CATEGORIA"));
-        Integer noDiputados = (requestData.get("NO_DIPUTADOS") instanceof Integer)
-                ? (Integer) requestData.get("NO_DIPUTADOS")
-                : Integer.valueOf(String.valueOf(requestData.get("NO_DIPUTADOS")));
-        Integer noConcejales = (requestData.get("NO_CONCEJALES") instanceof Integer)
-                ? (Integer) requestData.get("NO_CONCEJALES")
-                : Integer.valueOf(String.valueOf(requestData.get("NO_CONCEJALES")));
+        Integer noDiputados = parseIntegerField(requestData.get("NO_DIPUTADOS"), "NO_DIPUTADOS");
+        Integer noConcejales = parseIntegerField(requestData.get("NO_CONCEJALES"), "NO_CONCEJALES");
 
         if (codigoEntidad == null || ambitoCodigo == null || nombreEntidad.isEmpty() || categoria == null
                 || noDiputados == null || noConcejales == null) {
@@ -91,7 +122,24 @@ public class categoryParameter {
         jdbcTemplate.update(insertSql, codigoEntidad, ambitoCodigo, nombreFinal, categoria, noDiputados, noConcejales);
     }
 
+    private Integer parseIntegerField(Object value, String fieldName) {
+        if (value instanceof Integer) {
+            return (Integer) value;
+        }
+        try {
+            return Integer.parseInt(String.valueOf(value));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("El campo '" + fieldName + "' debe ser un número válido.");
+        }
+    }
+
     public void updateRecordForYear(int year, Map<String, Object> requestData) {
+
+        if (year < 2000 || year > Year.now().getValue() + 1) {
+            throw new IllegalArgumentException(
+                    "El año proporcionado no es válido. Debe estar entre 2000 y " + (Year.now().getValue() + 2) + ".");
+        }
+
         String tableName = "CATEGORIAS_ENTIDADES_" + year;
 
         if (!tableExists(tableName)) {
@@ -101,12 +149,8 @@ public class categoryParameter {
         String codigoEntidad = String.valueOf(requestData.get("CODIGO_ENTIDAD"));
         String ambitoCodigo = String.valueOf(requestData.get("AMBITO_CODIGO"));
         String categoria = String.valueOf(requestData.get("CATEGORIA"));
-        Integer noDiputados = (requestData.get("NO_DIPUTADOS") instanceof Integer)
-                ? (Integer) requestData.get("NO_DIPUTADOS")
-                : Integer.valueOf(String.valueOf(requestData.get("NO_DIPUTADOS")));
-        Integer noConcejales = (requestData.get("NO_CONCEJALES") instanceof Integer)
-                ? (Integer) requestData.get("NO_CONCEJALES")
-                : Integer.valueOf(String.valueOf(requestData.get("NO_CONCEJALES")));
+        Integer noDiputados = parseIntegerField(requestData.get("NO_DIPUTADOS"), "NO_DIPUTADOS");
+        Integer noConcejales = parseIntegerField(requestData.get("NO_CONCEJALES"), "NO_CONCEJALES");
 
         if (codigoEntidad == null || ambitoCodigo == null || categoria == null
                 || noDiputados == null || noConcejales == null) {

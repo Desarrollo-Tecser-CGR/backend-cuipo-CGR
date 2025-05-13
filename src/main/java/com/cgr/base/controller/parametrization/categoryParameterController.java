@@ -32,8 +32,9 @@ public class categoryParameterController extends AbstractController {
     @Autowired
     private LogGeneralService logGeneralService;
 
-    @PostMapping("/create/table/{year}")
-    public ResponseEntity<?> createCategoryTableByYear(@PathVariable int year, HttpServletRequest request) {
+    @PostMapping("/create/table")
+    public ResponseEntity<?> createCategoryTableByYear(@RequestBody Map<String, Integer> body,
+            HttpServletRequest request) {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         String token = header.split(" ")[1];
 
@@ -42,8 +43,9 @@ public class categoryParameterController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
-        if (year < 2000 || year > 2500) {
-            return requestResponse(null, "El año proporcionado no es válido.", HttpStatus.BAD_REQUEST, false);
+        Integer year = body.get("year");
+        if (year == null) {
+            return requestResponse(null, "El campo 'year' es obligatorio.", HttpStatus.BAD_REQUEST, false);
         }
 
         categoryParameter.createYearlyTable(year);
@@ -54,11 +56,11 @@ public class categoryParameterController extends AbstractController {
         return requestResponse(null, "Tabla creada exitosamente para el año " + year + ".", HttpStatus.CREATED, true);
     }
 
-    @PostMapping("/create/record/{year}")
+    @PostMapping("/create/record")
     public ResponseEntity<?> createRecord(
-            @PathVariable int year,
             @RequestBody Map<String, Object> requestData,
             HttpServletRequest request) {
+
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         String token = header.split(" ")[1];
         Long userId = jwtService.extractUserIdFromToken(token);
@@ -67,7 +69,9 @@ public class categoryParameterController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
-        categoryParameter.createRecordForYear(year, requestData);
+        categoryParameter.createRecordForYear(requestData);
+
+        int year = Integer.parseInt(requestData.get("year").toString());
 
         logGeneralService.createLog(userId, PARAMETRIZACION,
                 "Creación de registro en tabla CATEGORIAS_ENTIDADES_" + year + " con datos: " + requestData);
@@ -75,11 +79,11 @@ public class categoryParameterController extends AbstractController {
         return requestResponse(null, "Registro creado exitosamente.", HttpStatus.CREATED, true);
     }
 
-    @PostMapping("/update/record/{year}")
+    @PostMapping("/update/record")
     public ResponseEntity<?> updateRecord(
-            @PathVariable int year,
             @RequestBody Map<String, Object> requestData,
             HttpServletRequest request) {
+
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         String token = header.split(" ")[1];
         Long userId = jwtService.extractUserIdFromToken(token);
@@ -88,9 +92,12 @@ public class categoryParameterController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
+        int year = Integer.parseInt(requestData.get("year").toString());
+
         categoryParameter.updateRecordForYear(year, requestData);
         logGeneralService.createLog(userId, PARAMETRIZACION,
                 "Actualización de registro en tabla CATEGORIAS_ENTIDADES_" + year + " con datos: " + requestData);
+
         return requestResponse(null, "Registro actualizado exitosamente.", HttpStatus.OK, true);
     }
 
