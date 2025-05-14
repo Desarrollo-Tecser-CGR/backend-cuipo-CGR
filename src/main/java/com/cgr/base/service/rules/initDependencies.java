@@ -161,7 +161,6 @@ public class initDependencies {
             case "25A" -> Rules25.applySpecificRule25A();
             case "25_A" -> Rules25.applySpecificRule25_A();
             case "25B" -> Rules25.applySpecificRule25B();
-            case "25_B" -> Rules25.applySpecificRule25_B();
             case "GF" -> RulesGF.applySpecificRuleGF27();
             case "26" -> Rules26.applySpecificRule26();
             case "27" -> Rules27.applySpecificRule27();

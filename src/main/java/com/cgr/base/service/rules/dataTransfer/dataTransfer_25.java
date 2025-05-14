@@ -135,7 +135,8 @@ public class dataTransfer_25 {
     }
 
     public void applySpecificRule25_A() {
-        // 1) Definir y verificar la columna requerida en la tabla detalle (TABLA_EJEC_GASTOS2)
+        // 1) Definir y verificar la columna requerida en la tabla detalle
+        // (TABLA_EJEC_GASTOS2)
         List<String> requiredColumns = Arrays.asList("REGLA_25_A");
 
         String checkColumnsQuery = String.format(
@@ -238,75 +239,13 @@ public class dataTransfer_25 {
     }
 
     public void applySpecificRule25B() {
-
+        // Paso 1: Asegurar columna en EJECUCION_GASTOS
         List<String> requiredColumns = Arrays.asList("ALERTA_25_CA0105");
-
-        String checkColumnsQuery = String.format(
-                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
-                        + "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                "SPECIFIC_RULES_DATA",
-                "'" + String.join("','", requiredColumns) + "'");
-
-        List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
-
-        for (String col : requiredColumns) {
-            if (!existingCols.contains(col)) {
-                String addColumnQuery = String.format(
-                        "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        "SPECIFIC_RULES_DATA", col);
-                jdbcTemplate.execute(addColumnQuery);
-            }
-        }
-
-        String updateQuery = String.format(
-                """
-                        WITH Regla25B AS (
-                            SELECT
-                                T1.TRIMESTRE,
-                                T1.FECHA,
-                                T1.CODIGO_ENTIDAD,
-                                T1.AMBITO_CODIGO,
-                                CASE
-                                   WHEN EXISTS (
-                                       SELECT 1
-                                       FROM %s T2
-                                       WHERE T2.CODIGO_ENTIDAD = T1.CODIGO_ENTIDAD
-                                         AND (T2.CUENTA = '2.1.3.05.04.001.13.01' OR T2.CUENTA = '2.3.3.05.04.001.13.01')
-                                   ) THEN 'Existe la cuenta Transferencia de la sobretasa ambiental a las corporaciones autónomas regionales'
-                                   ELSE 'La cuenta "Transferencia de la sobretasa ambiental a las corporaciones autónomas regionales" NO se encuentra en el formulario'
-                                END AS ALERTA_25_CA0105
-                            FROM %s T1
-                            -- Opcionalmente, puedes filtrar T1 si no quieres toda la tabla
-                        )
-                        UPDATE r
-                        SET
-                            r.ALERTA_25_CA0105 = b.ALERTA_25_CA0105
-                        FROM %s r
-                        JOIN Regla25B b
-                           ON  r.FECHA          = b.FECHA
-                           AND r.TRIMESTRE      = b.TRIMESTRE
-                           AND r.CODIGO_ENTIDAD = b.CODIGO_ENTIDAD
-                           AND r.AMBITO_CODIGO  = b.AMBITO_CODIGO
-                        ;
-                        """,
-                TABLA_EJEC_GASTOS,
-                TABLA_EJEC_GASTOS,
-                "SPECIFIC_RULES_DATA");
-
-        jdbcTemplate.execute(updateQuery);
-    }
-
-    public void applySpecificRule25_B() {
-        // 1) Verificar/crear la columna ALERTA_25_CA0105 en la tabla detalle
-        // (TABLA_EJEC_GASTOS2)
-        List<String> requiredColumns = Arrays.asList("ALERTA_25_CA0105");
-
         String checkColumnsQuery = String.format(
                 "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
                         "WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                TABLA_EJEC_GASTOS, // Asegúrate de que esta variable contenga el nombre real de la tabla detalle
+                TABLA_EJEC_GASTOS,
                 "'" + String.join("','", requiredColumns) + "'");
-
         List<String> existingCols = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
         for (String col : requiredColumns) {
             if (!existingCols.contains(col)) {
@@ -317,20 +256,49 @@ public class dataTransfer_25 {
             }
         }
 
-        // 2) Actualizar la columna ALERTA_25_CA0105:
-        // Se asigna '1' si en esa fila CUENTA es '2.1.3.05.04.001.13.01', de lo
-        // contrario se asigna '0'
+        // Paso 2: Marcar filas con CUENTA específica
         String updateQuery = String.format(
                 """
                         UPDATE %s
                         SET ALERTA_25_CA0105 = CASE
-                            WHEN CUENTA = '2.1.3.05.04.001.13.01' OR CUENTA ='2.3.3.05.04.001.13.01' THEN '1'
+                            WHEN CUENTA = '2.1.3.05.04.001.13.01' OR CUENTA = '2.3.3.05.04.001.13.01' THEN '1'
                             ELSE '0'
                         END;
                         """,
                 TABLA_EJEC_GASTOS);
-
         jdbcTemplate.execute(updateQuery);
+
+        // Paso 3: Asegurar columna en SPECIFIC_RULES_DATA
+        String checkColumnSpecRules = """
+                    SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'SPECIFIC_RULES_DATA' AND COLUMN_NAME = 'ALERTA_25_CA0105'
+                """;
+        List<String> exists = jdbcTemplate.queryForList(checkColumnSpecRules, String.class);
+        if (exists.isEmpty()) {
+            jdbcTemplate.execute("""
+                        ALTER TABLE SPECIFIC_RULES_DATA ADD ALERTA_25_CA0105 VARCHAR(MAX) NULL
+                    """);
+        }
+
+        // Paso 4: Actualizar columna en SPECIFIC_RULES_DATA
+        String updateSpecRules = String.format("""
+                    UPDATE SPECIFIC_RULES_DATA
+                    SET ALERTA_25_CA0105 = CASE
+                        WHEN EXISTS (
+                            SELECT 1
+                            FROM %s eg
+                            WHERE eg.FECHA = SPECIFIC_RULES_DATA.FECHA
+                              AND eg.TRIMESTRE = SPECIFIC_RULES_DATA.TRIMESTRE
+                              AND eg.CODIGO_ENTIDAD = SPECIFIC_RULES_DATA.CODIGO_ENTIDAD
+                              AND eg.AMBITO_CODIGO = SPECIFIC_RULES_DATA.AMBITO_CODIGO
+                              AND eg.ALERTA_25_CA0105 = '1'
+                        ) THEN 'SI_CA0105'
+                        ELSE 'NO_CA0105'
+                    END
+                """, TABLA_EJEC_GASTOS);
+
+        jdbcTemplate.execute(updateSpecRules);
+
     }
 
 }
