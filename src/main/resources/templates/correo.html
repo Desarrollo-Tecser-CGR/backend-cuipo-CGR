@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${subject}"></title>
+</head>
+<body>
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f4f4f4; padding: 20px; border-radius: 8px;">
+    <div style="text-align: center;">
+        <img src="cid:logo" alt="Logo de Tecser" style="width: 200px; height: auto;" />
+    </div>
+    <h1 th:text="${'¡Hola, ' + name + '!'}" style="color: #333333; text-align: center;">¡Hola, Nombre del Usuario!</h1>
+    <p style="color: #555555; font-size: 16px;">Este es un mensaje automático con la siguiente información:</p>
+    <br/>
+    <strong style="color: #333333; font-size: 16px;">Asunto:</strong> <span th:text="${subject}" style="color: #555555; font-size: 16px;"></span><br/>
+    <strong style="color: #333333; font-size: 16px;">Entidad:</strong> <span th:text="${entity}" style="color: #555555; font-size: 16px;"></span><br/>
+    <strong style="color: #333333; font-size: 16px;">Número de Contrato:</strong> <span th:text="${numbercontract}" style="color: #555555; font-size: 16px;"></span><br/>
+    <strong style="color: #333333; font-size: 16px;">Observaciones:</strong> <span th:text="${notification}" style="color: #555555; font-size: 16px;"></span><br/>
+    <br/>
+    <p style="color: #555555; font-size: 16px;">Saludos,</p>
+    <p style="color: #555555; font-size: 16px; font-weight: bold;">El equipo de Tecser</p>
+</div>
+</body>
+</html>

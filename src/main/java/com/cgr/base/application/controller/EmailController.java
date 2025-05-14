@@ -5,12 +5,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cgr.base.application.services.Email.EmailService;
+import com.cgr.base.application.services.Email.EmailServices;
 
 @RestController
 public class EmailController {
     @Autowired
-    private EmailService emailService;
+    private EmailServices emailServices;
 
     @Autowired
     @Qualifier("excel")
@@ -106,7 +106,7 @@ public class EmailController {
                             """;
         try {
 
-            emailService.sendSimpleEmail(to, subject, htmlContent);
+            emailServices.sendSimpleEmail(to, subject, htmlContent);
             return "Correo enviado con éxito a " + to;
         } catch (Exception e) {
             return "Error al enviar el correo: " + e.getMessage();

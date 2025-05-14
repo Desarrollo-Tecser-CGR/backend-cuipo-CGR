@@ -29,15 +29,15 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: jerssonovalle2@gmail.com
-    password: egyw cias mgpd owgl
-    protocol: smtp
+    username: desarrollador9tecsersas@gmail.com
+    password: nryjjckrqzxmrjuc
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+    protocol: smtp
 
   application:
     name: baseapp
@@ -93,4 +93,6 @@ springdoc:
     tagsSorter: alpha
     disable-swagger-default-url: true
 
-
+# Configuración personalizada para el correo electrónico del remitente
+email:
+  from: desarrollador20@tecsersas.com

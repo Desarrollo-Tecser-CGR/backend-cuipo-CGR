@@ -9,7 +9,7 @@ import com.cgr.base.domain.exception.customException.MessageException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cgr.base.application.services.Email.EmailService;
+import com.cgr.base.application.services.Email.EmailServices;
 import com.cgr.base.domain.dto.dtoAuth.AuthRequestDto;
 import com.cgr.base.domain.dto.dtoAuth.AuthResponseDto;
 import com.cgr.base.domain.dto.dtoAuth.UserAuthDto;
@@ -44,7 +44,7 @@ public class AuthService implements IAuthUseCase {
 
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
-    private final EmailService emailService;
+    private final EmailServices emailServices;
 
     private final ILogUseCase logService;
 
@@ -256,7 +256,7 @@ public class AuthService implements IAuthUseCase {
 
                 String emailToken = jwtAuthenticationProvider.createToken(userToken, userLogin.getRoles(), 300000);
 
-                this.emailService.sendSimpleEmail(userDto.getEmail(), "Verificacion de Usuario",
+                this.emailServices.sendSimpleEmail(userDto.getEmail(), "Verificacion de Usuario",
                         EmailUtility.getHtmlContent(emailToken));
 
                 response.put("message", "Mail sent");
