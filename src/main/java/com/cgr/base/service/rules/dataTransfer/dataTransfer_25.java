@@ -216,7 +216,7 @@ public class dataTransfer_25 {
                                 AND (NOM_FUENTES_FINANCIACION NOT LIKE 'R.B%%'
                                      AND (NOM_FUENTES_FINANCIACION LIKE '%%INGRESOS CORRIENTES DE LIBRE DESTINACION%%'
                                           OR NOM_FUENTES_FINANCIACION LIKE '%%SGP-PROPOSITO GENERAL-LIBRE DESTINACION MUNICIPIOS CATEGORIAS 4, 5 Y 6%%'))
-                                AND CUENTA NOT IN ('2.1.3.07.02.002')
+                                AND CUENTA NOT LIKE ('2.1.3.07.02.002%%')
                                 AND (
                                     (CODIGO_ENTIDAD IN ('210105001','218168081','210108001','210976109',
                                                          '210113001','216813468','210144001','210147001',
@@ -271,7 +271,7 @@ public class dataTransfer_25 {
                                        SELECT 1
                                        FROM %s T2
                                        WHERE T2.CODIGO_ENTIDAD = T1.CODIGO_ENTIDAD
-                                         AND T2.CUENTA = '2.1.3.05.04.001.13.01'
+                                         AND (T2.CUENTA = '2.1.3.05.04.001.13.01' OR T2.CUENTA = '2.3.3.05.04.001.13.01')
                                    ) THEN 'Existe la cuenta Transferencia de la sobretasa ambiental a las corporaciones autónomas regionales'
                                    ELSE 'La cuenta "Transferencia de la sobretasa ambiental a las corporaciones autónomas regionales" NO se encuentra en el formulario'
                                 END AS ALERTA_25_CA0105
@@ -324,7 +324,7 @@ public class dataTransfer_25 {
                 """
                         UPDATE %s
                         SET ALERTA_25_CA0105 = CASE
-                            WHEN CUENTA = '2.1.3.05.04.001.13.01' THEN '1'
+                            WHEN CUENTA = '2.1.3.05.04.001.13.01' OR CUENTA ='2.3.3.05.04.001.13.01' THEN '1'
                             ELSE '0'
                         END;
                         """,

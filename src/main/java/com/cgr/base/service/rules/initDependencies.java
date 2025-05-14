@@ -21,6 +21,7 @@ import com.cgr.base.service.rules.dataTransfer.dataTransfer_EI;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_GF;
 import com.cgr.base.service.rules.dataTransfer.dataTransfer_PG;
 import com.cgr.base.service.rules.generalRules.dataTransfer_1;
+import com.cgr.base.service.rules.generalRules.dataTransfer_11;
 import com.cgr.base.service.rules.generalRules.dataTransfer_2;
 import com.cgr.base.service.rules.generalRules.dataTransfer_3;
 import com.cgr.base.service.rules.generalRules.dataTransfer_4;
@@ -61,6 +62,9 @@ public class initDependencies {
 
     @Autowired
     private dataTransfer_8 Rule8;
+
+    @Autowired
+    private dataTransfer_11 Rule11;
 
     @Autowired
     private dataTransfer_12 Rule12;
@@ -119,7 +123,7 @@ public class initDependencies {
             case "9A" -> RulesPG.applyGeneralRule9A();
             case "9B" -> RulesPG.applyGeneralRule9B();
             case "10" -> RulesPG.applyGeneralRule10();
-            case "11" -> RulesPG.applyGeneralRule11();
+            case "11" -> Rule11.applyGeneralRule11();
             case "12" -> Rule12.applyGeneralRule12();
             case "13A" -> RulesEG.applyGeneralRule13A();
             case "13B" -> RulesEG.applyGeneralRule13B();
