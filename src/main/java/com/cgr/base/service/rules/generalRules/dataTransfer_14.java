@@ -1,8 +1,5 @@
 package com.cgr.base.service.rules.generalRules;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,7 +23,7 @@ public class dataTransfer_14 {
 	private String TABLA_PROG_GASTOS;
 
 	public void applyGeneralRule14() {
-		// applyGeneralRule14A();
+		applyGeneralRule14A();
 		applyGeneralRule14B();
 	}
 
@@ -78,27 +75,6 @@ public class dataTransfer_14 {
 				TABLA_PROG_GASTOS, TABLA_PROG_GASTOS);
 		jdbcTemplate.execute(updateVigenciasProgGastos14B);
 
-		String updateRegla14B = """
-				UPDATE d
-				SET d.REGLA_GENERAL_14B = CASE
-				                            WHEN d.VAL_Vigencias_EjecGastos_14B IS NULL AND d.VAL_Vigencias_ProgGastos_14B IS NULL THEN 'SIN DATOS'
-				                            WHEN d.VAL_Vigencias_EjecGastos_14B IS NULL THEN 'NO CUMPLE'
-				                            WHEN d.VAL_Vigencias_ProgGastos_14B IS NULL THEN 'NO CUMPLE'
-				                            WHEN d.VAL_Vigencias_EjecGastos_14B = d.VAL_Vigencias_ProgGastos_14B THEN 'CUMPLE'
-				                            ELSE 'NO CUMPLE'
-				                         END,
-				    d.ALERTA_14B = CASE
-				                      WHEN d.VAL_Vigencias_EjecGastos_14B IS NULL AND d.VAL_Vigencias_ProgGastos_14B IS NULL THEN 'ND_CA0065'
-				                      WHEN d.VAL_Vigencias_EjecGastos_14B IS NULL THEN 'NO_EG_CA0065'
-				                      WHEN d.VAL_Vigencias_ProgGastos_14B IS NULL THEN 'NO_PG_CA0065'
-				                      WHEN d.VAL_Vigencias_EjecGastos_14B = d.VAL_Vigencias_ProgGastos_14B THEN 'OK'
-				                      ELSE 'CA0065'
-				                  END
-				FROM GENERAL_RULES_DATA d
-				""";
-
-		jdbcTemplate.execute(updateRegla14B);
-
 		String updateNoDataQuery = String.format(
 				"""
 						UPDATE GENERAL_RULES_DATA
@@ -132,6 +108,27 @@ public class dataTransfer_14 {
 						""", TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS);
 
 		jdbcTemplate.update(updateNoDataQuery2);
+
+		String updateRegla14B = """
+				UPDATE d
+				SET d.REGLA_GENERAL_14B = CASE
+				                            WHEN d.VAL_Vigencias_EjecGastos_14B IS NULL AND d.VAL_Vigencias_ProgGastos_14B IS NULL THEN 'SIN DATOS'
+				                            WHEN d.VAL_Vigencias_EjecGastos_14B IS NULL THEN 'NO CUMPLE'
+				                            WHEN d.VAL_Vigencias_ProgGastos_14B IS NULL THEN 'NO CUMPLE'
+				                            WHEN d.VAL_Vigencias_EjecGastos_14B = d.VAL_Vigencias_ProgGastos_14B THEN 'CUMPLE'
+				                            ELSE 'NO CUMPLE'
+				                         END,
+				    d.ALERTA_14B = CASE
+				                      WHEN d.VAL_Vigencias_EjecGastos_14B IS NULL AND d.VAL_Vigencias_ProgGastos_14B IS NULL THEN 'ND_CA0065'
+				                      WHEN d.VAL_Vigencias_EjecGastos_14B IS NULL THEN 'NO_EG_CA0065'
+				                      WHEN d.VAL_Vigencias_ProgGastos_14B IS NULL THEN 'NO_PG_CA0065'
+				                      WHEN d.VAL_Vigencias_EjecGastos_14B = d.VAL_Vigencias_ProgGastos_14B THEN 'OK'
+				                      ELSE 'CA0065'
+				                  END
+				FROM GENERAL_RULES_DATA d
+				""";
+
+		jdbcTemplate.execute(updateRegla14B);
 
 	}
 
