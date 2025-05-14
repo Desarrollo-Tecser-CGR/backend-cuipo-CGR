@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
 
 import com.cgr.base.service.certifications.initTablaCertifications;
 import com.cgr.base.service.parametrization.generalParameter;
+import com.cgr.base.service.parametrization.initDB_ParameterTables;
 import com.cgr.base.service.parametrization.specificParameter;
 import com.cgr.base.service.rules.dataTransfer.columnsER;
-import com.cgr.base.service.rules.initTables.dataCategoryInit;
 import com.cgr.base.service.rules.initTables.dataParameterInit;
 import com.cgr.base.service.rules.initTables.dataSourceInit;
 
@@ -26,7 +26,7 @@ public class ruleScheduler {
     private initDependencies applyRules;
 
     @Autowired
-    private dataCategoryInit categorias;
+    private initDB_ParameterTables initParamerBD;
 
     @Autowired
     private dataParameterInit parametria;
@@ -61,31 +61,37 @@ public class ruleScheduler {
 
     private void executeRuleFlow() {
 
+        // runStep(() -> initParamerBD.executeInitTables(), "initDB_ParameterTables");
+
         // runStep(() -> motorReglas.processTablesRules(), "processTablesRules");
         // runStep(() -> parametria.processTablesSource(), "processTablesSource");
-        // runStep(() -> categorias.initCategoryTable(), "initCategoryTable");
         // runStep(() -> parameterRG.tableGeneralRulesName(), "tableGeneralRulesName");
         // runStep(() -> parameterRE.tableSpecificRulesName(),
         // "tableSpecificRulesName");
 
         String[] rules = {
-                // // Programación de Ingresos
+
+                // // REGLAS GENERALES:
+                // // Programación Ingresos:
                 // "1", "2", "3", "4",
+                // // Ejecución Ingresos:
+                // "5", "6", "7", "8", "17",
+                // // Programación Gastos:
+                // "11",
+                // // Ejecución Gastos:
+                //  "13", "16",
+                "8",
+                // REGLAS ESPECIFICAS:
 
-                // // Programación de Gastos
-                // "5", "6", 
+                // REGLAS:
+                // "1", "2", "3", "4", "5", "6", "7", "8", "9A", "9B", "10", "11", "12", "13A",
+                // "13B", "14", "15", "16A",
+                // "16B", "17",
+                // "22A", "22_A", "22B", "22C", "22_C", "22D", "22_D", "22E", "22_E", "23",
+                // "24", "25A", "25_A", "25B",
+                // "25_B", "GF",
+                // "26", "27", "28", "29A", "29B", "29C", "30", "31", "32"
 
-                // // Ejecución de Ingresos
-                // "7",
-                //"8", // "9", "10",
-                // "8", "9A", "9B", "10", 
-                "11"
-                //, "12",
-                // "13A", "13B", "14A", "14B", "15", "16A", "16B",
-                // "17", "22A", "22_A", "22B", "22C", "22_C", "22D", "22_D",
-                // "22E", "22_E", "23", "24",
-                // "25A", "25_A", "25B", "25_B",
-                // "GF", "26", "27", "28", "29A", "29B", "29C", "30", "31", "32"
         };
 
         System.out.println("[RULES] Ejecutando reglas secuencialmente...");

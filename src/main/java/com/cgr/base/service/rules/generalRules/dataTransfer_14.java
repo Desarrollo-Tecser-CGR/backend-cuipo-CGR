@@ -1,4 +1,4 @@
-package com.cgr.base.service.rules.dataTransfer;
+package com.cgr.base.service.rules.generalRules;
 
 import java.util.Arrays;
 import java.util.List;
@@ -8,11 +8,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import com.cgr.base.service.rules.utils.dataBaseUtils;
+
 @Service
-public class dataTransfer_EG {
+public class dataTransfer_14 {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private dataBaseUtils UtilsDB;
 
     @Value("${TABLA_EJEC_GASTOS}")
     private String TABLA_EJEC_GASTOS;
@@ -20,103 +25,198 @@ public class dataTransfer_EG {
     @Value("${TABLA_PROG_GASTOS}")
     private String TABLA_PROG_GASTOS;
 
-    // Regla 15:
-    public void applyGeneralRule15() {
-        // Lista de columnas requeridas para la regla 15
-        List<String> requiredColumns = Arrays.asList(
-                "ALERTA_15",
-                "REGLA_GENERAL_15",
-                "CUENTAS_NO_CUMPLEN_15");
+    public void applyGeneralRule14X() {
+        applyGeneralRule14A();
+    }
 
-        String checkColumnsQuery = String.format(
-                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                "GENERAL_RULES_DATA",
-                "'" + String.join("','", requiredColumns) + "'");
+    public void applyGeneralRule14() {
+        UtilsDB.ensureColumnsExist(
+                TABLA_EJEC_GASTOS,
+                "CA0065_RG_14B:NVARCHAR(20)");
 
-        List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
-
-        for (String column : requiredColumns) {
-            if (!existingColumns.contains(column)) {
-                String addColumnQuery = String.format(
-                        "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        "GENERAL_RULES_DATA", column);
-                jdbcTemplate.execute(addColumnQuery);
-            }
-        }
-
-        String updateQuery = String.format(
+        String updateCA0065Query = String.format(
                 """
-                                WITH ejec AS (
-                                    SELECT
-                                        e.FECHA,
-                                        e.TRIMESTRE,
-                                        e.CODIGO_ENTIDAD,
-                                        e.AMBITO_CODIGO,
-                                        e.CUENTA,
-                                        CA.ULT_DIGITO,
-                                        CA.PRIMER_DIGITO,
-                                        CASE
-                                          WHEN e.CUENTA NOT IN (
-                                              '2.1.2.02.01.000','2.1.2.02.01.001','2.1.2.02.01.002','2.1.2.02.01.003','2.1.2.02.01.004',
-                                              '2.1.2.02.02.005','2.1.2.02.02.006','2.1.2.02.02.007','2.1.2.02.02.008','2.1.2.02.02.009',
-                                              '2.1.5.01.00','2.1.5.01.01','2.1.5.01.02','2.1.5.01.03','2.1.5.01.04',
-                                              '2.1.5.02.05','2.1.5.02.06','2.1.5.02.07','2.1.5.02.08','2.1.5.02.09',
-                                              '2.3.2.02.01.000','2.3.2.02.01.001','2.3.2.02.01.002','2.3.2.02.01.003','2.3.2.02.01.004',
-                                              '2.3.2.02.02.005','2.3.2.02.02.006','2.3.2.02.02.007','2.3.2.02.02.008','2.3.2.02.02.009',
-                                              '2.3.5.01.00','2.3.5.01.01','2.3.5.01.02','2.3.5.01.03','2.3.5.01.04',
-                                              '2.3.5.02.05','2.3.5.02.06','2.3.5.02.07','2.3.5.02.08','2.3.5.02.09',
-                                              '2.4.5.01.00','2.4.5.01.01','2.4.5.01.02','2.4.5.01.03','2.4.5.01.04',
-                                              '2.4.5.02.05','2.4.5.02.06','2.4.5.02.07','2.4.5.02.08','2.4.5.02.09'
-                                          )
-                                          THEN 'NO APLICA'
-                                          WHEN CA.ULT_DIGITO = CA.PRIMER_DIGITO THEN 'OK'
-                                          ELSE 'ALERTA'
-                                        END AS ALERTA_RESULTADO
-                                    FROM %s e
-                                    CROSS APPLY (
-                                      SELECT
-                                        RIGHT(REPLACE(e.CUENTA, '.', ''), 1) AS ULT_DIGITO,
-                                        LEFT(e.COD_CPC, 1) AS PRIMER_DIGITO
-                                    ) CA
-                                ),
-                                agg_ejec AS (
-                                    SELECT
-                                        FECHA,
-                                        TRIMESTRE,
-                                        CODIGO_ENTIDAD,
-                                        AMBITO_CODIGO,
-                                        CASE
-                                          WHEN COUNT(CASE WHEN ALERTA_RESULTADO = 'ALERTA' THEN 1 END) = 0 THEN ''
-                                          ELSE '[' + STRING_AGG(CASE WHEN ALERTA_RESULTADO = 'ALERTA' THEN CUENTA END, ', ') + ']'
-                                        END AS CUENTAS_NO_CUMPLEN_15
-                                    FROM ejec
-                                    GROUP BY FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO
-                                )
-                                UPDATE r
-                                SET
-                                    r.CUENTAS_NO_CUMPLEN_15 = a.CUENTAS_NO_CUMPLEN_15,
-                                    r.REGLA_GENERAL_15 = CASE
-                                        WHEN a.CUENTAS_NO_CUMPLEN_15 = '' THEN 'CUMPLE'
-                                        WHEN a.CUENTAS_NO_CUMPLEN_15 IS NULL THEN 'NO DATA'
-                                        ELSE 'NO CUMPLE'
-                                    END,
-                                    r.ALERTA_15 = CASE
-                                        WHEN a.CUENTAS_NO_CUMPLEN_15 IS NULL THEN 'La entidad no registró ninguna de las cuentas en ejecución de gasto'
-                                        WHEN a.CUENTAS_NO_CUMPLEN_15 = '' THEN 'La entidad satisface los criterios de aceptación'
-                                        ELSE 'La entidad NO satisface los criterios de aceptación'
-                                    END
-                                FROM %s r
-                                LEFT JOIN agg_ejec a
-                                    ON r.FECHA = a.FECHA
-                                    AND r.TRIMESTRE = a.TRIMESTRE
-                                    AND r.CODIGO_ENTIDAD = a.CODIGO_ENTIDAD
-                                    AND r.AMBITO_CODIGO = a.AMBITO_CODIGO;
+                        UPDATE eg
+                        SET CA0065_RG_14B = CASE
+                            WHEN pg.ID IS NOT NULL THEN '1'
+                            ELSE '0'
+                        END
+                        FROM %s eg
+                        OUTER APPLY (
+                            SELECT TOP 1 1 AS ID
+                            FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE a.FECHA = eg.FECHA
+                              AND a.TRIMESTRE = eg.TRIMESTRE
+                              AND a.CODIGO_ENTIDAD_INT = eg.CODIGO_ENTIDAD_INT
+                              AND a.AMBITO_CODIGO_STR = eg.AMBITO_CODIGO_STR
+                              AND a.CUENTA = eg.CUENTA
+                              AND a.COD_VIGENCIA_DEL_GASTO = eg.COD_VIGENCIA_DEL_GASTO
+                        ) pg
                         """,
-                TABLA_EJEC_GASTOS, "GENERAL_RULES_DATA");
-        jdbcTemplate.execute(updateQuery);
+                TABLA_EJEC_GASTOS,
+                TABLA_PROG_GASTOS, TABLA_PROG_GASTOS);
+        jdbcTemplate.execute(updateCA0065Query);
+
+        UtilsDB.ensureColumnsExist(
+                "GENERAL_RULES_DATA",
+                "REGLA_GENERAL_14B:NVARCHAR(20)",
+                "ALERTA_14B:NVARCHAR(20)");
+
+        String updateReglaCA0065Query = String.format(
+                """
+                            UPDATE d
+                            SET REGLA_GENERAL_14B = 'NO CUMPLE',
+                                ALERTA_14B = 'CA0065'
+                            FROM GENERAL_RULES_DATA d
+                            WHERE EXISTS (
+                                SELECT 1
+                                FROM %s e WITH (INDEX(IDX_%s_COMPUTED))
+                                WHERE e.CA0065_RG_14B = '0'
+                                  AND e.FECHA = d.FECHA
+                                  AND e.TRIMESTRE = d.TRIMESTRE
+                                  AND e.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
+                                  AND e.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
+                            )
+                        """,
+                TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS);
+        jdbcTemplate.execute(updateReglaCA0065Query);
+
+        String updateCumpleCA0065Query = String.format(
+                """
+                        UPDATE d
+                        SET REGLA_GENERAL_14B = 'CUMPLE',
+                            ALERTA_14B = 'OK'
+                        FROM GENERAL_RULES_DATA d
+                        WHERE NOT EXISTS (
+                            SELECT 1
+                            FROM %s e WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE e.FECHA = d.FECHA
+                              AND e.TRIMESTRE = d.TRIMESTRE
+                              AND e.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
+                              AND e.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
+                              AND e.CA0065_RG_14B = 0
+                        )
+                        """,
+                TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS);
+        jdbcTemplate.execute(updateCumpleCA0065Query);
+
+        String updateNoDataEjecGastosCA0065 = String.format(
+                """
+                        UPDATE GENERAL_RULES_DATA
+                        SET REGLA_GENERAL_14B = 'SIN DATOS',
+                            ALERTA_14B = 'NO_EG'
+                        WHERE NOT EXISTS (
+                            SELECT 1
+                            FROM %s e WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE e.FECHA = GENERAL_RULES_DATA.FECHA
+                              AND e.TRIMESTRE = GENERAL_RULES_DATA.TRIMESTRE
+                              AND e.CODIGO_ENTIDAD_INT = GENERAL_RULES_DATA.CODIGO_ENTIDAD
+                              AND e.AMBITO_CODIGO_STR = GENERAL_RULES_DATA.AMBITO_CODIGO
+                        )
+                        """, TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS);
+        jdbcTemplate.update(updateNoDataEjecGastosCA0065);
+
+        String updateNoDataProgGastosCA0065 = String.format(
+                """
+                        UPDATE GENERAL_RULES_DATA
+                        SET REGLA_GENERAL_14B = 'SIN DATOS',
+                            ALERTA_14B = 'NO_PG'
+                        WHERE NOT EXISTS (
+                            SELECT 1
+                            FROM %s p WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE p.FECHA = GENERAL_RULES_DATA.FECHA
+                              AND p.TRIMESTRE = GENERAL_RULES_DATA.TRIMESTRE
+                              AND p.CODIGO_ENTIDAD_INT = GENERAL_RULES_DATA.CODIGO_ENTIDAD
+                              AND p.AMBITO_CODIGO_STR = GENERAL_RULES_DATA.AMBITO_CODIGO
+                        )
+                        """, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS);
+        jdbcTemplate.update(updateNoDataProgGastosCA0065);
+
     }
 
     public void applyGeneralRule14A() {
+        UtilsDB.ensureColumnsExist(
+                "GENERAL_RULES_DATA",
+                "REGLA_GENERAL_14A:NVARCHAR(20)",
+                "ALERTA_14A:NVARCHAR(20)");
+
+        String queryOptimizada = String.format(
+                """
+                        UPDATE d
+                        SET
+                            REGLA_GENERAL_14A = CASE
+                                WHEN ejec.ID IS NOT NULL AND prog.ID IS NOT NULL THEN 'CUMPLE'
+                                ELSE 'NO CUMPLE'
+                            END,
+                            ALERTA_14A = CASE
+                                WHEN ejec.ID IS NULL AND prog.ID IS NOT NULL THEN 'CA0064_NE'
+                                WHEN ejec.ID IS NOT NULL AND prog.ID IS NULL THEN 'CA0064_NP'
+                                WHEN ejec.ID IS NULL AND prog.ID IS NULL THEN 'CA0064'
+                                ELSE 'OK'
+                            END
+                        FROM GENERAL_RULES_DATA d
+                        LEFT JOIN (
+                            SELECT DISTINCT
+                                FECHA, TRIMESTRE, CODIGO_ENTIDAD_INT, AMBITO_CODIGO_STR,
+                                1 AS ID
+                            FROM %s WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE COD_VIGENCIA_DEL_GASTO IN ('1', '1.0')
+                        ) ejec
+                            ON ejec.FECHA = d.FECHA
+                            AND ejec.TRIMESTRE = d.TRIMESTRE
+                            AND ejec.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
+                            AND ejec.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
+                        LEFT JOIN (
+                            SELECT DISTINCT
+                                FECHA, TRIMESTRE, CODIGO_ENTIDAD_INT, AMBITO_CODIGO_STR,
+                                1 AS ID
+                            FROM %s WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE COD_VIGENCIA_DEL_GASTO IN ('1', '1.0')
+                        ) prog
+                            ON prog.FECHA = d.FECHA
+                            AND prog.TRIMESTRE = d.TRIMESTRE
+                            AND prog.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD
+                            AND prog.AMBITO_CODIGO_STR = d.AMBITO_CODIGO
+                        """,
+                TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS,
+                TABLA_PROG_GASTOS, TABLA_PROG_GASTOS);
+        jdbcTemplate.execute(queryOptimizada);
+
+        String updateNoDataEjecGastos = String.format(
+                """
+                        UPDATE GENERAL_RULES_DATA
+                        SET REGLA_GENERAL_14A = 'SIN DATOS',
+                            ALERTA_14A = 'NO_EG'
+                        WHERE NOT EXISTS (
+                            SELECT 1
+                            FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE a.FECHA = GENERAL_RULES_DATA.FECHA
+                              AND a.TRIMESTRE = GENERAL_RULES_DATA.TRIMESTRE
+                              AND a.CODIGO_ENTIDAD_INT = GENERAL_RULES_DATA.CODIGO_ENTIDAD
+                              AND a.AMBITO_CODIGO_STR = GENERAL_RULES_DATA.AMBITO_CODIGO
+                        )
+                        """, TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS);
+        jdbcTemplate.update(updateNoDataEjecGastos);
+
+        String updateNoDataProgGastos = String.format(
+                """
+                        UPDATE GENERAL_RULES_DATA
+                        SET REGLA_GENERAL_14A = 'SIN DATOS',
+                            ALERTA_14A = 'NO_PG'
+                        WHERE NOT EXISTS (
+                            SELECT 1
+                            FROM %s a WITH (INDEX(IDX_%s_COMPUTED))
+                            WHERE a.FECHA = GENERAL_RULES_DATA.FECHA
+                              AND a.TRIMESTRE = GENERAL_RULES_DATA.TRIMESTRE
+                              AND a.CODIGO_ENTIDAD_INT = GENERAL_RULES_DATA.CODIGO_ENTIDAD
+                              AND a.AMBITO_CODIGO_STR = GENERAL_RULES_DATA.AMBITO_CODIGO
+                        )
+                        """, TABLA_PROG_GASTOS, TABLA_PROG_GASTOS);
+        jdbcTemplate.update(updateNoDataProgGastos);
+
+    };
+
+    public void applyGeneralRule14Aa() {
         // 1. Verificación y creación de columnas en la tabla de destino
         List<String> requiredColumns = Arrays.asList(
                 "REGLA_GENERAL_14A",
@@ -447,181 +547,6 @@ public class dataTransfer_EG {
                         """,
                 "GENERAL_RULES_DATA");
         jdbcTemplate.execute(updateCumpleQuery);
-    }
-
-    public void applyGeneralRule13B() {
-        List<String> requiredColumns = List.of("REGLA_GENERAL_13B", "ALERTA_13B");
-
-        // Verificar si las columnas existen en la tabla de reglas, si no, agregarlas
-        String checkColumnsQuery = String.format(
-                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN ('%s')",
-                "GENERAL_RULES_DATA", String.join("','", requiredColumns));
-        List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
-
-        requiredColumns.stream()
-                .filter(column -> !existingColumns.contains(column))
-                .forEach(column -> jdbcTemplate
-                        .execute(String.format("ALTER TABLE %s ADD %s VARCHAR(MAX) NULL", "GENERAL_RULES_DATA",
-                                column)));
-
-        // Optimización del UPDATE con CTE para evitar duplicación de lógica
-        String updateQuery = String.format("""
-                WITH filtered_data AS (
-                    SELECT d.FECHA, d.TRIMESTRE, d.CODIGO_ENTIDAD, d.AMBITO_CODIGO,
-                           MAX(CASE WHEN d.CUENTA = '2.99' THEN 1 ELSE 0 END) AS tieneCuenta299
-                    FROM [dbo].[%s] d
-                    GROUP BY d.FECHA, d.TRIMESTRE, d.CODIGO_ENTIDAD, d.AMBITO_CODIGO
-                )
-                UPDATE r
-                SET
-                    r.REGLA_GENERAL_13B = CASE
-                        WHEN fd.FECHA IS NULL THEN 'NO DATA'
-                        WHEN fd.tieneCuenta299 = 1 THEN 'NO CUMPLE'
-                        ELSE 'CUMPLE'
-                    END,
-                    r.ALERTA_13B = CASE
-                        WHEN fd.FECHA IS NULL THEN 'La entidad no registra en ejecución de gasto'
-                        WHEN fd.tieneCuenta299 = 1 THEN 'La entidad no satisface los criterios de aceptación'
-                        ELSE 'La entidad satisface los criterios de aceptación'
-                    END
-                FROM %s r
-                LEFT JOIN filtered_data fd
-                    ON r.FECHA = fd.FECHA
-                    AND r.TRIMESTRE = fd.TRIMESTRE
-                    AND r.CODIGO_ENTIDAD = fd.CODIGO_ENTIDAD
-                    AND r.AMBITO_CODIGO = fd.AMBITO_CODIGO;
-                """, TABLA_EJEC_GASTOS, "GENERAL_RULES_DATA");
-
-        jdbcTemplate.execute(updateQuery);
-    }
-
-    public void applyGeneralRule13A() {
-        // 1. Definir las columnas requeridas
-        List<String> requiredColumns = Arrays.asList(
-                "REGLA_GENERAL_13A",
-                "ALERTA_13A",
-                "CUENTAS_PROGRAMADAS_13A",
-                "CUENTAS_EJECUTADAS_13A");
-
-        // 2. Verificar y crear columnas en la tabla de destino si no existen
-        String checkColumnsQuery = String.format(
-                "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s' AND COLUMN_NAME IN (%s)",
-                "GENERAL_RULES_DATA", "'" + String.join("','", requiredColumns) + "'");
-
-        List<String> existingColumns = jdbcTemplate.queryForList(checkColumnsQuery, String.class);
-
-        for (String column : requiredColumns) {
-            if (!existingColumns.contains(column)) {
-                String addColumnQuery = String.format(
-                        "ALTER TABLE %s ADD %s VARCHAR(MAX) NULL",
-                        "GENERAL_RULES_DATA", column);
-                jdbcTemplate.execute(addColumnQuery);
-            }
-        }
-
-        // 3. Inicializar las columnas para la nueva validación
-        String initializeColumnsQuery = String.format(
-                """
-                        UPDATE %s
-                        SET REGLA_GENERAL_13A = NULL,
-                            ALERTA_13A = NULL,
-                            CUENTAS_PROGRAMADAS_13A = NULL,
-                            CUENTAS_EJECUTADAS_13A = NULL
-                        """,
-                "GENERAL_RULES_DATA");
-        jdbcTemplate.execute(initializeColumnsQuery);
-
-        // 4 y 5. Actualizar la tabla usando CTE para obtener cuentas ejecutadas y
-        // programadas
-        // y realizar la validación en una sola consulta SQL para máxima eficiencia
-        String updateQuery = String.format(
-                """
-                        WITH cuentas_ejecutadas AS (
-                            SELECT
-                                d.FECHA,
-                                d.TRIMESTRE,
-                                d.CODIGO_ENTIDAD_INT AS CODIGO_ENTIDAD,
-                                d.AMBITO_CODIGO_STR AS AMBITO_CODIGO,
-                                STRING_AGG(d.CUENTA, ',') AS CUENTAS_EJECUTADAS_LISTA,
-                                JSON_QUERY((
-                                    SELECT CONCAT('[', STRING_AGG(CONCAT('"', cuenta_unica, '"'), ','), ']')
-                                    FROM (SELECT DISTINCT d2.CUENTA AS cuenta_unica
-                                          FROM %s d2 WITH (INDEX(IDX_%s_COMPUTED))
-                                          WHERE d2.FECHA = d.FECHA
-                                            AND d2.TRIMESTRE = d.TRIMESTRE
-                                            AND d2.CODIGO_ENTIDAD_INT = d.CODIGO_ENTIDAD_INT
-                                            AND d2.AMBITO_CODIGO_STR = d.AMBITO_CODIGO_STR
-                                            AND d2.CUENTA IN ('2.1', '2.2', '2.3', '2.4')) AS unique_cuentas
-                                )) AS CUENTAS_EJECUTADAS_13A
-                            FROM %s d WITH (INDEX(IDX_%s_COMPUTED))
-                            WHERE d.CUENTA IN ('2.1', '2.2', '2.3', '2.4')
-                            GROUP BY d.FECHA, d.TRIMESTRE, d.CODIGO_ENTIDAD_INT, d.AMBITO_CODIGO_STR
-                        ),
-                        cuentas_programadas AS (
-                            SELECT
-                                c.FECHA,
-                                c.TRIMESTRE,
-                                c.CODIGO_ENTIDAD_INT AS CODIGO_ENTIDAD,
-                                c.AMBITO_CODIGO_STR AS AMBITO_CODIGO,
-                                STRING_AGG(c.CUENTA, ',') AS CUENTAS_PROGRAMADAS_LISTA,
-                                JSON_QUERY((
-                                    SELECT CONCAT('[', STRING_AGG(CONCAT('"', cuenta_unica, '"'), ','), ']')
-                                    FROM (SELECT DISTINCT c2.CUENTA AS cuenta_unica
-                                          FROM %s c2 WITH (INDEX(IDX_%s_COMPUTED))
-                                          WHERE c2.FECHA = c.FECHA
-                                            AND c2.TRIMESTRE = c.TRIMESTRE
-                                            AND c2.CODIGO_ENTIDAD_INT = c.CODIGO_ENTIDAD_INT
-                                            AND c2.AMBITO_CODIGO_STR = c.AMBITO_CODIGO_STR
-                                            AND c2.CUENTA IN ('2.1', '2.2', '2.3', '2.4')) AS unique_cuentas
-                                )) AS CUENTAS_PROGRAMADAS_13A
-                            FROM %s c WITH (INDEX(IDX_%s_COMPUTED))
-                            WHERE c.CUENTA IN ('2.1', '2.2', '2.3', '2.4')
-                            GROUP BY c.FECHA, c.TRIMESTRE, c.CODIGO_ENTIDAD_INT, c.AMBITO_CODIGO_STR
-                        )
-                        UPDATE r
-                        SET
-                            r.REGLA_GENERAL_13A = CASE
-                                WHEN ce.CODIGO_ENTIDAD IS NULL THEN 'NO DATA'
-                                WHEN ce.CUENTAS_EJECUTADAS_13A IS NULL THEN 'NO DATA'
-                                WHEN cp.CUENTAS_PROGRAMADAS_13A IS NULL THEN 'NO DATA'
-                                WHEN NOT EXISTS (
-                                    SELECT value FROM OPENJSON(ce.CUENTAS_EJECUTADAS_13A)
-                                    EXCEPT
-                                    SELECT value FROM OPENJSON(cp.CUENTAS_PROGRAMADAS_13A)
-                                ) THEN 'CUMPLE'
-                                ELSE 'NO CUMPLE'
-                            END,
-                            r.ALERTA_13A = CASE
-                                WHEN ce.CODIGO_ENTIDAD IS NULL THEN 'La entidad no registró ejecución de gastos'
-                                WHEN ce.CUENTAS_EJECUTADAS_13A IS NULL THEN 'La entidad no registró gastos ejecutados para las cuentas 2.1, 2.2, 2.3 o 2.4'
-                                WHEN cp.CUENTAS_PROGRAMADAS_13A IS NULL THEN 'La entidad no registró gastos programados para las cuentas 2.1, 2.2, 2.3 o 2.4'
-                                WHEN NOT EXISTS (
-                                    SELECT value FROM OPENJSON(ce.CUENTAS_EJECUTADAS_13A)
-                                    EXCEPT
-                                    SELECT value FROM OPENJSON(cp.CUENTAS_PROGRAMADAS_13A)
-                                ) THEN 'La entidad ejecutó todas las cuentas programadas'
-                                ELSE 'La entidad ejecutó cuentas no programadas'
-                            END,
-                            r.CUENTAS_PROGRAMADAS_13A = cp.CUENTAS_PROGRAMADAS_13A,
-                            r.CUENTAS_EJECUTADAS_13A = ce.CUENTAS_EJECUTADAS_13A
-                        FROM %s r
-                        LEFT JOIN cuentas_ejecutadas ce ON
-                            r.FECHA = ce.FECHA AND
-                            r.TRIMESTRE = ce.TRIMESTRE AND
-                            r.CODIGO_ENTIDAD = ce.CODIGO_ENTIDAD AND
-                            r.AMBITO_CODIGO = ce.AMBITO_CODIGO
-                        LEFT JOIN cuentas_programadas cp ON
-                            r.FECHA = cp.FECHA AND
-                            r.TRIMESTRE = cp.TRIMESTRE AND
-                            r.CODIGO_ENTIDAD = cp.CODIGO_ENTIDAD AND
-                            r.AMBITO_CODIGO = cp.AMBITO_CODIGO
-                        """,
-                TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS, TABLA_EJEC_GASTOS, TABLA_PROG_GASTOS,
-                TABLA_PROG_GASTOS, TABLA_PROG_GASTOS,
-                TABLA_PROG_GASTOS,
-                "GENERAL_RULES_DATA");
-
-        jdbcTemplate.execute(updateQuery);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.cgr.base.service.rules.initTables;
+package com.cgr.base.service.parametrization.InitParametrization;
 
 import org.springframework.stereotype.Service;
 
@@ -15,11 +15,11 @@ public class dataCategoryInit {
     @Transactional
     public void initCategoryTable() {
 
-        String sqlCheckTable = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'CATEGORIAS'";
-        String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'CATEGORIAS')"
+        String sqlCheckTable = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'CATEGORIAS_ENTIDADES'";
+        String sqlCreateTable = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'CATEGORIAS_ENTIDADES')"
                 +
                 " BEGIN " +
-                " CREATE TABLE [CATEGORIAS] (" +
+                " CREATE TABLE [CATEGORIAS_ENTIDADES] (" +
                 "[CODIGO_ENTIDAD] NVARCHAR(50), " +
                 "[AMBITO_CODIGO] NVARCHAR(50)," +
                 "[NOMBRE_ENTIDAD] NVARCHAR(50)," +
@@ -33,7 +33,7 @@ public class dataCategoryInit {
 
         if (count == 0) {
             entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
-            String sql = "INSERT INTO [CATEGORIAS] ([CODIGO_ENTIDAD],[AMBITO_CODIGO],[NOMBRE_ENTIDAD],[CATEGORIA],[NO_DIPUTADOS],[NO_CONCEJALES])"
+            String sql = "INSERT INTO [CATEGORIAS_ENTIDADES] ([CODIGO_ENTIDAD],[AMBITO_CODIGO],[NOMBRE_ENTIDAD],[CATEGORIA],[NO_DIPUTADOS],[NO_CONCEJALES])"
                     + "VALUES " +
                     "('119191000','A438','AMAZONAS','4',11,0)," +
                     "('110505000','A438','ANTIOQUIA','E',26,0)," +
@@ -683,7 +683,7 @@ public class dataCategoryInit {
                     "('216225862','A439','VERGARA','6',0,9)," +
                     "('211841518','A439','PAICOL','6',0,9)";
 
-            String sql2 = "INSERT INTO [CATEGORIAS] ([CODIGO_ENTIDAD],[AMBITO_CODIGO],[NOMBRE_ENTIDAD],[CATEGORIA],[NO_DIPUTADOS],[NO_CONCEJALES])"
+            String sql2 = "INSERT INTO [CATEGORIAS_ENTIDADES] ([CODIGO_ENTIDAD],[AMBITO_CODIGO],[NOMBRE_ENTIDAD],[CATEGORIA],[NO_DIPUTADOS],[NO_CONCEJALES])"
                     + "VALUES " +
                     "('217241872','A439','VILLAVIEJA','6',0,9)," +
                     "('210547605','A439','REMOLINO','6',0,9)," +

@@ -91,14 +91,10 @@ public class RoleController extends AbstractController {
         response.put("description", createdRole.getDescription());
         response.put("enable", createdRole.isEnable());
 
-        try {
-            logGeneralService.createLog(userId, USUARIOS,
-                    "Creación de rol id : " + createdRole.getId() + " nombre: " + createdRole.getName()
-                            + " con descripción: " + createdRole.getDescription() + " y estado: "
-                            + createdRole.isEnable() + ".");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
+        logGeneralService.createLog(userId, USUARIOS,
+                "Creación de rol id : " + createdRole.getId() + " nombre: " + createdRole.getName()
+                        + " con descripción: " + createdRole.getDescription() + " y estado: "
+                        + createdRole.isEnable() + ".");
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -125,17 +121,11 @@ public class RoleController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
-        try {
+        logGeneralService.createLog(userId, USUARIOS,
+                "Modificación de rol id: " + id + " a: " + updatedRole.getName() + " con descripción: "
+                        + updatedRole.getDescription() + ".");
 
-            logGeneralService.createLog(userId, USUARIOS,
-                    "Modificación de rol id: " + id + " a: " + updatedRole.getName() + " con descripción: "
-                            + updatedRole.getDescription() + ".");
-
-            return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
+        return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
     }
 
     @PutMapping("/config/{id}")
@@ -152,24 +142,19 @@ public class RoleController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
-        try {
+        logGeneralService.createLog(userId, USUARIOS,
+                "Modificación de rol id: " + id + " a: " + message + ".");
 
-            logGeneralService.createLog(userId, USUARIOS,
-                    "Modificación de rol id: " + id + " a: " + message + ".");
-
-            return requestResponse(Map.of("message", message, "enabled", isEnabled), "Update operation completed.",
-                    HttpStatus.OK, true);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
+        return requestResponse(Map.of("message", message, "enabled", isEnabled), "Update operation completed.",
+                HttpStatus.OK, true);
 
     }
 
     @DeleteMapping("/config/{id}")
     public ResponseEntity<?> deleteRole(@PathVariable Long id, HttpServletRequest request) {
-        if (id == 1) {
-            return requestResponse(null, "El rol Administrador no puede ser eliminado.", HttpStatus.FORBIDDEN, false);
+        if (id == 1 || id == 2 || id == 3) {
+            return requestResponse(null, "Los roles principales del sistema no pueden ser eliminados.",
+                    HttpStatus.FORBIDDEN, false);
         }
 
         roleService.delete(id);
@@ -183,12 +168,8 @@ public class RoleController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
-        try {
-            logGeneralService.createLog(userId, USUARIOS,
-                    "Eliminación de rol id: " + id + ".");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
+        logGeneralService.createLog(userId, USUARIOS,
+                "Eliminación de rol id: " + id + ".");
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Rol eliminado exitosamente.");

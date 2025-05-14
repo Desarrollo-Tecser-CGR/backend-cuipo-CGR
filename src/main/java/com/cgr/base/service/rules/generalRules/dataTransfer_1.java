@@ -19,7 +19,6 @@ public class dataTransfer_1 {
     @Autowired
     private dataBaseUtils UtilsDB;
 
-    // Regla1: Presupuesto Definitivo validando Liquidación.
     public void applyGeneralRule1() {
 
         UtilsDB.ensureColumnsExist("GENERAL_RULES_DATA",

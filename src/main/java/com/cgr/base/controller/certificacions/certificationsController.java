@@ -22,7 +22,6 @@ import com.cgr.base.config.jwt.JwtService;
 import com.cgr.base.service.certifications.CertificationsService;
 import com.cgr.base.service.logs.LogGeneralService;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @PreAuthorize("hasAuthority('MENU_CERTIFY')")
@@ -50,6 +49,7 @@ public class certificationsController extends AbstractController {
         return requestResponse(records, "Records retrieved successfully.", HttpStatus.OK, true);
     }
 
+    @PreAuthorize("hasAuthority('ROL_2')")
     @PutMapping("/update/calidad")
     public ResponseEntity<?> updateCalidad(@RequestBody Map<String, String> requestBody,
             HttpServletRequest httpRequest) {
@@ -62,21 +62,13 @@ public class certificationsController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
-        try {
-            String response = Certification.updateCertification(requestBody, userId, "calidad");
-            logGeneralService.createLog(userId, CERTIFICACIONES, "Modificación de certificación de calidad " + requestBody);
-            return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
-
-        } catch (EntityNotFoundException e) {
-            return requestResponse(null, e.getMessage(), HttpStatus.NOT_FOUND, false);
-        } catch (IllegalArgumentException e) {
-            return requestResponse(null, e.getMessage(), HttpStatus.BAD_REQUEST, false);
-        } catch (Exception e) {
-            return requestResponse(null, "Error inesperado.", HttpStatus.INTERNAL_SERVER_ERROR, false);
-        }
+        String response = Certification.updateCertification(requestBody, userId, "calidad");
+        logGeneralService.createLog(userId, CERTIFICACIONES, "Modificación de certificación de calidad " + requestBody);
+        return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
 
     }
 
+    @PreAuthorize("hasAuthority('ROL_2')")
     @PutMapping("/update/l617")
     public ResponseEntity<?> updateL617(@RequestBody Map<String, String> requestBody, HttpServletRequest httpRequest) {
 
@@ -89,18 +81,9 @@ public class certificationsController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
-        try {
-            String response = Certification.updateCertification(requestBody, userId, "L617");
-            logGeneralService.createLog(userId, CERTIFICACIONES, "Modificación de certificación L617 " + requestBody);
-            return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
-
-        } catch (EntityNotFoundException e) {
-            return requestResponse(null, e.getMessage(), HttpStatus.NOT_FOUND, false);
-        } catch (IllegalArgumentException e) {
-            return requestResponse(null, e.getMessage(), HttpStatus.BAD_REQUEST, false);
-        } catch (Exception e) {
-            return requestResponse(null, "Error inesperado.", HttpStatus.INTERNAL_SERVER_ERROR, false);
-        }
+        String response = Certification.updateCertification(requestBody, userId, "L617");
+        logGeneralService.createLog(userId, CERTIFICACIONES, "Modificación de certificación L617 " + requestBody);
+        return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
     }
 
 }

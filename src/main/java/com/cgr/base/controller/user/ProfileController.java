@@ -41,16 +41,12 @@ public class ProfileController extends AbstractController {
     }
 
     private Long getUserIdFromRequest(HttpServletRequest request) {
-        try {
-            String token = getToken(request);
-            Long userId = jwtService.extractUserIdFromToken(token);
-            if (userId == null) {
-                throw new SecurityException("User ID not Found."); // Ensure SecurityException is thrown
-            }
-            return userId;
-        } catch (Exception e) {
-            throw new SecurityException("Invalid or Expired Token."); // Ensure SecurityException is thrown
+        String token = getToken(request);
+        Long userId = jwtService.extractUserIdFromToken(token);
+        if (userId == null) {
+            throw new SecurityException("User ID not Found."); // Ensure SecurityException is thrown
         }
+        return userId;
     }
 
     @PostMapping("/upload_image")

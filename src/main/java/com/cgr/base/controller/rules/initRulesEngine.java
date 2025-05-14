@@ -18,7 +18,7 @@ public class initRulesEngine extends AbstractController {
 
     @Autowired
     private ruleScheduler tablesInit;
-    
+
     @PostMapping("/init-tables")
     public ResponseEntity<?> processTables() {
         tablesInit.launchRulesManually();
@@ -28,5 +28,4 @@ public class initRulesEngine extends AbstractController {
                 HttpStatus.OK,
                 true);
     }
-
 }

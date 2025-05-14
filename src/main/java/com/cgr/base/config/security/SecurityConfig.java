@@ -52,15 +52,14 @@ public class SecurityConfig {
                             "/swagger-ui/**", "/v3/api-docs/**",
                             "/ws-endpoint", "/ws-endpoint/**",
                             "/api/v1/access/module/**").permitAll();
+                    auth.requestMatchers("/api/v1/comments/**").hasAuthority("MENU_CERTIFY"); // Cambiado a MENU_CERTIFY
                     auth.anyRequest().authenticated();
-                })
-                // Filtro JWT antes del filtro de usuario/password
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                // HSTS
-                .headers(headers -> headers
-                        .httpStrictTransportSecurity(hsts -> hsts
-                                .includeSubDomains(true)
-                                .maxAgeInSeconds(31_536_000)));
+                }).sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        http.headers(headers -> headers
+                .httpStrictTransportSecurity(hsts -> hsts
+                        .includeSubDomains(true)
+                        .maxAgeInSeconds(31536000)));
 
         return http.build();
     }
@@ -82,8 +81,10 @@ public class SecurityConfig {
                 config.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "OPTIONS"));
                 config.setAllowedHeaders(Arrays.asList("*"));
                 config.setAllowCredentials(true);
-                config.setExposedHeaders(Arrays.asList("Authorization", "Content-Disposition"));
+                
+                // Tiempo de cache para preflight (1 hora)
                 config.setMaxAge(3600L);
+                
                 return config;
             }
         };
