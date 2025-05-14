@@ -75,12 +75,12 @@ public class ruleScheduler {
                 // // Programación Ingresos:
                 // "1", "2", "3", "4",
                 // // Ejecución Ingresos:
-                // "5", "6", "7", "8", "17",
+                // "5", "6",  "17",
                 // // Programación Gastos:
-                // "11",
+                // "7", "8", "9", "10", "11"
                 // // Ejecución Gastos:
-                //  "13", "16",
-                "8",
+                //  "12", "13", "16",
+                "14",
                 // REGLAS ESPECIFICAS:
 
                 // REGLAS:
