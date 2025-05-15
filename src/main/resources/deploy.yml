@@ -47,7 +47,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # Para usar contraseña (menos seguro):
+          # Para usar contraseña (menos seguro)::
           # password: ${{ secrets.SSH_PASSWORD }}
           script: |
             cd /home/${{ secrets.SSH_USER }}/t-302
