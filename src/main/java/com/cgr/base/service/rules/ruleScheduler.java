@@ -4,8 +4,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -61,12 +59,12 @@ public class ruleScheduler {
 
     private void executeRuleFlow() {
 
-        // runStep(() -> initParamerBD.executeInitTables(), "initDB_ParameterTables");
-        // runStep(() -> motorReglas.processTablesRules(), "processTablesRules");
-        // runStep(() -> parametria.processTablesSource(), "processTablesSource");
-        // runStep(() -> parameterRG.tableGeneralRulesName(), "tableGeneralRulesName");
-        // runStep(() -> parameterRE.tableSpecificRulesName(),
-        //         "tableSpecificRulesName");
+        runStep(() -> initParamerBD.executeInitTables(), "initDB_ParameterTables");
+        runStep(() -> motorReglas.processTablesRules(), "processTablesRules");
+        runStep(() -> parametria.processTablesSource(), "processTablesSource");
+        runStep(() -> parameterRG.tableGeneralRulesName(), "tableGeneralRulesName");
+        runStep(() -> parameterRE.tableSpecificRulesName(),
+                "tableSpecificRulesName");
 
         String[] rules = {
 
@@ -91,6 +89,8 @@ public class ruleScheduler {
         System.out.println("[RULES] Ejecutando reglas secuencialmente...");
         for (String rule : rules) {
             runStep(() -> applyRules.transferRule(rule), "transferRule: " + rule);
+
+            System.out.println("[RULES] Ejecutando regla" + rule + ".");
         }
 
         // Finales

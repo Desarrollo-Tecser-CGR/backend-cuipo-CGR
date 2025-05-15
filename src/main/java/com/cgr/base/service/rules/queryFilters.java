@@ -129,7 +129,8 @@ public class queryFilters {
 
         String trimestreBD = (trimestre != null) ? String.valueOf(Integer.parseInt(trimestre) * 3) : null;
 
-        StringBuilder sql = new StringBuilder("SELECT FECHA, TRIMESTRE, NOMBRE_ENTIDAD, AMBITO_NOMBRE");
+        StringBuilder sql = new StringBuilder(
+                "SELECT FECHA, TRIMESTRE, CODIGO_ENTIDAD, NOMBRE_ENTIDAD, AMBITO_CODIGO, AMBITO_NOMBRE");
         List<String> columnasReglaGeneral = obtenerColumnasReglaGeneral(formularioCodigo);
 
         if (!columnasReglaGeneral.isEmpty()) {
@@ -219,9 +220,6 @@ public class queryFilters {
 
         return result.stream()
                 .map(row -> {
-
-                    row.remove("CODIGO_ENTIDAD");
-                    row.remove("AMBITO_CODIGO");
 
                     if (row.containsKey("TRIMESTRE")) {
                         int trimestreBDValue = Integer.parseInt(row.get("TRIMESTRE").toString());
