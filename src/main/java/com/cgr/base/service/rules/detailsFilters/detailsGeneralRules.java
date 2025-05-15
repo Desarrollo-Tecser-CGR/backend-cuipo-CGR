@@ -26,7 +26,10 @@ public class detailsGeneralRules {
         for (GeneralRulesNames regla : reglas) {
             Map<String, Object> item = new HashMap<>();
             item.put("codigoRegla", regla.getCodigoRegla());
-            item.put("detalles", regla.getDetalles());
+
+            boolean tieneDetalles = regla.getDetalles() != null && !"0".equals(regla.getDetalles().trim());
+            item.put("detalles", tieneDetalles);
+
             resultado.add(item);
         }
 
