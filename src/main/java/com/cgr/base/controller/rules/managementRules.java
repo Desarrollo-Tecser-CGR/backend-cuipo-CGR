@@ -24,7 +24,7 @@ import com.cgr.base.dto.rules.listOptionsEG;
 import com.cgr.base.dto.rules.listOptionsRG;
 import com.cgr.base.entity.parametrization.GeneralRulesNames;
 import com.cgr.base.service.rules.dataTransfer.detailsInfo;
-import com.cgr.base.service.rules.generalRules.detailsGeneralRules;
+import com.cgr.base.service.rules.detailsFilters.detailsGeneralRules;
 import com.cgr.base.service.rules.exportCSVgeneral;
 import com.cgr.base.service.rules.exportCSVspecific;
 import com.cgr.base.service.rules.queryFilters;
@@ -180,12 +180,9 @@ public class managementRules extends AbstractController {
     @PreAuthorize("hasAuthority('MENU_RULES')")
     @PostMapping("/general/data/detail")
     public ResponseEntity<?> getGeneralDataDetail(@RequestBody Map<String, String> filters) {
-        GeneralRulesNames result = FilterDetailGR.detailsGeneralRequest(filters);
-        if (result == null) {
-            return requestResponse(null, "All fields (fecha, trimestre, ambito, entidad) are required.",
-                    HttpStatus.BAD_REQUEST, false);
-        }
-        return requestResponse(result, "GF data successfully retrieved.", HttpStatus.OK, true);
+
+        return requestResponse(FilterDetailGR.detailsGeneralRequest(filters), "GF data successfully retrieved.",
+                HttpStatus.OK, true);
     }
 
 }
