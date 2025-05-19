@@ -4,8 +4,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -61,32 +59,26 @@ public class ruleScheduler {
 
     private void executeRuleFlow() {
 
-        // runStep(() -> initParamerBD.executeInitTables(), "initDB_ParameterTables");
-
-        // runStep(() -> motorReglas.processTablesRules(), "processTablesRules");
-        // runStep(() -> parametria.processTablesSource(), "processTablesSource");
-        // runStep(() -> parameterRG.tableGeneralRulesName(), "tableGeneralRulesName");
-        // runStep(() -> parameterRE.tableSpecificRulesName(),
-        // "tableSpecificRulesName");
+        runStep(() -> initParamerBD.executeInitTables(), "initDB_ParameterTables");
+        runStep(() -> motorReglas.processTablesRules(), "processTablesRules");
+        runStep(() -> parametria.processTablesSource(), "processTablesSource");
+        runStep(() -> parameterRG.tableGeneralRulesName(), "tableGeneralRulesName");
+        runStep(() -> parameterRE.tableSpecificRulesName(),
+                "tableSpecificRulesName");
 
         String[] rules = {
 
-                // // REGLAS GENERALES:
-                // // Programación Ingresos:
-                // "1", "2", "3", "4",
-                // // Ejecución Ingresos:
-                // "5", "6", "7", "8", "17",
-                // // Programación Gastos:
-                // "11",
-                // // Ejecución Gastos:
-                //  "13", "16",
-                "8",
-                // REGLAS ESPECIFICAS:
+                // REGLAS GENERALES:
+                // Programación Ingresos:
+                "1", "2", "3", "4",
+                // Ejecución Ingresos:
+                "5", "6", "17",
+                // Programación Gastos:
+                "7", "8", "9", "10", "11",
+                // Ejecución Gastos:
+                "12", "13", "14", "15", "16",
 
-                // REGLAS:
-                // "1", "2", "3", "4", "5", "6", "7", "8", "9A", "9B", "10", "11", "12", "13A",
-                // "13B", "14", "15", "16A",
-                // "16B", "17",
+                // REGLAS ESPECIFICAS:
                 // "22A", "22_A", "22B", "22C", "22_C", "22D", "22_D", "22E", "22_E", "23",
                 // "24", "25A", "25_A", "25B",
                 // "25_B", "GF",
@@ -97,13 +89,15 @@ public class ruleScheduler {
         System.out.println("[RULES] Ejecutando reglas secuencialmente...");
         for (String rule : rules) {
             runStep(() -> applyRules.transferRule(rule), "transferRule: " + rule);
+
+            System.out.println("[RULES] Ejecutando regla" + rule + ".");
         }
 
         // Finales
         System.out.println("[FINAL] Ejecutando tareas finales...");
         // runStep(() -> er.actualizarSpecificRulesData(),
         // "actualizarSpecificRulesData");
-        // runStep(() -> certificator.generateControlTable(), "generateControlTable");
+        runStep(() -> certificator.generateControlTable(), "generateControlTable");
 
         System.out.println("[FINISHED] Flujo de reglas ejecutado completamente.");
     }
@@ -111,20 +105,15 @@ public class ruleScheduler {
     private void runStep(Runnable task, String stepName) {
         Future<?> future = executor.submit(task);
         try {
-            // Esperamos hasta 30 minutos
-            future.get(30, TimeUnit.MINUTES);
-        } catch (TimeoutException te) {
-            System.out.println("[TIMEOUT] : " + stepName + te.getMessage());
+            future.get();
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
             System.out.println("[INTERRUPTED] : " + stepName + ie.getMessage());
         } catch (ExecutionException ee) {
             System.out.println("[ERROR] : " + stepName + ee.getCause().getMessage());
         }
-
-        // Delay de 1 minuto entre pasos
         try {
-            Thread.sleep(60_000);
+            Thread.sleep(30_000);
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
             System.out.println("[WARN] : " + stepName + ie.getMessage());

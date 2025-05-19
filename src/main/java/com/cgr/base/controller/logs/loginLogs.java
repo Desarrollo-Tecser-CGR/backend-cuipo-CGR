@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.config.abstractResponse.AbstractController;
@@ -21,13 +22,15 @@ public class loginLogs extends AbstractController {
 
     @GetMapping("/login")
     public ResponseEntity<?> getLogAll() {
-        var logs = this.LogService.getAllLogsDesc();
 
-        ResponseEntity<?> response = requestResponse(logs, "Login Logs.", HttpStatus.OK, true);
+        return requestResponse(this.LogService.getAllLogsOptimized(), "Login Logs.", HttpStatus.OK, true);
 
-        return response;
     }
 
-
+    @GetMapping("/login/date")
+    public ResponseEntity<?> getLogsByDate(@RequestParam String date) {
+        return requestResponse(this.LogService.getLogsByDate(date), "Login Logs for date: " + date, HttpStatus.OK,
+                true);
+    }
 
 }

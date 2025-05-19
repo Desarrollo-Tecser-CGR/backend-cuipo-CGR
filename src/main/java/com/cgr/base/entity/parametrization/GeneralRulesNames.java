@@ -39,6 +39,9 @@ public class GeneralRulesNames {
     @Column(name = "CODIGO_TABLA")
     private String  codigoTabla;
 
+    @Column(name = "REFERENCIA")
+    private String  referencia;
+
     @Transient
     public String getCodigo() {
         if (codigoRegla != null && codigoRegla.startsWith("REGLA_GENERAL_")) {
