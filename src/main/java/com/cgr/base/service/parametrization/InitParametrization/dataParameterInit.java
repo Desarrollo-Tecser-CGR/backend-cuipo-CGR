@@ -1,17 +1,16 @@
-package com.cgr.base.service.rules.initTables;
+package com.cgr.base.service.parametrization.InitParametrization;
 
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import jakarta.persistence.EntityManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 @Service
 public class dataParameterInit {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Transactional
     public void processTablesSource() {
@@ -57,10 +56,10 @@ public class dataParameterInit {
                 "ALERTA_26_CA0110 VARCHAR(100) " +
                 " ) " +
                 " END";
-        Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
+        Integer count = jdbcTemplate.queryForObject(sqlCheckTable, Integer.class);
 
         if (count == 0) {
-            entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
+            jdbcTemplate.execute(sqlCreateTable);
         }
     }
 
@@ -98,10 +97,10 @@ public class dataParameterInit {
                 "ALERTA_24_CA0096 VARCHAR(100) " +
                 " ) " +
                 " END";
-        Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
+        Integer count = (Integer) jdbcTemplate.queryForObject(sqlCheckTable, Integer.class);
 
         if (count == 0) {
-            entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
+            jdbcTemplate.execute(sqlCreateTable);
         }
     }
 
@@ -112,7 +111,7 @@ public class dataParameterInit {
                 IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'PARAMETRIZACION_ANUAL')
                 SELECT 1 ELSE SELECT 0;
                 """;
-        Number tableExists = (Number) entityManager.createNativeQuery(checkTableQuery).getSingleResult();
+        Number tableExists = (Number) jdbcTemplate.queryForObject(checkTableQuery, Integer.class);
 
         if (tableExists.intValue() == 0) {
 
@@ -143,7 +142,7 @@ public class dataParameterInit {
 
                     );
                     """;
-            entityManager.createNativeQuery(createTableSQL).executeUpdate();
+            jdbcTemplate.execute(createTableSQL);
 
             String insertDataSQL = """
                     MERGE INTO PARAMETRIZACION_ANUAL AS target
@@ -185,7 +184,7 @@ public class dataParameterInit {
                         source.FECHA, source.SMMLV, source.IPC, source.INFLACION, source.INFL_PROY_BANC_REPU, source.APORTES_PARAFISCALES, source.SALUD, source.PENSION, source.RIESGOS_PROFESIONALES, source.CESANTIAS, source.INTERESES_CESANTIAS, source.VACAIONES, source.PRIMA_VACACIONES, source.PRIMA_NAVIDAD
                     );
                     """;
-            entityManager.createNativeQuery(insertDataSQL).executeUpdate();
+            jdbcTemplate.execute(insertDataSQL);
             String insert2DataSQL = """
                     WITH LimIcldCalc AS (
                         SELECT
@@ -211,7 +210,7 @@ public class dataParameterInit {
                     WHERE PARAMETRIZACION_ANUAL.FECHA = l.FECHA;
 
                                         """;
-            entityManager.createNativeQuery(insert2DataSQL).executeUpdate();
+            jdbcTemplate.execute(insert2DataSQL);
             String insert3DataSQL = """
                     WITH VAL_SESION_CONC_ECalc AS (
                         SELECT
@@ -235,7 +234,7 @@ public class dataParameterInit {
                     SET VAL_SESION_CONC_E = l.VAL_SESION_CONC_E
                     FROM VAL_SESION_CONC_ECalc l
                     WHERE PARAMETRIZACION_ANUAL.FECHA = l.FECHA;         """;
-            entityManager.createNativeQuery(insert3DataSQL).executeUpdate();
+            jdbcTemplate.execute(insert3DataSQL);
             String insert4DataSQL = """
                     WITH VAL_SESION_CONC_1Calc AS (
                         SELECT
@@ -259,7 +258,7 @@ public class dataParameterInit {
                     SET VAL_SESION_CONC_1 = l.VAL_SESION_CONC_1
                     FROM VAL_SESION_CONC_1Calc l
                     WHERE PARAMETRIZACION_ANUAL.FECHA = l.FECHA;""";
-            entityManager.createNativeQuery(insert4DataSQL).executeUpdate();
+            jdbcTemplate.execute(insert4DataSQL);
             String insert5DataSQL = """
                     WITH VAL_SESION_CONC_2Calc AS (
                         SELECT
@@ -283,7 +282,7 @@ public class dataParameterInit {
                     SET VAL_SESION_CONC_2 = l.VAL_SESION_CONC_2
                     FROM VAL_SESION_CONC_2Calc l
                     WHERE PARAMETRIZACION_ANUAL.FECHA = l.FECHA;""";
-            entityManager.createNativeQuery(insert5DataSQL).executeUpdate();
+            jdbcTemplate.execute(insert5DataSQL);
             String insert6DataSQL = """
                     WITH VAL_SESION_CONC_3Calc AS (
                         SELECT
@@ -307,7 +306,7 @@ public class dataParameterInit {
                     SET VAL_SESION_CONC_3 = l.VAL_SESION_CONC_3
                     FROM VAL_SESION_CONC_3Calc l
                     WHERE PARAMETRIZACION_ANUAL.FECHA = l.FECHA;""";
-            entityManager.createNativeQuery(insert6DataSQL).executeUpdate();
+            jdbcTemplate.execute(insert6DataSQL);
             String insert7DataSQL = """
                     WITH VAL_SESION_CONC_4Calc AS (
                         SELECT
@@ -332,7 +331,7 @@ public class dataParameterInit {
                     FROM VAL_SESION_CONC_4Calc l
                     WHERE PARAMETRIZACION_ANUAL.FECHA = l.FECHA;
                     """;
-            entityManager.createNativeQuery(insert7DataSQL).executeUpdate();
+            jdbcTemplate.execute(insert7DataSQL);
             String insert8DataSQL = """
                     WITH VAL_SESION_CONC_5Calc AS (
                         SELECT
@@ -356,7 +355,7 @@ public class dataParameterInit {
                     SET VAL_SESION_CONC_5 = l.VAL_SESION_CONC_5
                     FROM VAL_SESION_CONC_5Calc l
                     WHERE PARAMETRIZACION_ANUAL.FECHA = l.FECHA;""";
-            entityManager.createNativeQuery(insert8DataSQL).executeUpdate();
+            jdbcTemplate.execute(insert8DataSQL);
             String insert9DataSQL = """
                     WITH VAL_SESION_CONC_6Calc AS (
                         SELECT
@@ -380,7 +379,7 @@ public class dataParameterInit {
                     SET VAL_SESION_CONC_6 = l.VAL_SESION_CONC_6
                     FROM VAL_SESION_CONC_6Calc l
                     WHERE PARAMETRIZACION_ANUAL.FECHA = l.FECHA;""";
-            entityManager.createNativeQuery(insert9DataSQL).executeUpdate();
+            jdbcTemplate.execute(insert9DataSQL);
             String insert10DataSQL = """
                     WITH VAL_SESION_CONC_ECalc AS (
                         SELECT
@@ -404,7 +403,7 @@ public class dataParameterInit {
                     SET VAL_SESION_CONC_E = l.VAL_SESION_CONC_E
                     FROM VAL_SESION_CONC_ECalc l
                     WHERE PARAMETRIZACION_ANUAL.FECHA = l.FECHA; """;
-            entityManager.createNativeQuery(insert10DataSQL).executeUpdate();
+            jdbcTemplate.execute(insert10DataSQL);
             String insert11DataSQL = """
                     WITH VAL_SESION_CONC_1Calc AS (
                         SELECT
@@ -428,7 +427,7 @@ public class dataParameterInit {
                     SET VAL_SESION_CONC_1 = l.VAL_SESION_CONC_1
                     FROM VAL_SESION_CONC_1Calc l
                     WHERE PARAMETRIZACION_ANUAL.FECHA = l.FECHA; """;
-            entityManager.createNativeQuery(insert11DataSQL).executeUpdate();
+            jdbcTemplate.execute(insert11DataSQL);
             String insert12DataSQL = """
                     WITH VAL_SESION_CONC_2Calc AS (
                         SELECT
@@ -452,7 +451,7 @@ public class dataParameterInit {
                     SET VAL_SESION_CONC_2 = l.VAL_SESION_CONC_2
                     FROM VAL_SESION_CONC_2Calc l
                     WHERE PARAMETRIZACION_ANUAL.FECHA = l.FECHA; """;
-            entityManager.createNativeQuery(insert12DataSQL).executeUpdate();
+            jdbcTemplate.execute(insert12DataSQL);
             String insert13DataSQL = """
                     WITH VAL_SESION_CONC_3Calc AS (
                         SELECT
@@ -476,7 +475,7 @@ public class dataParameterInit {
                     SET VAL_SESION_CONC_3 = l.VAL_SESION_CONC_3
                     FROM VAL_SESION_CONC_3Calc l
                     WHERE PARAMETRIZACION_ANUAL.FECHA = l.FECHA; """;
-            entityManager.createNativeQuery(insert13DataSQL).executeUpdate();
+            jdbcTemplate.execute(insert13DataSQL);
             String insert14DataSQL = """
                     WITH VAL_SESION_CONC_4Calc AS (
                         SELECT
@@ -500,7 +499,7 @@ public class dataParameterInit {
                     SET VAL_SESION_CONC_4 = l.VAL_SESION_CONC_4
                     FROM VAL_SESION_CONC_4Calc l
                     WHERE PARAMETRIZACION_ANUAL.FECHA = l.FECHA; """;
-            entityManager.createNativeQuery(insert14DataSQL).executeUpdate();
+            jdbcTemplate.execute(insert14DataSQL);
             String insert15DataSQL = """
                     WITH VAL_SESION_CONC_5Calc AS (
                         SELECT
@@ -524,7 +523,7 @@ public class dataParameterInit {
                     SET VAL_SESION_CONC_5 = l.VAL_SESION_CONC_5
                     FROM VAL_SESION_CONC_5Calc l
                     WHERE PARAMETRIZACION_ANUAL.FECHA = l.FECHA; """;
-            entityManager.createNativeQuery(insert15DataSQL).executeUpdate();
+            jdbcTemplate.execute(insert15DataSQL);
             String insert16DataSQL = """
                     WITH VAL_SESION_CONC_6Calc AS (
                         SELECT
@@ -548,7 +547,7 @@ public class dataParameterInit {
                     SET VAL_SESION_CONC_6 = l.VAL_SESION_CONC_6
                     FROM VAL_SESION_CONC_6Calc l
                     WHERE PARAMETRIZACION_ANUAL.FECHA = l.FECHA; """;
-            entityManager.createNativeQuery(insert16DataSQL).executeUpdate();
+            jdbcTemplate.execute(insert16DataSQL);
 
         }
     }
@@ -560,7 +559,7 @@ public class dataParameterInit {
                 IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'PORCENTAJES_LIMITES')
                 SELECT 1 ELSE SELECT 0;
                 """;
-        Number tableExists = (Number) entityManager.createNativeQuery(checkTableQuery).getSingleResult();
+        Number tableExists = (Number) jdbcTemplate.queryForObject(checkTableQuery, Integer.class);
 
         if (tableExists.intValue() == 0) {
 
@@ -578,7 +577,7 @@ public class dataParameterInit {
                         MAX_SESIONES_ASAM INT
                     );
                     """;
-            entityManager.createNativeQuery(createTableSQL).executeUpdate();
+            jdbcTemplate.execute(createTableSQL);
 
             String insertDataSQL = """
                     MERGE INTO PORCENTAJES_LIMITES AS target
@@ -612,7 +611,7 @@ public class dataParameterInit {
                         source.LIM_GASTOS_ICLD, source.LIM_GASTOS_SMMLV, source.REMU_DIPUTADOS_SMMLV, source.LIM_GASTO_ASAMBLEA, source.MAX_SESIONES_ASAM
                     );
                     """;
-            entityManager.createNativeQuery(insertDataSQL).executeUpdate();
+            jdbcTemplate.execute(insertDataSQL);
         }
     }
 
@@ -622,8 +621,7 @@ public class dataParameterInit {
                 IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'CUENTAS_ICLD')
                 SELECT 1 ELSE SELECT 0;
                 """;
-        Number tableExists = (Number) entityManager.createNativeQuery(checkTableQuery)
-                .getSingleResult();
+        Number tableExists = (Number) jdbcTemplate.queryForObject(checkTableQuery, Integer.class);
 
         if (tableExists.intValue() == 0) {
             // Crear la tabla CUENTAS_ICLD
@@ -633,7 +631,7 @@ public class dataParameterInit {
                         CUENTA NVARCHAR(50)
                     );
                     """;
-            entityManager.createNativeQuery(createTableSQL).executeUpdate();
+            jdbcTemplate.execute(createTableSQL);
 
             // Insertar los datos usando MERGE
             String insertDataSQL = """
@@ -768,7 +766,7 @@ public class dataParameterInit {
                     INSERT (AMBITO_CODIGO, CUENTA)
                     VALUES (source.AMBITO_CODIGO, source.CUENTA);
                     """;
-            entityManager.createNativeQuery(insertDataSQL).executeUpdate();
+            jdbcTemplate.execute(insertDataSQL);
         }
     }
 

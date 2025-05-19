@@ -1,16 +1,16 @@
 package com.cgr.base.service.parametrization.InitParametrization;
 
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 @Service
 public class dataCategoryInit {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Transactional
     public void initCategoryTable() {
@@ -29,10 +29,10 @@ public class dataCategoryInit {
                 " ) " +
                 " END";
 
-        Integer count = (Integer) entityManager.createNativeQuery(sqlCheckTable).getSingleResult();
+        Integer count = jdbcTemplate.queryForObject(sqlCheckTable, Integer.class);
 
         if (count == 0) {
-            entityManager.createNativeQuery(sqlCreateTable).executeUpdate();
+            jdbcTemplate.execute(sqlCreateTable);
             String sql = "INSERT INTO [CATEGORIAS_ENTIDADES] ([CODIGO_ENTIDAD],[AMBITO_CODIGO],[NOMBRE_ENTIDAD],[CATEGORIA],[NO_DIPUTADOS],[NO_CONCEJALES])"
                     + "VALUES " +
                     "('119191000','A438','AMAZONAS','4',11,0)," +
@@ -1172,8 +1172,8 @@ public class dataCategoryInit {
                     "('212370523','A439','SAN ANTONIO DE PALMITO','6',0,11)," +
                     "('216373563','A439','PRADO','6',0,9)," +
                     "('923272927','A439','BARRANCOMINAS','6',0,9)";
-            entityManager.createNativeQuery(sql).executeUpdate();
-            entityManager.createNativeQuery(sql2).executeUpdate();
+            jdbcTemplate.execute(sql);
+            jdbcTemplate.execute(sql2);
         }
 
     }
