@@ -10,11 +10,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.cgr.base.service.certifications.initTablaCertifications;
-import com.cgr.base.service.parametrization.generalParameter;
 import com.cgr.base.service.parametrization.initDB_ParameterTables;
-import com.cgr.base.service.parametrization.specificParameter;
 import com.cgr.base.service.rules.dataTransfer.columnsER;
-import com.cgr.base.service.rules.initTables.dataParameterInit;
 import com.cgr.base.service.rules.initTables.dataSourceInit;
 
 @Service
@@ -27,19 +24,10 @@ public class ruleScheduler {
     private initDB_ParameterTables initParamerBD;
 
     @Autowired
-    private dataParameterInit parametria;
-
-    @Autowired
     private dataSourceInit motorReglas;
 
     @Autowired
     private columnsER er;
-
-    @Autowired
-    private generalParameter parameterRG;
-
-    @Autowired
-    private specificParameter parameterRE;
 
     @Autowired
     private initTablaCertifications certificator;
@@ -59,12 +47,10 @@ public class ruleScheduler {
 
     private void executeRuleFlow() {
 
+        System.out.println("[PARAMETRIZACION] Ejecutando TABLAS PARAMETRIZACION");
         runStep(() -> initParamerBD.executeInitTables(), "initDB_ParameterTables");
+        System.out.println("[MOTOR REGLAS] Ejecutando TABLAS MOTOR REGLAS");
         runStep(() -> motorReglas.processTablesRules(), "processTablesRules");
-        runStep(() -> parametria.processTablesSource(), "processTablesSource");
-        runStep(() -> parameterRG.tableGeneralRulesName(), "tableGeneralRulesName");
-        runStep(() -> parameterRE.tableSpecificRulesName(),
-                "tableSpecificRulesName");
 
         String[] rules = {
 
@@ -79,7 +65,8 @@ public class ruleScheduler {
                 "12", "13", "14", "15", "16",
 
                 // REGLAS ESPECIFICAS:
-                // "22A", "22_A", "22B", "22C", "22_C", "22D", "22_D", "22E", "22_E", "23",
+                "22A", "22_A", "22B", "22C", "22_C", "22D", "22_D", "22E", "22_E",
+                // "23",
                 // "24", "25A", "25_A", "25B",
                 // "25_B", "GF",
                 // "26", "27", "28", "29A", "29B", "29C", "30", "31", "32"
@@ -90,13 +77,14 @@ public class ruleScheduler {
         for (String rule : rules) {
             runStep(() -> applyRules.transferRule(rule), "transferRule: " + rule);
 
-            System.out.println("[RULES] Ejecutando regla" + rule + ".");
+            System.out.println("[RULES] Ejecutando regla --> " + rule + ".");
         }
 
         // Finales
         System.out.println("[FINAL] Ejecutando tareas finales...");
-        // runStep(() -> er.actualizarSpecificRulesData(),
-        // "actualizarSpecificRulesData");
+        runStep(() -> er.actualizarSpecificRulesData(), "actualizarSpecificRulesData");
+
+        System.out.println("[CERTIFICACION] Ejecutando PORCENTAJE DE CERTIFICACION");
         runStep(() -> certificator.generateControlTable(), "generateControlTable");
 
         System.out.println("[FINISHED] Flujo de reglas ejecutado completamente.");
