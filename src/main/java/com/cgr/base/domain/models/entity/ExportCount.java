@@ -25,4 +25,5 @@ public class ExportCount {
 
     @Column(name = "export_type")
     private String exportType;
+
 }

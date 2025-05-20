@@ -100,18 +100,26 @@ public class UserController extends AbstractController {
     }
 
     @GetMapping("/profile_image/{userId}")
-    public ResponseEntity<String> getProfileImage(@PathVariable Long id) {
-
+    public ResponseEntity<String> getProfileImage(@PathVariable Long userId) {
         try {
-            String base64Image = userService.getProfileImage(id);
-            return new ResponseEntity<>(base64Image, HttpStatus.OK);
+
+            String base64Image = userService.getProfileImage(userId);
+
+            if (base64Image != null && !base64Image.isEmpty()) {
+                return new ResponseEntity<>(base64Image, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("imagen no encontrada", HttpStatus.NOT_FOUND);
+            }
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            e.printStackTrace(); // Para ver el stack trace en los logs del servidor
+            return new ResponseEntity<>("Error interno del servidor al obtener la imagen: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
     }
 
-
-    @GetMapping("/{id}")
+        @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
         Optional<UserWithRolesResponseDto> userOptional = this.userService.findById(id);
         if (userOptional.isPresent()) {

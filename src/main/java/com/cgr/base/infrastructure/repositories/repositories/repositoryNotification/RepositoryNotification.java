@@ -17,4 +17,7 @@ public interface RepositoryNotification extends JpaRepository<EntityNotification
 
     @Query("SELECT n FROM EntityNotification n WHERE n.date > :lastLogoutDate")
     List<EntityNotification> findByUserAndDateAfter(@Param("lastLogoutDate") Date lastLogoutDate);
+
+    @Query("SELECT en FROM EntityNotification en JOIN FETCH en.user")
+    List<EntityNotification> findAllWithUser();
 }

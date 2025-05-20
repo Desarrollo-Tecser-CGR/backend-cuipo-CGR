@@ -123,7 +123,7 @@ public class AuthService implements IAuthUseCase {
                 userRequest.setLoginFailureReason("Cuenta bloqueada por intentos fallidos");
                 this.logService.createLog(userRequest);
 
-                response.put("message", "Se han superado los 3 intentos fallidos...");
+                response.put("message", "Se han superado los 3 intentos fallidos. Su cuenta ha sido bloqueada. Por favor, intente nuevamente en 15 minutos.");
                 response.put("statusCode", 403);
                 response.put("status", "error");
                 return response;
