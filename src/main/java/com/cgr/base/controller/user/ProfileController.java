@@ -35,7 +35,7 @@ public class ProfileController extends AbstractController {
     private String getToken(HttpServletRequest request) {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (header == null || !header.startsWith("Bearer ")) {
-            throw new SecurityException("Token is Required."); // Ensure SecurityException is thrown
+            throw new SecurityException("Token is Required.");
         }
         return header.split(" ")[1];
     }
@@ -44,7 +44,7 @@ public class ProfileController extends AbstractController {
         String token = getToken(request);
         Long userId = jwtService.extractUserIdFromToken(token);
         if (userId == null) {
-            throw new SecurityException("User ID not Found."); // Ensure SecurityException is thrown
+            throw new SecurityException("User ID not Found.");
         }
         return userId;
     }

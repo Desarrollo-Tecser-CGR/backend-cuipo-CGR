@@ -90,10 +90,17 @@ public class RoleController extends AbstractController {
         response.put("description", createdRole.getDescription());
         response.put("enable", createdRole.isEnable());
 
-        logGeneralService.createLog(userId, USUARIOS,
-                "Creación de Rol " + createdRole.getId() + " : " + createdRole.getName(), response);
+        Map<String, Object> detail = new HashMap<>();
+        detail.put("ID", createdRole.getId());
+        detail.put("Nombre", createdRole.getName());
+        detail.put("Descripción", createdRole.getDescription());
+        detail.put("Habilitado", createdRole.isEnable());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        logGeneralService.createLog(userId, USUARIOS,
+                "Creación de Rol " + createdRole.getId() + " : " + createdRole.getName(), detail);
+
+        return requestResponse(response, "Create operation completed.", HttpStatus.CREATED, true);
+
     }
 
     @PutMapping("/config")
@@ -174,7 +181,7 @@ public class RoleController extends AbstractController {
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Rol eliminado exitosamente.");
-        return ResponseEntity.ok(response);
+        return requestResponse(response, "Delete operation completed.", HttpStatus.OK, true);
     }
 
 }

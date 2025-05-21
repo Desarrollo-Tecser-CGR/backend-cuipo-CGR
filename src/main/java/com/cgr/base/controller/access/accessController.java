@@ -98,9 +98,7 @@ public class accessController extends AbstractController {
 
         boolean updated = Access.updateRoleModules(roleId, moduleIds);
 
-        if (updated) {
-
-            RoleEntity role = roleRepository.findById(roleId);
+        RoleEntity role = roleRepository.findById(roleId);
             String message = "Asignación de Módulos al Rol " + roleId + " : " + role.getName() + ".";
 
             List<Long> moduleIdsLong = moduleIds.stream()
@@ -121,9 +119,7 @@ public class accessController extends AbstractController {
             logGeneralService.createLog(userId, USUARIOS,
                     message, modulesDetail);
 
-        }
-
-        return requestResponse(null, "Módulos actualizados correctamente.", HttpStatus.OK, true);
+        return requestResponse(updated ? modulesDetail : null, "Asignación de Módulos Correctamente.", HttpStatus.OK, true);
     }
 
 }
