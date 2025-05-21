@@ -34,9 +34,6 @@ public class ProfileController extends AbstractController {
 
     private String getToken(HttpServletRequest request) {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith("Bearer ")) {
-            throw new SecurityException("Token is Required.");
-        }
         return header.split(" ")[1];
     }
 

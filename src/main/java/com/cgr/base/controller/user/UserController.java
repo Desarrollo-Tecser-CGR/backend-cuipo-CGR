@@ -22,7 +22,6 @@ import com.cgr.base.dto.user.UserWithRolesRequestDto;
 import com.cgr.base.dto.user.UserWithRolesResponseDto;
 import com.cgr.base.entity.role.RoleEntity;
 import com.cgr.base.repository.role.IRoleRepository;
-import com.cgr.base.service.access.accessManagement;
 import com.cgr.base.service.user.IUserSynchronizerUseCase;
 import com.cgr.base.service.user.IUserUseCase;
 
@@ -58,10 +57,6 @@ public class UserController extends AbstractController {
 
     @GetMapping("/info/list")
     public ResponseEntity<?> getAll(HttpServletRequest request) {
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication token is required.");
-        }
         return requestResponse(this.userService.findAll(), "System Users.", HttpStatus.OK, true);
     }
 
@@ -131,9 +126,6 @@ public class UserController extends AbstractController {
 
     private String getToken(HttpServletRequest request) {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith("Bearer ")) {
-            throw new SecurityException("Token is Required.");
-        }
         return header.split(" ")[1];
     }
 
