@@ -22,6 +22,7 @@ public interface ILogGeneralRepositoryJpa extends JpaRepository<LogsEntityGenera
        List<Object[]> findLogsWithUserFullNameByFiltersNative(
                      @Param("userId") Long userId,
                      @Param("logType") String logType,
+                     @Param("message") String message,
                      @Param("detail") String detail,
                      @Param("createdAt") String create_date);
 

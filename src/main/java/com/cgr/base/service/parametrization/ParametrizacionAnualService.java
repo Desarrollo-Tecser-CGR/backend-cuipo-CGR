@@ -27,6 +27,13 @@ public class ParametrizacionAnualService {
                                         "Solo se permite agregar o modificar el año actual o el inmediatamente anterior.");
                 }
 
+                Optional<ParametrizacionAnual> existente = parametrizacionAnualRepository
+                                .findByFecha(parametrizacionAnual.getFecha());
+                if (existente.isPresent()) {
+                        throw new IllegalArgumentException(
+                                        "Ya existe un registro para el año " + parametrizacionAnual.getFecha());
+                }
+
                 // Obtener el año anterior, si existe
                 Optional<ParametrizacionAnual> anioAnteriorOpt = parametrizacionAnualRepository
                                 .findByFecha(parametrizacionAnual.getFecha() - 1);
@@ -104,6 +111,12 @@ public class ParametrizacionAnualService {
 
         @Transactional
         public void deleteByFecha(int fecha) {
+                Optional<ParametrizacionAnual> existente = parametrizacionAnualRepository.findByFecha(fecha);
+
+                if (existente.isEmpty()) {
+                        throw new IllegalArgumentException("No existe un registro para el año " + fecha + ".");
+                }
+
                 parametrizacionAnualRepository.deleteByFecha(fecha);
         }
 

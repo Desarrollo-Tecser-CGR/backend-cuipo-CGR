@@ -33,15 +33,19 @@ public class categoryParameter {
         }
 
         String newTableName = "CATEGORIAS_ENTIDADES_" + year;
-        String previousTableName = "CATEGORIAS_ENTIDADES_" + (year - 1);
-        String sourceTable = "CATEGORIAS_ENTIDADES";
+        String baseTableName = "CATEGORIAS_ENTIDADES";
 
         if (tableExists(newTableName)) {
             throw new IllegalArgumentException("La tabla '" + newTableName + "' ya existe.");
         }
 
-        if (tableExists(previousTableName)) {
-            sourceTable = previousTableName;
+        String sourceTable = baseTableName;
+        for (int y = year - 1; y >= 2000; y--) {
+            String candidateTable = "CATEGORIAS_ENTIDADES_" + y;
+            if (tableExists(candidateTable)) {
+                sourceTable = candidateTable;
+                break;
+            }
         }
 
         String sql = String.format("""
