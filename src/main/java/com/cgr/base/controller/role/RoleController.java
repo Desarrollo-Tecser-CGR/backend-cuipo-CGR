@@ -1,7 +1,6 @@
 package com.cgr.base.controller.role;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -92,9 +91,7 @@ public class RoleController extends AbstractController {
         response.put("enable", createdRole.isEnable());
 
         logGeneralService.createLog(userId, USUARIOS,
-                "Creación de rol id : " + createdRole.getId() + " nombre: " + createdRole.getName()
-                        + " con descripción: " + createdRole.getDescription() + " y estado: "
-                        + createdRole.isEnable() + ".");
+                "Creación de Rol " + createdRole.getId() + " : " + createdRole.getName(), response);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -121,9 +118,13 @@ public class RoleController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
+        Map<String, Object> detalle = new LinkedHashMap<>();
+        detalle.put("ID", id);
+        detalle.put("Nombre", updatedRole.getName());
+        detalle.put("Descripción", updatedRole.getDescription());
+
         logGeneralService.createLog(userId, USUARIOS,
-                "Modificación de rol id: " + id + " a: " + updatedRole.getName() + " con descripción: "
-                        + updatedRole.getDescription() + ".");
+                "Modificación de Rol con ID: " + id, detalle);
 
         return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
     }
@@ -143,7 +144,7 @@ public class RoleController extends AbstractController {
         }
 
         logGeneralService.createLog(userId, USUARIOS,
-                "Modificación de rol id: " + id + " a: " + message + ".");
+                "Modificación de Estado de Activación Rol con ID: " + id, Map.of("Activo", isEnabled));
 
         return requestResponse(Map.of("message", message, "enabled", isEnabled), "Update operation completed.",
                 HttpStatus.OK, true);
@@ -169,7 +170,7 @@ public class RoleController extends AbstractController {
         }
 
         logGeneralService.createLog(userId, USUARIOS,
-                "Eliminación de rol id: " + id + ".");
+                "Eliminación de Rol con ID: " + id, null);
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Rol eliminado exitosamente.");

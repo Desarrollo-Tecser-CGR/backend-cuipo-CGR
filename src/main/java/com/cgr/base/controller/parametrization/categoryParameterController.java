@@ -2,6 +2,7 @@ package com.cgr.base.controller.parametrization;
 
 import static com.cgr.base.entity.logs.LogType.PARAMETRIZACION;
 
+import org.apache.commons.lang3.ObjectUtils.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -51,7 +52,7 @@ public class categoryParameterController extends AbstractController {
         categoryParameter.createYearlyTable(year);
 
         logGeneralService.createLog(userId, PARAMETRIZACION,
-                "Creación de tabla CATEGORIAS_ENTIDADES_" + year);
+                "Creación de Tabla CATEGORIAS ENTIDADES para el Año:" + year, null);
 
         return requestResponse(null, "Tabla creada exitosamente para el año " + year + ".", HttpStatus.CREATED, true);
     }
@@ -74,7 +75,7 @@ public class categoryParameterController extends AbstractController {
         int year = Integer.parseInt(requestData.get("year").toString());
 
         logGeneralService.createLog(userId, PARAMETRIZACION,
-                "Creación de registro en tabla CATEGORIAS_ENTIDADES_" + year + " con datos: " + newRecord);
+                "Creación de Registro en Tabla CATEGORIAS ENTIDADES para el Año:" + year, newRecord);
 
         return requestResponse(newRecord, "Registro creado exitosamente.", HttpStatus.CREATED, true);
     }
@@ -96,7 +97,7 @@ public class categoryParameterController extends AbstractController {
 
         categoryParameter.updateRecordForYear(year, requestData);
         logGeneralService.createLog(userId, PARAMETRIZACION,
-                "Actualización de registro en tabla CATEGORIAS_ENTIDADES_" + year + " con datos: " + requestData);
+                "Actualización de Registro en Tabla CATEGORIAS ENTIDADES para el Año:" + year, requestData);
 
         return requestResponse(null, "Registro actualizado exitosamente.", HttpStatus.OK, true);
     }
@@ -116,9 +117,14 @@ public class categoryParameterController extends AbstractController {
         }
 
         categoryParameter.deleteRecordForYear(year, codigoEntidad, ambitoCodigo);
+
+        Map<String, Object> detalle = new LinkedHashMap<>();
+        detalle.put("Año", year);
+        detalle.put("Código Entidad", codigoEntidad);
+        detalle.put("Ámbito Código", ambitoCodigo);
         logGeneralService.createLog(userId, PARAMETRIZACION,
-                "Eliminación de registro en tabla CATEGORIAS_ENTIDADES_" + year + " con CODIGO_ENTIDAD: "
-                        + codigoEntidad + " y AMBITO_CODIGO: " + ambitoCodigo);
+                "Eliminación de Registro en Tabla CATEGORIAS ENTIDADES para el Año:" + year,
+                detalle);
         return requestResponse(null, "Registro eliminado exitosamente.", HttpStatus.OK, true);
     }
 

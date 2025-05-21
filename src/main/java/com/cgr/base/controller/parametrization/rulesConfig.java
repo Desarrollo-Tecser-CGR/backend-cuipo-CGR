@@ -2,6 +2,7 @@ package com.cgr.base.controller.parametrization;
 
 import static com.cgr.base.entity.logs.LogType.PARAMETRIZACION;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -71,8 +72,12 @@ public class rulesConfig extends AbstractController {
         }
         GeneralRulesNames updatedRule = serviceGR.updateRuleName(codigoRegla, nuevoNombre);
 
+        Map<String, Object> detalle = new LinkedHashMap<>();
+        detalle.put("Código", codigoRegla);
+        detalle.put("NuevoNombre", request.get("nuevoNombre"));
+
         logGeneralService.createLog(userId, PARAMETRIZACION,
-                "Modificación de regla general code " + codigoRegla + " to " + request.get("nuevoNombre"));
+                "Modificación de Regla General: " + codigoRegla, detalle);
 
         return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
     }
@@ -104,8 +109,12 @@ public class rulesConfig extends AbstractController {
         }
         SpecificRulesTables updatedRule = serviceSR.updateReportName(codigoReporte, nuevoNombre);
 
+        Map<String, Object> detalle = new LinkedHashMap<>();
+        detalle.put("Código", codigoReporte);
+        detalle.put("NuevoNombre", request.get("nuevoNombre"));
+
         logGeneralService.createLog(userId, PARAMETRIZACION,
-                "Modificación de reporte específico code " + codigoReporte + " to " + request.get("nuevoNombre"));
+                "Modificación de Reporte: " + codigoReporte, detalle);
 
         return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
 
@@ -139,8 +148,12 @@ public class rulesConfig extends AbstractController {
 
         SpecificRulesNames updatedRule = serviceSR.updateRuleName(codigoRegla, nuevoNombre);
 
+        Map<String, Object> detalle = new LinkedHashMap<>();
+        detalle.put("Código", codigoRegla);
+        detalle.put("NuevoNombre", request.get("nuevoNombre"));
+
         logGeneralService.createLog(userId, PARAMETRIZACION,
-                "Modificación de regla específica code " + codigoRegla + " to " + request.get("nuevoNombre"));
+                "Modificación de Regla Específica: " + codigoRegla, detalle);
 
         return requestResponse(updatedRule, "Update operation completed.", HttpStatus.OK, true);
 
