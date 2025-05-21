@@ -65,10 +65,12 @@ public class ParametrizacionAnualController extends AbstractController {
         if (userId == null) {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
+
+        ParametrizacionAnual response = parametrizacionAnualService.save(parametrizacionAnual);
         logGeneralService.createLog(userId, PARAMETRIZACION,
                 "Creación de Parametrización Anual para el Año:" + parametrizacionAnual.getFecha(),
                 parametrizacionAnual);
-        return requestResponse(parametrizacionAnualService.save(parametrizacionAnual), "Create operation completed.",
+        return requestResponse(response, "Create operation completed.",
                 HttpStatus.OK, true);
     }
 
@@ -85,23 +87,30 @@ public class ParametrizacionAnualController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
+        ParametrizacionAnual response = parametrizacionAnualService.update(parametrizacionAnual);
+
         logGeneralService.createLog(userId, PARAMETRIZACION,
                 "Modificación de Parametrización Anual para el Año:" +
                         parametrizacionAnual.getFecha(),
                 parametrizacionAnual);
 
-        return requestResponse(parametrizacionAnualService.update(parametrizacionAnual),
+        return requestResponse(response,
                 "Update operation completed.", HttpStatus.OK, true);
 
     }
 
     @PreAuthorize("hasAuthority('ROL_1')")
     @DeleteMapping("/{fecha}")
-    public ResponseEntity<?> deleteByFecha(@PathVariable int fecha) {
+    public ResponseEntity<?> deleteByFecha(@PathVariable int fecha, HttpServletRequest request) {
         parametrizacionAnualService.deleteByFecha(fecha);
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getDetails().toString();
-        Long userId = jwtService.extractUserIdFromToken(username);
+
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = header != null && header.startsWith("Bearer ") ? header.split(" ")[1] : null;
+        Long userId = token != null ? jwtService.extractUserIdFromToken(token) : null;
+
+        if (userId == null) {
+            return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
+        }
 
         logGeneralService.createLog(userId, PARAMETRIZACION,
                 "Eliminación de Parametrización Anual para el Año:" + fecha, null);

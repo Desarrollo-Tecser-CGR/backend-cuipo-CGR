@@ -99,7 +99,7 @@ public class categoryParameterController extends AbstractController {
         logGeneralService.createLog(userId, PARAMETRIZACION,
                 "Actualización de Registro en Tabla CATEGORIAS ENTIDADES para el Año:" + year, requestData);
 
-        return requestResponse(null, "Registro actualizado exitosamente.", HttpStatus.OK, true);
+        return requestResponse(requestData, "Registro actualizado exitosamente.", HttpStatus.OK, true);
     }
 
     @DeleteMapping("/delete/record/{year}")
@@ -125,19 +125,19 @@ public class categoryParameterController extends AbstractController {
         logGeneralService.createLog(userId, PARAMETRIZACION,
                 "Eliminación de Registro en Tabla CATEGORIAS ENTIDADES para el Año:" + year,
                 detalle);
-        return requestResponse(null, "Registro eliminado exitosamente.", HttpStatus.OK, true);
+        return requestResponse(detalle, "Registro eliminado exitosamente.", HttpStatus.OK, true);
     }
 
     @GetMapping("/list/{year}")
     public ResponseEntity<?> getRecordsByYear(@PathVariable int year) {
         List<Map<String, Object>> records = categoryParameter.getAllRecordsByYear(year);
-        return requestResponse(records, null, HttpStatus.OK, true);
+        return requestResponse(records, "Registros retornados exitosamente", HttpStatus.OK, true);
     }
 
     @GetMapping("/options")
     public ResponseEntity<?> getAvailableYears() {
         List<Integer> years = categoryParameter.getAvailableYears();
-        return requestResponse(years, null, HttpStatus.OK, true);
+        return requestResponse(years, "Años disponibles retornados exitosamente.", HttpStatus.OK, true);
     }
 
 }
