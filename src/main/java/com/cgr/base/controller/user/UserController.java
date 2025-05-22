@@ -81,7 +81,7 @@ public class UserController extends AbstractController {
 
         ResponseEntity<?> response = requestResponse(result, () -> this.userService.assignRolesToUser(rolesRequestDto),
                 "Roles Updated.",
-                HttpStatus.CREATED, true);
+                HttpStatus.OK, true);
 
         String fullName = "";
         if (response.getBody() instanceof Map) {
