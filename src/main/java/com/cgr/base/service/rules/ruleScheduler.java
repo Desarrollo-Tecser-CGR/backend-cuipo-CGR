@@ -73,16 +73,16 @@ public class ruleScheduler {
 
         };
 
-        System.out.println("[RULES] Ejecutando reglas secuencialmente...");
-        for (String rule : rules) {
-            runStep(() -> applyRules.transferRule(rule), "transferRule: " + rule);
+        // System.out.println("[RULES] Ejecutando reglas secuencialmente...");
+        // for (String rule : rules) {
+        //     runStep(() -> applyRules.transferRule(rule), "transferRule: " + rule);
 
-            System.out.println("[RULES] Ejecutando regla --> " + rule + ".");
-        }
+        //     System.out.println("[RULES] Ejecutando regla --> " + rule + ".");
+        // }
 
-        // Finales
-        System.out.println("[FINAL] Ejecutando tareas finales...");
-        runStep(() -> er.actualizarSpecificRulesData(), "actualizarSpecificRulesData");
+        // // Finales
+        // System.out.println("[FINAL] Ejecutando tareas finales...");
+        // runStep(() -> er.actualizarSpecificRulesData(), "actualizarSpecificRulesData");
 
         System.out.println("[CERTIFICACION] Ejecutando PORCENTAJE DE CERTIFICACION");
         runStep(() -> certificator.generateControlTable(), "generateControlTable");

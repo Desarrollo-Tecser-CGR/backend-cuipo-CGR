@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,10 +22,12 @@ import com.cgr.base.dto.user.UserFilterRequestDto;
 import com.cgr.base.dto.user.UserWithRolesRequestDto;
 import com.cgr.base.dto.user.UserWithRolesResponseDto;
 import com.cgr.base.entity.role.RoleEntity;
+import com.cgr.base.entity.user.UserEntity;
+import com.cgr.base.external.LDAP.LDAPUsuarioRepository;
 import com.cgr.base.repository.role.IRoleRepository;
-import com.cgr.base.service.access.accessManagement;
 import com.cgr.base.service.user.IUserSynchronizerUseCase;
 import com.cgr.base.service.user.IUserUseCase;
+import com.cgr.base.service.user.UserAddService;
 
 import static com.cgr.base.entity.logs.LogType.USUARIOS;
 import com.cgr.base.service.logs.LogGeneralService;
@@ -38,30 +41,25 @@ import jakarta.validation.Valid;
 public class UserController extends AbstractController {
 
     private final IUserUseCase userService;
-
     private final IUserSynchronizerUseCase synchronizerUsers;
-
     private final JwtService jwtService;
-
-    private IRoleRepository roleRepository;
-
+    private final IRoleRepository roleRepository;
     private final LogGeneralService logGeneralService;
+    private final UserAddService userAddService;
 
     public UserController(IUserUseCase userService, IUserSynchronizerUseCase synchronizerUsers, JwtService jwtService,
-            IRoleRepository roleRepository, LogGeneralService logGeneralService) {
+            IRoleRepository roleRepository, LogGeneralService logGeneralService,
+            UserAddService userAddService) {
         this.userService = userService;
         this.synchronizerUsers = synchronizerUsers;
         this.jwtService = jwtService;
         this.roleRepository = roleRepository;
         this.logGeneralService = logGeneralService;
+        this.userAddService = userAddService;
     }
 
     @GetMapping("/info/list")
     public ResponseEntity<?> getAll(HttpServletRequest request) {
-        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication token is required.");
-        }
         return requestResponse(this.userService.findAll(), "System Users.", HttpStatus.OK, true);
     }
 
@@ -86,7 +84,7 @@ public class UserController extends AbstractController {
 
         ResponseEntity<?> response = requestResponse(result, () -> this.userService.assignRolesToUser(rolesRequestDto),
                 "Roles Updated.",
-                HttpStatus.CREATED, true);
+                HttpStatus.OK, true);
 
         String fullName = "";
         if (response.getBody() instanceof Map) {
@@ -131,9 +129,6 @@ public class UserController extends AbstractController {
 
     private String getToken(HttpServletRequest request) {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith("Bearer ")) {
-            throw new SecurityException("Token is Required.");
-        }
         return header.split(" ")[1];
     }
 
@@ -144,6 +139,14 @@ public class UserController extends AbstractController {
             throw new SecurityException("User ID not Found.");
         }
         return userId;
+    }
+
+    @GetMapping("/register/{samAccountName}")
+    public ResponseEntity<?> registerUserFromExternal(@PathVariable String samAccountName) {
+
+        UserEntity user = userAddService.addUserIfNotExists(samAccountName);
+        return requestResponse(user, "Usuario procesado correctamente.", HttpStatus.OK, true);
+
     }
 
 }
