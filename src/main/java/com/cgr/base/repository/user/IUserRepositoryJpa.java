@@ -12,8 +12,6 @@ import org.springframework.stereotype.Repository;
 import com.cgr.base.entity.menu.Menu;
 import com.cgr.base.entity.user.UserEntity;
 
-import jakarta.persistence.MapKeyColumn;
-
 @Repository
 public interface IUserRepositoryJpa extends JpaRepository<UserEntity, Long>, JpaSpecificationExecutor<UserEntity> {
 
