@@ -49,8 +49,8 @@ public class ruleScheduler {
 
         System.out.println("[PARAMETRIZACION] Ejecutando TABLAS PARAMETRIZACION");
         runStep(() -> initParamerBD.executeInitTables(), "initDB_ParameterTables");
-        System.out.println("[MOTOR REGLAS] Ejecutando TABLAS MOTOR REGLAS");
-        runStep(() -> motorReglas.processTablesRules(), "processTablesRules");
+        // System.out.println("[MOTOR REGLAS] Ejecutando TABLAS MOTOR REGLAS");
+        // runStep(() -> motorReglas.processTablesRules(), "processTablesRules");
 
         String[] rules = {
 
