@@ -122,7 +122,7 @@ public class dataTransfer_32 {
           FROM %s
           WHERE
             CUENTA = '2'
-            AND COD_SECCION_PRESUPUESTAL = '17'
+            AND CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) = 17
             AND (COD_VIGENCIA_DEL_GASTO = '1' OR COD_VIGENCIA_DEL_GASTO = '4')
           GROUP BY
             FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO, NOMBRE_CUENTA
@@ -150,7 +150,7 @@ public class dataTransfer_32 {
             FROM %s
             WHERE
               CUENTA = '2'
-              AND COD_SECCION_PRESUPUESTAL = '17'
+              AND CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) = 17
               AND (COD_VIGENCIA_DEL_GASTO = '1' OR COD_VIGENCIA_DEL_GASTO = '4')
             GROUP BY
               FECHA, TRIMESTRE, CODIGO_ENTIDAD, AMBITO_CODIGO, NOMBRE_CUENTA

@@ -3,9 +3,9 @@ package com.cgr.base.service.rules.dataTransfer;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Value;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -179,7 +179,7 @@ public class dataTransfer_30 {
                 "    SELECT SUM(CAST(COMPROMISOS AS FLOAT)) " +
                 "    FROM " + TABLA_EJEC_GASTOS + " " +
                 "    WHERE " +
-                "        COD_SECCION_PRESUPUESTAL = 17 " +
+                "        CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) = 17" +
                 "        AND (COD_VIGENCIA_DEL_GASTO = 1 OR COD_VIGENCIA_DEL_GASTO = 4) " +
                 "        AND CUENTA = '2' " +
                 "        AND TRIMESTRE = '12' " +
@@ -192,7 +192,7 @@ public class dataTransfer_30 {
                 "    SELECT 1 " +
                 "    FROM " + TABLA_EJEC_GASTOS + " " +
                 "    WHERE " +
-                "        COD_SECCION_PRESUPUESTAL = 17 " +
+                "        CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) = 17 " +
                 "        AND (COD_VIGENCIA_DEL_GASTO = 1 OR COD_VIGENCIA_DEL_GASTO = 4) " +
                 "        AND CUENTA = '2' " +
                 "        AND TRIMESTRE = '12' " +

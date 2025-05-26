@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -128,7 +127,7 @@ public class dataTransfer_27 {
         String sqlUpdateHonorariosComp = String.format("""
                 UPDATE e
                 SET e.HONORARIOS_COMP =
-                    (SELECT SUM(g.COMPROMISOS)
+                    (SELECT SUM(CAST(g.COMPROMISOS AS DECIMAL(18,5)))
                      FROM [%s].[dbo].[%s] g
                      WHERE g.CODIGO_ENTIDAD = e.CODIGO_ENTIDAD
                      AND g.FECHA = e.FECHA
@@ -211,7 +210,7 @@ public class dataTransfer_27 {
         String sqlUpdateGastosCompCta2 = String.format("""
                     UPDATE e
                     SET e.GASTOS_COMP_CTA2 = (
-                        SELECT SUM(g.COMPROMISOS)
+                        SELECT SUM(CAST(g.COMPROMISOS AS DECIMAL(18,5)))
                         FROM [%s].[dbo].[%s] g
                         WHERE g.CODIGO_ENTIDAD = e.CODIGO_ENTIDAD
                         AND g.FECHA = e.FECHA

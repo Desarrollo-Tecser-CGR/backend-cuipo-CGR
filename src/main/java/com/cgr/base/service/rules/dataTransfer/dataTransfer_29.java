@@ -97,7 +97,11 @@ private String DATASOURCE_NAME;
                     case "REMU_DIPUTADOS_SMMLV":
                     case "SMMLV":
                     case "GASTOS_ASAMBLEA":
+                        columnType = "DECIMAL(18,2)";
+                        break;
                     case "REMUNERACION_DIPUTADOS":
+                        columnType = "DECIMAL(18,2)";
+                        break;
                     case "PRESTACIONES_SOCIALES":
                         columnType = "DECIMAL(18,2)";
                         break;
@@ -130,7 +134,7 @@ private String DATASOURCE_NAME;
                         g.TRIMESTRE,
                         g.CODIGO_ENTIDAD,
                         g.AMBITO_CODIGO,
-                        SUM(CAST(g.COMPROMISOS AS FLOAT)) AS GASTOS_FUNCIONAMIENTO_ASAM,
+                        SUM(CAST(g.COMPROMISOS AS DECIMAL(18,2))) AS GASTOS_FUNCIONAMIENTO_ASAM,
                         c.CATEGORIA,
                         c.NO_DIPUTADOS,
                         p.LIM_GASTO_ASAMBLEA,
@@ -166,10 +170,10 @@ private String DATASOURCE_NAME;
                         TRIMESTRE,
                         CODIGO_ENTIDAD,
                         AMBITO_CODIGO,
-                        SUM(COMPROMISOS) AS GASTOS_ASAMBLEA
+                        SUM(CAST(COMPROMISOS AS DECIMAL(18,2))) AS GASTOS_ASAMBLEA
                     FROM %s
                     WHERE CUENTA = '2'
-                      AND COD_SECCION_PRESUPUESTAL = '19'
+                      AND CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) = 19
                       AND (COD_VIGENCIA_DEL_GASTO = '1' OR COD_VIGENCIA_DEL_GASTO = '4')
                     GROUP BY
                         FECHA,
@@ -183,10 +187,10 @@ private String DATASOURCE_NAME;
                         TRIMESTRE,
                         CODIGO_ENTIDAD,
                         AMBITO_CODIGO,
-                        SUM(COMPROMISOS) AS REMUNERACION_DIPUTADOS
+                        SUM(CAST(COMPROMISOS AS DECIMAL(18,2))) AS REMUNERACION_DIPUTADOS
                     FROM %s
                     WHERE CUENTA = '2.1.1.01.01.001.11'
-                      AND COD_SECCION_PRESUPUESTAL = '19'
+                      AND CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) = 19
                       AND (COD_VIGENCIA_DEL_GASTO = '1' OR COD_VIGENCIA_DEL_GASTO = '4')
                     GROUP BY
                         FECHA,
@@ -214,10 +218,10 @@ private String DATASOURCE_NAME;
                         TRIMESTRE,
                         CODIGO_ENTIDAD,
                         AMBITO_CODIGO,
-                        SUM(COMPROMISOS) AS PRESTACIONES_SOCIALES
+                        SUM(CAST(COMPROMISOS AS DECIMAL(18,2))) AS PRESTACIONES_SOCIALES
                     FROM %s
                     WHERE CUENTA IN (SELECT CUENTA FROM CuentasEsperadas)
-                      AND COD_SECCION_PRESUPUESTAL = '19'
+                      AND CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) = 19
                       AND (COD_VIGENCIA_DEL_GASTO = '1' OR COD_VIGENCIA_DEL_GASTO = '4')
                     GROUP BY
                         FECHA,
@@ -234,7 +238,7 @@ private String DATASOURCE_NAME;
                         CUENTA
                     FROM %s
                     WHERE CUENTA IN (SELECT CUENTA FROM CuentasEsperadas)
-                      AND COD_SECCION_PRESUPUESTAL = '19'
+                      AND CAST(CAST(COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) = 19
                       AND (COD_VIGENCIA_DEL_GASTO = '1' OR COD_VIGENCIA_DEL_GASTO = '4')
                 ),
                 MissingAccounts AS (

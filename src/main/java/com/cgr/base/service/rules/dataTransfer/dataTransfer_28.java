@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -117,7 +116,7 @@ public class dataTransfer_28 {
                                  AND g.TRIMESTRE = E028.TRIMESTRE
                                  AND g.CUENTA = Cuentas.CUENTA
                                  AND g.COD_VIGENCIA_DEL_GASTO IN (1, 4)
-                                 AND g.COD_SECCION_PRESUPUESTAL = 20
+                                 AND CAST(CAST(g.COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) = 20
                              )
                              FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, ''
                         )
@@ -147,7 +146,7 @@ public class dataTransfer_28 {
                         AND g.TRIMESTRE = e.TRIMESTRE
                         AND g.CUENTA = '2'
                         AND g.COD_VIGENCIA_DEL_GASTO IN (1, 4)
-                        AND g.COD_SECCION_PRESUPUESTAL = 20
+                        AND CAST(CAST(g.COD_SECCION_PRESUPUESTAL AS FLOAT) AS INT) = 20
                         GROUP BY g.CODIGO_ENTIDAD, g.FECHA, g.TRIMESTRE
                     )
                     FROM E028 e
