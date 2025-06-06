@@ -47,47 +47,42 @@ public class ruleScheduler {
 
     private void executeRuleFlow() {
 
-        // System.out.println("[PARAMETRIZACION] Ejecutando TABLAS PARAMETRIZACION");
-        // runStep(() -> initParamerBD.executeInitTables(), "initDB_ParameterTables");
+        System.out.println("[PARAMETRIZACION] Ejecutando TABLAS PARAMETRIZACION");
+        runStep(() -> initParamerBD.executeInitTables(), "initDB_ParameterTables");
         // System.out.println("[MOTOR REGLAS] Ejecutando TABLAS MOTOR REGLAS");
         // runStep(() -> motorReglas.processTablesRules(), "processTablesRules");
 
         String[] rules = {
 
-                // // REGLAS GENERALES:
-                // // Programación Ingresos:
-                // "1", "2", "3", "4",
-                // // Ejecución Ingresos:
-                // "5", "6", "17",
-                // // Programación Gastos:
-                // "7", "8", "9", "10", "11",
-                // // Ejecución Gastos:
-                //  "13", "16",
-                //"8",
-                // REGLAS ESPECIFICAS:
+                // REGLAS GENERALES:
+                // Programación Ingresos:
+                "1", "2", "3", "4",
+                // Ejecución Ingresos:
+                "5", "6", "17",
+                // Programación Gastos:
+                "7", "8", "9", "10", "11",
+                // Ejecución Gastos:
+                "12", "13", "14", "15", "16",
 
-                // REGLAS:
-                // "1", "2", "3", "4", "5", "6", "7", "8", "9A", "9B", "10", "11", "12", "13A",
-                // "13B", "14", "15", "16A",
-                // "16B", "17",
-                // "22A", "22_A", "22B", "22C", "22_C", "22D", "22_D", "22E", "22_E", "23",
-                // "24", "25A", "25_A", 
-                "25B"
-                // "GF",
+                // REGLAS ESPECIFICAS:
+                // "22A", "22_A", "22B", "22C", "22_C", "22D", "22_D", "22E", "22_E",
+                // "23",
+                // "24", "25A", "25_A", "25B",
+                // "25_B", "GF",
                 // "26", "27", "28", "29A", "29B", "29C", "30", "31", "32"
 
         };
 
-        // System.out.println("[RULES] Ejecutando reglas secuencialmente...");
-        // for (String rule : rules) {
-        //     runStep(() -> applyRules.transferRule(rule), "transferRule: " + rule);
+        System.out.println("[RULES] Ejecutando reglas secuencialmente...");
+        for (String rule : rules) {
+            runStep(() -> applyRules.transferRule(rule), "transferRule: " + rule);
 
-        //     System.out.println("[RULES] Ejecutando regla --> " + rule + ".");
-        // }
+            System.out.println("[RULES] Ejecutando regla --> " + rule + ".");
+        }
 
-        // // Finales
-        // System.out.println("[FINAL] Ejecutando tareas finales...");
-        // runStep(() -> er.actualizarSpecificRulesData(), "actualizarSpecificRulesData");
+        // Finales
+        System.out.println("[FINAL] Ejecutando tareas finales...");
+        runStep(() -> er.actualizarSpecificRulesData(), "actualizarSpecificRulesData");
 
         System.out.println("[CERTIFICACION] Ejecutando PORCENTAJE DE CERTIFICACION");
         runStep(() -> certificator.generateControlTable(), "generateControlTable");
