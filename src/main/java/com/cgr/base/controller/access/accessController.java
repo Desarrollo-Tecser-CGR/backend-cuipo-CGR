@@ -1,8 +1,9 @@
 package com.cgr.base.controller.access;
 
-import java.util.List;
-import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.*;
 import java.util.stream.Collectors;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cgr.base.config.abstractResponse.AbstractController;
 import com.cgr.base.config.jwt.JwtService;
+import com.cgr.base.entity.menu.Menu;
+import com.cgr.base.entity.role.RoleEntity;
+import com.cgr.base.repository.menu.IMenuRepositoryJpa;
+import com.cgr.base.repository.role.IRoleRepository;
+
 import static com.cgr.base.entity.logs.LogType.USUARIOS;
 import com.cgr.base.service.access.accessManagement;
 import com.cgr.base.service.logs.LogGeneralService;
@@ -29,11 +35,18 @@ public class accessController extends AbstractController {
 
     @Autowired
     accessManagement Access;
+
     @Autowired
     private JwtService jwtService;
 
     @Autowired
     private LogGeneralService logGeneralService;
+
+    @Autowired
+    private IRoleRepository roleRepository;
+
+    @Autowired
+    private IMenuRepositoryJpa menuRepository;
 
     @PreAuthorize("hasAuthority('ROL_1')")
     @GetMapping("/module/list")
@@ -73,12 +86,10 @@ public class accessController extends AbstractController {
                 .map(o -> ((Number) o).intValue())
                 .collect(Collectors.toList());
 
-        // Validate if the role exists
         if (!Access.roleExists(roleId)) {
             return requestResponse(null, "El rol especificado no existe.", HttpStatus.NOT_FOUND, false);
         }
 
-        // Validate if all modules exist
         List<Integer> invalidModules = Access.getInvalidModules(moduleIds);
         if (!invalidModules.isEmpty()) {
             return requestResponse(null, "Los siguientes módulos no existen: " + invalidModules,
@@ -87,12 +98,28 @@ public class accessController extends AbstractController {
 
         boolean updated = Access.updateRoleModules(roleId, moduleIds);
 
-        logGeneralService.createLog(userId, USUARIOS,
-                "Modificación de rol id " + roleId + " con los módulos " + moduleIds + " asignados.");
+        RoleEntity role = roleRepository.findById(roleId);
+            String message = "Asignación de Módulos al Rol " + roleId + " : " + role.getName() + ".";
 
-        return updated ? requestResponse(null, "Módulos actualizados correctamente.", HttpStatus.OK, true)
-                : requestResponse(null, "Error al actualizar los módulos.", HttpStatus.INTERNAL_SERVER_ERROR,
-                        false);
+            List<Long> moduleIdsLong = moduleIds.stream()
+                    .map(Integer::longValue)
+                    .collect(Collectors.toList());
+
+            List<Menu> menus = menuRepository.findAllById(moduleIdsLong);
+
+            List<Map<String, Object>> modulesDetail = menus.stream()
+                    .map(menu -> {
+                        Map<String, Object> map = new LinkedHashMap<>();
+                        map.put("ID", menu.getId());
+                        map.put("Modulo", menu.getTitle());
+                        return map;
+                    })
+                    .collect(Collectors.toList());
+
+            logGeneralService.createLog(userId, USUARIOS,
+                    message, modulesDetail);
+
+        return requestResponse(updated ? modulesDetail : null, "Asignación de Módulos Correctamente.", HttpStatus.OK, true);
     }
 
 }

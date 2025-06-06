@@ -42,15 +42,15 @@ public class ParametrizacionAnualController extends AbstractController {
     private LogGeneralService logGeneralService;
 
     @GetMapping
-    public List<ParametrizacionAnual> getAll() {
-        return parametrizacionAnualService.getAll();
+    public ResponseEntity<?> getAll() {
+        return requestResponse(parametrizacionAnualService.getAll(),
+                "Retornar Tabla Parametrizacion Anual", HttpStatus.OK, true);
     }
 
     @GetMapping("/{fecha}")
-    public ResponseEntity<ParametrizacionAnual> getByFecha(@PathVariable int fecha) {
-        return parametrizacionAnualService.getByFecha(fecha)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> getByFecha(@PathVariable int fecha) {
+        return requestResponse(parametrizacionAnualService.getByFecha(fecha),
+                "Retornar Parametrizacion Anual por Fecha", HttpStatus.OK, true);
     }
 
     @PostMapping
@@ -65,10 +65,12 @@ public class ParametrizacionAnualController extends AbstractController {
         if (userId == null) {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
+
+        ParametrizacionAnual response = parametrizacionAnualService.save(parametrizacionAnual);
         logGeneralService.createLog(userId, PARAMETRIZACION,
-                "Creación de parametrización anual año " + parametrizacionAnual.getFecha() + " with values "
-                        + parametrizacionAnual);
-        return requestResponse(parametrizacionAnualService.save(parametrizacionAnual), "Create operation completed.",
+                "Creación de Parametrización Anual para el Año:" + parametrizacionAnual.getFecha(),
+                parametrizacionAnual);
+        return requestResponse(response, "Create operation completed.",
                 HttpStatus.OK, true);
     }
 
@@ -85,21 +87,35 @@ public class ParametrizacionAnualController extends AbstractController {
             return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
         }
 
-        logGeneralService.createLog(userId, PARAMETRIZACION,
-                "Modificación de parametrización anual año " + parametrizacionAnual.getFecha() + " to "
-                        + parametrizacionAnual);
+        ParametrizacionAnual response = parametrizacionAnualService.update(parametrizacionAnual);
 
-        return requestResponse(parametrizacionAnualService.update(parametrizacionAnual),
+        logGeneralService.createLog(userId, PARAMETRIZACION,
+                "Modificación de Parametrización Anual para el Año:" +
+                        parametrizacionAnual.getFecha(),
+                parametrizacionAnual);
+
+        return requestResponse(response,
                 "Update operation completed.", HttpStatus.OK, true);
 
     }
 
+    @PreAuthorize("hasAuthority('ROL_1')")
     @DeleteMapping("/{fecha}")
-    public void deleteByFecha(@PathVariable int fecha) {
+    public ResponseEntity<?> deleteByFecha(@PathVariable int fecha, HttpServletRequest request) {
         parametrizacionAnualService.deleteByFecha(fecha);
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
 
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = header != null && header.startsWith("Bearer ") ? header.split(" ")[1] : null;
+        Long userId = token != null ? jwtService.extractUserIdFromToken(token) : null;
+
+        if (userId == null) {
+            return requestResponse(null, "User ID not found.", HttpStatus.FORBIDDEN, false);
+        }
+
+        logGeneralService.createLog(userId, PARAMETRIZACION,
+                "Eliminación de Parametrización Anual para el Año:" + fecha, null);
+
+        return requestResponse(null, "Delete operation completed.", HttpStatus.OK, true);
     }
 
 }

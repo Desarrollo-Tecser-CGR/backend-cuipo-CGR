@@ -36,6 +36,12 @@ public class JwtAuthenticationProvider {
 
     public String createToken(AuthResponseDto customerJwt, List<RoleEntity> roles) throws JsonProcessingException {
 
+        String existingToken = findTokenByUser(customerJwt.getSAMAccountName());
+
+        if (existingToken != null) {
+            deleteToken(existingToken);
+        }
+
         String tokenCreated = jwtService.createToken(customerJwt, roles);
 
         listToken.put(tokenCreated, customerJwt);
@@ -149,6 +155,14 @@ public class JwtAuthenticationProvider {
         listToken.remove(jwt);
 
         return "session closed";
+    }
+
+    private String findTokenByUser(String samAccountName) {
+        return listToken.entrySet().stream()
+                .filter(entry -> samAccountName.equals(entry.getValue().getSAMAccountName()))
+                .map(entry -> entry.getKey())
+                .findFirst()
+                .orElse(null);
     }
 
 }

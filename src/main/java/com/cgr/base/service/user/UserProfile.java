@@ -5,8 +5,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.cgr.base.dto.user.UserProfileDto;
 import com.cgr.base.entity.user.ProfileEntity;
@@ -39,7 +41,8 @@ public class UserProfile {
 
         byte[] decodedBytes = Base64.getDecoder().decode(base64Image.split(",")[1]);
         if (decodedBytes.length > MAX_IMAGE_SIZE) {
-            throw new IllegalArgumentException("Image size exceeds the limit.");
+            throw new IllegalArgumentException(
+                    "Image size exceeds the limit " + (MAX_IMAGE_SIZE / (1024 * 1024)) + " MB");
         }
 
         String imageType = extractImageType(base64Image);
@@ -88,14 +91,16 @@ public class UserProfile {
     public String getProfileImage(Long userId) {
         Optional<ProfileEntity> profile = userProfileRepo.findById(userId);
         if (profile.isEmpty() || profile.get().getImageProfile() == null) {
-            throw new IllegalArgumentException("Profile Image Not Found.");
+            throw new ResponseStatusException(
+                    HttpStatus.NO_CONTENT,
+                    "Profile Image Not Found.");
         }
         return profile.get().getImageProfile();
     }
 
     // Extraer el tipo MIME de la cadena Base64.
     private String extractImageType(String base64Image) {
-        String regex = "data:image/([a-zA-Z]*);base64,";
+        String regex = "data:image/([a-zA-Z0-9+\\-]+);base64,";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(base64Image);
         if (matcher.find()) {
@@ -111,6 +116,15 @@ public class UserProfile {
 
         if (optionalUser.isEmpty()) {
             throw new IllegalArgumentException("User not found.");
+        }
+
+        boolean allFieldsEmpty = (userDto.getEmail() == null || userDto.getEmail().trim().isEmpty()) &&
+                (userDto.getPhone() == null || userDto.getPhone().trim().isEmpty()) &&
+                (userDto.getFullName() == null || userDto.getFullName().trim().isEmpty());
+
+        if (allFieldsEmpty) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "At least one field must be provided to update the profile.");
         }
 
         UserEntity user = optionalUser.get();

@@ -63,7 +63,7 @@ public class certificationsController extends AbstractController {
         }
 
         String response = Certification.updateCertification(requestBody, userId, "calidad");
-        logGeneralService.createLog(userId, CERTIFICACIONES, "Modificación de certificación de calidad " + requestBody);
+        logGeneralService.createLog(userId, CERTIFICACIONES, "Modificación de Certificación de Calidad ", requestBody);
         return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
 
     }
@@ -82,7 +82,7 @@ public class certificationsController extends AbstractController {
         }
 
         String response = Certification.updateCertification(requestBody, userId, "L617");
-        logGeneralService.createLog(userId, CERTIFICACIONES, "Modificación de certificación L617 " + requestBody);
+        logGeneralService.createLog(userId, CERTIFICACIONES, "Modificación de Certificación L617 ", requestBody);
         return requestResponse(response, "Update operation completed.", HttpStatus.OK, true);
     }
 

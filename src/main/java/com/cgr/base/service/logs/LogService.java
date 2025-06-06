@@ -3,9 +3,7 @@ package com.cgr.base.service.logs;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,27 +22,64 @@ public class LogService {
     @Autowired
     private IUserRepositoryJpa UserRepo;
 
-    // Método para obtener logs en orden descendente
-    public List<Map<String, Object>> getAllLogsDesc() {
-        List<LogEntity> logs = LogRepo.findAllByOrderByDateSessionStartDesc();
-        List<Map<String, Object>> result = logs.stream()
+    public List<Map<String, Object>> getLogsByDate(String date) {
+
+        List<LogEntity> logs = LogRepo.findByDatePrefix(date + "%");
+
+        Set<Long> userIds = logs.stream()
+                .map(LogEntity::getUserId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        List<Object[]> idAndNames = UserRepo.findIdAndFullNameByIdIn(userIds);
+        Map<Long, String> userNamesById = idAndNames.stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (String) row[1]));
+
+        return logs.stream()
                 .map(log -> {
-                    String fullName = UserRepo.findFullNameById(log.getUserId());
                     Map<String, Object> logMap = new HashMap<>();
                     logMap.put("id", log.getId());
                     logMap.put("dateSessionStart", log.getDateSessionStart());
                     logMap.put("userId", log.getUserId());
-                    logMap.put("fullName", fullName != null ? fullName : null);
+                    logMap.put("fullName", userNamesById.get(log.getUserId()));
                     logMap.put("roles", log.getRoles());
                     logMap.put("status", log.getStatus());
                     return logMap;
                 })
                 .collect(Collectors.toList());
-
-        return result;
     }
 
-    // Método para guardar los logs de inicio de sesión
+    public List<Map<String, Object>> getAllLogsOptimized() {
+
+        List<LogEntity> logs = LogRepo.findAllByOrderByDateSessionStartDesc();
+
+        Set<Long> userIds = logs.stream()
+                .map(LogEntity::getUserId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        List<Object[]> idAndNames = UserRepo.findIdAndFullNameByIdIn(userIds);
+        Map<Long, String> userNamesById = idAndNames.stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (String) row[1]));
+
+        return logs.stream()
+                .map(log -> {
+                    Map<String, Object> logMap = new HashMap<>();
+                    logMap.put("id", log.getId());
+                    logMap.put("dateSessionStart", log.getDateSessionStart());
+                    logMap.put("userId", log.getUserId());
+                    logMap.put("fullName", userNamesById.get(log.getUserId()));
+                    logMap.put("roles", log.getRoles());
+                    logMap.put("status", log.getStatus());
+                    return logMap;
+                })
+                .collect(Collectors.toList());
+    }
+
     public LogEntity saveLog(LogEntity log, String status) {
         log.setStatus(status);
         return LogRepo.save(log);

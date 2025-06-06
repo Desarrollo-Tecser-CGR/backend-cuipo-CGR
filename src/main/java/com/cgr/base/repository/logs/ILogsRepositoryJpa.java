@@ -16,4 +16,7 @@ public interface ILogsRepositoryJpa extends JpaRepository<LogEntity, Long> {
     @Query("SELECT COUNT(l) FROM LogEntity l WHERE l.userId = :userId AND l.dateSessionStart > :fiveMinutesAgo AND l.status = 'FAILURE'")
     int countFailedAttemptsInLast5Minutes(Long userId, String fiveMinutesAgo);
 
+    @Query("SELECT l FROM LogEntity l WHERE l.dateSessionStart LIKE :datePrefix ORDER BY l.dateSessionStart DESC")
+    List<LogEntity> findByDatePrefix(String datePrefix);
+
 }

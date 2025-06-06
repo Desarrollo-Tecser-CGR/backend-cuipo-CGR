@@ -35,9 +35,6 @@ public class NotificationController extends AbstractController {
     @GetMapping()
     public ResponseEntity<?> getNotifications(HttpServletRequest request) {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Falta token de autorización.");
-        }
         String token = header.split(" ")[1];
         Long userId = jwtService.extractUserIdFromToken(token);
 
@@ -69,10 +66,6 @@ public class NotificationController extends AbstractController {
     @GetMapping("/mark-all-as-read")
     public ResponseEntity<?> markAllAsRead(HttpServletRequest request) {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (header == null || !header.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Falta token de autorización.");
-        }
-
         String token = header.split(" ")[1];
         Long userId = jwtService.extractUserIdFromToken(token);
 

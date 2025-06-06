@@ -67,7 +67,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
  
         if (header == null) {
-            responseHandler(response, "Token is Required.", HttpServletResponse.SC_FORBIDDEN);
+            responseHandler(response, "Token is Required.", HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
  
@@ -80,21 +80,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             isTokenExpiredException = jwtService.isTokenExpired(header.split(" ")[1]);
         } catch (Exception e) {
-            responseHandler(response, "Invalid Token.", HttpServletResponse.SC_FORBIDDEN);
+            responseHandler(response, "Invalid Token.", HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
  
         if (isTokenExpiredException != null) {
- 
-            responseHandler(response, isTokenExpiredException, HttpServletResponse.SC_FORBIDDEN);
- 
+
+            responseHandler(response, isTokenExpiredException, HttpServletResponse.SC_UNAUTHORIZED);
+
             return;
         }
- 
+
         String isTokenInvalidateFirma = jwtService.validateFirma(header.split(" ")[1]);
  
         if (isTokenInvalidateFirma != null) {
-            responseHandler(response, isTokenInvalidateFirma, HttpServletResponse.SC_FORBIDDEN);
+            responseHandler(response, isTokenInvalidateFirma, HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
  
@@ -110,7 +110,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String validatetokeninlist = jwtAuthenticationProvider.validatetokenInlistToken(header.split(" ")[1]);
         if (validatetokeninlist != null) {
  
-            responseHandler(response, validatetokeninlist, HttpServletResponse.SC_FORBIDDEN);
+            responseHandler(response, validatetokeninlist, HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
  
@@ -168,7 +168,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         Map<String, Object> jsonresponse = new HashMap<>();
  
         jsonresponse.put("message", isTokenExpired);
-        jsonresponse.put("statusCode", HttpServletResponse.SC_FORBIDDEN);
+        jsonresponse.put("statusCode", HttpServletResponse.SC_UNAUTHORIZED);
         jsonresponse.put("error", "Invalid Token.");
  
         String responseJson = getObjectMapper.writeValueAsString(jsonresponse);

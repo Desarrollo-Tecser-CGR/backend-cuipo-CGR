@@ -34,6 +34,7 @@ public class logsGenerals extends AbstractController {
     public ResponseEntity<?> getLogAll(
             @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam(value = "logType", required = false) String logTypeStr,
+            @RequestParam(value = "message", required = false) String message,
             @RequestParam(value = "detail", required = false) String detail,
             @RequestParam(value = "createdAt", required = false) String create_date) {
 
@@ -47,8 +48,8 @@ public class logsGenerals extends AbstractController {
             }
         }
 
-        List<LogWithUserFullNameDTO> logs = logService.findLogsByFilters(userId, logType, detail, create_date);
-        return requestResponse(logs, "Login Logs filtrados.", HttpStatus.OK, true);
+        List<LogWithUserFullNameDTO> logs = logService.findLogsByFilters(userId, logType, message, detail, create_date);
+        return requestResponse(logs, "Generales Logs filtrados.", HttpStatus.OK, true);
 
     }
 }

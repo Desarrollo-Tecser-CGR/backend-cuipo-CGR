@@ -1,8 +1,7 @@
 
 package com.cgr.base.repository.user;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -36,4 +35,8 @@ public interface IUserRepositoryJpa extends JpaRepository<UserEntity, Long>, Jpa
 
         @Query("SELECT u.fullName FROM UserEntity u WHERE u.id = :id")
         String findFullNameById(@Param("id") Long id);
+
+        @Query("SELECT u.id, u.fullName FROM UserEntity u WHERE u.id IN :ids")
+        List<Object[]> findIdAndFullNameByIdIn(@Param("ids") Set<Long> ids);
+
 }

@@ -4,19 +4,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.cgr.base.service.certifications.initTablaCertifications;
-import com.cgr.base.service.parametrization.generalParameter;
 import com.cgr.base.service.parametrization.initDB_ParameterTables;
-import com.cgr.base.service.parametrization.specificParameter;
 import com.cgr.base.service.rules.dataTransfer.columnsER;
-import com.cgr.base.service.rules.initTables.dataParameterInit;
 import com.cgr.base.service.rules.initTables.dataSourceInit;
 
 @Service
@@ -29,19 +24,10 @@ public class ruleScheduler {
     private initDB_ParameterTables initParamerBD;
 
     @Autowired
-    private dataParameterInit parametria;
-
-    @Autowired
     private dataSourceInit motorReglas;
 
     @Autowired
     private columnsER er;
-
-    @Autowired
-    private generalParameter parameterRG;
-
-    @Autowired
-    private specificParameter parameterRE;
 
     @Autowired
     private initTablaCertifications certificator;
@@ -61,13 +47,10 @@ public class ruleScheduler {
 
     private void executeRuleFlow() {
 
+        // System.out.println("[PARAMETRIZACION] Ejecutando TABLAS PARAMETRIZACION");
         // runStep(() -> initParamerBD.executeInitTables(), "initDB_ParameterTables");
-
+        // System.out.println("[MOTOR REGLAS] Ejecutando TABLAS MOTOR REGLAS");
         // runStep(() -> motorReglas.processTablesRules(), "processTablesRules");
-        // runStep(() -> parametria.processTablesSource(), "processTablesSource");
-        // runStep(() -> parameterRG.tableGeneralRulesName(), "tableGeneralRulesName");
-        // runStep(() -> parameterRE.tableSpecificRulesName(),
-        // "tableSpecificRulesName");
 
         String[] rules = {
 
@@ -75,9 +58,9 @@ public class ruleScheduler {
                 // // Programación Ingresos:
                 // "1", "2", "3", "4",
                 // // Ejecución Ingresos:
-                // "5", "6", "7", "8", "17",
+                // "5", "6", "17",
                 // // Programación Gastos:
-                // "11",
+                // "7", "8", "9", "10", "11",
                 // // Ejecución Gastos:
                 //  "13", "16",
                 //"8",
@@ -95,16 +78,19 @@ public class ruleScheduler {
 
         };
 
-        System.out.println("[RULES] Ejecutando reglas secuencialmente...");
-        for (String rule : rules) {
-            runStep(() -> applyRules.transferRule(rule), "transferRule: " + rule);
-        }
+        // System.out.println("[RULES] Ejecutando reglas secuencialmente...");
+        // for (String rule : rules) {
+        //     runStep(() -> applyRules.transferRule(rule), "transferRule: " + rule);
 
-        // Finales
-        System.out.println("[FINAL] Ejecutando tareas finales...");
-        // runStep(() -> er.actualizarSpecificRulesData(),
-        // "actualizarSpecificRulesData");
-        // runStep(() -> certificator.generateControlTable(), "generateControlTable");
+        //     System.out.println("[RULES] Ejecutando regla --> " + rule + ".");
+        // }
+
+        // // Finales
+        // System.out.println("[FINAL] Ejecutando tareas finales...");
+        // runStep(() -> er.actualizarSpecificRulesData(), "actualizarSpecificRulesData");
+
+        System.out.println("[CERTIFICACION] Ejecutando PORCENTAJE DE CERTIFICACION");
+        runStep(() -> certificator.generateControlTable(), "generateControlTable");
 
         System.out.println("[FINISHED] Flujo de reglas ejecutado completamente.");
     }
@@ -112,20 +98,15 @@ public class ruleScheduler {
     private void runStep(Runnable task, String stepName) {
         Future<?> future = executor.submit(task);
         try {
-            // Esperamos hasta 30 minutos
-            future.get(30, TimeUnit.MINUTES);
-        } catch (TimeoutException te) {
-            System.out.println("[TIMEOUT] : " + stepName + te.getMessage());
+            future.get();
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
             System.out.println("[INTERRUPTED] : " + stepName + ie.getMessage());
         } catch (ExecutionException ee) {
             System.out.println("[ERROR] : " + stepName + ee.getCause().getMessage());
         }
-
-        // Delay de 1 minuto entre pasos
         try {
-            Thread.sleep(60_000);
+            Thread.sleep(30_000);
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
             System.out.println("[WARN] : " + stepName + ie.getMessage());

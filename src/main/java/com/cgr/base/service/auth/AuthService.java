@@ -6,9 +6,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
-import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
 import com.cgr.base.config.jwt.JwtAuthenticationProvider;
 import com.cgr.base.dto.auth.AuthRequestDto;
 import com.cgr.base.dto.auth.AuthResponseDto;
@@ -64,7 +65,9 @@ public class AuthService {
         UserEntity user = userOpt.get();
 
         if (userBlockService.isUserBlocked(user.getId())) {
-            throw new SecurityException("User is blocked due to too many failed login attempts");
+            throw new ResponseStatusException(
+                    HttpStatus.TOO_MANY_REQUESTS,
+                    "User is blocked due to too many failed login attempts");
         }
 
         boolean isAccountValid = activeDirectoryUserRepository.checkAccount(
@@ -94,7 +97,7 @@ public class AuthService {
         List<Menu> menus = userRepositoryFull.findMenusByRoleNames(
                 user.getRoles().stream().map(RoleEntity::getName).toList());
         userRequestDto.setMenus(menus);
-        
+
         userRequestDto.setFullName(user.getFullName());
 
         userRequest.setEmail(user.getEmail());

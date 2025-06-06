@@ -45,6 +45,7 @@ public class SyncActiveDirectoryUsers implements IUserSynchronizerUseCase {
     }
 
     private void synchronizeLdapUsers() {
+
         List<UserEntity> usersAD = directoryUserRepository.getAllUsers();
 
         usersAD.forEach(userAD -> {
@@ -55,7 +56,8 @@ public class SyncActiveDirectoryUsers implements IUserSynchronizerUseCase {
 
             if (optionalUserDB.isPresent()) {
                 UserEntity userDB = optionalUserDB.get();
-                if (!userDB.getDateModify().equals(userAD.getDateModify())) {
+
+                if (userDB.getDateModify() == null || !userDB.getDateModify().equals(userAD.getDateModify())) {
                     userDB.mapActiveDirectoryUser(userAD);
                     userDB.setDateModify(dateModify);
                     userRepositoryDB.save(userDB);
@@ -85,6 +87,7 @@ public class SyncActiveDirectoryUsers implements IUserSynchronizerUseCase {
                     userDB.setPhone(userCGR.getPhone());
                 }
                 userDB.setCargo(userCGR.getCargo());
+                userDB.setEnabled(true);
 
             } else {
 

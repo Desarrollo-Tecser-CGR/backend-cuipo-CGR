@@ -236,4 +236,22 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
             throw new IllegalArgumentException("Error parsing 'whenChanged' attribute: " + whenChanged, e);
         }
     }
+
+    public boolean existsInExternalDirectory(String samAccountName) {
+        if ("ldap".equalsIgnoreCase(authMode)) {
+            try (LDAPConnection connection = new LDAPConnection(ldapHost, ldapPort)) {
+                connection.bind(serviceUser, servicePassword);
+                SearchResultEntry entry = getUserDirectoryBySAMAccountName(connection, samAccountName, baseDN);
+                return entry != null;
+            } catch (LDAPException e) {
+                throw new IllegalStateException("Error querying LDAP", e);
+            }
+        } else if ("cgr".equalsIgnoreCase(authMode)) {
+            UserEntity user = getUserDirectoryCGR(samAccountName);
+            return user != null;
+        } else {
+            throw new IllegalArgumentException("Unknown mode: " + authMode);
+        }
+    }
+
 }

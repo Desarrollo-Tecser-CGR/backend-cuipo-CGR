@@ -19,11 +19,21 @@ import com.cgr.base.common.exception.exceptionCustom.ResourceNotFoundException;
 import com.cgr.base.config.abstractResponse.AbstractController;
 import com.cgr.base.service.role.RoleServiceImpl.RoleConflictException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @RestControllerAdvice
 public class GlobalRegistrationExceptionHandler extends AbstractController {
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<?> handleResponseStatusException(ResponseStatusException ex) {
+        HttpStatus status = ex.getStatusCode() instanceof HttpStatus
+                ? (HttpStatus) ex.getStatusCode()
+                : HttpStatus.INTERNAL_SERVER_ERROR;
+
+        return requestResponse(null, ex.getReason(), status, false);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationErrors(MethodArgumentNotValidException ex) {
