@@ -55,7 +55,7 @@ public class LDAPUsuarioRepository implements IActiveDirectoryUserRepository {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private final String externalUserInfoUrl = "https://preserviciosint.contraloria.gov.co/directorio/usuarios/consultar/";
+    private final String externalUserInfoUrl = "https://serviciosint.contraloria.gov.co/directorio/usuarios/autenticar/";
 
     // Verificar credenciales en Active Directory
     @Override

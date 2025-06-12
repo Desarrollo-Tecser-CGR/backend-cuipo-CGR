@@ -57,6 +57,6 @@ logging:
 
 external:
   auth:
-    url: ${external.auth.ur:https://preserviciosint.contraloria.gov.co/directorio/usuarios/autenticar}
+    url: ${external.auth.ur:https://serviciosint.contraloria.gov.co/directorio/usuarios/autenticar}
     # Configuración auth cgr o ldap
     mode: ${MODE_AUTH}
