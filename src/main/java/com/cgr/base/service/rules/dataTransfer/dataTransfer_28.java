@@ -139,7 +139,7 @@ public class dataTransfer_28 {
         String sqlUpdateGastosCompCta2 = String.format("""
                     UPDATE e
                     SET e.GASTOS_COMP_CTA2 = (
-                        SELECT SUM(g.COMPROMISOS)
+                        SELECT SUM(TRY_CAST(g.COMPROMISOS AS DECIMAL(18,0)))
                         FROM [%s].[dbo].[%s] g
                         WHERE g.CODIGO_ENTIDAD = e.CODIGO_ENTIDAD
                         AND g.FECHA = e.FECHA
