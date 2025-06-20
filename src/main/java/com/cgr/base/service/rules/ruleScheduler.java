@@ -47,33 +47,35 @@ public class ruleScheduler {
 
     private void executeRuleFlow() {
 
-        System.out.println("[PARAMETRIZACION] Ejecutando TABLAS PARAMETRIZACION");
-        runStep(() -> initParamerBD.executeInitTables(), "initDB_ParameterTables");
-        // System.out.println("[MOTOR REGLAS] Ejecutando TABLAS MOTOR REGLAS");
-        // runStep(() -> motorReglas.processTablesRules(), "processTablesRules");
-
+        //System.out.println("[PARAMETRIZACION] Ejecutando TABLAS PARAMETRIZACION");
+        //runStep(() -> initParamerBD.executeInitTables(), "initDB_ParameterTables");
+        //System.out.println("[MOTOR REGLAS] Ejecutando TABLAS MOTOR REGLAS");
+        //runStep(() -> motorReglas.processTablesRules(), "processTablesRules");
         String[] rules = {
+            // REGLAS GENERALES:
+            // Programación Ingresos:
+            //"1", "2", "3", "4",
+            // Ejecución Ingresos:
+            //"5", "6", "17",
+            // Programación Gastos:
+            //"7", "8", "9", "10", "11",
+            // Ejecución Gastos:
+            //"12", "13", "14", "15", "16",
 
-                // REGLAS GENERALES:
-                // Programación Ingresos:
-                "1", "2", "3", "4",
-                // Ejecución Ingresos:
-                "5", "6", "17",
-                // Programación Gastos:
-                "7", "8", "9", "10", "11",
-                // Ejecución Gastos:
-                "12", "13", "14", "15", "16",
+            // REGLAS ESPECIFICAS:
 
-                // REGLAS ESPECIFICAS:
-                // "22A", "22_A", "22B", "22C", "22_C", "22D", "22_D", "22E", "22_E",
-                // "23",
-                // "24", "25A", "25_A", "25B",
-                // "25_B", "GF",
-                // "26", "27", "28", "29A", "29B", "29C", "30", "31", "32"
-
+            //"22A", "22_A", "22B", "22C", "22_C", "22D", "22_D", "22E", "22_E",
+            // "23", "24", 
+            //"25A", "25_A", "25B", "GF"
+            //"26", "27", 
+             "28"
+            // "29A", "29B", "29C"
+            //"30", "31", "32"
         };
 
+        System.out.println(">>> Cantidad de reglas a ejecutar: " + rules.length);
         System.out.println("[RULES] Ejecutando reglas secuencialmente...");
+
         for (String rule : rules) {
             runStep(() -> applyRules.transferRule(rule), "transferRule: " + rule);
 
@@ -98,8 +100,10 @@ public class ruleScheduler {
             Thread.currentThread().interrupt();
             System.out.println("[INTERRUPTED] : " + stepName + ie.getMessage());
         } catch (ExecutionException ee) {
-            System.out.println("[ERROR] : " + stepName + ee.getCause().getMessage());
+            Throwable cause = ee.getCause();
+            System.out.printf("[ERROR] : %s -> %s (%s)%n", stepName, cause.getMessage(), cause.getClass().getSimpleName());
         }
+
         try {
             Thread.sleep(30_000);
         } catch (InterruptedException ie) {

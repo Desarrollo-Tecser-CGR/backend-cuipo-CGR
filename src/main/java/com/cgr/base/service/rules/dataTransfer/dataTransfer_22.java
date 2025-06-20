@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class dataTransfer_22 {
 
@@ -17,7 +19,10 @@ public class dataTransfer_22 {
     @Value("${TABLA_EJEC_INGRESOS}")
     private String TABLA_EJEC_INGRESOS;
 
+    @Transactional
     public void applyGeneralRule22A() {
+        System.out.println(">>> Ejecutando lógica de regla 22A");
+
 
         List<String> requiredColumns = Arrays.asList("ICLD");
 
@@ -88,6 +93,7 @@ public class dataTransfer_22 {
         jdbcTemplate.execute(updateQuery);
     }
 
+    @Transactional
     public void applyGeneralRule22_A() {
         // ----------------------------------------------------------------------
         // REGLA 22A (versión alternativa)
@@ -160,6 +166,7 @@ public class dataTransfer_22 {
      * - Actualiza cada columna con la lista de cuentas que falten.
      */
 
+     @Transactional
     public void applyGeneralRule22B() {
 
         // 1) Define las columnas a verificar
@@ -286,6 +293,7 @@ public class dataTransfer_22 {
         jdbcTemplate.execute(updateQuery);
     }
 
+    @Transactional
     public void applyGeneralRule22C() {
         // 1) Verificar/crear la columna ALERTA_22_CA0080 de forma más eficiente
         List<String> requiredColumns = Arrays.asList("ALERTA_22_CA0080");
@@ -359,6 +367,7 @@ public class dataTransfer_22 {
         jdbcTemplate.execute(updateQuery);
     }
 
+    @Transactional
     public void applyGeneralRule22_C() {
 
         // ----------------------------------------------------------------------
@@ -423,6 +432,7 @@ public class dataTransfer_22 {
      * no contenga ciertos patrones: "0%", "%NA%", "%NO APLICA%", etc.
      */
 
+     @Transactional
     public void applyGeneralRule22D() {
 
         // 1) Verifica/crea la columna ALERTA_22_CA0082
@@ -519,6 +529,7 @@ public class dataTransfer_22 {
         jdbcTemplate.execute(updateQuery);
     }
 
+@Transactional
     public void applyGeneralRule22_D() {
         // 1) Verifica/crea la columna ALERTA_22_CA0082
         List<String> requiredColumns = Arrays.asList("ALERTA_22_CA0082");
@@ -563,6 +574,7 @@ public class dataTransfer_22 {
         jdbcTemplate.execute(updateQuery);
     }
 
+    @Transactional
     public void applyGeneralRule22E() {
 
         // --------------------------------------------------------------------
@@ -642,6 +654,7 @@ public class dataTransfer_22 {
         jdbcTemplate.execute(updateQuery);
     }
 
+    @Transactional
     public void applyGeneralRule22_E() {
         // 1) Verifica/crea la columna ALERTA_22_CA0082
         List<String> requiredColumns = Arrays.asList("ALERTA_22_CA0079");

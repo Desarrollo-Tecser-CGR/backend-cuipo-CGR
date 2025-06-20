@@ -7,12 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class dataTransfer_26 {
 
   @Autowired
   private JdbcTemplate jdbcTemplate;
 
+  @Transactional
   public void applySpecificRule26() {
     // 1) Definir columnas requeridas
     List<String> requiredColumns = Arrays.asList(

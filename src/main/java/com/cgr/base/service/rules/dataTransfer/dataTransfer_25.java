@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class dataTransfer_25 {
 
@@ -17,6 +19,7 @@ public class dataTransfer_25 {
     @Value("${TABLA_EJEC_GASTOS}")
     private String TABLA_EJEC_GASTOS;
 
+    @Transactional
     public void applySpecificRule25A() {
 
         // --------------------------------------------------------------------
@@ -86,8 +89,8 @@ public class dataTransfer_25 {
                         AND (CUENTA LIKE '2.1%%')
                         AND (NOM_FUENTES_FINANCIACION NOT LIKE 'R.B%%'
                             AND (
-                                NOM_FUENTES_FINANCIACION LIKE '%INGRESOS CORRIENTES DE LIBRE DESTINACION%'
-                                OR NOM_FUENTES_FINANCIACION LIKE '%SGP-PROPOSITO GENERAL-LIBRE DESTINACION MUNICIPIOS CATEGORIAS 4, 5 Y 6%'
+                                NOM_FUENTES_FINANCIACION LIKE '%%INGRESOS CORRIENTES DE LIBRE DESTINACION%%'
+                                OR NOM_FUENTES_FINANCIACION LIKE '%%SGP-PROPOSITO GENERAL-LIBRE DESTINACION MUNICIPIOS CATEGORIAS 4, 5 Y 6%%'
                             )
                         )
                         AND CUENTA NOT LIKE ('2.1.3.07.02.002%%')
@@ -212,6 +215,7 @@ public class dataTransfer_25 {
         jdbcTemplate.execute(updateQuery);
     }
 
+    @Transactional
     public void applySpecificRule25_A() {
         // 1) Definir y verificar la columna requerida en la tabla detalle
         // (TABLA_EJEC_GASTOS2)
@@ -295,8 +299,8 @@ public class dataTransfer_25 {
                     CUENTA LIKE '2.1%%'
                     AND (NOM_FUENTES_FINANCIACION NOT LIKE 'R.B%%'
                         AND (
-                            NOM_FUENTES_FINANCIACION LIKE '%INGRESOS CORRIENTES DE LIBRE DESTINACION%'
-                            OR NOM_FUENTES_FINANCIACION LIKE '%SGP-PROPOSITO GENERAL-LIBRE DESTINACION MUNICIPIOS CATEGORIAS 4, 5 Y 6%'
+                            NOM_FUENTES_FINANCIACION LIKE '%%INGRESOS CORRIENTES DE LIBRE DESTINACION%%'
+                            OR NOM_FUENTES_FINANCIACION LIKE '%%SGP-PROPOSITO GENERAL-LIBRE DESTINACION MUNICIPIOS CATEGORIAS 4, 5 Y 6%%'
                         )
                     )
                     AND CUENTA NOT LIKE '2.1.3.07.02.002%%'
@@ -322,6 +326,7 @@ public class dataTransfer_25 {
         jdbcTemplate.execute(updateQuery);
     }
 
+    @Transactional
     public void applySpecificRule25B() {
         // Paso 1: Asegurar columna en EJECUCION_GASTOS
         List<String> requiredColumns = Arrays.asList("ALERTA_25_CA0105");
